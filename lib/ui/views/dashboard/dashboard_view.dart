@@ -99,7 +99,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         GestureDetector(
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (c) {
-              return const ServicesView();
+              return ServicesView();
             }));
           },
           child: actionContainer('assets/images/2148087576.jpg', "Services", context),
@@ -661,7 +661,24 @@ class DashboardView extends StackedView<DashboardViewModel> {
       return Column(
         children: [
           verticalSpaceSmall,
-          _buildAdsSlideshow(viewModel),
+          Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
+                  borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16.0),
+                  child: Image.asset(
+                    'assets/animations/quality_power_supply.gif',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // _buildAdsSlideshow(viewModel),
           // quickActions(context),
           verticalSpaceSmall,
           Container(
@@ -692,113 +709,113 @@ class DashboardView extends StackedView<DashboardViewModel> {
   }
 
 
-  Widget _buildAdsSlideshow(DashboardViewModel viewModel) {
-    if (viewModel.productList.where((element) => element.ad == true).isEmpty) {
-      // Placeholder Card for no ads
-      return Card(
-        color: kcPrimaryColor,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: double.infinity, // Adjust to take available space
-                      child: const Text(
-                        'Best Full Solar Installation',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: kcWhiteColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        softWrap: true,
-                      ),
-                    ),
-                    Container(
-                      width: double.infinity, // Adjust to take available space
-                      child: Text(
-                        'Light out your world',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: kcWhiteColor,
-                        ),
-                        softWrap: true,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: kcBlackColor,
-                          backgroundColor: kcWhiteColor,
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12.0, horizontal: 24.0),
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                        ),
-                        child: Text("Check now"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 4.0),
-              child: Container(
-                height: 150, // Adjust the height of the container
-                width: 130, // Adjust the width of the container
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(10),
-                    topRight: Radius.circular(10),
-                  ),
-                  image: DecorationImage(
-                    image: AssetImage(
-                        "assets/images/Mercury-10KVA-Solar-System-1 2.png"),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return CarouselSlider.builder(
-      itemCount:
-          viewModel.productList.where((element) => element.ad == true).length,
-      itemBuilder: (context, index, realIndex) {
-        final ad = viewModel.productList
-            .where((element) => element.ad == true)
-            .toList()[index];
-        return _buildAdItem(ad, context);
-      },
-      options: CarouselOptions(
-        height: 180, // Updated height here
-        autoPlay: true,
-        enlargeCenterPage: true,
-        viewportFraction: 1,
-        autoPlayInterval: Duration(seconds: 5),
-        onPageChanged: (index, reason) {},
-      ),
-    );
-  }
+  // Widget _buildAdsSlideshow(DashboardViewModel viewModel) {
+  //   if (viewModel.productList.where((element) => element.ad == true).isEmpty) {
+  //     // Placeholder Card for no ads
+  //     return Card(
+  //       color: kcPrimaryColor,
+  //       elevation: 2,
+  //       shape: RoundedRectangleBorder(
+  //         borderRadius: BorderRadius.circular(15),
+  //       ),
+  //       child: Row(
+  //         mainAxisAlignment: MainAxisAlignment.start,
+  //         children: [
+  //           Flexible(
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(16.0),
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   Container(
+  //                     width: double.infinity, // Adjust to take available space
+  //                     child: const Text(
+  //                       'Best Full Solar Installation',
+  //                       style: TextStyle(
+  //                         fontSize: 20,
+  //                         color: kcWhiteColor,
+  //                         fontWeight: FontWeight.bold,
+  //                       ),
+  //                       softWrap: true,
+  //                     ),
+  //                   ),
+  //                   Container(
+  //                     width: double.infinity, // Adjust to take available space
+  //                     child: Text(
+  //                       'Light out your world',
+  //                       style: TextStyle(
+  //                         fontSize: 16,
+  //                         color: kcWhiteColor,
+  //                       ),
+  //                       softWrap: true,
+  //                     ),
+  //                   ),
+  //                   Padding(
+  //                     padding: const EdgeInsets.all(8.0),
+  //                     child: ElevatedButton(
+  //                       onPressed: () {},
+  //                       style: ElevatedButton.styleFrom(
+  //                         foregroundColor: kcBlackColor,
+  //                         backgroundColor: kcWhiteColor,
+  //                         padding: const EdgeInsets.symmetric(
+  //                             vertical: 12.0, horizontal: 24.0),
+  //                         textStyle: const TextStyle(
+  //                           fontWeight: FontWeight.bold,
+  //                           fontSize: 16,
+  //                         ),
+  //                         shape: RoundedRectangleBorder(
+  //                           borderRadius: BorderRadius.circular(8.0),
+  //                         ),
+  //                       ),
+  //                       child: Text("Check now"),
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //           ),
+  //           Padding(
+  //             padding: const EdgeInsets.only(right: 4.0),
+  //             child: Container(
+  //               height: 150, // Adjust the height of the container
+  //               width: 130, // Adjust the width of the container
+  //               decoration: BoxDecoration(
+  //                 borderRadius: const BorderRadius.only(
+  //                   topLeft: Radius.circular(10),
+  //                   topRight: Radius.circular(10),
+  //                 ),
+  //                 image: DecorationImage(
+  //                   image: AssetImage(
+  //                       "assets/images/Mercury-10KVA-Solar-System-1 2.png"),
+  //                   fit: BoxFit.fill,
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     );
+  //   }
+  //
+  //   return CarouselSlider.builder(
+  //     itemCount:
+  //         viewModel.productList.where((element) => element.ad == true).length,
+  //     itemBuilder: (context, index, realIndex) {
+  //       final ad = viewModel.productList
+  //           .where((element) => element.ad == true)
+  //           .toList()[index];
+  //       return _buildAdItem(ad, context);
+  //     },
+  //     options: CarouselOptions(
+  //       height: 180, // Updated height here
+  //       autoPlay: true,
+  //       enlargeCenterPage: true,
+  //       viewportFraction: 1,
+  //       autoPlayInterval: Duration(seconds: 5),
+  //       onPageChanged: (index, reason) {},
+  //     ),
+  //   );
+  // }
 
   Widget _buildAdItem(Product ad, BuildContext context) {
     return Container(

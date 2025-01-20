@@ -18,6 +18,9 @@ class ServicesviewModel extends BaseViewModel {
   final log = getLogger("ServicesviewModel");
   String loadingId = "";
 
+  final dateController = TextEditingController();
+  final timeController = TextEditingController();
+
   String searchQuery = '';
   List<Service> services = [];
   List<Service> filteredServices = [];

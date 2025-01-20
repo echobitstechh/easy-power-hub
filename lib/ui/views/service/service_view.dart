@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import '../../common/app_colors.dart';
 import '../../components/submit_button.dart';
+import '../cart/checkout.dart';
 import 'service_viewmodel.dart';
 
 class ServicesView extends StackedView<ServicesviewModel> {
@@ -65,6 +66,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                             service.name,
                             service.description,
                             '\$${service.price.toStringAsFixed(2)}',
+                            viewModel
                           );
                         },
                       ),
@@ -77,7 +79,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
   }
 
   Widget _buildServiceItem(BuildContext context, String imagePath, String title,
-      String description, String price) {
+      String description, String price,ServicesviewModel viewModel) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(
@@ -85,7 +87,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
       ),
       child: InkWell(
         onTap: () {
-          showServiceAddressSheet(context, () {
+          showServiceAddressSheet(context, viewModel, () {
             // Handle Place Order action
             print("Proceeding to checkout...");
           });
@@ -156,7 +158,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
     );
   }
 
-  void showServiceAddressSheet(BuildContext context, Function onPlaceOrder) {
+  void showServiceAddressSheet(BuildContext context,ServicesviewModel viewModel, Function onPlaceOrder) {
     showModalBottomSheet(
       context: context,
       isScrollControlled:
@@ -225,6 +227,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                   children: [
                     Expanded(
                       child: TextField(
+                        controller: viewModel.dateController,
                         readOnly: true,
                         decoration: InputDecoration(
                           labelText: "Date of Service",
@@ -238,6 +241,12 @@ class ServicesView extends StackedView<ServicesviewModel> {
                             lastDate: DateTime(2100),
                           ).then((selectedDate) {
                             if (selectedDate != null) {
+                              // Format the date as needed (e.g., MM/dd/yyyy)
+                              final formattedDate =
+                                  "${selectedDate.month}/${selectedDate.day}/${selectedDate.year}";
+
+                              // Update the text field
+                              viewModel.dateController.text = formattedDate;
                               // Handle selected date
                             }
                           });
@@ -247,6 +256,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     SizedBox(width: 8),
                     Expanded(
                       child: TextField(
+                        controller: viewModel.timeController,
                         readOnly: true,
                         decoration: InputDecoration(
                           labelText: "Time of Service",
@@ -259,6 +269,12 @@ class ServicesView extends StackedView<ServicesviewModel> {
                           ).then((selectedTime) {
                             if (selectedTime != null) {
                               // Handle selected time
+                              // Format the time as needed (e.g., HH:mm AM/PM)
+                              final formattedTime = selectedTime.format(
+                                  context);
+
+                              // Update the text field
+                              viewModel.timeController.text = formattedTime;
                             }
                           });
                         },
@@ -291,7 +307,16 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 SubmitButton(
                   isLoading: false,
                   label: "place Order",
-                  submit: () {},
+                  submit: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Checkout(
+                          infoList: [],
+                        ),
+                      ),
+                    );
+                  },
                   color: kcSecondaryColor,
                 )
               ],

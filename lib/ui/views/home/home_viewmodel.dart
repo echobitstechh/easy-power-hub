@@ -41,7 +41,7 @@ class HomeViewModel extends BaseViewModel {
      DashboardView(),
       ShopView(),
     const CartView(),
-    const ServicesView(),
+    ServicesView(),
     const ProfileView()
   ];
 
