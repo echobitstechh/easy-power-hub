@@ -663,16 +663,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
           verticalSpaceSmall,
           Column(
             children: [
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
-                  borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16.0),
-                  child: Image.asset(
-                    'assets/animations/quality_power_supply.gif',
-                    fit: BoxFit.cover,
+              Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
+                    borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16.0),
+                    child: Image.asset(
+                      'assets/animations/easy_power_hub.gif',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
