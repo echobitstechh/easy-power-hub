@@ -661,31 +661,30 @@ class DashboardView extends StackedView<DashboardViewModel> {
       return Column(
         children: [
           verticalSpaceSmall,
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
-                    borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16.0),
-                    child: Image.asset(
-                      'assets/animations/easy_power_hub.gif',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          // _buildAdsSlideshow(viewModel),
+          // Column(
+          //   children: [
+          //     Padding(
+          //       padding: const EdgeInsets.only(right: 8.0),
+          //       child: Container(
+          //         decoration: BoxDecoration(
+          //           border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
+          //           borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
+          //         ),
+          //         child: ClipRRect(
+          //           borderRadius: BorderRadius.circular(16.0),
+          //           child: Image.asset(
+          //             'assets/animations/easy_power_hub.gif',
+          //             fit: BoxFit.cover,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          _buildAdsSlideshow(),
           // quickActions(context),
           verticalSpaceSmall,
           Container(
-
             // Staggered Grid View starts here
             child: StaggeredGrid.count(
               crossAxisCount: 4,
@@ -711,7 +710,50 @@ class DashboardView extends StackedView<DashboardViewModel> {
     }
   }
 
+  Widget _buildAdsSlideshow() {
+    // List of static GIF asset paths
+    final List<String> gifList = [
+      "assets/animations/quality_power_supply.gif",
+      "assets/animations/easy_power_hub.gif",
+      "assets/animations/easy_ph_1.gif",
+      "assets/animations/easy_ph_2.gif",
+    ];
 
+    return CarouselSlider.builder(
+      itemCount: gifList.length,
+      itemBuilder: (context, index, realIndex) {
+        final gifPath = gifList[index];
+        return Container(
+          // margin: const EdgeInsets.symmetric(horizontal: 3.0), // Add spacing between carousel items
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(15),
+            child: Image.asset(
+              gifPath,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
+      options: CarouselOptions(
+        height: 200, // Adjust height of the carousel
+        autoPlay: true, // Enable autoplay
+        autoPlayInterval: const Duration(seconds: 5),
+        enlargeCenterPage: true,
+        viewportFraction: 1.0, // Adjust size of the carousel items
+      ),
+    );
+  }
   // Widget _buildAdsSlideshow(DashboardViewModel viewModel) {
   //   if (viewModel.productList.where((element) => element.ad == true).isEmpty) {
   //     // Placeholder Card for no ads
