@@ -502,7 +502,8 @@ class ProductCardWidget extends StatelessWidget {
                                 product.images!.isNotEmpty)
                             ? product.images!.first
                             : 'https://via.placeholder.com/120',
-                        height: MediaQuery.of(context).size.height * 0.1,
+                        height: MediaQuery.of(context).size.height * 0.14,
+                        // height: 130,
                         width: double.infinity,
                         fit: BoxFit.fitHeight,
                         errorWidget: (context, url, error) =>

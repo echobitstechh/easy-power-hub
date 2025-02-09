@@ -684,8 +684,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                     (item.images != null && item.images!.isNotEmpty)
                                         ? item.images!.first
                                         : 'https://via.placeholder.com/120',
-                                height: MediaQuery.of(context).size.height *
-                                    0.14, // Reduced image size
+                                height: MediaQuery.of(context).size.height * 0.15, // Reduced image size
                                 width: double.infinity,
                                 fit: BoxFit.fitHeight, // Ensures it fits properly
                                 errorWidget: (context, url, error) =>
@@ -751,7 +750,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                     size: 16,
                                     color: Colors.amber,
                                   ),
-                                  const SizedBox(width: 4),
+                                  const SizedBox(width: 2),
                                   Text(
                                     "2.5",
                                     style: const TextStyle(
