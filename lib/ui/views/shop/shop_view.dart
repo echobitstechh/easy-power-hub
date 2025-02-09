@@ -121,12 +121,15 @@ class ShopView extends StackedView<ShopViewModel> {
                                 ? CachedNetworkImage(
                               imageUrl: slide['image']!,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error),
+                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                            )
+                                : Image.asset(
+                              slide['image']!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
                             ),
+
 
                             Container(
                               color: Colors.black.withOpacity(0.3),
