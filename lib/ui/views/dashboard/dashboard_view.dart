@@ -648,7 +648,9 @@ class DashboardView extends StackedView<DashboardViewModel> {
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Color(0xFFF9F9F9),
+                  color:Theme.of(context).brightness == Brightness.dark
+                    ? kcDarkGreyColor// Slightly lighter black for contrast
+                    : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade200),
                 ),
@@ -661,18 +663,20 @@ class DashboardView extends StackedView<DashboardViewModel> {
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color:Theme.of(context).brightness == Brightness.dark
+                                ? kcDarkGreyColor// Slightly lighter black for contrast
+                                : Colors.white,
                               border: Border.all(
-                                color: Colors.grey.shade300,  // Border color
-                                width: 1.0,  // Border width
+                                color: Colors.grey.shade300, // Border color
+                                width: 1.0, // Border width
                               ),
-                              borderRadius: const BorderRadius.all(Radius.circular(12)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(12)),
                             ),
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(12)),
-                              child:
-                                  CachedNetworkImage(
+                              child: CachedNetworkImage(
                                 placeholder: (context, url) => const Center(
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.0,
@@ -680,17 +684,21 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                         kcSecondaryColor),
                                   ),
                                 ),
-                                imageUrl:
-                                    (item.images != null && item.images!.isNotEmpty)
-                                        ? item.images!.first
-                                        : 'https://via.placeholder.com/120',
-                                height: MediaQuery.of(context).size.height * 0.15, // Reduced image size
+                                imageUrl: (item.images != null &&
+                                        item.images!.isNotEmpty)
+                                    ? item.images!.first
+                                    : 'https://via.placeholder.com/120',
+                                height: MediaQuery.of(context).size.height *
+                                    0.15, // Reduced image size
                                 width: double.infinity,
-                                fit: BoxFit.fitHeight, // Ensures it fits properly
+                                fit: BoxFit
+                                    .fitHeight, // Ensures it fits properly
                                 errorWidget: (context, url, error) =>
                                     const Icon(Icons.error),
-                                fadeInDuration: const Duration(milliseconds: 500),
-                                fadeOutDuration: const Duration(milliseconds: 300),
+                                fadeInDuration:
+                                    const Duration(milliseconds: 500),
+                                fadeOutDuration:
+                                    const Duration(milliseconds: 300),
                               ),
                             ),
                           ),
@@ -720,18 +728,36 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(5),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item.productName ?? 'Product name',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item.productName ?? 'Product name',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  locator<NavigationService>()
+                                      .navigateToCartView();
+                                },
+                                child: const Icon(
+                                  Icons.shopping_cart_outlined,
+                                  color: kcSecondaryColor,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1162,8 +1188,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
               uiMode.value == AppUiModes.dark
                   ? "assets/images/dashboard_otification_white.svg" // Dark mode logo
                   : "assets/images/dashboard_otification.svg",
-              width: 30,
-              height: 40,
+              width: 25,
+              height: 25,
             ),
             onPressed: () {
               _showNotificationSheet(context, viewModel);

@@ -467,7 +467,9 @@ class ProductCardWidget extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Color(0xFFF9F9F9),
+          color:Theme.of(context).brightness == Brightness.dark
+              ? kcDarkGreyColor// Slightly lighter black for contrast
+              : Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.grey.shade200),
         ),
@@ -480,7 +482,9 @@ class ProductCardWidget extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color:Theme.of(context).brightness == Brightness.dark
+                          ? kcDarkGreyColor// Slightly lighter black for contrast
+                          : Colors.white,
                       border: Border.all(
                         color: Colors.grey.shade300, // Border color
                         width: 1.0, // Border width
@@ -543,14 +547,32 @@ class ProductCardWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.productName ?? 'Product name',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          product.productName ?? 'Product name',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          locator<NavigationService>()
+                              .navigateToCartView();
+                        },
+                        child: const Icon(
+                          Icons.shopping_cart_outlined,
+                          color: kcSecondaryColor,
+                          size: 16,
+                        ),
+                      ),
+                    ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
