@@ -4,6 +4,7 @@ import 'package:afriprize/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../common/app_colors.dart';
 import '../../components/submit_button.dart';
 import '../cart/checkout.dart';
@@ -142,13 +143,11 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 children: [
                   Icon(Icons.more_vert),
                   SizedBox(height: 16.0),
-                  Text(
-                    price,
-                    style: GoogleFonts.redHatDisplay(
-                      textStyle: const TextStyle(
-                          fontSize: 12, fontWeight: FontWeight.w500),
-                    ),
+                  IconButton(
+                    icon: Icon(Icons.phone, color: Colors.green), // Phone icon
+                    onPressed: _openDialer, // Opens the dialer without a number
                   ),
+
                 ],
               ),
             ],
@@ -336,5 +335,15 @@ class ServicesView extends StackedView<ServicesviewModel> {
   void onViewModelReady(ServicesviewModel viewModel) {
     viewModel.getServices(); // Fetch services when the view model is ready
     super.onViewModelReady(viewModel);
+  }
+}
+
+
+void _openDialer() async {
+  final Uri phoneUri = Uri(scheme: 'tel');
+  if (await canLaunchUrl(phoneUri)) {
+    await launchUrl(phoneUri);
+  } else {
+    throw 'Could not open dialer';
   }
 }

@@ -225,35 +225,32 @@ class CartView extends StackedView<CartViewModel> {
                                                                       .ellipsis,
                                                             ),
                                                             verticalSpaceTiny,
-                                                            Row(
-                                                              children: [
-                                                                Text(
-                                                                  MoneyUtils().formatAmount(((item.product?.price != null &&
-                                                                              item.quantity !=
-                                                                                  null)
-                                                                          ? (double.parse(item.product!.price!) *
-                                                                              item.quantity!)
-                                                                          : 0)
-                                                                      .toInt()),
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        16,
-                                                                    color: uiMode.value ==
-                                                                            AppUiModes
-                                                                                .dark
-                                                                        ? Colors
-                                                                            .white
-                                                                        : Colors
-                                                                            .black,
-                                                                    fontFamily:
-                                                                        "Satoshi",
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w700,
-                                                                  ),
-                                                                ),
-                                                              ],
+                                                            Text(
+                                                              MoneyUtils().formatAmount(((item.product?.price != null &&
+                                                                          item.quantity !=
+                                                                              null)
+                                                                      ? (double.parse(item.product!.price!) *
+                                                                          item.quantity!)
+                                                                      : 0)
+                                                                  .toInt()),
+                                                              overflow: TextOverflow.ellipsis,
+                                                              style:
+                                                                  TextStyle(
+                                                                fontSize:
+                                                                    16,
+                                                                color: uiMode.value ==
+                                                                        AppUiModes
+                                                                            .dark
+                                                                    ? Colors
+                                                                        .white
+                                                                    : Colors
+                                                                        .black,
+                                                                fontFamily:
+                                                                    "Satoshi",
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                              ),
                                                             ),
                                                           ],
                                                         ),
@@ -268,9 +265,7 @@ class CartView extends StackedView<CartViewModel> {
                                                   children: [
                                                     InkWell(
                                                       onTap: () {
-                                                        viewModel
-                                                            .addRemoveDeleteRaffle(
-                                                                item);
+                                                        viewModel.removeItem(item);
                                                       },
                                                       child: Icon(
                                                         Icons.delete,

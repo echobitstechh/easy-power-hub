@@ -20,12 +20,10 @@ import '../../../utils/binance_pay.dart';
 import '../../../utils/money_util.dart';
 import 'custom_reciept.dart';
 
-
 /// @author George David
 /// email: georgequin19@gmail.com
 /// Feb, 2024
 ///
-
 
 class CartViewModel extends BaseViewModel {
   final repo = locator<Repository>();
@@ -37,9 +35,9 @@ class CartViewModel extends BaseViewModel {
   int deliveryFee = 0;
   final refferalCode = TextEditingController();
 
-  ValueNotifier<PaymentMethod> selectedPaymentMethod = ValueNotifier(PaymentMethod.flutterwave);
+  ValueNotifier<PaymentMethod> selectedPaymentMethod =
+      ValueNotifier(PaymentMethod.flutterwave);
   ValueNotifier<bool> isPaymentProcessing = ValueNotifier(false);
-
 
   PaymentMethod get selectedMethod => selectedPaymentMethod.value;
 
@@ -51,18 +49,35 @@ class CartViewModel extends BaseViewModel {
     super.dispose();
   }
 
-
   void selectMethod(PaymentMethod method) {
     selectedPaymentMethod.value = method;
     notifyListeners(); // Notify overall ViewModel listeners
   }
 
+  void removeItem(CartItem item) async {
 
-  void addRemoveDeleteRaffle(CartItem item) {
-    itemsToDeleteRaffle.contains(item)
-        ? itemsToDeleteRaffle.remove(item)
-        : itemsToDeleteRaffle.add(item);
+    print('wee2 ${item.product?.id}');
+    await repo.deleteFromCart(item.product!.id.toString())
+        .then((value) async {
+      print('wee3');
+      itemsToDeleteRaffle.remove(item);
+      print('wee4');
+      await refreshData();
+    })
+        .catchError((e) {
+    //todo: show error: Error in deleting item from cart
+      print('wee5');
+    });
+  }
+
+  void addRemoveDeleteRaffle(CartItem item) async {
+      itemsToDeleteRaffle.contains(item)
+          ? itemsToDeleteRaffle.remove(item)
+          : itemsToDeleteRaffle.add(item);
+
+
     rebuildUi();
+    notifyListeners();
   }
 
   Future<void> refreshData() async {
@@ -72,7 +87,6 @@ class CartViewModel extends BaseViewModel {
     setBusy(false);
     notifyListeners();
   }
-
 
   // void clearRaffleCart() async{
   //   for (var element in itemsToDeleteRaffle) {
@@ -98,22 +112,26 @@ class CartViewModel extends BaseViewModel {
         cart.value.clear(); // Use clear() with parentheses
         print('cleared cart');
         cart.notifyListeners(); // Notify listeners to update the UI
-        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+        List<Map<String, dynamic>> storedList =
+            cart.value.map((e) => e.toJson()).toList();
+        await locator<LocalStorage>()
+            .save(LocalStorageDir.raffleCart, storedList);
 
         getRaffleSubTotal();
         rebuildUi(); // Ensure UI rebuilds properly
       } else {
-        snackBar.showSnackbar(message: "Failed to delete items from cart: ${res.data['message']}");
+        snackBar.showSnackbar(
+            message:
+                "Failed to delete items from cart: ${res.data['message']}");
       }
     } catch (e) {
       log.e(e);
-      snackBar.showSnackbar(message: "An error occurred while clearing the cart: $e");
+      snackBar.showSnackbar(
+          message: "An error occurred while clearing the cart: $e");
     } finally {
       setBusy(false);
     }
   }
-
 
   void getRaffleSubTotal() {
     int total = 0;
@@ -122,9 +140,8 @@ class CartViewModel extends BaseViewModel {
       final product = element.product;
 
       // Convert ticketPrice from String to double, defaulting to 0 if ticketPrice is null
-      final ticketPrice = product?.price != null
-          ? double.parse(product!.price!)
-          : 0;
+      final ticketPrice =
+          product?.price != null ? double.parse(product!.price!) : 0;
 
       // Multiply ticketPrice by quantity and cast to int
       total += (ticketPrice * element.quantity!).toInt();
@@ -134,7 +151,6 @@ class CartViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-
   void checkoutRaffle(BuildContext context) async {
     if (cart.value.isEmpty) {
       return null;
@@ -142,9 +158,8 @@ class CartViewModel extends BaseViewModel {
     isPaymentProcessing.value = true;
     setBusy(true);
     try {
-      ApiResponse res = await repo.saveOrder({
-        "payment_method": selectedMethod.name
-      });
+      ApiResponse res =
+          await repo.saveOrder({"payment_method": selectedMethod.name});
       if (res.statusCode == 201) {
         // String paymentLink = res.data['data']['payment_link'];
         String orderId = res.data['data']['order']['_id'];
@@ -155,8 +170,7 @@ class CartViewModel extends BaseViewModel {
         //   snackBar.showSnackbar(message: "Could not launch payment link");
         //   throw Exception('Could not launch $paymentLink');
         // }
-         processPayment(selectedMethod, context, AppModules.raffle, orderId);
-
+        processPayment(selectedMethod, context, AppModules.raffle, orderId);
       } else {
         snackBar.showSnackbar(message: res.data["message"]);
         isPaymentProcessing.value = false;
@@ -170,13 +184,14 @@ class CartViewModel extends BaseViewModel {
     }
   }
 
-  processPayment(PaymentMethod paymentMethod, BuildContext context, AppModules module, String orderId) async {
+  processPayment(PaymentMethod paymentMethod, BuildContext context,
+      AppModules module, String orderId) async {
     // Calculate the amount
     int amount = raffleSubTotal;
 
-
-    try{
-      ApiResponse res = await MoneyUtils().chargeCardUtil(paymentMethod, context, amount, orderId);
+    try {
+      ApiResponse res = await MoneyUtils()
+          .chargeCardUtil(paymentMethod, context, amount, orderId);
 
       if (res.statusCode == 200) {
         Navigator.pop(context);
@@ -186,29 +201,22 @@ class CartViewModel extends BaseViewModel {
         locator<SnackbarService>().showSnackbar(message: res.data["message"]);
         locator<NavigationService>().replaceWithHomeView();
       }
-    }catch(e){
+    } catch (e) {
       log.e(e);
-    }finally{
-     
+    } finally {
       isPaymentProcessing.value = false;
       setBusy(false);
     }
-
-
   }
 
-
   Future<void> showReceipt(AppModules module, BuildContext context) async {
-
-    if(module == AppModules.raffle){
+    if (module == AppModules.raffle) {
       List<CartItem> receiptCart = List<CartItem>.from(cart.value);
 
-
-
       cart.notifyListeners();
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
+      List<Map<String, dynamic>> storedList =
+          cart.value.map((e) => e.toJson()).toList();
       locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
 
       showModalBottomSheet(
         isScrollControlled: true,
@@ -216,7 +224,7 @@ class CartViewModel extends BaseViewModel {
         backgroundColor: Colors.white,
         context: context,
         builder: (BuildContext context) {
-          return RaffleReceiptPage(carts:receiptCart);
+          return RaffleReceiptPage(carts: receiptCart);
         },
       );
       cart.value.clear();
@@ -236,7 +244,7 @@ class CartViewModel extends BaseViewModel {
         print('online cart items: $items');
 
         // Map the items list to List<CartItem>
-        if(items.isNotEmpty){
+        if (items.isNotEmpty) {
           List<CartItem> onlineItems = items
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
@@ -247,32 +255,31 @@ class CartViewModel extends BaseViewModel {
           cart.value = onlineItems;
           getRaffleSubTotal();
           notifyListeners();
-          print('Saved raffle cart are: ${cart.value.first.product?.productName}');
+          print(
+              'Saved raffle cart are: ${cart.value.first.product?.productName}');
 
           // Update local storage
           List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-        }else{
+              cart.value.map((e) => e.toJson()).toList();
+          await locator<LocalStorage>()
+              .save(LocalStorageDir.raffleCart, storedList);
+        } else {
           cart.value.clear();
           await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
           notifyListeners();
         }
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to load cart from server: $e");
+      locator<SnackbarService>()
+          .showSnackbar(message: "Failed to load cart from server: $e");
       print('Couldn\'t get online cart: $e');
     } finally {
       setBusy(false);
     }
   }
 
-
-
   // Future<void> loadPayStackPlugin() async{
   //   final plugin = PaystackPlugin();
   //   plugin.initialize(publicKey: AppConfig.paystackApiKeyTest);
   // }
-
-
 }

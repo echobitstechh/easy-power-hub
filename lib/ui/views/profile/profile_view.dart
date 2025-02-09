@@ -19,6 +19,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/interceptors.dart';
+import '../enter_email/enter_email_view.dart';
 import 'profile_viewmodel.dart';
 
 class ProfileView extends StatelessWidget {
@@ -251,8 +252,8 @@ class ProfileView extends StatelessWidget {
                           // ),
                           ListTile(
                             onTap: () {
-                              locator<NavigationService>()
-                                  .navigateToChangePasswordView();
+                              //locator<NavigationService>().navigateToChangePasswordView();
+                              locator<NavigationService>().navigateToEnterEmailView();
                             },
                             leading: Icon(Icons.lock,
                               color: kcOrangeColor,

@@ -278,7 +278,7 @@ class Repository extends IRepository {
   @override
   Future<ApiResponse> updateMedia(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
-      method: HttpMethod.post,
+      method: HttpMethod.get,
       endpoint: "profile",
       useFormData: true,
       formData: FormData.fromMap(req),

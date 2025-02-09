@@ -46,7 +46,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
   final PageController _pageController = PageController();
 
-  List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
+  List<StaggeredGridTile> buildCardTiles(
+      BuildContext context, DashboardViewModel model) {
     return [
       StaggeredGridTile.count(
         crossAxisCellCount: 2,
@@ -61,69 +62,73 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 builder: (c) {
                   return ShopView(
                     filter: model.filteredCategories
-                        .where((element) => element.name.toLowerCase().contains("solar"))
+                        .where((element) =>
+                            element.name.toLowerCase().contains("solar"))
                         .first,
                   );
                 },
               ),
             );
           },
-          child: actionContainer('assets/images/solar.jpg', "Solar Energy", context),
+          child: actionContainer(
+              'assets/images/solar.jpg', "Solar Energy", context),
         ),
       ),
       StaggeredGridTile.count(
         crossAxisCellCount: 2,
         mainAxisCellCount: 1,
-        child:
-        GestureDetector(
+        child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (c) {
                   return ShopView(
                     filter: model.filteredCategories
-                        .where((element) => element.name.toLowerCase().contains("electronics"))
+                        .where((element) =>
+                            element.name.toLowerCase().contains("electronics"))
                         .first,
                   );
                 },
               ),
             );
           },
-          child: actionContainer('assets/images/2148254069.jpg', "Electronices", context),
+          child: actionContainer(
+              'assets/images/2148254069.jpg', "Electronices", context),
         ),
       ),
       StaggeredGridTile.count(
         crossAxisCellCount: 1,
         mainAxisCellCount: 1,
-        child:
-        GestureDetector(
+        child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(MaterialPageRoute(builder: (c) {
               return ServicesView();
             }));
           },
-          child: actionContainer('assets/images/2148087576.jpg', "Services", context),
+          child: actionContainer(
+              'assets/images/2148087576.jpg', "Services", context),
         ),
       ),
       StaggeredGridTile.count(
         crossAxisCellCount: 1,
         mainAxisCellCount: 1,
-        child:
-        GestureDetector(
+        child: GestureDetector(
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (c) {
                   return ShopView(
                     filter: model.filteredCategories
-                        .where((element) => element.name.toLowerCase().contains("light"))
+                        .where((element) =>
+                            element.name.toLowerCase().contains("light"))
                         .first,
                   );
                 },
               ),
             );
           },
-          child: actionContainer('assets/images/107.jpg', "Lightening", context),
+          child:
+              actionContainer('assets/images/107.jpg', "Lightening", context),
         ),
       ),
     ];
@@ -149,7 +154,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
           title: Row(
             children: [
               CircleAvatar(
-                backgroundImage: const AssetImage("assets/images/easy_ph_logo.png"),
+                backgroundImage:
+                    const AssetImage("assets/images/easy_ph_logo.png"),
                 radius: 20,
               ),
               const SizedBox(width: 8),
@@ -160,16 +166,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     if (productTextEditingValue.text == '') {
                       return const Iterable<Product>.empty();
                     }
-                    return viewModel.filteredProductList.where((Product product) {
+                    return viewModel.filteredProductList
+                        .where((Product product) {
                       final query = productTextEditingValue.text.toLowerCase();
                       return (product.productName != null &&
-                          product.productName!.toLowerCase().contains(query)) ||
+                              product.productName!
+                                  .toLowerCase()
+                                  .contains(query)) ||
                           (product.brandName != null &&
                               product.brandName!.toLowerCase().contains(query));
                     });
                   },
                   displayStringForOption: (Product product) =>
-                  product.productName ?? '',
+                      product.productName ?? '',
                   onSelected: (Product value) {
                     debugPrint('You just selected ${value.productName}');
                     showModalBottomSheet(
@@ -214,7 +223,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
             ],
           ),
           centerTitle: false,
-          actions: _buildAppBarActions(context, viewModel.appBarLoading, viewModel),
+          actions:
+              _buildAppBarActions(context, viewModel.appBarLoading, viewModel),
         ),
         body: RefreshIndicator(
           onRefresh: () async {
@@ -263,7 +273,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
             // Overlay
             Positioned.fill(
               child: Container(
-                color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+                color:
+                    Colors.black.withOpacity(0.5), // Semi-transparent overlay
               ),
             ),
             // Title Text
@@ -295,7 +306,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
       ),
     );
   }
-
 
   void showProductDialog({
     required BuildContext context,
@@ -353,7 +363,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          Navigator.of(context).push(MaterialPageRoute(builder: (c) {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (c) {
                             return ShopView();
                           }));
                           print('Selected Product: ${products[index]}');
@@ -394,7 +405,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
     "Outdoor Lights",
   ];
 
-  Widget popularDrawsSlider(BuildContext context, DashboardViewModel viewModel) {
+  Widget popularDrawsSlider(
+      BuildContext context, DashboardViewModel viewModel) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -437,7 +449,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 }));
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: kcSecondaryColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -468,6 +481,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         ),
         GridView.builder(
           shrinkWrap: true,
+          padding: EdgeInsets.only(top: 20),
           physics: NeverScrollableScrollPhysics(),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
@@ -496,58 +510,210 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   },
                 );
               },
-              child: Card(
-                margin: const EdgeInsets.all(8.0),
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              // child: Card(
+              //   margin: const EdgeInsets.all(8.0),
+              //   elevation: 3,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Stack(
+              //         children: [
+              //           ClipRRect(
+              //             borderRadius: const BorderRadius.only(
+              //               topLeft: Radius.circular(20),
+              //               topRight: Radius.circular(20),
+              //             ),
+              //             child: CachedNetworkImage(
+              //               placeholder: (context, url) => const Center(
+              //                 child: CircularProgressIndicator(
+              //                   strokeWidth: 2.0,
+              //                   valueColor:
+              //                   AlwaysStoppedAnimation<Color>(kcSecondaryColor),
+              //                 ),
+              //               ),
+              //               imageUrl: (item.images != null && item.images!.isNotEmpty)
+              //                   ? item.images!.first
+              //                   : 'https://via.placeholder.com/120',
+              //               height: MediaQuery.of(context).size.height * 0.14, // Reduced image size
+              //               width: double.infinity,
+              //               fit: BoxFit.fitHeight, // Ensures it fits properly
+              //               errorWidget: (context, url, error) =>
+              //               const Icon(Icons.error),
+              //               fadeInDuration: const Duration(milliseconds: 500),
+              //               fadeOutDuration: const Duration(milliseconds: 300),
+              //             ),
+              //           ),
+              //           Positioned(
+              //             top: 8,
+              //             left: 8,
+              //             child: Container(
+              //               padding: const EdgeInsets.symmetric(
+              //                   horizontal: 8.0, vertical: 4.0),
+              //               decoration: BoxDecoration(
+              //                 color: Colors.black,
+              //                 borderRadius: BorderRadius.circular(12),
+              //               ),
+              //               child: const Text(
+              //                 'NEW',
+              //                 style: TextStyle(
+              //                   color: Colors.white,
+              //                   fontSize: 12,
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 8.0, vertical: 4.0),
+              //         child: Row(
+              //           children: List.generate(5, (starIndex) {
+              //             return Icon(
+              //               Icons.star,
+              //               color: starIndex < (item.rating?.toInt() ?? 0)
+              //                   ? kcStarColor
+              //                   : Colors.grey,
+              //               size: 16,
+              //             );
+              //           }),
+              //         ),
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //         child: Text(
+              //           item.productName ?? 'Product name',
+              //           style: const TextStyle(
+              //             fontSize: 14,
+              //             fontWeight: FontWeight.bold,
+              //           ),
+              //           maxLines: 1,
+              //           overflow: TextOverflow.ellipsis,
+              //         ),
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 8.0, vertical: 4.0),
+              //         child: Row(
+              //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //           children: [
+              //             Expanded(
+              //               child: Text(
+              //                 '₦${item.price ?? 0}',
+              //                 style: const TextStyle(
+              //                   fontSize: 14,
+              //                   fontWeight: FontWeight.bold,
+              //                   color: kcPrimaryColor,
+              //                 ),
+              //                 maxLines: 1,
+              //                 overflow: TextOverflow.ellipsis,
+              //               ),
+              //             ),
+              //             GestureDetector(
+              //               onTap: () {
+              //                 RaffleCartItem newItem =
+              //                 RaffleCartItem(raffle: item, quantity: 1);
+              //                 viewModel.addToRaffleCart(item);
+              //                 viewModel.notifyListeners();
+              //               },
+              //               child: Container(
+              //                 padding: const EdgeInsets.all(8.0),
+              //                 decoration: BoxDecoration(
+              //                   color: Colors.white,
+              //                   shape: BoxShape.circle,
+              //                 ),
+              //                 child: GestureDetector(
+              //                   onTap: (){
+              //                     locator<NavigationService>().navigateToCartView();
+              //                   },
+              //                   child: const Icon(
+              //                     Icons.shopping_cart_outlined,
+              //                     color: kcSecondaryColor,
+              //                     size: 16,
+              //                   ),
+              //                 ),
+              //               ),
+              //             )
+              //           ],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF9F9F9),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Stack(
                       children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
-                          child: CachedNetworkImage(
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.0,
-                                valueColor:
-                                AlwaysStoppedAnimation<Color>(kcSecondaryColor),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                color: Colors.grey.shade300,  // Border color
+                                width: 1.0,  // Border width
+                              ),
+                              borderRadius: const BorderRadius.all(Radius.circular(12)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12)),
+                              child:
+                                  CachedNetworkImage(
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        kcSecondaryColor),
+                                  ),
+                                ),
+                                imageUrl:
+                                    (item.images != null && item.images!.isNotEmpty)
+                                        ? item.images!.first
+                                        : 'https://via.placeholder.com/120',
+                                height: MediaQuery.of(context).size.height *
+                                    0.14, // Reduced image size
+                                width: double.infinity,
+                                fit: BoxFit.fitHeight, // Ensures it fits properly
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
+                                fadeInDuration: const Duration(milliseconds: 500),
+                                fadeOutDuration: const Duration(milliseconds: 300),
                               ),
                             ),
-                            imageUrl: (item.images != null && item.images!.isNotEmpty)
-                                ? item.images!.first
-                                : 'https://via.placeholder.com/120',
-                            height: MediaQuery.of(context).size.height * 0.14, // Reduced image size
-                            width: double.infinity,
-                            fit: BoxFit.fitHeight, // Ensures it fits properly
-                            errorWidget: (context, url, error) =>
-                            const Icon(Icons.error),
-                            fadeInDuration: const Duration(milliseconds: 500),
-                            fadeOutDuration: const Duration(milliseconds: 300),
                           ),
                         ),
+
+                        // if (isNew)
                         Positioned(
-                          top: 8,
-                          left: 8,
+                          left: 16,
+                          top: 16,
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 4.0),
+                                horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.black87,
+                              borderRadius: BorderRadius.circular(14),
                             ),
                             child: const Text(
-                              'NEW',
+                              'New',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
                           ),
@@ -555,78 +721,48 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ],
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
-                      child: Row(
-                        children: List.generate(5, (starIndex) {
-                          return Icon(
-                            Icons.star,
-                            color: starIndex < (item.rating?.toInt() ?? 0)
-                                ? kcStarColor
-                                : Colors.grey,
-                            size: 16,
-                          );
-                        }),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        item.productName ?? 'Product name',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8.0, vertical: 4.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Expanded(
-                            child: Text(
-                              '₦${item.price ?? 0}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: kcPrimaryColor,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                          Text(
+                            item.productName ?? 'Product name',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
                             ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              RaffleCartItem newItem =
-                              RaffleCartItem(raffle: item, quantity: 1);
-                              viewModel.addToRaffleCart(item);
-                              viewModel.notifyListeners();
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 1,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 3),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '₦${item.price ?? 0}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.star,
+                                    size: 16,
+                                    color: Colors.amber,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    "2.5",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.shopping_cart_outlined,
-                                color: kcSecondaryColor,
-                                size: 16,
-                              ),
-                            ),
-                          )
+                            ],
+                          ),
                         ],
                       ),
                     ),
@@ -639,7 +775,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
       ],
     );
   }
-
 
   Widget _buildShimmerOrContent(
       BuildContext context, DashboardViewModel viewModel) {
@@ -1222,16 +1357,17 @@ class DashboardView extends StackedView<DashboardViewModel> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               if (userLoggedIn.value == true) ...[
-                 _notificationIcon(unreadCount.value, context, viewModel),
+                _notificationIcon(unreadCount.value, context, viewModel),
                 const SizedBox(width: 3),
                 InkWell(
-                  onTap: (){
+                  onTap: () {
                     locator<NavigationService>().navigateTo(Routes.profileView);
                   },
                   child: CircleAvatar(
-                  // backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
-                  backgroundImage: AssetImage(profile.value.profilePicture ?? "assets/images/display_pic.png"),
-                  radius: 20, // Adjust size as needed
+                    // backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
+                    backgroundImage: AssetImage(profile.value.profilePicture ??
+                        "assets/images/display_pic.png"),
+                    radius: 20, // Adjust size as needed
                   ),
                 )
               ] else ...[
@@ -1240,10 +1376,13 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     locator<NavigationService>().navigateTo(Routes.authView);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: kcSecondaryColor.withOpacity(0.2), // Capsule background color
-                      borderRadius: BorderRadius.circular(10), // Rounded capsule shape
+                      color: kcSecondaryColor
+                          .withOpacity(0.2), // Capsule background color
+                      borderRadius:
+                          BorderRadius.circular(10), // Rounded capsule shape
                     ),
                     child: const Text(
                       "Login",
@@ -1258,7 +1397,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
             ],
           ),
         )
-
       ];
     }
   }
@@ -1274,7 +1412,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
     viewModel.dispose();
     _pageController.dispose();
   }
-
 
   @override
   DashboardViewModel viewModelBuilder(
@@ -1439,6 +1576,7 @@ class RaffleRow extends StatelessWidget {
     return luminance < 0.1 ? Colors.white : Colors.black;
   }
 }
+
 class BackGroundTile extends StatelessWidget {
   final Color backgroundColor;
   final IconData icondata;
