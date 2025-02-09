@@ -56,17 +56,17 @@ class CartViewModel extends BaseViewModel {
 
   void removeItem(CartItem item) async {
 
-    print('wee2 ${item.product?.id}');
+    //print('wee2 ${item.product?.id}');
     await repo.deleteFromCart(item.product!.id.toString())
         .then((value) async {
-      print('wee3');
+    //  print('wee3');
       itemsToDeleteRaffle.remove(item);
-      print('wee4');
+     // print('wee4');
       await refreshData();
     })
         .catchError((e) {
-    //todo: show error: Error in deleting item from cart
-      print('wee5');
+    // show error: Error in deleting item from cart
+     // print('wee5');
     });
   }
 
