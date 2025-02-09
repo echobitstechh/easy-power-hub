@@ -261,7 +261,7 @@ class _ProductCardState extends State<ProductCard> {
                 child: Row(
                   children: [
                     Text(
-                      '\$${widget.product.price}',
+                      '₦${widget.product.price}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 20,

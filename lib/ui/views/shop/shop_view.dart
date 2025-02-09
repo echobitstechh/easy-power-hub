@@ -20,6 +20,7 @@ import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
 import 'package:stacked/stacked.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
@@ -42,10 +43,10 @@ class ShopView extends StackedView<ShopViewModel> {
 
   @override
   Widget builder(
-      BuildContext context,
-      ShopViewModel viewModel,
-      Widget? child,
-      ) {
+    BuildContext context,
+    ShopViewModel viewModel,
+    Widget? child,
+  ) {
     // Filter products based on the passed category
     List<Product> categoryProducts = viewModel.filteredProductList;
     if (filter != null) {
@@ -93,7 +94,8 @@ class ShopView extends StackedView<ShopViewModel> {
           headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
             return [
               SliverOverlapAbsorber(
-                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                handle:
+                    NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
                   expandedHeight: 300.0,
                   pinned: true,
@@ -109,7 +111,8 @@ class ShopView extends StackedView<ShopViewModel> {
                         autoPlay: true,
                       ),
                       itemCount: slides.length,
-                      itemBuilder: (BuildContext context, int index, int pageIndex) {
+                      itemBuilder:
+                          (BuildContext context, int index, int pageIndex) {
                         final slide = slides[index];
                         return Stack(
                           fit: StackFit.expand,
@@ -118,13 +121,11 @@ class ShopView extends StackedView<ShopViewModel> {
                                 ? CachedNetworkImage(
                               imageUrl: slide['image']!,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                            )
-                                : Image.asset(
-                              slide['image']!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
 
                             Container(
@@ -169,7 +170,8 @@ class ShopView extends StackedView<ShopViewModel> {
               return CustomScrollView(
                 slivers: [
                   SliverOverlapInjector(
-                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context),
                   ),
                   SliverToBoxAdapter(
                     child: Padding(
@@ -179,12 +181,14 @@ class ShopView extends StackedView<ShopViewModel> {
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
-                              children: viewModel.filteredCategories.map((category) {
+                              children:
+                                  viewModel.filteredCategories.map((category) {
                                 return _buildCategoryChip(category, viewModel);
                               }).toList(),
                             ),
                           ),
-                          popularDrawsSlider(context, categoryProducts, viewModel),
+                          popularDrawsSlider(
+                              context, categoryProducts, viewModel),
                         ],
                       ),
                     ),
@@ -199,10 +203,10 @@ class ShopView extends StackedView<ShopViewModel> {
   }
 
   Widget popularDrawsSlider(
-      BuildContext context,
-      List<Product> productList,
-      ShopViewModel viewModel,
-      ) {
+    BuildContext context,
+    List<Product> productList,
+    ShopViewModel viewModel,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,8 +249,6 @@ class ShopView extends StackedView<ShopViewModel> {
     );
   }
 
-
-
   Widget _buildCategoryChip(Category category, ShopViewModel viewModel) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -270,7 +272,7 @@ class ShopView extends StackedView<ShopViewModel> {
             : Colors.grey[100]!,
         labelStyle: TextStyle(
           color:
-          category.id == viewModel.selectedId ? Colors.white : Colors.black,
+              category.id == viewModel.selectedId ? Colors.white : Colors.black,
         ),
         shape: RoundedRectangleBorder(
           side: BorderSide(
@@ -286,8 +288,6 @@ class ShopView extends StackedView<ShopViewModel> {
     );
   }
 
-
-
   @override
   void onViewModelReady(ShopViewModel viewModel) {
     super.onViewModelReady(viewModel);
@@ -300,14 +300,14 @@ class ShopView extends StackedView<ShopViewModel> {
     _pageController.dispose();
   }
 
-
   @override
   ShopViewModel viewModelBuilder(
-      BuildContext context,
-      ) =>
+    BuildContext context,
+  ) =>
       ShopViewModel();
+}
 
-} /// Product Card Widget
+/// Product Card Widget
 class ProductCardWidget extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
@@ -324,60 +324,211 @@ class ProductCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.all(8.0),
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+      // child: Card(
+      //   margin: const EdgeInsets.all(8.0),
+      //   elevation: 3,
+      //   shape: RoundedRectangleBorder(
+      //     borderRadius: BorderRadius.circular(20),
+      //   ),
+      //   child: Column(
+      //     crossAxisAlignment: CrossAxisAlignment.start,
+      //     mainAxisSize: MainAxisSize.min,
+      //     children: [
+      //       Stack(
+      //         children: [
+      //           ClipRRect(
+      //             borderRadius: const BorderRadius.only(
+      //               topLeft: Radius.circular(20),
+      //               topRight: Radius.circular(20),
+      //             ),
+      //             child: CachedNetworkImage(
+      //               placeholder: (context, url) => const Center(
+      //                 child: CircularProgressIndicator(
+      //                   strokeWidth: 2.0,
+      //                   valueColor: AlwaysStoppedAnimation<Color>(
+      //                     kcSecondaryColor,
+      //                   ),
+      //                 ),
+      //               ),
+      //               imageUrl: (product.images != null && product.images!.isNotEmpty)
+      //                   ? product.images!.first
+      //                   : 'https://via.placeholder.com/120',
+      //               height: MediaQuery.of(context).size.height * 0.1,
+      //               width: double.infinity,
+      //               fit: BoxFit.fitHeight,
+      //               errorWidget: (context, url, error) => const Icon(Icons.error),
+      //               fadeInDuration: const Duration(milliseconds: 500),
+      //               fadeOutDuration: const Duration(milliseconds: 300),
+      //             ),
+      //           ),
+      //           Positioned(
+      //             top: 8,
+      //             left: 8,
+      //             child: Container(
+      //               padding: const EdgeInsets.symmetric(
+      //                 horizontal: 8.0,
+      //                 vertical: 4.0,
+      //               ),
+      //               decoration: BoxDecoration(
+      //                 color: Colors.black,
+      //                 borderRadius: BorderRadius.circular(12),
+      //               ),
+      //               child: const Text(
+      //                 'NEW',
+      //                 style: TextStyle(
+      //                   color: Colors.white,
+      //                   fontSize: 12,
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         ],
+      //       ),
+      //       Padding(
+      //         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      //         child: Row(
+      //           children: List.generate(5, (starIndex) {
+      //             return Icon(
+      //               Icons.star,
+      //               color: starIndex < (product.rating?.toInt() ?? 0)
+      //                   ? kcStarColor
+      //                   : Colors.grey,
+      //               size: 16,
+      //             );
+      //           }),
+      //         ),
+      //       ),
+      //       Padding(
+      //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      //         child: Text(
+      //           product.productName ?? 'Product name',
+      //           style: const TextStyle(
+      //             fontSize: 14,
+      //             fontWeight: FontWeight.bold,
+      //           ),
+      //           maxLines: 1,
+      //           overflow: TextOverflow.ellipsis,
+      //         ),
+      //       ),
+      //       Padding(
+      //         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      //         child: Row(
+      //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //           children: [
+      //             Expanded(
+      //               child: Text(
+      //                 '₦${product.price ?? 0}',
+      //                 style: const TextStyle(
+      //                   fontSize: 14,
+      //                   fontWeight: FontWeight.bold,
+      //                   color: kcPrimaryColor,
+      //                 ),
+      //                 maxLines: 1,
+      //                 overflow: TextOverflow.ellipsis,
+      //               ),
+      //             ),
+      //             GestureDetector(
+      //               onTap: onAddToCart,
+      //               child: Container(
+      //                 padding: const EdgeInsets.all(8.0),
+      //                 decoration: BoxDecoration(
+      //                   color: Colors.white,
+      //                   shape: BoxShape.circle,
+      //                   boxShadow: [
+      //                     BoxShadow(
+      //                       color: Colors.grey.withOpacity(0.5),
+      //                       spreadRadius: 1,
+      //                       blurRadius: 5,
+      //                       offset: const Offset(0, 3),
+      //                     ),
+      //                   ],
+      //                 ),
+      //                 child: GestureDetector(
+      //                   onTap: (){
+      //                     locator<NavigationService>().navigateToCartView();
+      //                   },
+      //                   child: const Icon(
+      //                     Icons.shopping_cart_outlined,
+      //                     color: kcSecondaryColor,
+      //                     size: 16,
+      //                   ),
+      //                 ),
+      //               ),
+      //             )
+      //           ],
+      //         ),
+      //       ),
+      //     ],
+      //   ),
+      // ),
+      child: Container(
+        margin: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Color(0xFFF9F9F9),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  child: CachedNetworkImage(
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.0,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          kcSecondaryColor,
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                    height: 155,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Colors.grey.shade300, // Border color
+                        width: 1.0, // Border width
+                      ),
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                    ),
+                    child: ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(12)),
+                      child: CachedNetworkImage(
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(kcSecondaryColor),
+                          ),
                         ),
+                        imageUrl: (product.images != null &&
+                                product.images!.isNotEmpty)
+                            ? product.images!.first
+                            : 'https://via.placeholder.com/120',
+                        height: MediaQuery.of(context).size.height * 0.1,
+                        width: double.infinity,
+                        fit: BoxFit.fitHeight,
+                        errorWidget: (context, url, error) =>
+                            const Icon(Icons.error),
+                        fadeInDuration: const Duration(milliseconds: 500),
+                        fadeOutDuration: const Duration(milliseconds: 300),
                       ),
                     ),
-                    imageUrl: (product.images != null && product.images!.isNotEmpty)
-                        ? product.images!.first
-                        : 'https://via.placeholder.com/120',
-                    height: MediaQuery.of(context).size.height * 0.1,
-                    width: double.infinity,
-                    fit: BoxFit.fitHeight,
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                    fadeInDuration: const Duration(milliseconds: 500),
-                    fadeOutDuration: const Duration(milliseconds: 300),
                   ),
                 ),
+
+                // if (isNew)
                 Positioned(
-                  top: 8,
-                  left: 8,
+                  left: 16,
+                  top: 16,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 4.0,
-                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.black87,
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Text(
-                      'NEW',
+                      'New',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
+                        fontSize: 8,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
@@ -385,71 +536,48 @@ class ProductCardWidget extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                children: List.generate(5, (starIndex) {
-                  return Icon(
-                    Icons.star,
-                    color: starIndex < (product.rating?.toInt() ?? 0)
-                        ? kcStarColor
-                        : Colors.grey,
-                    size: 16,
-                  );
-                }),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                product.productName ?? 'Product name',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      '₦${product.price ?? 0}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: kcPrimaryColor,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    product.productName ?? 'Product name',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  GestureDetector(
-                    onTap: onAddToCart,
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: const Offset(0, 3),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '₦${product.price ?? 0}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.star,
+                            size: 16,
+                            color: Colors.amber,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "2.5",
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.shopping_cart_outlined,
-                        color: kcSecondaryColor,
-                        size: 16,
-                      ),
-                    ),
-                  )
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -459,6 +587,3 @@ class ProductCardWidget extends StatelessWidget {
     );
   }
 }
-
-
-

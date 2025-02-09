@@ -32,8 +32,8 @@ class EnterEmailView extends StackedView<EnterEmailViewModel> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SvgPicture.asset(
-                    "assets/images/logo_login.svg",
-                    height: 60, // Adjust the height to make the image smaller
+                    "assets/images/easy_power_logo.svg",
+                    height: 60,
                     fit: BoxFit.fitHeight,
                   ),
                 ],

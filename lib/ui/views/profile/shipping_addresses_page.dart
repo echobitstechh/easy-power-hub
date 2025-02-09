@@ -231,7 +231,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -242,7 +242,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                         child: Text(
                           address.address,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                           maxLines: 1, // Ensure it doesn't wrap
@@ -251,8 +251,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                       ),
                       Row(
                         children: [
-                          _buildIconButton(Icons.edit, 'Edit', Colors.red, ),
-                          horizontalSpaceSmall,
+                          _buildIconButton(Icons.edit, 'Edit', Colors.red,),
                           _buildIconButton(Icons.delete, 'Delete', Colors.red, () {
                             deleteAddress(index);
                           }),
@@ -260,38 +259,9 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                       ),
                     ],
                   ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(address.city),
-                      Text(address.state),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-
-                          // Checkbox(
-                          //   value: address[address.],
-                          //   activeColor: Colors.black,
-                          //   checkColor: Colors.white,
-                          //   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          //   onChanged: (value) {
-                          //     setState(() {
-                          //       address['isDefaultPayment'] = value;
-                          //     });
-                          //   },
-                          // ),
-                          const SizedBox(width: 2),
-                          // const Expanded(
-                          //   child: Text(
-                          //     "Use as shipping address",
-                          //     style: TextStyle(fontSize: 14),
-                          //   ),
-                          // ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  Text(address.city, style: TextStyle(fontSize: 16),),
+                  Text(address.state,style:  TextStyle(fontSize: 16),),
+                  const SizedBox(height: 2),
                 ],
               ),
             ),
@@ -314,10 +284,10 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
     return Column(
         children: [
         IconButton(
-        icon: Icon(icon, color: color, size: 20,),
+        icon: Icon(icon, color: color, size: 15,),
     onPressed: onPressed,
     ),
-    Text(label, style: TextStyle(color: color)),
+    Text(label, style: TextStyle(color: color, fontSize: 12) ),
     ],
     );
     }
