@@ -465,7 +465,7 @@ class ProductCardWidget extends StatelessWidget {
       //   ),
       // ),
       child: Container(
-        margin: const EdgeInsets.all(6),
+        margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Color(0xFFF9F9F9),
           borderRadius: BorderRadius.circular(12),
@@ -473,14 +473,12 @@ class ProductCardWidget extends StatelessWidget {
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
             Stack(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(6.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    //height: 140,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
@@ -504,7 +502,8 @@ class ProductCardWidget extends StatelessWidget {
                                 product.images!.isNotEmpty)
                             ? product.images!.first
                             : 'https://via.placeholder.com/120',
-                        height: MediaQuery.of(context).size.height * 0.13,
+                        height: MediaQuery.of(context).size.height * 0.14,
+                        // height: 130,
                         width: double.infinity,
                         fit: BoxFit.fitHeight,
                         errorWidget: (context, url, error) =>
@@ -515,6 +514,7 @@ class ProductCardWidget extends StatelessWidget {
                     ),
                   ),
                 ),
+
                 // if (isNew)
                 Positioned(
                   left: 16,
@@ -562,17 +562,17 @@ class ProductCardWidget extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const Row(
+                      Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.star,
                             size: 16,
                             color: Colors.amber,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             "2.5",
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
