@@ -100,6 +100,7 @@ class Routes {
   static const withdrawView = '/withdraw-view';
 
   static const registerView = '/register-view';
+
   static const successView = '/success-view';
 
   static const all = <String>{

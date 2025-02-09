@@ -176,6 +176,7 @@ class _SignUpState extends State<SignUp> {
                       submit: () async {
                         if (model.isOtpRequested) {
                           model.submitOtp(); // Call submitOtp for verification
+                          widget.updatePage(PresentPage.register);
                         } else {
                           final ApiResponse? response = await model.requestOtp();
                           if (response != null) {

@@ -281,6 +281,7 @@ class AuthViewModel extends BaseViewModel {
       isLoading = false;
       print('response is ${res.data}');
       if (res.statusCode == 200) {
+        print("OTP Verified Successfully. Navigating to registerView...");
         snackBar.showSnackbar(message: 'OTP verified successfully', duration: Duration(seconds: 5));
         locator<NavigationService>().clearStackAndShow(Routes.registerView, arguments: {
           'updateIsLogin': false,

@@ -168,9 +168,7 @@ class CartView extends StackedView<CartViewModel> {
                                               ],
                                             ),
                                             child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Row(
@@ -322,8 +320,7 @@ class CartView extends StackedView<CartViewModel> {
                                                                     1;
                                                             viewModel
                                                                 .getRaffleSubTotal();
-                                                            cart
-                                                                .notifyListeners();
+                                                            cart.notifyListeners();
                                                           },
                                                           child: Container(
                                                             height: 30,
@@ -334,15 +331,10 @@ class CartView extends StackedView<CartViewModel> {
                                                                         kcLightGrey),
                                                                 borderRadius:
                                                                     BorderRadius
-                                                                        .circular(
-                                                                            5)),
+                                                                        .circular(5)),
                                                             child: const Align(
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Icon(
-                                                                Icons.add,
-                                                                size: 18,
+                                                              alignment: Alignment.center,
+                                                              child: Icon(Icons.add, size: 18,
                                                               ),
                                                             ),
                                                           ),

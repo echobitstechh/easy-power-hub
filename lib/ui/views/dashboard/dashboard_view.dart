@@ -45,7 +45,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
   DashboardView({Key? key}) : super(key: key);
 
   final PageController _pageController = PageController();
-
   List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
     return [
       StaggeredGridTile.count(

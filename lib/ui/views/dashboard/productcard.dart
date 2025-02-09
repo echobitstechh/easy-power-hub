@@ -329,7 +329,7 @@ class _ProductCardState extends State<ProductCard> {
                                       ),
                                     ),
                                   ),
-                                  verticalSpaceSmall,
+                                  const SizedBox(width: 20),
                                   Container(
                                     height: 53,
                                     decoration: BoxDecoration(
@@ -461,10 +461,10 @@ class _ProductCardState extends State<ProductCard> {
                   'You might also like',
                   style: TextStyle(fontSize: 18),
                 ),
-                Text(
-                  '12 items',
-                  style: TextStyle(fontSize: 14),
-                ),
+                // Text(
+                //   '12 items',
+                //   style: TextStyle(fontSize: 14),
+                // ),
               ],
             ),
           ),
