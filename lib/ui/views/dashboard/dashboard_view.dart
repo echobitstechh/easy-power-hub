@@ -731,7 +731,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           Row(

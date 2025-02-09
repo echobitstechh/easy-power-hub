@@ -479,7 +479,6 @@ class ProductCardWidget extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Container(
-                    height: 155,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
