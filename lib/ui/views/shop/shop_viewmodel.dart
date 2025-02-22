@@ -74,6 +74,13 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  bool isNewProduct(String createdAt) {
+    final productDate = DateTime.parse(createdAt);
+    final currentDate = DateTime.now();
+    final difference = currentDate.difference(productDate).inDays;
+    return difference <= 14;  // 14 days = 2 weeks
+  }
+
   void changeSelected(int i) {
     selectedIndex = i;
     rebuildUi();

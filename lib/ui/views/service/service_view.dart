@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/utils/config.dart';
 import '../../common/app_colors.dart';
 import '../../components/submit_button.dart';
 import '../cart/checkout.dart';
@@ -86,72 +87,64 @@ class ServicesView extends StackedView<ServicesviewModel> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16.0),
       ),
-      child: InkWell(
-        onTap: () {
-          showServiceAddressSheet(context, viewModel, () {
-            // Handle Place Order action
-            print("Proceeding to checkout...");
-          });
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.network(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  height: 90,
-                  width: 86,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset('assets/images/default.png',
-                        height: 90, width: 86);
-                  },
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.network(
+                imagePath,
+                fit: BoxFit.cover,
+                height: 90,
+                width: 86,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/default.png',
+                      height: 90, width: 86);
+                },
               ),
-              SizedBox(width: 16.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: GoogleFonts.redHatDisplay(
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      description,
-                      style: GoogleFonts.redHatDisplay(
-                        textStyle:
-                            TextStyle(fontSize: 10, color: Colors.grey[600]),
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 16.0),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+            SizedBox(width: 16.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.more_vert),
-                  SizedBox(height: 16.0),
-                  IconButton(
-                    icon: Icon(Icons.phone, color: Colors.green), // Phone icon
-                    onPressed: _openDialer, // Opens the dialer without a number
+                  Text(
+                    title,
+                    style: GoogleFonts.redHatDisplay(
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-
+                  SizedBox(height: 8.0),
+                  Text(
+                    description,
+                    style: GoogleFonts.redHatDisplay(
+                      textStyle:
+                      TextStyle(fontSize: 10, color: Colors.grey[600]),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Icon(Icons.more_vert),
+                SizedBox(height: 16.0),
+                IconButton(
+                  icon: Icon(Icons.phone, color: Colors.green), // Phone icon
+                  onPressed: _openDialer, // Opens the dialer without a number
+                ),
+
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -338,12 +331,14 @@ class ServicesView extends StackedView<ServicesviewModel> {
   }
 }
 
-
 void _openDialer() async {
-  final Uri phoneUri = Uri(scheme: 'tel');
+  const String phoneNumber = AppConfig.companyPhone;
+  final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
   if (await canLaunchUrl(phoneUri)) {
     await launchUrl(phoneUri);
   } else {
     throw 'Could not open dialer';
   }
 }
+

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:ffi';
 import 'package:afriprize/app/app.router.dart';
 import 'package:afriprize/state.dart';
 import 'package:afriprize/ui/common/app_colors.dart';
@@ -7,6 +8,7 @@ import 'package:afriprize/ui/common/ui_helpers.dart';
 import 'package:afriprize/ui/views/dashboard/productcard.dart';
 import 'package:afriprize/ui/views/dashboard/raffle_detail.dart';
 import 'package:afriprize/ui/views/service/service_view.dart';
+import 'package:afriprize/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
@@ -704,7 +706,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                           ),
                         ),
 
-                        // if (isNew)
+                        viewModel.isNewProduct(item.createdAt ?? '') ?
                         Positioned(
                           left: 16,
                           top: 16,
@@ -724,7 +726,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                               ),
                             ),
                           ),
-                        ),
+                        ): const SizedBox.shrink(),
                       ],
                     ),
                     Padding(
@@ -742,14 +744,13 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
-                                  maxLines: 2,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  locator<NavigationService>()
-                                      .navigateToCartView();
+                                 viewModel.addToRaffleCart(item);
                                 },
                                 child: const Icon(
                                   Icons.shopping_cart_outlined,
@@ -763,7 +764,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                '₦${item.price ?? 0}',
+                                MoneyUtils().formatAmount((double.tryParse(item.salePrice ?? '0.0') ?? 0.0).toInt()),
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -771,21 +772,39 @@ class DashboardView extends StackedView<DashboardViewModel> {
                               ),
                               Row(
                                 children: [
-                                  const Icon(
-                                    Icons.star,
-                                    size: 16,
-                                    color: Colors.amber,
+                                  Stack(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: Colors.grey, // Base star color
+                                      ),
+                                      ShaderMask(
+                                        shaderCallback: (Rect bounds) {
+                                          double ratingValue = item.rating ?? 0.0;
+                                          return LinearGradient(
+                                            stops: [ratingValue / 5, ratingValue / 5],
+                                            colors: [Colors.amber, Colors.grey], // Fill and empty colors
+                                          ).createShader(bounds);
+                                        },
+                                        child: const Icon(
+                                          Icons.star,
+                                          size: 16,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  const SizedBox(width: 2),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    "2.5",
+                                    (item.rating ?? 0.0).toStringAsFixed(1),
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
                                 ],
-                              ),
+                              )
                             ],
                           ),
                         ],
@@ -914,212 +933,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
       ),
     );
   }
-  // Widget _buildAdsSlideshow(DashboardViewModel viewModel) {
-  //   if (viewModel.productList.where((element) => element.ad == true).isEmpty) {
-  //     // Placeholder Card for no ads
-  //     return Card(
-  //       color: kcPrimaryColor,
-  //       elevation: 2,
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(15),
-  //       ),
-  //       child: Row(
-  //         mainAxisAlignment: MainAxisAlignment.start,
-  //         children: [
-  //           Flexible(
-  //             child: Padding(
-  //               padding: const EdgeInsets.all(16.0),
-  //               child: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.start,
-  //                 children: [
-  //                   Container(
-  //                     width: double.infinity, // Adjust to take available space
-  //                     child: const Text(
-  //                       'Best Full Solar Installation',
-  //                       style: TextStyle(
-  //                         fontSize: 20,
-  //                         color: kcWhiteColor,
-  //                         fontWeight: FontWeight.bold,
-  //                       ),
-  //                       softWrap: true,
-  //                     ),
-  //                   ),
-  //                   Container(
-  //                     width: double.infinity, // Adjust to take available space
-  //                     child: Text(
-  //                       'Light out your world',
-  //                       style: TextStyle(
-  //                         fontSize: 16,
-  //                         color: kcWhiteColor,
-  //                       ),
-  //                       softWrap: true,
-  //                     ),
-  //                   ),
-  //                   Padding(
-  //                     padding: const EdgeInsets.all(8.0),
-  //                     child: ElevatedButton(
-  //                       onPressed: () {},
-  //                       style: ElevatedButton.styleFrom(
-  //                         foregroundColor: kcBlackColor,
-  //                         backgroundColor: kcWhiteColor,
-  //                         padding: const EdgeInsets.symmetric(
-  //                             vertical: 12.0, horizontal: 24.0),
-  //                         textStyle: const TextStyle(
-  //                           fontWeight: FontWeight.bold,
-  //                           fontSize: 16,
-  //                         ),
-  //                         shape: RoundedRectangleBorder(
-  //                           borderRadius: BorderRadius.circular(8.0),
-  //                         ),
-  //                       ),
-  //                       child: Text("Check now"),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           ),
-  //           Padding(
-  //             padding: const EdgeInsets.only(right: 4.0),
-  //             child: Container(
-  //               height: 150, // Adjust the height of the container
-  //               width: 130, // Adjust the width of the container
-  //               decoration: BoxDecoration(
-  //                 borderRadius: const BorderRadius.only(
-  //                   topLeft: Radius.circular(10),
-  //                   topRight: Radius.circular(10),
-  //                 ),
-  //                 image: DecorationImage(
-  //                   image: AssetImage(
-  //                       "assets/images/Mercury-10KVA-Solar-System-1 2.png"),
-  //                   fit: BoxFit.fill,
-  //                 ),
-  //               ),
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     );
-  //   }
-  //
-  //   return CarouselSlider.builder(
-  //     itemCount:
-  //         viewModel.productList.where((element) => element.ad == true).length,
-  //     itemBuilder: (context, index, realIndex) {
-  //       final ad = viewModel.productList
-  //           .where((element) => element.ad == true)
-  //           .toList()[index];
-  //       return _buildAdItem(ad, context);
-  //     },
-  //     options: CarouselOptions(
-  //       height: 180, // Updated height here
-  //       autoPlay: true,
-  //       enlargeCenterPage: true,
-  //       viewportFraction: 1,
-  //       autoPlayInterval: Duration(seconds: 5),
-  //       onPageChanged: (index, reason) {},
-  //     ),
-  //   );
-  // }
 
-  Widget _buildAdItem(Product ad, BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      width: double.infinity,
-      height: 180,
-      decoration: BoxDecoration(
-        color: kcSecondaryColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Left side: Title and description
-          Flexible(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    ad.productName ?? 'Best Full Solar Installation',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  verticalSpaceSmall,
-                  Text(
-                    ad.productDescription ?? 'Light out your world',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                    ),
-                  ),
-                  verticalSpaceSmall,
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          isDismissible: true,
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(25.0),
-                                topRight: Radius.circular(25.0)),
-                          ),
-                          backgroundColor: Colors.black.withOpacity(0.7),
-                          builder: (BuildContext context) {
-                            return ProductCard(product: ad);
-                          },
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: kcSecondaryColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        minimumSize: Size(80, 30),
-                      ),
-                      child: Text('Check Now'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Right side: Product image
-          SizedBox(width: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.network(
-              ad.images?.first ?? '',
-              width: 120,
-              height: 150,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Center(child: CircularProgressIndicator());
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(Icons.broken_image, size: 100, color: Colors.white);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildShimmerContainer() {
     return Shimmer.fromColors(

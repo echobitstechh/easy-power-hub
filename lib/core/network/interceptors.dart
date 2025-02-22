@@ -108,8 +108,8 @@ final requestInterceptors = InterceptorsWrapper(
         } else {
           final res = await locator<DialogService>().showCustomDialog(
               variant: DialogType.infoAlert,
-              title: "Session Expired",
-              description: "Login again to continue");
+              title: "You are not logged in",
+              description: "Login to continue");
           if (res!.confirmed) {
             userLoggedIn.value = false;
             await locator<LocalStorage>().delete(LocalStorageDir.authToken);
@@ -124,7 +124,7 @@ final requestInterceptors = InterceptorsWrapper(
         if (kDebugMode) {
           print('refresh token is null');
         }
-        final res = await showDialogWithResponse("Session Expired", "Login again to continue", isDialogBeingDisplayed);
+        final res = await showDialogWithResponse("You are not logged in", "Login to continue", isDialogBeingDisplayed);
         if (res!.confirmed) {
           return locator<NavigationService>().clearStackAndShow(Routes.authView);
         }

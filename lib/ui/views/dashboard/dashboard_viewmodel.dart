@@ -81,6 +81,12 @@ class DashboardViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  bool isNewProduct(String createdAt) {
+    final productDate = DateTime.parse(createdAt);
+    final currentDate = DateTime.now();
+    final difference = currentDate.difference(productDate).inDays;
+    return difference <= 14;  // 14 days = 2 weeks
+  }
 
 
   Future<void> loadProduct() async {
@@ -93,11 +99,14 @@ class DashboardViewModel extends BaseViewModel {
 
       if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
+        print('Decoded JSON: $storedProducts');
         // Populate productList and filteredProductList
         productList = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
         filteredProductList = productList;
+        print('loaded products from local storage list ${productList.length}');
+        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
         rebuildUi();
       }else{
         print('no value to load');
@@ -210,6 +219,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void addToRaffleCart(Product product) async {
+    print('adding to cart');
     try {
       final existingIndex = cart.value.indexWhere(
             (raffleItem) => raffleItem.product?.id == product.id,

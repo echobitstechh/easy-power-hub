@@ -5,6 +5,7 @@ class Product {
   String? productName;
   String? productDescription;
   String? price;
+  String? salePrice;
   double? rating;
   int? availability;
   int? stock;
@@ -26,6 +27,7 @@ class Product {
     this.productName,
     this.productDescription,
     this.price,
+    this.salePrice,
     this.rating,
     this.availability,
     this.stock,
@@ -45,33 +47,34 @@ class Product {
 
   Product.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    productName = json['name'];
-    productDescription = json['description'];
-    price = json['price']?.toString() ?? '0'; // Convert price to int
+    productName = json['name']; // Corrected key
+    productDescription = json['description']; // Corrected key
+    price = json['price']?.toString() ?? '0';
+    salePrice = json['salePrice']?.toString() ?? '0';
     rating = double.tryParse(json['rating']?.toString() ?? '0.0');
     availability = json['availability'];
     stock = json['stock'];
     ad = json['ad'];
     featured = json['featured'];
     lowStockAlert = json['lowStockAlert'];
-    categoryId = json['categoryId'] is int ? json['categoryId'] : int.tryParse(json['categoryId']?.toString() ?? '0'); // Convert categoryId to int
-    verifiedSales = json['verifiedSale'];
+    categoryId = json['categoryId'] is int ? json['categoryId'] : int.tryParse(json['categoryId']?.toString() ?? '0');
+    verifiedSales = json['verifiedSale']; // Corrected key
     brandName = json['brandName'];
-    modelNumber = json['modelNumber'] is int ? json['modelNumber'] : int.tryParse(json['modelNumber']?.toString() ?? '0'); // Convert modelNumber to int
+    modelNumber = json['modelNumber'] is int ? json['modelNumber'] : int.tryParse(json['modelNumber']?.toString() ?? '0');
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
     reviews = json['reviews'] != null ? List<String>.from(json['reviews']) : null;
     images = json['images'] != null ? List<String>.from(json['images']) : null;
     installment = json['installment'];
-
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
-    data['productName'] = productName;
-    data['productDescription'] = productDescription;
+    data['name'] = productName;
+    data['description'] = productDescription;
     data['price'] = price;
+    data['salePrice'] = salePrice;
     data['rating'] = rating;
     data['availability'] = availability;
     data['stock'] = stock;

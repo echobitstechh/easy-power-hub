@@ -5,7 +5,7 @@
 
 class AppConfig {
   // static const String baseUrl = "https://api.afriprize.com/api/v1/";
-  static const String baseUrl = "https://easy-ph-backend.onrender.com/api/v1/";
+  static const String baseUrl = "https://easyph.echobitsone.com/api/v1/";
 
   // static const String baseUrl = "http://192.168.0.179:3001/api/v1/";
 
@@ -20,5 +20,6 @@ class AppConfig {
   static const bool isTestMode = false;
   static const String APPLESTOREURL = 'https://apps.apple.com/ng/app/afriprize-mobile/id6474942596';
   static const String GOOGLESTOREURL = 'https://play.google.com/store/apps/details?id=com.afriprize.afriprize&pcampaignid=web_share';
+  static const String companyPhone = '08085053131';
 
 }

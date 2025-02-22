@@ -27,6 +27,7 @@ import '../../../core/data/models/product.dart';
 import '../../../core/data/models/raffle_cart_item.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
+import '../../../utils/money_util.dart';
 import '../../../widget/AdventureDialog.dart';
 import 'shop_viewmodel.dart';
 
@@ -224,9 +225,8 @@ class ShopView extends StackedView<ShopViewModel> {
           ),
           itemCount: productList.length,
           itemBuilder: (context, index) {
-            final product = productList[index];
-            return ProductCardWidget(
-              product: product,
+            final item = productList[index];
+            return InkWell(
               onTap: () {
                 showModalBottomSheet(
                   context: context,
@@ -240,12 +240,312 @@ class ShopView extends StackedView<ShopViewModel> {
                   ),
                   backgroundColor: Colors.black.withOpacity(0.7),
                   builder: (BuildContext context) {
-                    return ProductCard(product: product);
+                    return ProductCard(product: item);
                   },
                 );
               },
-              onAddToCart: () => viewModel.addToRaffleCart(product),
-            );
+              // child: Card(
+              //   margin: const EdgeInsets.all(8.0),
+              //   elevation: 3,
+              //   shape: RoundedRectangleBorder(
+              //     borderRadius: BorderRadius.circular(20),
+              //   ),
+              //   child: Column(
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     mainAxisSize: MainAxisSize.min,
+              //     children: [
+              //       Stack(
+              //         children: [
+              //           ClipRRect(
+              //             borderRadius: const BorderRadius.only(
+              //               topLeft: Radius.circular(20),
+              //               topRight: Radius.circular(20),
+              //             ),
+              //             child: CachedNetworkImage(
+              //               placeholder: (context, url) => const Center(
+              //                 child: CircularProgressIndicator(
+              //                   strokeWidth: 2.0,
+              //                   valueColor:
+              //                   AlwaysStoppedAnimation<Color>(kcSecondaryColor),
+              //                 ),
+              //               ),
+              //               imageUrl: (item.images != null && item.images!.isNotEmpty)
+              //                   ? item.images!.first
+              //                   : 'https://via.placeholder.com/120',
+              //               height: MediaQuery.of(context).size.height * 0.14, // Reduced image size
+              //               width: double.infinity,
+              //               fit: BoxFit.fitHeight, // Ensures it fits properly
+              //               errorWidget: (context, url, error) =>
+              //               const Icon(Icons.error),
+              //               fadeInDuration: const Duration(milliseconds: 500),
+              //               fadeOutDuration: const Duration(milliseconds: 300),
+              //             ),
+              //           ),
+              //           Positioned(
+              //             top: 8,
+              //             left: 8,
+              //             child: Container(
+              //               padding: const EdgeInsets.symmetric(
+              //                   horizontal: 8.0, vertical: 4.0),
+              //               decoration: BoxDecoration(
+              //                 color: Colors.black,
+              //                 borderRadius: BorderRadius.circular(12),
+              //               ),
+              //               child: const Text(
+              //                 'NEW',
+              //                 style: TextStyle(
+              //                   color: Colors.white,
+              //                   fontSize: 12,
+              //                 ),
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 8.0, vertical: 4.0),
+              //         child: Row(
+              //           children: List.generate(5, (starIndex) {
+              //             return Icon(
+              //               Icons.star,
+              //               color: starIndex < (item.rating?.toInt() ?? 0)
+              //                   ? kcStarColor
+              //                   : Colors.grey,
+              //               size: 16,
+              //             );
+              //           }),
+              //         ),
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //         child: Text(
+              //           item.productName ?? 'Product name',
+              //           style: const TextStyle(
+              //             fontSize: 14,
+              //             fontWeight: FontWeight.bold,
+              //           ),
+              //           maxLines: 1,
+              //           overflow: TextOverflow.ellipsis,
+              //         ),
+              //       ),
+              //       Padding(
+              //         padding: const EdgeInsets.symmetric(
+              //             horizontal: 8.0, vertical: 4.0),
+              //         child: Row(
+              //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //           children: [
+              //             Expanded(
+              //               child: Text(
+              //                 '₦${item.price ?? 0}',
+              //                 style: const TextStyle(
+              //                   fontSize: 14,
+              //                   fontWeight: FontWeight.bold,
+              //                   color: kcPrimaryColor,
+              //                 ),
+              //                 maxLines: 1,
+              //                 overflow: TextOverflow.ellipsis,
+              //               ),
+              //             ),
+              //             GestureDetector(
+              //               onTap: () {
+              //                 RaffleCartItem newItem =
+              //                 RaffleCartItem(raffle: item, quantity: 1);
+              //                 viewModel.addToRaffleCart(item);
+              //                 viewModel.notifyListeners();
+              //               },
+              //               child: Container(
+              //                 padding: const EdgeInsets.all(8.0),
+              //                 decoration: BoxDecoration(
+              //                   color: Colors.white,
+              //                   shape: BoxShape.circle,
+              //                 ),
+              //                 child: GestureDetector(
+              //                   onTap: (){
+              //                     locator<NavigationService>().navigateToCartView();
+              //                   },
+              //                   child: const Icon(
+              //                     Icons.shopping_cart_outlined,
+              //                     color: kcSecondaryColor,
+              //                     size: 16,
+              //                   ),
+              //                 ),
+              //               ),
+              //             )
+              //           ],
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color:Theme.of(context).brightness == Brightness.dark
+                      ? kcDarkGreyColor// Slightly lighter black for contrast
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color:Theme.of(context).brightness == Brightness.dark
+                                  ? kcDarkGreyColor// Slightly lighter black for contrast
+                                  : Colors.white,
+                              border: Border.all(
+                                color: Colors.grey.shade300, // Border color
+                                width: 1.0, // Border width
+                              ),
+                              borderRadius:
+                              const BorderRadius.all(Radius.circular(12)),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(12)),
+                              child: CachedNetworkImage(
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        kcSecondaryColor),
+                                  ),
+                                ),
+                                imageUrl: (item.images != null &&
+                                    item.images!.isNotEmpty)
+                                    ? item.images!.first
+                                    : 'https://via.placeholder.com/120',
+                                height: MediaQuery.of(context).size.height *
+                                    0.15, // Reduced image size
+                                width: double.infinity,
+                                fit: BoxFit
+                                    .fitHeight, // Ensures it fits properly
+                                errorWidget: (context, url, error) =>
+                                const Icon(Icons.error),
+                                fadeInDuration:
+                                const Duration(milliseconds: 500),
+                                fadeOutDuration:
+                                const Duration(milliseconds: 300),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        viewModel.isNewProduct(item.createdAt ?? '') ?
+                        Positioned(
+                          left: 16,
+                          top: 16,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black87,
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: const Text(
+                              'New',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ): const SizedBox.shrink(),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(5),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  item.productName ?? 'Product name',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  viewModel.addToRaffleCart(item);
+                                },
+                                child: const Icon(
+                                  Icons.shopping_cart_outlined,
+                                  color: kcSecondaryColor,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                MoneyUtils().formatAmount((double.tryParse(item.salePrice ?? '0.0') ?? 0.0).toInt()),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Stack(
+                                    children: [
+                                      const Icon(
+                                        Icons.star,
+                                        size: 16,
+                                        color: Colors.grey, // Base star color
+                                      ),
+                                      ShaderMask(
+                                        shaderCallback: (Rect bounds) {
+                                          double ratingValue = item.rating ?? 0.0;
+                                          return LinearGradient(
+                                            stops: [ratingValue / 5, ratingValue / 5],
+                                            colors: [Colors.amber, Colors.grey], // Fill and empty colors
+                                          ).createShader(bounds);
+                                        },
+                                        child: const Icon(
+                                          Icons.star,
+                                          size: 16,
+                                          color: Colors.amber,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    (item.rating ?? 0.0).toStringAsFixed(1),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );;
           },
         )
       ],

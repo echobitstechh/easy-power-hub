@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:afriprize/app/app.router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,6 +16,7 @@ import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
+import '../../../utils/money_util.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -80,31 +83,33 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   Future<void> loadProduct() async {
+    print('loading products....');
+    try {
 
-    if (productList.isEmpty) {
-      // setBusy(true);
-      setState(() {
+      dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
+      print("Loaded jsonProducts from storage: $storedJsonProduct");
 
-      });
+
+      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
+        List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
+        print('Decoded JSON: $storedProducts');
+        // Populate productList and filteredProductList
+        productList = storedProducts
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+        print('loaded products from local storage list ${productList.length}');
+        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
+        setState(() {
+          productList = productList;
+          filteredProductList = productList.where((product) => product.id == widget.product.id).toList();
+        });
+      }else{
+        print('no value to load');
+      }
+
+    } catch (e) {
+      print("Error loading products: $e");
     }
-
-    dynamic storedRaffle = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-    if (storedRaffle != null) {
-      // Extracting and filtering only active raffles
-      productList = List<Map<String, dynamic>>.from(storedRaffle)
-          .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-          .toList();
-      filteredProductList = productList.where((element) => element.categoryId == widget.product.categoryId).toList();
-      setState(() {
-
-      });
-    }
-
-    // setBusy(false);
-    setState(() {
-
-    });
-
   }
 
   Future<void> decreaseRaffleQuantity(CartItem item) async {
@@ -261,7 +266,7 @@ class _ProductCardState extends State<ProductCard> {
                 child: Row(
                   children: [
                     Text(
-                      '₦${widget.product.price}',
+                      MoneyUtils().formatAmount((double.tryParse(widget.product.salePrice ?? '0.0') ?? 0.0).toInt()),
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 20,
@@ -461,16 +466,12 @@ class _ProductCardState extends State<ProductCard> {
                   'You might also like',
                   style: TextStyle(fontSize: 18),
                 ),
-                // Text(
-                //   '12 items',
-                //   style: TextStyle(fontSize: 14),
-                // ),
               ],
             ),
           ),
           verticalSpaceMedium,
           SizedBox(
-            height: 250, // Adjust height to match the size of your cards
+            height: 200, // Adjust height to match the size of your cards
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: filteredProductList.length,
@@ -478,7 +479,7 @@ class _ProductCardState extends State<ProductCard> {
                 Product product = filteredProductList[index];
 
                 return Padding(
-                  padding: const EdgeInsets.only(right: 10.0),
+                  padding: const EdgeInsets.all(10.0),
                   child: InkWell(
                     onTap: () {
                       Navigator.push(
@@ -490,7 +491,7 @@ class _ProductCardState extends State<ProductCard> {
                       );
                     },
                     child: Container(
-                      width: 222,
+                      width: 150,
                       decoration: BoxDecoration(
                         color: uiMode.value == AppUiModes.dark
                             ? Colors.transparent // Dark mode logo
