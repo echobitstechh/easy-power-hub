@@ -135,8 +135,11 @@ class ServicesView extends StackedView<ServicesviewModel> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Icon(Icons.more_vert),
-                SizedBox(height: 16.0),
+                IconButton(
+                  icon: Icon(Icons.chat, color: Colors.green), // WhatsApp chat icon
+                  onPressed: () => _openWhatsAppChat(title, "Service Image URL"),
+                ),
+                SizedBox(height: 0.0),
                 IconButton(
                   icon: Icon(Icons.phone, color: Colors.green), // Phone icon
                   onPressed: _openDialer, // Opens the dialer without a number
@@ -341,4 +344,19 @@ void _openDialer() async {
     throw 'Could not open dialer';
   }
 }
+
+void _openWhatsAppChat(String serviceName, String serviceImage) async {
+  String phoneNumber = AppConfig.companyPhone; // Remove +
+  String message = Uri.encodeFull(
+      "Hello, I want more info on the service *$serviceName*");
+
+  String whatsappUrl = "https://wa.me/$phoneNumber?text=$message";
+
+  if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+    await launchUrl(Uri.parse(whatsappUrl));
+  } else {
+    throw 'Could not launch WhatsApp chat';
+  }
+}
+
 

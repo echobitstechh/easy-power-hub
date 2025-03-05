@@ -46,9 +46,8 @@ class ChangePasswordViewModel extends BaseViewModel {
       ApiResponse res =
           await repo.resetPassword(
               {
-                "old_password": oldPassword.text,
-                "new_password": newPassword.text,
-                "confirm_password":  confirmPassword.text,
+                "currentPassword": oldPassword.text,
+                "newPassword": newPassword.text,
               },
             );
 
@@ -58,6 +57,7 @@ class ChangePasswordViewModel extends BaseViewModel {
       }
     } catch (e) {
       log.e(e);
+      snackBar.showSnackbar(message: "Unable to update password: $e");
     }
 
     setBusy(false);

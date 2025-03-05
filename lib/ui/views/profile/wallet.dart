@@ -145,7 +145,7 @@ class _WalletState extends State<Wallet> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text("My wallet"),
+        title: const Text("Wallet(under developement)", style: TextStyle(color: Colors.red),),
       ),
       body: RefreshIndicator(
         onRefresh: () async {

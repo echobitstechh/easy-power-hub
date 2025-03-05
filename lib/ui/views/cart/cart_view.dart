@@ -224,10 +224,10 @@ class CartView extends StackedView<CartViewModel> {
                                                             ),
                                                             verticalSpaceTiny,
                                                             Text(
-                                                              MoneyUtils().formatAmount(((item.product?.price != null &&
+                                                              MoneyUtils().formatAmount(((item.product?.salePrice != null &&
                                                                           item.quantity !=
                                                                               null)
-                                                                      ? (double.parse(item.product!.price!) *
+                                                                      ? (double.parse(item.product!.salePrice!) *
                                                                           item.quantity!)
                                                                       : 0)
                                                                   .toInt()),
@@ -276,13 +276,8 @@ class CartView extends StackedView<CartViewModel> {
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            if (item.quantity! >
-                                                                1) {
-                                                              item.quantity =
-                                                                  item.quantity! -
-                                                                      1;
-                                                              viewModel
-                                                                  .getRaffleSubTotal();
+                                                            if (item.quantity! > 1) {
+                                                              viewModel.modifyCartQuantity(item, "decrement");
                                                             }
                                                           },
                                                           child: Container(
@@ -310,12 +305,7 @@ class CartView extends StackedView<CartViewModel> {
                                                         horizontalSpaceSmall,
                                                         InkWell(
                                                           onTap: () {
-                                                            item.quantity =
-                                                                item.quantity! +
-                                                                    1;
-                                                            viewModel
-                                                                .getRaffleSubTotal();
-                                                            cart.notifyListeners();
+                                                            viewModel.modifyCartQuantity(item, "increment");
                                                           },
                                                           child: Container(
                                                             height: 30,

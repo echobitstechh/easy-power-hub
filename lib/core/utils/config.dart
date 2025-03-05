@@ -20,6 +20,6 @@ class AppConfig {
   static const bool isTestMode = false;
   static const String APPLESTOREURL = 'https://apps.apple.com/ng/app/afriprize-mobile/id6474942596';
   static const String GOOGLESTOREURL = 'https://play.google.com/store/apps/details?id=com.afriprize.afriprize&pcampaignid=web_share';
-  static const String companyPhone = '08085053131';
+  static const String companyPhone = '+2348085053131';
 
 }

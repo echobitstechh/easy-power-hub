@@ -131,7 +131,7 @@ class _CheckoutState extends State<Checkout> {
                               Text(item.product!.productName ?? ""),
                               verticalSpaceTiny,
                               Text(
-                                "N${item.product!.price}",
+                                "N${item.product!.salePrice}",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               )
@@ -438,7 +438,7 @@ class _CheckoutState extends State<Checkout> {
 
     for (var element in cart.value) {
       total = total +
-          (double.parse(element.product?.price.toString() ?? '0').round() *
+          (double.parse(element.product?.salePrice.toString() ?? '0').round() *
               element.quantity!);
     }
 
@@ -487,7 +487,7 @@ class _CheckoutState extends State<Checkout> {
             return {
               "productId": item.product?.id,
               "quantity": item.quantity,
-              "price": double.parse(item.product?.price.toString() ?? '0').round(),
+              "price": double.parse(item.product?.salePrice.toString() ?? '0').round(),
             };
           }).toList(),
         };

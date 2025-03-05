@@ -19,6 +19,18 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> modifyCartItem(String productId, String action) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.put,
+      endpoint: "cart/modify/$productId",
+      reqBody: {"action": action},
+    );
+    return response;
+  }
+
+
+
+  @override
   Future<ApiResponse> requestOtp(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
@@ -533,12 +545,13 @@ class Repository extends IRepository {
     return response;
   }
 
+
   @override
   Future<ApiResponse> resetPassword(
       Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "auth/update-password",
+      endpoint: "auth/update-user-password",
       reqBody: req,
     );
 

@@ -61,6 +61,8 @@ class CartViewModel extends BaseViewModel {
         .then((value) async {
     //  print('wee3');
       itemsToDeleteRaffle.remove(item);
+      cart.value.remove(item);
+      cart.notifyListeners();
      // print('wee4');
       await refreshData();
     })
@@ -87,6 +89,32 @@ class CartViewModel extends BaseViewModel {
     setBusy(false);
     notifyListeners();
   }
+
+  void modifyCartQuantity(CartItem item, String action) async {
+    setBusy(true);
+    try {
+      ApiResponse res = await repo.modifyCartItem(item.product!.id.toString(), action);
+
+      if (res.statusCode == 200) {
+        if (action == "increment") {
+          item.quantity = item.quantity! + 1;
+        } else if (action == "decrement" && item.quantity! > 1) {
+          item.quantity = item.quantity! - 1;
+        }
+
+        getRaffleSubTotal();
+        cart.notifyListeners();
+      } else {
+        snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}");
+      }
+    } catch (e) {
+      log.e("Cart modification error: $e");
+      snackBar.showSnackbar(message: "An error occurred while updating the cart");
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   // void clearRaffleCart() async{
   //   for (var element in itemsToDeleteRaffle) {
@@ -141,7 +169,7 @@ class CartViewModel extends BaseViewModel {
 
       // Convert ticketPrice from String to double, defaulting to 0 if ticketPrice is null
       final ticketPrice =
-          product?.price != null ? double.parse(product!.price!) : 0;
+          product?.salePrice != null ? double.parse(product!.salePrice!) : 0;
 
       // Multiply ticketPrice by quantity and cast to int
       total += (ticketPrice * element.quantity!).toInt();

@@ -251,46 +251,54 @@ class ShopViewModel extends BaseViewModel {
 
 
 
-  void addToRaffleCart(Product raffle) async {
-    // setBusy(true);
-    // notifyListeners();
+  void addToRaffleCart(Product product) async {
+    print('adding to cart');
     try {
-      final existingItem = cart.value.firstWhere(
-            (raffleItem) => raffleItem.product?.id == raffle.id,
-        orElse: () => CartItem(product: raffle, quantity: 0),
+      final existingIndex = cart.value.indexWhere(
+            (raffleItem) => raffleItem.product?.id == product.id,
       );
 
-      if (existingItem.quantity != null && existingItem.quantity! > 0 && existingItem.product != null) {
-        existingItem.quantity = (existingItem.quantity! + 1);
+      if (existingIndex != -1) {
+        // Product already exists, create a new instance to avoid modifying the original reference
+        final updatedItem = CartItem(
+          product: cart.value[existingIndex].product,
+          quantity: cart.value[existingIndex].quantity! + 1,
+        );
+
+        // Replace the existing item in the cart list
+        cart.value[existingIndex] = updatedItem;
       } else {
-        existingItem.quantity = 1;
-        cart.value.add(existingItem);
+        // Product does not exist, add a new one
+        cart.value.add(CartItem(product: product, quantity: 1));
       }
 
       // Save to local storage
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
+      List<Map<String, dynamic>> storedList =
+      cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
 
       // Save to online cart using API
-      // final response = await repo.addToCart({
-      //   "raffle": raffle.id,
-      //   "quantity": existingItem.quantity,
-      // });
+      final response = await repo.addToCart({
+        "productId": product.id,
+        "quantity": cart.value.firstWhere((item) => item.product?.id == product.id).quantity,
+      });
 
-      // if (response.statusCode == 201) {
-      //   locator<SnackbarService>().showSnackbar(message: "Raffle added to cart", duration: Duration(seconds: 2));
-      // } else {
-      //   locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: Duration(seconds: 2));
-      // }
+      if (response.statusCode == 200) {
+        locator<SnackbarService>().showSnackbar(
+            message: "Product added to cart", duration: Duration(seconds: 2));
+      } else {
+        locator<SnackbarService>().showSnackbar(
+            message: response.data["message"], duration: Duration(seconds: 2));
+      }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to add raffle to cart: $e", duration: Duration(seconds: 2));
-      log.e(e);
+      locator<SnackbarService>().showSnackbar(
+          message: "Failed to add raffle to cart: $e",
+          duration: Duration(seconds: 2));
     } finally {
-      setBusy(false);
-      cart.notifyListeners();
+      notifyListeners();
     }
   }
-  
+
   void initCart() async {
     dynamic raffle = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
     dynamic store = await locator<LocalStorage>().fetch(LocalStorageDir.cart);

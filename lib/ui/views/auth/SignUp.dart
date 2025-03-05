@@ -159,7 +159,7 @@ class _SignUpState extends State<SignUp> {
                   child: CodeInputWidget(
                     codeController: model.otp,
                     onCompleted: (String value) {
-                      model.submitOtp();
+                      model.submitOtp(context);
                     },
                   ),
                 ),
@@ -175,7 +175,7 @@ class _SignUpState extends State<SignUp> {
                       label: model.isOtpRequested ? 'Verify OTP' : 'Get OTP',
                       submit: () async {
                         if (model.isOtpRequested) {
-                          model.submitOtp(); // Call submitOtp for verification
+                          model.submitOtp(context); // Call submitOtp for verification
                           widget.updatePage(PresentPage.register);
                         } else {
                           final ApiResponse? response = await model.requestOtp();

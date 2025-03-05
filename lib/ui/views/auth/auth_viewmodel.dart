@@ -222,6 +222,8 @@ class AuthViewModel extends BaseViewModel {
         "firstName": firstname.text,
         "lastName": lastname.text,
         "userId":  profile.value.id,
+        "email": email.text,
+        "phoneNumber": phone.text,
         "password": password.text,
 
       });
@@ -269,7 +271,7 @@ class AuthViewModel extends BaseViewModel {
 
   }
 
-  Future<void> submitOtp() async {
+  Future<void> submitOtp(BuildContext context) async {
     appLoading.value = true;
 
     try {
@@ -283,9 +285,15 @@ class AuthViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         print("OTP Verified Successfully. Navigating to registerView...");
         snackBar.showSnackbar(message: 'OTP verified successfully', duration: Duration(seconds: 5));
-        locator<NavigationService>().clearStackAndShow(Routes.registerView, arguments: {
-          'updateIsLogin': false,
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AuthView(
+              initialPage: PresentPage.register,
+            ),
+          ),
+        );
+        notifyListeners();
       }else if(res.statusCode == 400){
         snackBar.showSnackbar(message: 'Invalid verification code', duration: Duration(seconds: 5));
       }

@@ -43,6 +43,8 @@ abstract class IRepository {
 
   Future<ApiResponse> saveOrder(Map<String, dynamic> req);
 
+  Future<ApiResponse> modifyCartItem(String productId, String action);
+
   Future<ApiResponse> verifyTransaction(String ref);
 
   Future<ApiResponse> payForOrder(Map<String, dynamic> req);

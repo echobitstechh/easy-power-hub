@@ -892,10 +892,10 @@ class DashboardView extends StackedView<DashboardViewModel> {
   Widget _buildAdsSlideshow() {
     // List of static GIF asset paths
     final List<String> gifList = [
-      "assets/animations/quality_power_supply.gif",
-      "assets/animations/easy_power_hub.gif",
-      "assets/animations/easy_ph_1.gif",
-      "assets/animations/easy_ph_2.gif",
+      "assets/gif/quality_power_supply.gif",
+      "assets/gif/easy_power_hub.gif",
+      "assets/gif/easy_ph_1.gif",
+      "assets/gif/easy_ph_2.gif",
     ];
 
     return CarouselSlider.builder(

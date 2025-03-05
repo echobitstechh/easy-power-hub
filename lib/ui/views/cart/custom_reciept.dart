@@ -164,7 +164,7 @@ class ReceiptPage extends StatelessWidget {
                                       leading: Image.network(cartItem.product!.images!.first ?? '', height: 44, width: 48), // Replace with your image URL field
                                       title: Text(cartItem.product!.productName!, style: const TextStyle(fontSize: 10.61)),
                                       subtitle: Text('${cartItem.quantity}', style: const TextStyle(fontSize: 10.61)),
-                                      trailing: Text(cartItem.product!.price!,style: TextStyle(fontSize: 10.61, fontWeight: FontWeight.bold,
+                                      trailing: Text(cartItem.product!.salePrice!,style: TextStyle(fontSize: 10.61, fontWeight: FontWeight.bold,
                                         color: uiMode.value == AppUiModes.dark ? Colors.white : Colors.black,
                                         fontFamily: "roboto",)),
                                     )),
@@ -411,7 +411,7 @@ class ReceiptPage extends StatelessWidget {
               ],
             ),
           ),
-          pw.Text(cartItem.product!.price!,
+          pw.Text(cartItem.product!.salePrice!,
             style: pw.TextStyle(fontSize: 10.61, fontWeight: pw.FontWeight.bold),
           ),
         ],

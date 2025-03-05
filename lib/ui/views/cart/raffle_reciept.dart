@@ -222,7 +222,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                               const TextStyle(fontSize: 10.61)),
                                       trailing: Text(
                                           MoneyUtils().formatAmount(
-                                              double.parse(cartItem.product!.price!).toInt()),
+                                              double.parse(cartItem.product!.salePrice!).toInt()),
                                           style: TextStyle(
                                             fontSize: 10.61,
                                             fontWeight: FontWeight.bold,
@@ -283,8 +283,8 @@ class RaffleReceiptPage extends StatelessWidget {
                                 verticalSpaceSmall,
                                 SvgPicture.asset(
                                   uiMode.value == AppUiModes.dark
-                                      ? "assets/images/dashboard_logo_white.svg" // Dark mode logo
-                                      : "assets/images/dashboard_logo.svg",
+                                      ? "assets/images/easy_power_logo.svg" // Dark mode logo
+                                      : "assets/images/easy_power_logo.svg",
                                   width: 150,
                                   height: 40,
                                 ),
@@ -539,7 +539,7 @@ class RaffleReceiptPage extends StatelessWidget {
           ),
           pw.Text(
             '₦${MoneyUtils().formatAmount(
-                double.parse(cartItem.product!.price!).toInt()
+                double.parse(cartItem.product!.salePrice!).toInt()
                 )}',
             style:
                 pw.TextStyle(fontSize: 10.61, fontWeight: pw.FontWeight.bold),
