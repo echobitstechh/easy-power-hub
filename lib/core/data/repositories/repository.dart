@@ -220,7 +220,7 @@ class Repository extends IRepository {
       Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "auth/forgot_password",
+      endpoint: "auth/password-reset",
       reqBody: req,
     );
 

@@ -22,23 +22,33 @@ class EnterEmailViewModel extends BaseViewModel {
   void toggleObscure() {
     obscure = !obscure;
     rebuildUi();
+    //notifyListeners(); // Use notifyListeners() to rebuild the UI
+
   }
 
   void sendCode() async{
     setBusy(true);
+    debugPrint('weee1');
 
     try{
       ApiResponse res=  await repo.forgotPassword({
+
         "email": emailController.text
       });
       if(res.statusCode == 201){
         snackBar.showSnackbar(message: "Code sent to ${emailController.text}");
         codeSent = true;
+        rebuildUi();
+        notifyListeners();
       }
+
+      debugPrint('weee2');
+
     }catch(e){
       snackBar.showSnackbar(message: "Unable to send code");
       throw Exception(e);
     }
+    debugPrint('weee3');
 
     setBusy(false);
 

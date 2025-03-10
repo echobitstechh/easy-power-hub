@@ -42,6 +42,8 @@ import '../core/data/models/raffle_ticket.dart';
 import '../ui/views/auth/auth_view.dart';
 import '../ui/views/profile/order_list.dart';
 import '../ui/views/profile/shipping_addresses_page.dart' as _i28;
+import '../ui/views/service/projectDetailsPage.dart' as _i21;
+import '../ui/views/service/projectDetailsPage.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -102,6 +104,8 @@ class Routes {
   static const registerView = '/register-view';
 
   static const successView = '/success-view';
+  
+  static const detailsView = '/projectDetailsPage';
 
   static const all = <String>{
     homeView,
@@ -130,6 +134,7 @@ class Routes {
     registerView,
     successView,
     shippingView,
+    detailsView,
   };
 }
 
@@ -227,6 +232,12 @@ class StackedRouter extends _i1.RouterBase {
       Routes.shippingView,
       page: AddShipping,
     ),
+
+    _i1.RouteDef(
+      Routes.detailsView,
+      page: ProjectDetailsPage,
+    ),
+
   ];
 
   final _pagesMap = <Type, _i1.StackedRouteFactory>{
@@ -364,6 +375,9 @@ class StackedRouter extends _i1.RouterBase {
     //     settings: data,
     //   );
     // },
+
+
+    
   };
 
   @override
