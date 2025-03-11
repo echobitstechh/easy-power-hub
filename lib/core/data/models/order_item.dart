@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:afriprize/core/data/models/product.dart';
 import 'package:afriprize/core/data/models/profile.dart';
 import 'package:afriprize/core/data/models/raffle_ticket.dart';
@@ -7,15 +9,17 @@ class Order {
   final String id;
   final int quantity;
   final String orderType;
-  final int shippingFee;
+  final double shippingFee;
   final bool installmentPayment;
   final String userId;
+  final String? transactionId;
+  final String status;
   final String trackingNumber;
   final String orderNumber;
-  final String status;
   final int totalPrice;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final List<Product> products;
 
   Order({
     required this.id,
@@ -24,29 +28,56 @@ class Order {
     required this.shippingFee,
     required this.installmentPayment,
     required this.userId,
+    this.transactionId,
+    required this.status,
     required this.trackingNumber,
     required this.orderNumber,
-    required this.status,
     required this.totalPrice,
     required this.createdAt,
     required this.updatedAt,
+    required this.products,
   });
 
+  // Factory method to create an Order from JSON
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id'],
       quantity: json['quantity'],
       orderType: json['orderType'],
-      shippingFee: json['shippingFee'],
+      shippingFee: (json['shippingFee'] ?? 0).toDouble(),
       installmentPayment: json['installmentPayment'],
       userId: json['userId'],
+      transactionId: json['transactionId'],
+      status: json['status'],
       trackingNumber: json['trackingNumber'],
       orderNumber: json['orderNumber'],
-      status: json['status'],
-      totalPrice: json['totalPrice'],
+      totalPrice: (json['totalPrice'] as num).toInt(),
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
+      products: (json['Products'] as List)
+          .map((product) => Product.fromJson(product))
+          .toList() ?? [],
     );
+  }
+
+  // Convert an Order object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'quantity': quantity,
+      'orderType': orderType,
+      'shippingFee': shippingFee,
+      'installmentPayment': installmentPayment,
+      'userId': userId,
+      'transactionId': transactionId,
+      'status': status,
+      'trackingNumber': trackingNumber,
+      'orderNumber': orderNumber,
+      'totalPrice': totalPrice,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+      'Products': products.map((product) => product.toJson()).toList(),
+    };
   }
 }
 

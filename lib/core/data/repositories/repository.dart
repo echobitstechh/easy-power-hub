@@ -157,7 +157,7 @@ class Repository extends IRepository {
   Future<ApiResponse> saveOrder(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "orders/create",
+      endpoint: "create",
       reqBody: req,
     );
 
@@ -412,7 +412,7 @@ class Repository extends IRepository {
   Future<ApiResponse> getOrderList() async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
-      endpoint: "orders/list",
+      endpoint: "orders",
     );
 
     return response;
@@ -434,7 +434,7 @@ class Repository extends IRepository {
   Future<ApiResponse> getOrdersStatus(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "orders/validate",
+      endpoint: "validate",
       reqBody: req,
     );
 
