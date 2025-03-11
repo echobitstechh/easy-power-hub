@@ -2,6 +2,7 @@ import 'dart:convert';
 
 
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/phone_number.dart';
@@ -53,6 +54,7 @@ class AuthViewModel extends BaseViewModel {
 
   bool isOtpRequested = false;
   bool isLoading = false;
+
 
   init() async {
 
@@ -117,25 +119,32 @@ class AuthViewModel extends BaseViewModel {
   }
 
 
-  void login(BuildContext context) async {
+  Future<void> login(BuildContext context) async {
     appLoading.value = true;
     rebuildUi();
+
     try {
       // Ensure phone number is formatted correctly
       if (phone.text.isNotEmpty && !phone.text.startsWith('0')) {
         phone.text = '0${phone.text}';
       }
 
-      // Make API request
+      // Get FCM token
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $fcmToken");
+
+      // Make API request with FCM token included
       ApiResponse res = await repo.login({
         if (email.text.isNotEmpty) "email": email.text,
         if (phone.text.isNotEmpty) "phoneNumber": phone.text,
         "password": password.text,
+        "fcmToken": fcmToken, // Include FCM token in request
       });
 
       if (res.statusCode == 200) {
         final data = res.data;
         print('value of data is: $data');
+        print("FCM Token: $fcmToken");
 
         if (data['verificationRequired'] == true) {
           // User not verified, redirect to verification
@@ -150,9 +159,9 @@ class AuthViewModel extends BaseViewModel {
                 parameters: {
                   'isOtpRequested': true.toString(),
                   'userId': data['userId'] ?? '',
-                  if (phone.text.isNotEmpty)'verificationCode': data['sendTokenResponse']?['data']?['token'] ?? '',
-                  if (phone.text.isNotEmpty)'phone': phone.text,
-                  if (email.text.isNotEmpty)'email': email.text,
+                  if (phone.text.isNotEmpty) 'verificationCode': data['sendTokenResponse']?['data']?['token'] ?? '',
+                  if (phone.text.isNotEmpty) 'phone': phone.text,
+                  if (email.text.isNotEmpty) 'email': email.text,
                 },
               ),
             ),
@@ -170,8 +179,8 @@ class AuthViewModel extends BaseViewModel {
                 parameters: {
                   'isOtpRequested': false.toString(),
                   'userId': data['userId'] ?? '',
-                  if (phone.text.isNotEmpty)'phone': phone.text,
-                  if (email.text.isNotEmpty)'email': email.text,
+                  if (phone.text.isNotEmpty) 'phone': phone.text,
+                  if (email.text.isNotEmpty) 'email': email.text,
                 },
               ),
             ),
@@ -181,10 +190,8 @@ class AuthViewModel extends BaseViewModel {
           userLoggedIn.value = true;
           profile.value = Profile.fromJson(Map<String, dynamic>.from(data["User"]));
           locator<LocalStorage>().save(LocalStorageDir.authToken, data["token"]);
-          locator<LocalStorage>()
-              .save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
-          locator<LocalStorage>()
-              .save(LocalStorageDir.authUser, jsonEncode(data["User"]));
+          locator<LocalStorage>().save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
+          locator<LocalStorage>().save(LocalStorageDir.authUser, jsonEncode(data["User"]));
           locator<LocalStorage>().save(LocalStorageDir.remember, remember);
 
           if (remember) {
@@ -208,28 +215,28 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
+
   Future<RegistrationResult> register() async {
-
-
-    // if (!terms) {
-    //   snackBar.showSnackbar(message: "Accept terms to continue");
-    //   return RegistrationResult.failure;
-    // }
     appLoading.value = true;
 
     try {
+      // Get FCM Token
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $fcmToken");
+
+      // API request
       ApiResponse res = await repo.register({
         "firstName": firstname.text,
         "lastName": lastname.text,
-        "userId":  profile.value.id,
+        "userId": profile.value.id,
         "email": email.text,
         "phoneNumber": phone.text,
         "password": password.text,
-
+        "fcmToken": fcmToken, // Send FCM token to backend
       });
-      if (res.statusCode == 200) {
 
-        print('response is ${res.data}');
+      if (res.statusCode == 200) {
+        print('Response is ${res.data}');
 
         userLoggedIn.value = true;
         profile.value =
@@ -238,37 +245,28 @@ class AuthViewModel extends BaseViewModel {
         locator<LocalStorage>().save(LocalStorageDir.authRefreshToken, res.data["refreshToken"]);
         locator<LocalStorage>().save(LocalStorageDir.authUser, jsonEncode(res.data["User"]));
 
-
         snackBar.showSnackbar(message: res.data["message"]);
         locator<NavigationService>().clearStackAndShow(Routes.homeView);
         setBusy(false);
         return RegistrationResult.success;
       } else {
         setBusy(false);
-
         if (res.data["message"] is String) {
           snackBar.showSnackbar(message: res.data["message"]);
-          return RegistrationResult.failure; // Return failure since it's an error message
-        }
-        else if (res.data["message"] is List<String>) {
+        } else if (res.data["message"] is List<String>) {
           snackBar.showSnackbar(message: res.data["message"].join('\n'));
-          return RegistrationResult.failure; // Return failure since it's an error message
         } else {
-          // Handle unexpected data type (e.g., it's not a string or list)
           snackBar.showSnackbar(message: "Unexpected response format");
-          return RegistrationResult.failure;
         }
-
+        return RegistrationResult.failure;
       }
     } catch (e) {
       log.e(e);
-
       return RegistrationResult.failure;
-
-    }finally{
+    } finally {
       appLoading.value = false;
-    notifyListeners();}
-
+      notifyListeners();
+    }
   }
 
   Future<void> submitOtp(BuildContext context) async {
