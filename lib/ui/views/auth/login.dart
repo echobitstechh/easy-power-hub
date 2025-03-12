@@ -187,8 +187,8 @@ class _LoginState extends State<Login> {
                       isLoading: isLoading, // Dynamically updates based on `appLoading.value`
                       boldText: true,
                       label: "Login",
-                      submit: () {
-                        model.login(context);
+                      submit: () async {
+                        await model.login(context);
                       },
                       color: kcPrimaryColor,
                     );

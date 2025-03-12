@@ -174,6 +174,7 @@ class _SignUpState extends State<SignUp> {
                       boldText: true,
                       label: model.isOtpRequested ? 'Verify OTP' : 'Get OTP',
                       submit: () async {
+                        print('When otp is requested (${isOtpRequestedByEmail.value})');
                         if (model.isOtpRequested) {
                           model.submitOtp(context); // Call submitOtp for verification
                           widget.updatePage(PresentPage.register);
@@ -183,6 +184,14 @@ class _SignUpState extends State<SignUp> {
                             if (response.statusCode == 200) {
                               // OTP successfully sent
                               model.isOtpRequested = true;
+                              isOtpRequestedByEmail.value = model.email.text.isNotEmpty;
+                              print('${model.email.text}');
+                              if((model.email.text.isEmpty || model.email.text == null) && model.phone.text.isNotEmpty) {
+                                isOtpRequestedByEmail.value = false;
+                              } else{
+                                isOtpRequestedByEmail.value = true;
+                              }
+                              model.notifyListeners();
                               snackBar.showSnackbar(
                                 message: 'OTP sent successfully',
                                 duration: const Duration(seconds: 5),
@@ -201,8 +210,10 @@ class _SignUpState extends State<SignUp> {
                                   duration: const Duration(seconds: 5),
                                 );
                                 widget.updatePage(PresentPage.register);
+                                isLoginByEmail.value = model.email.text.isNotEmpty;
                                 isLoginByEmail.value = model.email.text != '';
                                 profile.value.id = errorData['userId'];
+                                print('When otp is requested (${isOtpRequestedByEmail.value})');
                               } else {
                                 snackBar.showSnackbar(
                                   message: errorData['message'] ?? 'An error occurred',

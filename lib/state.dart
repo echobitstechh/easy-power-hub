@@ -22,6 +22,7 @@ ValueNotifier<int> unreadCount = ValueNotifier(0);
 ValueNotifier<AppModules> currentModuleNotifier = ValueNotifier(AppModules.raffle);
 ValueNotifier<bool> appLoading = ValueNotifier(false);
 ValueNotifier<bool> isLoginByEmail = ValueNotifier(false);
+ValueNotifier<bool> isOtpRequestedByEmail = ValueNotifier(false);
 
 
 void switchModule(AppModules module) {
