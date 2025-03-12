@@ -142,32 +142,32 @@ class BottomNavBar extends StatelessWidget {
 
   Widget _navBarItemWithCounter(String icon, String filledIcon, bool isSelected, ValueListenable<List<dynamic>> counterListenable, Color color) {
     return ValueListenableBuilder<List<dynamic>>(
-        valueListenable: counterListenable,
-        builder: (context, value, child) {
-          return Stack(
-            clipBehavior: Clip.none,
-            children: [
-              _navBarItemIcon(filledIcon, icon, isSelected, color),
-              if (value.isNotEmpty)
-                Positioned(
-                  right: -6,
-                  top: -6,
-                  child: Container(
-                    padding: EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '${value.length}',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
+      valueListenable: counterListenable,
+      builder: (context, value, child) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            _navBarItemIcon(filledIcon, icon, isSelected, color),
+            if (value.isNotEmpty)
+              Positioned(
+                right: -6,
+                top: -6,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${value.length}',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
-            ],
-          );
-          },
+              ),
+          ],
         );
-    }
+      },
+    );
+  }
 
 }

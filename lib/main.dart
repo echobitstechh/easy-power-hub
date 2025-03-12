@@ -46,7 +46,11 @@ void main() async{
   // await paystackPlugin.initialize(publicKey: AppConfig.paystackApiKeyTest);
 
 
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
+  // Request notification permissions (iOS)
+  FirebaseMessaging.instance.requestPermission();
 
 
   //final messaging = FirebaseMessaging.instance;

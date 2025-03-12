@@ -36,6 +36,7 @@ class _RegisterState extends State<Register> {
   List<Country> countries = [];
   final List<String> genderOptions = ['Male', 'Female'];
 
+
   @override
   void initState() {
     super.initState();
@@ -129,60 +130,59 @@ class _RegisterState extends State<Register> {
                   ],
                 ),
                 verticalSpaceMedium,
-                isLoginByEmail.value ?
-                IntlPhoneField(
-                  decoration: InputDecoration(
-                    labelText: 'Phone Number',
-                    labelStyle: const TextStyle(color: Colors.black,fontSize: 13),
-                    floatingLabelStyle: const TextStyle(color: Colors.black),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Add border curve
-                      borderSide: const BorderSide(color: Color(0xFFCC9933)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0), // Add border curve
-                      borderSide: const BorderSide(color: Color(0xFFCC9933)),
-                    ),
+              isOtpRequestedByEmail.value
+                  ? IntlPhoneField(
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  labelStyle: const TextStyle(color: Colors.black, fontSize: 13),
+                  floatingLabelStyle: const TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Add border curve
+                    borderSide: const BorderSide(color: Color(0xFFCC9933)),
                   ),
-                  validator: (value) {
-                    if (value!.completeNumber.isEmpty) {
-                      return 'required';
-                    }
-                    return null; // Return null to indicate no validation error
-                  },
-                  initialCountryCode: 'NG',
-                  countries: countries.isNotEmpty
-                      ? countries.map((country) => CountryPickerUtils.getCountryByIsoCode(country.code!)).toList()
-                      : [],
-                  controller: model.phone,
-                  onChanged: (phone) {
-                    model.phoneNumber = phone;
-                    try {
-                      // Attempt to find the country where the code matches phone.countryISOCode
-                      print('phone code is: ${phone.countryISOCode}');
-                      print('country code is: ${countries.first.code}');
-                      model.countryId = countries.firstWhere((country) => country.code == phone.countryISOCode).id2!;
-                    } catch (e) {
-                      // Handle the case where no matching country is found
-                      print('No matching country found for ISO code: ${phone.countryISOCode}');
-                      model.countryId = ''; // or handle appropriately
-                    }
-                    // model.countryId = countries.firstWhere((country) => country.code == phone.countryISOCode).id!;
-                  },
-                ) :
-                TextFieldWidget(
-                  hint: "Email Address",
-                  controller: model.email,
-                  validator: (value) {
-                    if (value.isEmpty) {
-                      return 'required';
-                    }
-                    if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(value)) {
-                      return 'Invalid email address';
-                    }
-                    return null; // Return null to indicate no validation error
-                  },
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0), // Add border curve
+                    borderSide: const BorderSide(color: Color(0xFFCC9933)),
+                  ),
                 ),
+                validator: (value) {
+                  if (value!.completeNumber.isEmpty) {
+                    return 'required';
+                  }
+                  return null; // Return null to indicate no validation error
+                },
+                initialCountryCode: 'NG',
+                countries: countries.isNotEmpty
+                    ? countries.map((country) => CountryPickerUtils.getCountryByIsoCode(country.code!)).toList()
+                    : [],
+                controller: model.phone,
+                onChanged: (phone) {
+                  model.phoneNumber = phone;
+                  try {
+                    // Attempt to find the country where the code matches phone.countryISOCode
+                    print('phone code is: ${phone.countryISOCode}');
+                    print('country code is: ${countries.first.code}');
+                    model.countryId = countries.firstWhere((country) => country.code == phone.countryISOCode).id2!;
+                  } catch (e) {
+                    // Handle the case where no matching country is found
+                    print('No matching country found for ISO code: ${phone.countryISOCode}');
+                    model.countryId = ''; // or handle appropriately
+                  }
+                },
+              )
+                  : TextFieldWidget(
+                hint: "Email Address",
+                controller: model.email,
+                validator: (value) {
+                  if (value.isEmpty) {
+                    return 'required';
+                  }
+                  if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(value)) {
+                    return 'Invalid email address';
+                  }
+                  return null; // Return null to indicate no validation error
+                },
+              ),
                 verticalSpaceMedium,
                 TextFieldWidget(
                   inputType: TextInputType.visiblePassword,
