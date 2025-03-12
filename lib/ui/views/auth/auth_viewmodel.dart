@@ -228,9 +228,13 @@ class AuthViewModel extends BaseViewModel {
       ApiResponse res = await repo.register({
         "firstName": firstname.text,
         "lastName": lastname.text,
+
+        "userId":  profile.value.id,
+        
         "userId": profile.value.id,
         "email": email.text,
         "phoneNumber": phone.text,
+
         "password": password.text,
         "fcmToken": fcmToken, // Send FCM token to backend
       });
@@ -283,15 +287,9 @@ class AuthViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         print("OTP Verified Successfully. Navigating to registerView...");
         snackBar.showSnackbar(message: 'OTP verified successfully', duration: Duration(seconds: 5));
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const AuthView(
-              initialPage: PresentPage.register,
-            ),
-          ),
-        );
-        notifyListeners();
+        locator<NavigationService>().clearStackAndShow(Routes.registerView, arguments: {
+          'updateIsLogin': false,
+        });
       }else if(res.statusCode == 400){
         snackBar.showSnackbar(message: 'Invalid verification code', duration: Duration(seconds: 5));
       }

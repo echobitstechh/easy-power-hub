@@ -186,20 +186,20 @@ class ProfileView extends StatelessWidget {
                           //   ),
                           //   title: const Text("My orders"),
                           // ),
-                          // ListTile(
-                          //   onTap: () {
-                          //     // locator<NavigationService>().navigateToTrack();
-                          //     Navigator.of(context)
-                          //         .push(MaterialPageRoute(builder: (c) {
-                          //       return const OrderList();
-                          //     }));
-                          //   },
-                          //   leading: const Icon(
-                          //     Icons.wallet,
-                          //     color: kcSecondaryColor,
-                          //   ),
-                          //   title: const Text("My orders"),
-                          // ),
+                          ListTile(
+                            onTap: () {
+                              // locator<NavigationService>().navigateToTrack();
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (c) {
+                                return const OrderList();
+                              }));
+                            },
+                            leading: const Icon(
+                              Icons.wallet,
+                              color: kcSecondaryColor,
+                            ),
+                            title: const Text("My orders"),
+                          ),
                           ListTile(
                             onTap: () {
                               // locator<NavigationService>().navigateToTrack();
@@ -252,8 +252,8 @@ class ProfileView extends StatelessWidget {
                           // ),
                           ListTile(
                             onTap: () {
-                              locator<NavigationService>().navigateToChangePasswordView();
-                              // locator<NavigationService>().navigateToEnterEmailView();
+                              //locator<NavigationService>().navigateToChangePasswordView();
+                              locator<NavigationService>().navigateToEnterEmailView();
                             },
                             leading: Icon(Icons.lock,
                               color: kcOrangeColor,
