@@ -138,7 +138,7 @@ class AuthViewModel extends BaseViewModel {
         if (email.text.isNotEmpty) "email": email.text,
         if (phone.text.isNotEmpty) "phoneNumber": phone.text,
         "password": password.text,
-        "fcmToken": fcmToken, // Include FCM token in request
+        // "fcmToken": fcmToken, // Include FCM token in request
       });
 
       if (res.statusCode == 200) {
@@ -232,7 +232,7 @@ class AuthViewModel extends BaseViewModel {
         "email": email.text,
         "phoneNumber": phone.text,
         "password": password.text,
-        "fcmToken": fcmToken, // Send FCM token to backend
+        // "fcmToken": fcmToken, // Send FCM token to backend
       });
 
       if (res.statusCode == 200) {
