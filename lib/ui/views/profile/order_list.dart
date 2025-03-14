@@ -3,6 +3,7 @@ import 'package:afriprize/core/data/models/product.dart';
 import 'package:afriprize/core/data/repositories/repository.dart';
 import 'package:afriprize/core/network/api_response.dart';
 import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:afriprize/ui/common/ui_helpers.dart';
 import 'package:afriprize/ui/components/empty_state.dart';
 import 'package:afriprize/utils/money_util.dart';
 import 'package:flutter/material.dart';
@@ -139,15 +140,29 @@ class _OrderListState extends State<OrderList> {
           children: [
             _buildOrderHeader(order),
             const SizedBox(height: 10),
-            InkWell(
-              onTap: () => _showOrderDetailsBottomSheet(order),
-              child: const Text(
-                "Details",
-                style: TextStyle(
-
-                  fontWeight: FontWeight.bold,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () => _showOrderDetailsBottomSheet(order),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black, width: 1), // Borderline
+                      borderRadius: BorderRadius.circular(12), // Optional: Rounded corners
+                    ),
+                    child: const Text(
+                      "Details",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+
+                Text(" ${order.status}",
+                    style: const TextStyle(fontSize: 14, color: kcOrangeColor)),
+              ],
             ),
 
     //         ...order.products.map((product) => Padding(
@@ -214,10 +229,11 @@ class _OrderListState extends State<OrderList> {
             ),
             Text("Quantity: ${order.quantity}",
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text("Status: ${order.status}",
-                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            // Text("Status: ${order.status}",
+            //     style: const TextStyle(fontSize: 12, color: Colors.grey)),
             Text("Tracking: ${order.trackingNumber}",
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            verticalSpaceSmall,
             Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
                 style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
