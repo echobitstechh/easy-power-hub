@@ -24,7 +24,6 @@ class _OrderListState extends State<OrderList> {
   void initState() {
     super.initState();
     _fetchOrders();
-
   }
 
   Future<void> _fetchOrders() async {
@@ -52,7 +51,10 @@ class _OrderListState extends State<OrderList> {
   }
 
   List<Order> _completedOrders() {
-    return orders.where((order) => order.status == "Cancelled" || order.status == "Completed").toList();
+    return orders
+        .where((order) =>
+            order.status == "Cancelled" || order.status == "Completed")
+        .toList();
   }
 
   @override
@@ -68,23 +70,25 @@ class _OrderListState extends State<OrderList> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : orders.isEmpty
-          ? const EmptyState(animation: "empty_order.json", label: "No Orders Yet")
-          : DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            _buildTabBar(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildOrderList(_pendingOrders(), "Pending Orders"),
-                   _buildOrderList(_completedOrders(), "Completed Orders"),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+              ? const EmptyState(
+                  animation: "empty_order.json", label: "No Orders Yet")
+              : DefaultTabController(
+                  length: 2,
+                  child: Column(
+                    children: [
+                      _buildTabBar(),
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            _buildOrderList(_pendingOrders(), "Pending Orders"),
+                            _buildOrderList(
+                                _completedOrders(), "Completed Orders"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -105,7 +109,8 @@ class _OrderListState extends State<OrderList> {
 
   Widget _buildOrderList(List<Order> orders, String title) {
     if (orders.isEmpty) {
-      return const EmptyState(animation: "empty_order.json", label: "No Orders Yet");
+      return const EmptyState(
+          animation: "empty_order.json", label: "No Orders Yet");
     }
 
     return ListView.builder(
@@ -118,7 +123,8 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildOrderCard(Order order) {
-     Product? product = order.products.isNotEmpty ? order.products.first : null;
+
+    Product? product = order.products.isNotEmpty ? order.products.first : null;
     final imageUrl = product != null && product.images!.isNotEmpty
         ? product.images!.first
         : "https://via.placeholder.com/120";
@@ -133,12 +139,64 @@ class _OrderListState extends State<OrderList> {
           children: [
             _buildOrderHeader(order),
             const SizedBox(height: 10),
-            ...order.products.map((e) => Padding(padding: EdgeInsets.symmetric(vertical: 5), child: _buildOrderDetails(e, e.images!.first),)),
+            InkWell(
+              onTap: () => _showOrderDetailsBottomSheet(order),
+              child: const Text(
+                "Details",
+                style: TextStyle(
+
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+    //         ...order.products.map((product) => Padding(
+    //               padding: EdgeInsets.symmetric(vertical: 5),
+    //               child: _buildOrderDetails(
+    //                   product,
+    //                   //e.images!.first),
+    //               product.images != null && product.images!.isNotEmpty ? product.images!.first : 'https://img.icons8.com/?size=100&id=53386&format=png'),
+    //
+    // )
+            //),
             const SizedBox(height: 10),
             _buildOrderActions(order),
           ],
         ),
       ),
+    );
+  }
+  void _showOrderDetailsBottomSheet(Order order) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      isScrollControlled: true,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Order #${order.orderNumber}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              const Divider(),
+              ...order.products.map((product) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: _buildOrderDetails(product, product.images != null && product.images!.isNotEmpty ? product.images!.first : "https://placehold.co/400"),
+              )),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -154,20 +212,20 @@ class _OrderListState extends State<OrderList> {
               "#${order.orderNumber}",
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text("Quantity: ${order.quantity}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text("Status: ${order.status}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text("Tracking: ${order.trackingNumber}", style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text("Quantity: ${order.quantity}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text("Status: ${order.status}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text("Tracking: ${order.trackingNumber}",
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
+                style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         Text(
           DateFormat("d MMM, yyyy").format(order.createdAt),
           style: const TextStyle(fontSize: 12, color: Colors.grey),
         ),
-
-
-
-
       ],
     );
   }
@@ -191,10 +249,13 @@ class _OrderListState extends State<OrderList> {
             children: [
               Text(
                 product?.productName ?? "Unknown Product",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 4),
-              Text("Total: ${MoneyUtils().formatAmount((double.tryParse(product?.price ?? '0.0') ?? 0.0).toInt())}", style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                  "Total: ${MoneyUtils().formatAmount((double.tryParse(product?.price ?? '0.0') ?? 0.0).toInt())}",
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
         ),
@@ -213,13 +274,14 @@ class _OrderListState extends State<OrderList> {
           //   label: const Text("Make Payment"),
           //   style: ElevatedButton.styleFrom(backgroundColor: kcSecondaryColor),
           // ),
-        if (order.status == "Cancelled")
-          ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.cancel_outlined, size: 16),
-            label: const Text("Cancelled"),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-          ),
+          if (order.status == "Cancelled")
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(Icons.cancel_outlined, size: 16),
+              label: const Text("Cancelled"),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            ),
         if (order.status == "Completed")
           ElevatedButton.icon(
             onPressed: () {},

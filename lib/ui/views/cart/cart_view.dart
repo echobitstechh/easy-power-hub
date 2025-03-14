@@ -184,12 +184,13 @@ class CartView extends StackedView<CartViewModel> {
                                                           image:
                                                               DecorationImage(
                                                             image:
-                                                                CachedNetworkImageProvider(
-                                                              item.product?.images?[
-                                                                      0] ??
-                                                                  'https://via.placeholder.com/120',
+                                                            CachedNetworkImageProvider(
+                                                              (item.product?.images != null && item.product!.images!.isNotEmpty)
+                                                                  ? item.product!.images![0]
+                                                                  : 'https://via.placeholder.com/120',
                                                             ),
-                                                            fit: BoxFit.cover,
+
+                                                                fit: BoxFit.cover,
                                                           ),
                                                         ),
                                                       ),

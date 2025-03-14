@@ -43,7 +43,9 @@ class _ProductCardState extends State<ProductCard> {
   void initState() {
     super.initState();
     loadProduct();
-    selectedImage = widget.product.images?.first ?? ''; // Default to the first image
+    selectedImage = (widget.product.images != null && widget.product.images!.isNotEmpty)
+        ? widget.product.images!.first
+        : ''; // Fallback value
   }
 
   void addToRaffleCart(Product product) async {
@@ -101,7 +103,7 @@ class _ProductCardState extends State<ProductCard> {
         print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
         setState(() {
           productList = productList;
-          filteredProductList = productList.where((product) => product.id == widget.product.id).toList();
+          filteredProductList = productList.where((product) => product.categoryId == widget.product.categoryId).toList();
         });
       }else{
         print('no value to load');
@@ -518,7 +520,9 @@ class _ProductCardState extends State<ProductCard> {
                             ClipRRect(
                               borderRadius: const BorderRadius.all(Radius.circular(12)),
                               child: Image.network(
-                                product.images?.first ?? '',
+                                product.images != null && product.images!.isNotEmpty
+                                    ? product.images!.first
+                                    : 'https://via.placeholder.com/150',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,

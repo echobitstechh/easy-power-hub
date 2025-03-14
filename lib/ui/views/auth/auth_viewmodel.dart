@@ -130,21 +130,21 @@ class AuthViewModel extends BaseViewModel {
       }
 
       // Get FCM token
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      print("FCM Token: $fcmToken");
+     // String? fcmToken = await FirebaseMessaging.instance.getToken();
+     // print("FCM Token: $fcmToken");
 
       // Make API request with FCM token included
       ApiResponse res = await repo.login({
         if (email.text.isNotEmpty) "email": email.text,
         if (phone.text.isNotEmpty) "phoneNumber": phone.text,
         "password": password.text,
-        "fcmToken": fcmToken, // Include FCM token in request
+        //"fcmToken": fcmToken, // Include FCM token in request
       });
 
       if (res.statusCode == 200) {
         final data = res.data;
         print('value of data is: $data');
-        print("FCM Token: $fcmToken");
+       // print("FCM Token: $fcmToken");
 
         if (data['verificationRequired'] == true) {
           // User not verified, redirect to verification
