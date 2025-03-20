@@ -112,7 +112,7 @@ class ChangePasswordView extends StackedView<ChangePasswordViewModel> {
                       isLoading: viewModel.isBusy,
                       label: "Update Password",
                       submit: () {
-                        viewModel.changePassword(context, isResetPassword);
+                        viewModel.changePassword(context, isResetPassword); 
                       },
                       boldText: true,
                       color: kcPrimaryColor,

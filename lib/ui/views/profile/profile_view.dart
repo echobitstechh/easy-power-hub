@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:afriprize/app/app.locator.dart';
 import 'package:afriprize/app/app.router.dart';
 import 'package:afriprize/core/utils/local_store_dir.dart';
@@ -59,10 +61,10 @@ class ProfileView extends StatelessWidget {
                                     backgroundColor:
                                         Colors.black.withOpacity(0.7),
                                     builder: (BuildContext context) {
-                                      return const FractionallySizedBox(
+                                      return  FractionallySizedBox(
                                         heightFactor:
                                             1.0, // 70% of the screen's height
-                                        child: ProfileScreen(),
+                                        child: ProfileScreen(viewModel: viewModel,),
                                       );
                                     },
                                   );
@@ -84,10 +86,10 @@ class ProfileView extends StatelessWidget {
                                     backgroundColor:
                                         Colors.black.withOpacity(0.7),
                                     builder: (BuildContext context) {
-                                      return const FractionallySizedBox(
+                                      return  FractionallySizedBox(
                                         heightFactor:
                                             1.0, // 70% of the screen's height
-                                        child: ProfileScreen(),
+                                        child: ProfileScreen(viewModel: viewModel,),
                                       );
                                     },
                                   );
@@ -136,7 +138,7 @@ class ProfileView extends StatelessWidget {
                                 verticalSpaceMedium,
                                 InkWell(
                                   onTap: () {
-                                    viewModel.updateProfilePicture();
+                                    // viewModel.updateProfilePicture();
                                   },
                                   child: const Text(
                                     "Change Profile Picture",
@@ -195,8 +197,8 @@ class ProfileView extends StatelessWidget {
                               }));
                             },
                             leading: const Icon(
-                              Icons.wallet,
-                              color: kcSecondaryColor,
+                              Icons.fire_truck_rounded,
+                              color: kcPrimaryColor,
                             ),
                             title: const Text("My orders"),
                           ),
@@ -212,6 +214,19 @@ class ProfileView extends StatelessWidget {
                               color: kcOrangeColor,
                             ),
                             title: const Text("Shipping addresses"),
+                          ),
+                          ListTile(
+                            onTap: () {
+                              // locator<NavigationService>().navigateToTrack();
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (c) {
+                                return const Support();
+                              }));
+                            },
+                            leading: Icon(Icons.support_agent,
+                              color: kcOrangeColor,
+                            ),
+                            title: const Text("Support"),
                           ),
                           // ListTile(
                           //   onTap: () {

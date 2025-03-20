@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'dart:io';
 import 'package:afriprize/app/app.locator.dart';
 import 'package:afriprize/app/app.logger.dart';
 import 'package:afriprize/core/data/models/product.dart';
@@ -34,6 +34,13 @@ class DashboardViewModel extends BaseViewModel {
 
   bool appBarLoading = false;
   final snackBar = locator<SnackbarService>();
+
+  // File? selectedFile;
+  //
+  // void updateProfileImage(File? file) {
+  //     selectedFile = file;
+  //     notifyListeners();
+  // }
 
   void setSelectedCategory(int id) {
     selectedId = id;

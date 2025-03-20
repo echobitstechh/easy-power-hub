@@ -63,6 +63,22 @@ class _SupportState extends State<Support> {
               goToFaqs('https://afriprize.com/faq');
             },
           ),
+          SupportOption(
+            icon: Icons.phone,
+            title: "Electronics Customer Care",
+            subtitle: "",
+            onTap: () {
+              launchDialer('08081099871');
+            },
+          ),
+          SupportOption(
+            icon: Icons.phone,
+            title: "Lighting Customer Care Number",
+            subtitle: "",
+            onTap: () {
+              launchDialer('08081099871');
+            },
+          ),
 
         ],
       ),
@@ -129,6 +145,14 @@ Future<void> goToFaqs(String url) async {
 
   if (!await launchUrl(toLaunch, mode: LaunchMode.inAppBrowserView)) {
     throw Exception('Could not launch $url');
+  }
+}
+void launchDialer(String phoneNumber) async {
+  final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+  if (await canLaunchUrl(phoneUri)) {
+    await launchUrl(phoneUri);
+  } else {
+    throw 'Could not launch $phoneUri';
   }
 }
 

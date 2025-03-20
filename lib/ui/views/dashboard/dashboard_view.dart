@@ -1204,8 +1204,12 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   },
                   child: CircleAvatar(
                     // backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
-                    backgroundImage: AssetImage(profile.value.profilePicture ??
-                        "assets/images/display_pic.png"),
+                    backgroundImage: CachedNetworkImageProvider(
+                      (profile.value.profilePicture != null && profile.value.profilePicture!.isNotEmpty)
+                          ? profile.value.profilePicture!
+                          : 'assets/images/display_pic.png',
+                    ),
+
                     radius: 20, // Adjust size as needed
                   ),
                 )

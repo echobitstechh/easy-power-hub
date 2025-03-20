@@ -304,7 +304,7 @@ class Repository extends IRepository {
   Future<ApiResponse> updateProfilePicture(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.put,
-      endpoint: "users/me/update_dp",
+      endpoint: "profile/updateProfilePic",
       reqBody: req,
     );
 
