@@ -54,8 +54,12 @@ class HomeView extends StackedView<HomeViewModel> {
 
   @override
   void onViewModelReady(HomeViewModel viewModel) {
-    if(userLoggedIn.value == true){
-      viewModel.fetchOnlineCart();
+    if (userLoggedIn.value == true) {
+      // Instead of fetching the online cart, we now fetch delivered orders.
+      viewModel.fetchDeliveredOrders();
+      // If you need to keep both functionalities, you can call both:
+      // viewModel.fetchOnlineCart();
+      // viewModel.fetchDeliveredOrders();
     }
     super.onViewModelReady(viewModel);
   }
@@ -79,7 +83,6 @@ class BottomNavBar extends StatelessWidget {
 
         List<BottomNavigationBarItem> items = nav_Items(iconColor, selectedColor);
 
-
         int currentIndex = viewModel.selectedTab;
 
         return BottomNavigationBar(
@@ -87,7 +90,6 @@ class BottomNavBar extends StatelessWidget {
           backgroundColor: uiMode.value == AppUiModes.dark
               ? kcDarkGreyColor // Dark mode logo
               : kcWhiteColor,
-
           selectedLabelStyle: TextStyle(color: selectedColor),
           selectedItemColor: selectedColor,
           unselectedItemColor: iconColor,
@@ -110,9 +112,9 @@ class BottomNavBar extends StatelessWidget {
         label: "Shop",
       ),
       BottomNavigationBarItem(
-          icon: _navBarItemWithCounter('buy.svg', 'buy.svg',  viewModel.selectedTab == 2, cart, iconColor),
-          label: "Cart",
-          ),
+        icon: _navBarItemWithCounter('buy.svg', 'buy.svg',  viewModel.selectedTab == 2, cart, iconColor),
+        label: "Cart",
+      ),
       BottomNavigationBarItem(
         icon: _navBarItemIcon('engineering.svg', 'engineering.svg', viewModel.selectedTab == 3, iconColor),
         label: "Services",
@@ -169,5 +171,4 @@ class BottomNavBar extends StatelessWidget {
       },
     );
   }
-
 }

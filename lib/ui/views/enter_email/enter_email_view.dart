@@ -59,7 +59,7 @@ class EnterEmailView extends StackedView<EnterEmailViewModel> {
                   textStyle: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: kcWhiteColor,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -159,8 +159,5 @@ class EnterEmailView extends StackedView<EnterEmailViewModel> {
   }
 
   @override
-  EnterEmailViewModel viewModelBuilder(
-      BuildContext context,
-      ) =>
-      EnterEmailViewModel();
+  EnterEmailViewModel viewModelBuilder(BuildContext context) => EnterEmailViewModel();
 }

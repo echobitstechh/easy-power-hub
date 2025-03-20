@@ -462,6 +462,16 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> rating() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "reviews",
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> clearCart() async {
     ApiResponse response = await api.call(
       method: HttpMethod.delete,
