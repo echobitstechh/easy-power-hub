@@ -1,4 +1,4 @@
-import 'package:afriprize/ui/common/app_colors.dart';
+   import 'package:afriprize/ui/common/app_colors.dart';
 import 'package:afriprize/ui/common/ui_helpers.dart';
 import 'package:afriprize/ui/components/submit_button.dart';
 import 'package:afriprize/ui/components/text_field_widget.dart';
@@ -59,7 +59,7 @@ class EnterEmailView extends StackedView<EnterEmailViewModel> {
                   textStyle: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
-                    color: kcWhiteColor,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -159,8 +159,5 @@ class EnterEmailView extends StackedView<EnterEmailViewModel> {
   }
 
   @override
-  EnterEmailViewModel viewModelBuilder(
-      BuildContext context,
-      ) =>
-      EnterEmailViewModel();
+  EnterEmailViewModel viewModelBuilder(BuildContext context) => EnterEmailViewModel();
 }

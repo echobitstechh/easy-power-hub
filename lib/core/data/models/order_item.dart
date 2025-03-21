@@ -20,6 +20,7 @@ class Order {
   final DateTime createdAt;
   final DateTime updatedAt;
   final List<Product> products;
+  final bool isReviewed;
 
   Order({
     required this.id,
@@ -36,6 +37,7 @@ class Order {
     required this.createdAt,
     required this.updatedAt,
     required this.products,
+    this.isReviewed = false,
   });
 
   // Factory method to create an Order from JSON
@@ -57,6 +59,7 @@ class Order {
       products: (json['Products'] as List)
           .map((product) => Product.fromJson(product))
           .toList() ?? [],
+      isReviewed: json["isReviewed"] ?? false,
     );
   }
 

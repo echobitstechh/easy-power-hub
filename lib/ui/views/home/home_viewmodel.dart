@@ -19,7 +19,9 @@ import 'package:update_available/update_available.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/data/models/cart_item.dart';
+import '../../../core/data/models/order_item.dart';
 import '../../../core/data/models/raffle_cart_item.dart';
+import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
@@ -38,8 +40,8 @@ class HomeViewModel extends BaseViewModel {
   final _dialogService = locator<DialogService>();
   final _bottomSheetService = locator<BottomSheetService>();
   List<Widget> pages = [
-     DashboardView(),
-      ShopView(),
+    DashboardView(),
+    ShopView(),
     const CartView(),
     ServicesView(),
     const ProfileView()
@@ -54,19 +56,13 @@ class HomeViewModel extends BaseViewModel {
     super.dispose();
   }
 
-
   HomeViewModel() {
     currentModuleNotifier.addListener(notifyListeners);
   }
 
-
   String get counterLabel => 'Counter is: $_counter';
 
   int _counter = 0;
-
-
-
-
 
   //for test
   void incrementCounter() {
@@ -79,11 +75,9 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-
   Widget get currentPage {
     return pages[selectedTab];
   }
-
 
   void showBottomSheet() {
     _bottomSheetService.showCustomSheet(
@@ -116,22 +110,39 @@ class HomeViewModel extends BaseViewModel {
                   height: 94,
                 ),
                 const ListTile(
-                  title: Text('App Updates', style: TextStyle(fontSize: 22,
-                    fontFamily: "Panchang", fontWeight: FontWeight.bold, color: kcSecondaryColor)),
-                  subtitle: Text('A new version of Easy PH is now available.'
-                      ' download now to enjoy our lastest features.', style: TextStyle(fontSize: 13,
-                    fontFamily: "Panchang",)),
+                  title: Text(
+                    'App Updates',
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontFamily: "Panchang",
+                        fontWeight: FontWeight.bold,
+                        color: kcSecondaryColor),
+                  ),
+                  subtitle: Text(
+                    'A new version of Easy PH is now available. download now to enjoy our lastest features.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontFamily: "Panchang",
+                    ),
+                  ),
                 ),
                 ButtonBar(
                   children: <Widget>[
                     TextButton(
-                      style: ButtonStyle(backgroundColor: MaterialStateProperty.all(kcSecondaryColor)),
+                      style: ButtonStyle(
+                          backgroundColor:
+                          MaterialStateProperty.all(kcSecondaryColor)),
                       onPressed: () {
-                        Platform.isIOS ? _launchURL(AppConfig.APPLESTOREURL) : _launchURL(AppConfig.GOOGLESTOREURL);
+                        Platform.isIOS
+                            ? _launchURL(AppConfig.APPLESTOREURL)
+                            : _launchURL(AppConfig.GOOGLESTOREURL);
                         Navigator.pop(context);
                       },
-                      child: const Text('Update Now', style: TextStyle(
-                          fontFamily: "Panchang", fontWeight: FontWeight.bold, color: kcWhiteColor)),
+                      child: const Text('Update Now',
+                          style: TextStyle(
+                              fontFamily: "Panchang",
+                              fontWeight: FontWeight.bold,
+                              color: kcWhiteColor)),
                     ),
                   ],
                 ),
@@ -151,10 +162,10 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> fetchOnlineCart() async {
+  Future<void> reviewRating() async {
     setBusy(true);
     try {
-      ApiResponse res = await repo.cartList();
+      ApiResponse res = await repo.rating();
       if (res.statusCode == 200) {
         // Corrected the key to "cartItems" and added a null check
         List<dynamic> items = res.data["cartItems"] ?? [];
@@ -162,9 +173,10 @@ class HomeViewModel extends BaseViewModel {
         print('online cart items: $items');
 
         // Map the items list to List<CartItem>
-        if(items.isNotEmpty){
+        if (items.isNotEmpty) {
           List<CartItem> onlineItems = items
-              .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
+              .map((item) =>
+              CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
 
           print('Saved items are: ${onlineItems.first.product?.productName}');
@@ -178,11 +190,12 @@ class HomeViewModel extends BaseViewModel {
           List<Map<String, dynamic>> storedList =
           cart.value.map((e) => e.toJson()).toList();
           await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-        }else{
+        } else {
           cart.value.clear();
           await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
 
-          notifyListeners();}
+          notifyListeners();
+        }
       }
     } catch (e) {
       // locator<SnackbarService>().showSnackbar(message: "Failed to load cart from server: $e");
@@ -192,4 +205,46 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
+  // ========================
+  // NEW: Fetch delivered orders and prompt for rating if needed.
+  // ========================
+  Future<void> fetchDeliveredOrders() async {
+    setBusy(true);
+    try {
+      // Fetch all orders using the same repository method.
+      ApiResponse res = await locator<Repository>().getOrderList();
+      if (res.statusCode == 200) {
+        // Extract orders list from response.
+        List<dynamic> ordersData = res.data["orders"] ?? [];
+        // Map to Order model and filter for delivered orders.
+        // Assuming delivered orders have status "Completed".
+        List<Order> deliveredOrders = ordersData
+            .map((order) =>
+            Order.fromJson(Map<String, dynamic>.from(order)))
+            .where((order) => order.status == "Completed")
+            .toList();
+
+        // Check for delivered orders that haven't been reviewed/rated.
+        List<Order> unratedOrders = deliveredOrders
+            .where((order) => order.isReviewed == false)
+            .toList();
+
+        if (unratedOrders.isNotEmpty) {
+          Order unratedOrder = unratedOrders.first;
+          // Trigger a rating dialog for the unrated delivered order.
+          _dialogService.showCustomDialog(
+            variant: "RatingDialog", // Use a valid variant for your dialog service.
+            title: "Rate Your Order",
+            description: "Please rate your recently delivered order.",
+            data: unratedOrder, // Pass the order so the dialog can use it.
+          );
+        }
+      }
+    } catch (e) {
+      locator<SnackbarService>()
+          .showSnackbar(message: "Failed to load orders: $e");
+    } finally {
+      setBusy(false);
+    }
+  }
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:afriprize/app/app.locator.dart';
@@ -27,36 +28,43 @@ class ProfileViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  void updateProfilePicture() async {
+  File? selectedFile;
+
+  void updateProfileImage(File? file) {
+    if (file == null) return;
+
+    selectedFile = file;
+    notifyListeners(); // Refresh UI
+    updateProfilePicture(file); // Now triggers API call
+  }
+
+  void updateProfilePicture(File file) async {
     setBusy(true);
-    //pick photo
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    String oldPath = image!.path;
-    String newPath = '${path.withoutExtension(oldPath)}.png';
-    File inputFile = File(oldPath);
-    File outputFile = File(newPath);
-
-    XFile? result = await FlutterImageCompress.compressAndGetFile(
-      inputFile.path,
-      outputFile.path,
-      format: CompressFormat.png,
-    );
-
-    log.i(result!.path);
 
     try {
-      ApiResponse res = await locator<Repository>().updateProfilePicture({
-        "picture": await MultipartFile.fromFile(File(result.path).path),
+      // Read image as bytes
+      List<int> imageBytes = await file.readAsBytes();
+
+      // Convert to Base64
+      String base64Image = base64Encode(imageBytes);
+
+      log.i("Uploading Base64 Image");
+
+      // Send Base64 string to API
+      ApiResponse res = await repo.updateProfilePicture({
+        "profilePicture": base64Image = "data:image/png;base64," + base64Encode(imageBytes)// Send as Base64 string
       });
+
       if (res.statusCode == 200) {
         snackBar.showSnackbar(message: res.data["message"]);
-        getProfile();
+        getProfile(); // Refresh profile after upload
+      } else {
+        log.e("Failed to upload image");
       }
     } catch (e) {
-      throw Exception(e);
+      log.e("Error uploading image: $e");
     }
+
     setBusy(false);
   }
 
@@ -73,7 +81,7 @@ class ProfileViewModel extends BaseViewModel {
       ApiResponse res = await repo.getProfile();
       if (res.statusCode == 200) {
         profile.value =
-            Profile.fromJson(Map<String, dynamic>.from(res.data["User"]));
+            Profile.fromJson(Map<String, dynamic>.from(res.data["data"]));
         await locator<LocalStorage>().save(LocalStorageDir.profileView, res.data["data"]); // Cache updated profile
         rebuildUi(); // Update UI with fresh data
       }
