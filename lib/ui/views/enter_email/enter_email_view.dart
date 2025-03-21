@@ -1,7 +1,7 @@
-   import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/ui/components/submit_button.dart';
-import 'package:afriprize/ui/components/text_field_widget.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/components/submit_button.dart';
+import 'package:easyph/ui/components/text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';

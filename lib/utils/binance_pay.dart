@@ -1,4 +1,4 @@
-import 'package:afriprize/core/data/models/raffle_cart_item.dart';
+import 'package:easyph/core/data/models/raffle_cart_item.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';

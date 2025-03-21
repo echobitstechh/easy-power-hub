@@ -1,5 +1,5 @@
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
 import 'package:flutter/material.dart';
 
 

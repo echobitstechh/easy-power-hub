@@ -1,5 +1,5 @@
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:open_mail_app/open_mail_app.dart';
@@ -34,9 +34,9 @@ class _SupportState extends State<Support> {
           SupportOption(
             icon: Icons.email_outlined,
             title: "Email Us",
-            //subtitle: "support@afriprize.com",
+            //subtitle: "support@easyph.com",
             onTap: () async {
-              sendEmail("support@afriprize.com", context);
+              sendEmail("support@easyph.com", context);
             },
           ),
           // SupportOption(
@@ -60,7 +60,7 @@ class _SupportState extends State<Support> {
             title: "FAQs",
             subtitle: "",
             onTap: () {
-              goToFaqs('https://afriprize.com/faq');
+              goToFaqs('https://easyph.com/faq');
             },
           ),
           SupportOption(
@@ -91,7 +91,7 @@ Future<void> sendEmail(String emailAddress, BuildContext context) async {
     to: [
       emailAddress,
     ],
-    bcc: ['dev@afriprize.com'],
+    bcc: ['dev@easyph.com'],
   );
 
   OpenMailAppResult result =
@@ -141,7 +141,7 @@ void showNoMailAppsDialog(BuildContext context) {
 
 Future<void> goToFaqs(String url) async {
   final Uri toLaunch =
-  Uri(scheme: 'https', host: 'www.afriprize.com', path: '/faq');
+  Uri(scheme: 'https', host: 'www.easyph.com', path: '/faq');
 
   if (!await launchUrl(toLaunch, mode: LaunchMode.inAppBrowserView)) {
     throw Exception('Could not launch $url');

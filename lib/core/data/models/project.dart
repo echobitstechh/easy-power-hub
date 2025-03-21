@@ -1,7 +1,7 @@
 
 
-import 'package:afriprize/core/data/models/product.dart';
-import 'package:afriprize/core/data/models/profile.dart';
+import 'package:easyph/core/data/models/product.dart';
+import 'package:easyph/core/data/models/profile.dart';
 
 import 'category.dart';
 

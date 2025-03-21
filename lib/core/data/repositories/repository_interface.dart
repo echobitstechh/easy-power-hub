@@ -1,4 +1,4 @@
-import 'package:afriprize/core/network/api_response.dart';
+import 'package:easyph/core/network/api_response.dart';
 
 abstract class IRepository {
   Future<ApiResponse> login(Map<String, dynamic> req);
@@ -84,6 +84,8 @@ abstract class IRepository {
   Future<ApiResponse> clearCart();
 
   Future<ApiResponse> addToCart(Map<String, dynamic> req);
+
+  Future<ApiResponse>  rating(Map<String, dynamic> req);
 
   Future<ApiResponse> deleteFromCart(String raffleId);
 

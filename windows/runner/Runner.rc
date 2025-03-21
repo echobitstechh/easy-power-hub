@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "afriprize" "\0"
+            VALUE "FileDescription", "easyph" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "afriprize" "\0"
+            VALUE "InternalName", "easyph" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "afriprize.exe" "\0"
-            VALUE "ProductName", "afriprize" "\0"
+            VALUE "OriginalFilename", "easyph.exe" "\0"
+            VALUE "ProductName", "easyph" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

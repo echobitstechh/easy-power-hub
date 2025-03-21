@@ -1,4 +1,4 @@
-import 'package:afriprize/ui/components/background.dart';
+import 'package:easyph/ui/components/background.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

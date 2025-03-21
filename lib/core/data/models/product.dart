@@ -1,4 +1,4 @@
-import 'package:afriprize/core/data/models/order_item.dart';
+import 'package:easyph/core/data/models/order_item.dart';
 
 class Product {
   String? id;

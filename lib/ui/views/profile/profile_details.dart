@@ -1,10 +1,6 @@
-import 'dart:io';
-import 'package:afriprize/ui/views/profile/profile_viewmodel.dart';
-import 'package:dio/dio.dart';
+
+import 'package:easyph/ui/views/profile/profile_viewmodel.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:path/path.dart' as path;
 import '../../../app/app.locator.dart';
@@ -15,8 +11,6 @@ import '../../../state.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/profile_picker.dart';
-import '../../components/profile_picture.dart';
-import '../cart/add_shipping.dart';
 
 class ProfileScreen extends StatefulWidget {
   final ProfileViewModel viewModel;

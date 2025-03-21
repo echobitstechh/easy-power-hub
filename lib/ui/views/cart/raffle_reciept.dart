@@ -1,7 +1,8 @@
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/utils/date_time_utils.dart';
-import 'package:afriprize/utils/money_util.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/utils/date_time_utils.dart';
+import 'package:easyph/utils/money_util.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,7 @@ import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/raffle_cart_item.dart';
+import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../utils/cart_utill.dart';
@@ -208,9 +210,12 @@ class RaffleReceiptPage extends StatelessWidget {
                                 ),
                                 verticalSpaceTiny,
                                 ...carts.map((cartItem) => ListTile(
-                                      leading: Image.network(
-                                          cartItem.product!.images!.first ??
-                                              '',
+                                      leading:
+
+                                      Image.network(
+                                          (cartItem.product?.images != null && cartItem.product!.images!.isNotEmpty)
+                                              ? cartItem.product!.images![0]
+                                              : 'https://via.placeholder.com/120',
                                           height: 44,
                                           width:
                                               48), // Replace with your image URL field
@@ -314,46 +319,21 @@ class RaffleReceiptPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              // Expanded(
-              //   child: ElevatedButton(
-              //     onPressed: () {
-              //       Navigator.push(
-              //         context,
-              //         MaterialPageRoute(
-              //             builder: (context) =>
-              //                 ShippingAddressesPage()), // Assuming TicketPage is the page to navigate to
-              //       ).then((_) {
-              //         // When coming back from TicketPage, navigate to HomePage
-              //         locator<NavigationService>()
-              //             .clearStackAndShow(Routes.homeView);
-              //       });
-              //     },
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor:
-              //           kcSecondaryColor, // Use the appropriate color for your app
-              //       shape: RoundedRectangleBorder(
-              //         borderRadius: BorderRadius.circular(10),
-              //       ),
-              //     ),
-              //     child: const Row(
-              //       mainAxisAlignment: MainAxisAlignment.center,
-              //       children: [
-              //         Icon(Icons.airplane_ticket_outlined),
-              //         horizontalSpaceTiny,
-              //         Expanded(
-              //             child: Text('Tickets',
-              //                 style: TextStyle(
-              //                     color: kcPrimaryColor, fontSize: 15))),
-              //       ],
-              //     ),
-              //   ),
-              // ),
-              // horizontalSpaceSmall,
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
-                    cart.value.clear();
+
+                    try {
+                      for (var item in cart.value) {
+                        await repo.deleteFromCart(item.product!.id.toString());
+                      }
+                      // Clear the cart after successful deletion
+                      cart.value.clear();
+                    } catch (e) {
+                      print(e); // Handle errors if necessary
+                    }
                     await locator<LocalStorage>().delete(LocalStorageDir.cart);
+                    cart.notifyListeners();
 
                     locator<NavigationService>()
                         .clearStackAndShow(Routes.homeView);

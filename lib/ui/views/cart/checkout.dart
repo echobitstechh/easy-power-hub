@@ -1,12 +1,12 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/core/data/models/order_info.dart';
-import 'package:afriprize/core/data/models/profile.dart';
-import 'package:afriprize/core/data/repositories/repository.dart';
-import 'package:afriprize/core/network/api_response.dart';
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/components/submit_button.dart';
-import 'package:afriprize/ui/views/cart/raffle_reciept.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/core/data/models/order_info.dart';
+import 'package:easyph/core/data/models/profile.dart';
+import 'package:easyph/core/data/repositories/repository.dart';
+import 'package:easyph/core/network/api_response.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/components/submit_button.dart';
+import 'package:easyph/ui/views/cart/raffle_reciept.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -496,8 +496,8 @@ class _CheckoutState extends State<Checkout> {
         ApiResponse res = await locator<Repository>().payForOrder(requestBody);
 
         if (res.statusCode == 201) {
-          final orderData = res.data['order'];
-          final Order order = Order.fromJson(orderData);
+          // final orderData = res.data['order'];
+          // final Order order = Order.fromJson(orderData);
 
           // Navigate to the receipt page with the `Order` object
           Navigator.push(

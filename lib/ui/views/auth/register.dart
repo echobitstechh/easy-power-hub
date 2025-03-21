@@ -1,10 +1,10 @@
- import 'package:afriprize/core/data/models/country.dart';
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/components/submit_button.dart';
-import 'package:afriprize/ui/components/text_field_widget.dart';
-import 'package:afriprize/ui/views/auth/auth_viewmodel.dart';
-import 'package:afriprize/utils/country_utils.dart';
+ import 'package:easyph/core/data/models/country.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/components/submit_button.dart';
+import 'package:easyph/ui/components/text_field_widget.dart';
+import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
+import 'package:easyph/utils/country_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:stacked/stacked.dart';

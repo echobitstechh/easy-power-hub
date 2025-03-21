@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/ui/views/dashboard/productcard.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/views/dashboard/productcard.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';

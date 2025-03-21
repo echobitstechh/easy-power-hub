@@ -1,6 +1,6 @@
-import 'package:afriprize/core/data/models/country.dart';
-import 'package:afriprize/core/data/models/discount.dart';
-import 'package:afriprize/core/data/models/product.dart';
+import 'package:easyph/core/data/models/country.dart';
+import 'package:easyph/core/data/models/discount.dart';
+import 'package:easyph/core/data/models/product.dart';
 
 class Profile {
   String? id;

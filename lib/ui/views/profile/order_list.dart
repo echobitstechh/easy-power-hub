@@ -1,13 +1,13 @@
 import 'dart:ui';
 
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/core/data/models/product.dart';
-import 'package:afriprize/core/data/repositories/repository.dart';
-import 'package:afriprize/core/network/api_response.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/ui/components/empty_state.dart';
-import 'package:afriprize/utils/money_util.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/core/data/models/product.dart';
+import 'package:easyph/core/data/repositories/repository.dart';
+import 'package:easyph/core/network/api_response.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/components/empty_state.dart';
+import 'package:easyph/utils/money_util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -221,7 +221,7 @@ class _OrderListState extends State<OrderList> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
-                    onTap: () => _showOrderDetailsBottomSheet(order),
+                    onTap: () => showTimelineBottomSheet(context,order),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),

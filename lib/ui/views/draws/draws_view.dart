@@ -1,6 +1,6 @@
-import 'package:afriprize/core/utils/config.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/core/utils/config.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -135,7 +135,7 @@ class DrawsView extends StatelessWidget {
                                         'No raffles are sold out at the moment.',
                                     description: '',
                                     rules: [
-                                      'Entry Eligibility: Secure your spot in the draw with an Afriprize card purchase of \$5...',
+                                      'Entry Eligibility: Secure your spot in the draw with an Easyph card purchase of \$5...',
                                     ],
                                   )
                                 ],
@@ -267,7 +267,7 @@ class DrawsView extends StatelessWidget {
                                       child: Row(
                                         children: [
                                           Text(
-                                            "Afriprize Raffle Draw Winners",
+                                            "Easyph Raffle Draw Winners",
                                             style:
                                                 GoogleFonts.bricolageGrotesque(
                                               textStyle:  TextStyle(

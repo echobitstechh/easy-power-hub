@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:afriprize/app/app.router.dart';
+import 'package:easyph/app/app.router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

@@ -1,10 +1,10 @@
-import 'package:afriprize/state.dart';
+import 'package:easyph/state.dart';
 import 'package:flutter/material.dart';
-import 'package:afriprize/core/data/models/transaction.dart';
-import 'package:afriprize/core/data/repositories/repository.dart';
-import 'package:afriprize/core/network/api_response.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/components/empty_state.dart';
+import 'package:easyph/core/data/models/transaction.dart';
+import 'package:easyph/core/data/repositories/repository.dart';
+import 'package:easyph/core/network/api_response.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/components/empty_state.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';

@@ -7,28 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:875974620022:android:dff23206177bb24e140057",
+        "mobilesdk_app_id": "1:875974620022:android:23548575c33fa1f3140057",
         "android_client_info": {
-          "package_name": "com.afriprize.afriprize"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCzaB-bH7SSYuk8gwYVHU4zSzac0vrSWX0"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:875974620022:android:be0b06abb4af616f140057",
-        "android_client_info": {
-          "package_name": "easyph.echobitstech.com"
+          "package_name": "com.echobitstech.easyph"
         }
       },
       "oauth_client": [],

@@ -1,16 +1,16 @@
-import 'package:afriprize/core/utils/config.dart';
-import 'package:afriprize/core/utils/local_store_dir.dart';
-import 'package:afriprize/core/utils/local_stotage.dart';
-import 'package:afriprize/state.dart';
+import 'package:easyph/core/utils/config.dart';
+import 'package:easyph/core/utils/local_store_dir.dart';
+import 'package:easyph/core/utils/local_stotage.dart';
+import 'package:easyph/state.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:afriprize/app/app.bottomsheets.dart';
-import 'package:afriprize/app/app.dialogs.dart';
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:easyph/app/app.bottomsheets.dart';
+import 'package:easyph/app/app.dialogs.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/ui/common/app_colors.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -147,7 +147,7 @@ void displayTextNotification(String title, String body) async {
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
   AndroidNotificationDetails(
     'AFRI2024',
-    'Afriprize',
+    'Easyph',
     channelDescription: 'your_channel_description',
     importance: Importance.max,
     priority: Priority.high,
@@ -203,7 +203,7 @@ class _MyAppState extends State<MyApp> {
     return ValueListenableBuilder<AppUiModes>(
       valueListenable: uiMode,
       builder: (context, value, child) => MaterialApp(
-        title: 'Afriprize',
+        title: 'Easyph',
         // theme: value == AppUiModes.dark ? darkTheme() : lightTheme(),
         theme: ThemeData.light(useMaterial3: true),
         darkTheme: ThemeData.dark(),
@@ -284,7 +284,7 @@ class _MyAppState extends State<MyApp> {
                 const ListTile(
                   title: Text('App Updates', style: TextStyle(fontSize: 12,
                     fontFamily: "Panchang", fontWeight: FontWeight.bold,)),
-                  subtitle: Text('A new version of Afriprize is now available.'
+                  subtitle: Text('A new version of Easyph is now available.'
                       ' download now to enjoy our lastest features.', style: TextStyle(fontSize: 8,
                     fontFamily: "Panchang",)),
                 ),

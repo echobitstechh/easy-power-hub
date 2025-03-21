@@ -1,5 +1,5 @@
-// // import 'package:afriprize/ui/common/app_colors.dart';
-// // import 'package:afriprize/ui/common/ui_helpers.dart';
+// // import 'package:easyph/ui/common/app_colors.dart';
+// // import 'package:easyph/ui/common/ui_helpers.dart';
 // // import 'package:flutter/material.dart';
 // // import 'package:intl/intl.dart';
 // //
@@ -201,7 +201,7 @@
 // //                         ],
 // //                       ),
 // //                       verticalSpaceLarge,
-// //                       Image.asset("assets/images/afriprize_light.png")
+// //                       Image.asset("assets/images/easyph_light.png")
 // //                     ],
 // //                   ),
 // //                 ),
@@ -417,8 +417,8 @@
 //
 
 
-// import 'package:afriprize/app/app.router.dart';
-// import 'package:afriprize/core/data/models/raffle_ticket.dart';
+// import 'package:easyph/app/app.router.dart';
+// import 'package:easyph/core/data/models/raffle_ticket.dart';
 //
 // import '../../../core/data/models/order_item.dart';
 //

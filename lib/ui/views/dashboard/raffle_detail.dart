@@ -1,11 +1,11 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/core/data/models/product.dart';
-import 'package:afriprize/core/data/models/raffle_cart_item.dart';
-import 'package:afriprize/core/network/api_response.dart';
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/core/data/models/product.dart';
+import 'package:easyph/core/data/models/raffle_cart_item.dart';
+import 'package:easyph/core/network/api_response.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -286,7 +286,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(10.0,10.0,0,16.0),
-                          child: doMoreOnAfriprize(context),
+                          child: doMoreOnEasyph(context),
                         ),
                         Container(
                           margin: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
@@ -486,7 +486,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
   }
 
 
-  Widget doMoreOnAfriprize(BuildContext context) {
+  Widget doMoreOnEasyph(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

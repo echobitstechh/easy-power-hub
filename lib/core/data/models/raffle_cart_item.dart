@@ -1,4 +1,4 @@
-import 'package:afriprize/core/data/models/product.dart';
+import 'package:easyph/core/data/models/product.dart';
 
 class RaffleCartItem {
   Product? raffle;

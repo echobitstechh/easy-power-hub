@@ -1,18 +1,18 @@
-import 'package:afriprize/app/app.locator.dart';
+import 'package:easyph/app/app.locator.dart';
 
-import 'package:afriprize/app/app.router.dart';
+import 'package:easyph/app/app.router.dart';
 
-import 'package:afriprize/core/data/models/profile.dart';
+import 'package:easyph/core/data/models/profile.dart';
 
-import 'package:afriprize/core/data/repositories/repository.dart';
+import 'package:easyph/core/data/repositories/repository.dart';
 
-import 'package:afriprize/core/network/api_response.dart';
+import 'package:easyph/core/network/api_response.dart';
 
-import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/app_colors.dart';
 
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 
-import 'package:afriprize/ui/components/submit_button.dart';
+import 'package:easyph/ui/components/submit_button.dart';
 
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
 
@@ -20,7 +20,7 @@ import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 
-import 'package:afriprize/core/data/models/profile.dart' as pro;
+import 'package:easyph/core/data/models/profile.dart' as pro;
 
 import 'package:flutter/widgets.dart';
 

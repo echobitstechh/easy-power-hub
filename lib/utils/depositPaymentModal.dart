@@ -1,4 +1,4 @@
-import 'package:afriprize/core/data/models/product.dart';
+import 'package:easyph/core/data/models/product.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

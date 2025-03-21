@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/state.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stacked/stacked.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/app_colors.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';

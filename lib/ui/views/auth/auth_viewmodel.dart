@@ -130,21 +130,21 @@ class AuthViewModel extends BaseViewModel {
       }
 
       // Get FCM token
-     // String? fcmToken = await FirebaseMessaging.instance.getToken();
-     // print("FCM Token: $fcmToken");
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $fcmToken");
 
       // Make API request with FCM token included
       ApiResponse res = await repo.login({
         if (email.text.isNotEmpty) "email": email.text,
         if (phone.text.isNotEmpty) "phoneNumber": phone.text,
         "password": password.text,
-        //"fcmToken": fcmToken, // Include FCM token in request
+        "fcmToken": fcmToken,
       });
 
       if (res.statusCode == 200) {
         final data = res.data;
         print('value of data is: $data');
-       // print("FCM Token: $fcmToken");
+        print("FCM Token: $fcmToken");
 
         if (data['verificationRequired'] == true) {
           // User not verified, redirect to verification
@@ -241,7 +241,7 @@ class AuthViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         print('Response is ${res.data}');
-
+        isLoginByEmail.value = email.text != '';
         userLoggedIn.value = true;
         profile.value =
             Profile.fromJson(Map<String, dynamic>.from(res.data["User"]));
@@ -287,9 +287,15 @@ class AuthViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         print("OTP Verified Successfully. Navigating to registerView...");
         snackBar.showSnackbar(message: 'OTP verified successfully', duration: Duration(seconds: 5));
-        locator<NavigationService>().clearStackAndShow(Routes.registerView, arguments: {
-          'updateIsLogin': false,
-        });
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AuthView(
+              initialPage: PresentPage.register,
+            ),
+          ),
+        );
+        notifyListeners();
       }else if(res.statusCode == 400){
         snackBar.showSnackbar(message: 'Invalid verification code', duration: Duration(seconds: 5));
       }
@@ -299,8 +305,9 @@ class AuthViewModel extends BaseViewModel {
         snackBar.showSnackbar(message: responseMessage, duration: Duration(seconds: 5));
         appLoading.value = false;
       }
-    } catch (e) {
+    } catch (e, stacktrace) {
       print("error is $e");
+      print("stack is $stacktrace");
       log.i(e);
       if (e is TypeError) {
         log.i('TypeError: ${e.toString()}');

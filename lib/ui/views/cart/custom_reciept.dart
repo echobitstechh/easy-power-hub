@@ -1,9 +1,9 @@
-import 'package:afriprize/core/data/models/cart_item.dart';
-import 'package:afriprize/core/data/models/raffle_cart_item.dart';
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/utils/date_time_utils.dart';
-import 'package:afriprize/utils/money_util.dart';
+import 'package:easyph/core/data/models/cart_item.dart';
+import 'package:easyph/core/data/models/raffle_cart_item.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/utils/date_time_utils.dart';
+import 'package:easyph/utils/money_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';

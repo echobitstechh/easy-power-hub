@@ -1,6 +1,6 @@
 
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/components/background.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/components/background.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';

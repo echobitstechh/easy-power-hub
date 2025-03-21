@@ -1,7 +1,7 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/core/data/repositories/repository_interface.dart';
-import 'package:afriprize/core/network/api_response.dart';
-import 'package:afriprize/core/network/api_service.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/core/data/repositories/repository_interface.dart';
+import 'package:easyph/core/network/api_response.dart';
+import 'package:easyph/core/network/api_service.dart';
 import 'package:dio/dio.dart';
 
 class Repository extends IRepository {
@@ -462,10 +462,11 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> rating() async {
+  Future<ApiResponse> rating(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
       endpoint: "reviews",
+      reqBody: req,
     );
 
     return response;

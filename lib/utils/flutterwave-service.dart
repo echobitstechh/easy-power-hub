@@ -1,6 +1,6 @@
 import 'dart:io';
-import 'package:afriprize/core/utils/config.dart';
-import 'package:afriprize/state.dart';
+import 'package:easyph/core/utils/config.dart';
+import 'package:easyph/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterwave_standard/flutterwave.dart';
 
@@ -15,9 +15,9 @@ class FlutterwavePaymentService {
     bool isTestMode = false,
   }) async {
     final Customer customer = Customer(
-      name: '${profile.value.firstName} ${profile.value.lastName}' ?? "Afriprize NG",
+      name: '${profile.value.firstName} ${profile.value.lastName}' ?? "Easyph NG",
       phoneNumber: profile.value.phoneNumber ?? "07045007400",
-      email: profile.value.email ?? 'dev@afriprize.com',
+      email: profile.value.email ?? 'dev@easyph.com',
     );
 
     final Flutterwave flutterwave = Flutterwave(
@@ -26,10 +26,10 @@ class FlutterwavePaymentService {
       currency: "NGN",
       amount: amount,
       txRef: reference!,
-      redirectUrl: "https://www.afriprize.com",
+      redirectUrl: "https://www.easyph.com",
       customer: customer,
       paymentOptions: "card, ussd, payattitude, barter",
-      customization: Customization(title: "Afriprize Test Payment"),
+      customization: Customization(title: "Easyph Test Payment"),
       isTestMode: isTestMode,
     );
 

@@ -27,7 +27,7 @@ class PrizeCard extends StatelessWidget {
               ),
               const SizedBox(width: 8), // Spacing between icon and text
               const Text(
-                'Afriprize Card',
+                'Easyph Card',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

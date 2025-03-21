@@ -1,9 +1,9 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.logger.dart';
-import 'package:afriprize/core/network/interceptors.dart';
-import 'package:afriprize/core/utils/config.dart';
-import 'package:afriprize/core/utils/local_store_dir.dart';
-import 'package:afriprize/core/utils/local_stotage.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.logger.dart';
+import 'package:easyph/core/network/interceptors.dart';
+import 'package:easyph/core/utils/config.dart';
+import 'package:easyph/core/utils/local_store_dir.dart';
+import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 

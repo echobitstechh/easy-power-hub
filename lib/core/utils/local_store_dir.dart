@@ -4,7 +4,7 @@
 ///
 
 class LocalStorageDir {
-  static const String dbName = "afriprize.db";
+  static const String dbName = "easyph.db";
   static const String authToken = "token";
   static const String authRefreshToken = "refresh_token";
   static const String authUser = "user";

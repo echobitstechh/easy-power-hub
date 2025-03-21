@@ -1,5 +1,5 @@
-import 'package:afriprize/state.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/state.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

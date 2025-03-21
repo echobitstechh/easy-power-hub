@@ -1,5 +1,5 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/core/data/repositories/repository.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webview_flutter/webview_flutter.dart';

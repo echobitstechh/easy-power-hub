@@ -1,10 +1,10 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/ui_helpers.dart';
-import 'package:afriprize/ui/components/submit_button.dart';
-import 'package:afriprize/ui/components/text_field_widget.dart';
-import 'package:afriprize/ui/views/auth/auth_viewmodel.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/components/submit_button.dart';
+import 'package:easyph/ui/components/text_field_widget.dart';
+import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';

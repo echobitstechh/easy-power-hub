@@ -1,4 +1,4 @@
-import 'package:afriprize/core/utils/config.dart';
+import 'package:easyph/core/utils/config.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';

@@ -1,16 +1,16 @@
 import 'dart:io';
 
-import 'package:afriprize/app/app.bottomsheets.dart';
-import 'package:afriprize/app/app.dialogs.dart';
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/core/utils/config.dart';
-import 'package:afriprize/ui/common/app_colors.dart';
-import 'package:afriprize/ui/common/app_strings.dart';
-import 'package:afriprize/ui/components/submit_button.dart';
-import 'package:afriprize/ui/views/cart/cart_view.dart';
-import 'package:afriprize/ui/views/dashboard/dashboard_view.dart';
-import 'package:afriprize/ui/views/profile/profile_view.dart';
+import 'package:easyph/app/app.bottomsheets.dart';
+import 'package:easyph/app/app.dialogs.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/core/utils/config.dart';
+import 'package:easyph/ui/common/app_colors.dart';
+import 'package:easyph/ui/common/app_strings.dart';
+import 'package:easyph/ui/components/submit_button.dart';
+import 'package:easyph/ui/views/cart/cart_view.dart';
+import 'package:easyph/ui/views/dashboard/dashboard_view.dart';
+import 'package:easyph/ui/views/profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
@@ -48,6 +48,9 @@ class HomeViewModel extends BaseViewModel {
   ];
 
   int selectedTab = 0;
+  double rating = 3.0;
+  TextEditingController reviewController = TextEditingController();
+
 
   @override
   void dispose() {
@@ -77,6 +80,11 @@ class HomeViewModel extends BaseViewModel {
 
   Widget get currentPage {
     return pages[selectedTab];
+  }
+
+  void setRating(double newRating) {
+    rating = newRating;
+    notifyListeners();
   }
 
   void showBottomSheet() {
@@ -162,89 +170,71 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> reviewRating() async {
+  Future<void> reviewRating(Order order) async {
     setBusy(true);
     try {
-      ApiResponse res = await repo.rating();
-      if (res.statusCode == 200) {
-        // Corrected the key to "cartItems" and added a null check
-        List<dynamic> items = res.data["cartItems"] ?? [];
+      for (var product in order.products) {
+        ApiResponse res = await repo.rating({
+          "reviewText": reviewController.text,
+          "rating": rating,
+          "productId": product.id,
+        });
 
-        print('online cart items: $items');
-
-        // Map the items list to List<CartItem>
-        if (items.isNotEmpty) {
-          List<CartItem> onlineItems = items
-              .map((item) =>
-              CartItem.fromJson(Map<String, dynamic>.from(item)))
-              .toList();
-
-          print('Saved items are: ${onlineItems.first.product?.productName}');
-
-          // Sync online items with the local cart
-          cart.value = onlineItems;
-          notifyListeners();
-          print('Saved raffle cart are: ${cart.value.first.product?.productName}');
-
-          // Update local storage
-          List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+        if (res.statusCode == 200) {
+          print('Successfully submitted review for product: ${product.productName}');
         } else {
-          cart.value.clear();
-          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
-
-          notifyListeners();
+          print('Failed to submit review for product: ${product.productName}');
         }
       }
+
+      // Handle local cart updates if needed
+
     } catch (e) {
-      // locator<SnackbarService>().showSnackbar(message: "Failed to load cart from server: $e");
-      print('Couldn\'t get online cart: $e');
+      print('Error submitting reviews: $e');
     } finally {
       setBusy(false);
     }
   }
 
-  // ========================
-  // NEW: Fetch delivered orders and prompt for rating if needed.
-  // ========================
+
+
   Future<void> fetchDeliveredOrders() async {
     setBusy(true);
     try {
-      // Fetch all orders using the same repository method.
       ApiResponse res = await locator<Repository>().getOrderList();
       if (res.statusCode == 200) {
-        // Extract orders list from response.
         List<dynamic> ordersData = res.data["orders"] ?? [];
-        // Map to Order model and filter for delivered orders.
-        // Assuming delivered orders have status "Completed".
         List<Order> deliveredOrders = ordersData
             .map((order) =>
             Order.fromJson(Map<String, dynamic>.from(order)))
-            .where((order) => order.status == "Completed")
+            .where((order) => order.status == "Delivered")
             .toList();
 
-        // Check for delivered orders that haven't been reviewed/rated.
         List<Order> unratedOrders = deliveredOrders
             .where((order) => order.isReviewed == false)
             .toList();
 
         if (unratedOrders.isNotEmpty) {
           Order unratedOrder = unratedOrders.first;
-          // Trigger a rating dialog for the unrated delivered order.
           _dialogService.showCustomDialog(
-            variant: "RatingDialog", // Use a valid variant for your dialog service.
+            variant: DialogType.ratingDialog,
             title: "Rate Your Order",
             description: "Please rate your recently delivered order.",
-            data: unratedOrder, // Pass the order so the dialog can use it.
+            data: unratedOrder,
           );
         }
       }
     } catch (e) {
       locator<SnackbarService>()
-          .showSnackbar(message: "Failed to load orders: $e");
+          .showSnackbar(message: "Failed to load orders", duration: Duration(seconds: 2));
+      print("Failed to load orders: $e");
     } finally {
       setBusy(false);
     }
+  }
+
+  Future<void> submitReview() async {
+    // Make API call here
+    print("Submitting review: Rating - $rating, Review - ${reviewController.text}");
   }
 }

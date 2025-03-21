@@ -1,4 +1,4 @@
-import 'package:afriprize/core/data/models/raffle_cart_item.dart';
+import 'package:easyph/core/data/models/raffle_cart_item.dart';
 
 import '../core/data/models/cart_item.dart';
 

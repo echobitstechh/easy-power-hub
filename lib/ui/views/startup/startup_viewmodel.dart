@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:afriprize/core/utils/local_store_dir.dart';
-import 'package:afriprize/core/utils/local_stotage.dart';
+import 'package:easyph/core/utils/local_store_dir.dart';
+import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:stacked/stacked.dart';
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.router.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../core/data/models/profile.dart';

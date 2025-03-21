@@ -211,7 +211,7 @@ class _SignUpState extends State<SignUp> {
                                 );
                                 widget.updatePage(PresentPage.register);
                                 isLoginByEmail.value = model.email.text.isNotEmpty;
-                                isLoginByEmail.value = model.email.text != '';
+
                                 profile.value.id = errorData['userId'];
                                 print('When otp is requested (${isOtpRequestedByEmail.value})');
                               } else {

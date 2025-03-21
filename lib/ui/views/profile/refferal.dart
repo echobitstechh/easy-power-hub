@@ -1,4 +1,4 @@
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -188,14 +188,14 @@ class _ReferralState extends State<Referral> {
   void shareReferralCode() {
     final String referralCode = discount!.referralCode ?? '';
     // final String profileName = profile.value.firstname ?? 'Your friend'; // Make sure you have a profile name
-    // final String shareText = "Hello! $profileName has shared you their Afriprize referral code $referralCode, buy a ticket with their code to give them a chance at a free ticket.";
+    // final String shareText = "Hello! $profileName has shared you their Easyph referral code $referralCode, buy a ticket with their code to give them a chance at a free ticket.";
     final String shareText =
         "Sharing is caring, but winning is better! Use my code $referralCode"
-        " when you sign up for AfriPrize and get a head start on winning!"
-        " #AfriPrize #FriendsWhoRaffleTogether. https://staging.afriprize.com";
+        " when you sign up for Easyph and get a head start on winning!"
+        " #Easyph #FriendsWhoRaffleTogether. https://staging.easyph.com";
 
 
-    Share.share(shareText, subject: 'AfriPrize: where losing is (almost) impossible!');
+    Share.share(shareText, subject: 'Easyph: where losing is (almost) impossible!');
   }
 
 }

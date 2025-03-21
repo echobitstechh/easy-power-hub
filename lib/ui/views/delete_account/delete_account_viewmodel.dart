@@ -1,7 +1,7 @@
-import 'package:afriprize/app/app.locator.dart';
-import 'package:afriprize/app/app.logger.dart';
-import 'package:afriprize/app/app.router.dart';
-import 'package:afriprize/core/network/api_response.dart';
+import 'package:easyph/app/app.locator.dart';
+import 'package:easyph/app/app.logger.dart';
+import 'package:easyph/app/app.router.dart';
+import 'package:easyph/core/network/api_response.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';

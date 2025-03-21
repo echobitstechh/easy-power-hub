@@ -1,4 +1,4 @@
-import 'package:afriprize/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
