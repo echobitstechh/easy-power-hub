@@ -3,6 +3,8 @@ import 'package:easyph/core/network/api_response.dart';
 abstract class IRepository {
   Future<ApiResponse> login(Map<String, dynamic> req);
 
+  Future<ApiResponse> googleSignIn(Map<String, dynamic> req);
+
   Future<ApiResponse> requestOtp(Map<String, dynamic> req);
 
   Future<ApiResponse> submitOtp(Map<String, dynamic> req);
