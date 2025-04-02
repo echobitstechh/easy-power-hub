@@ -14,6 +14,7 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/project.dart';
+import '../../../core/network/interceptors.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
@@ -25,6 +26,8 @@ class DashboardViewModel extends BaseViewModel {
   List<Category> filteredCategories = [];
   List<Category> filteredCategoriesList = [];
   List<Category> categories = [];
+  double discountAmount = 0.0;
+  bool freeDelivery = false;
 
   static const int allCategoriesId = 0;
 
@@ -226,32 +229,24 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void addToRaffleCart(Product product) async {
-    print('adding to cart');
     try {
       final existingIndex = cart.value.indexWhere(
             (raffleItem) => raffleItem.product?.id == product.id,
       );
 
       if (existingIndex != -1) {
-        // Product already exists, create a new instance to avoid modifying the original reference
-        final updatedItem = CartItem(
+        cart.value[existingIndex] = CartItem(
           product: cart.value[existingIndex].product,
           quantity: cart.value[existingIndex].quantity! + 1,
         );
-
-        // Replace the existing item in the cart list
-        cart.value[existingIndex] = updatedItem;
       } else {
-        // Product does not exist, add a new one
         cart.value.add(CartItem(product: product, quantity: 1));
       }
 
-      // Save to local storage
       List<Map<String, dynamic>> storedList =
       cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
 
-      // Save to online cart using API
       final response = await repo.addToCart({
         "productId": product.id,
         "quantity": cart.value.firstWhere((item) => item.product?.id == product.id).quantity,
@@ -264,6 +259,24 @@ class DashboardViewModel extends BaseViewModel {
         locator<SnackbarService>().showSnackbar(
             message: response.data["message"], duration: Duration(seconds: 2));
       }
+
+      // **Calculate Discount & Free Delivery**
+      final brandCount = <String, int>{};
+      double eligibleProductTotal = 0.0;
+
+      for (var item in cart.value) {
+        if (["Hisense", "LG", "Maxi"].contains(item.product?.brandName)) {
+          brandCount[item.product!.brandName!] = (brandCount[item.product!.brandName!] ?? 0) + item.quantity!;
+          eligibleProductTotal += (double.tryParse(item.product?.salePrice ?? '0.0') ?? 0.0) * item.quantity!;
+        }
+      }
+
+      freeDelivery = brandCount.values.any((count) => count >= 5);
+      bool applyDiscount = brandCount.values.any((count) => count >= 3);
+
+      discountAmount = applyDiscount ? eligibleProductTotal * 0.02 : 0.0;
+
+      updateCartSummary();
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to add raffle to cart: $e",
@@ -272,6 +285,27 @@ class DashboardViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
+  void updateCartSummary() {
+    double totalPrice = cart.value
+        .map((item) => (double.tryParse(item.product?.salePrice ?? '0.0') ?? 0.0) * item.quantity!)
+        .reduce((a, b) => a + b);
+
+    totalPrice -= discountAmount; // Apply 2% discount correctly
+
+    notifyListeners();
+
+    print("Updated Cart Summary:");
+    print("Total Price: \$${totalPrice.toStringAsFixed(2)}");
+    print("Discount Applied: \$${discountAmount.toStringAsFixed(2)}");
+    print("Free Delivery: $freeDelivery");
+  }
+  void onEnd() {
+    print('onEnd');
+    //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
+    notifyListeners();
+  }
+}
 
   void initCart() async {
     try {
@@ -365,10 +399,3 @@ class DashboardViewModel extends BaseViewModel {
     final seconds = difference.inSeconds.remainder(60);
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
-
-  void onEnd() {
-    print('onEnd');
-    //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
-    notifyListeners();
-  }
-}
