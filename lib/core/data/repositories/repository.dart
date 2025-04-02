@@ -208,6 +208,17 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> categoryDiscounts(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "admin/category-discounts",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> convertToNaira(String amount) async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
@@ -243,7 +254,7 @@ class Repository extends IRepository {
       Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "auth/reset_password",
+      endpoint: "auth/update-password",
       reqBody: req,
     );
 
@@ -316,6 +327,17 @@ class Repository extends IRepository {
     ApiResponse response = await api.call(
       method: HttpMethod.put,
       endpoint: "profile/updateProfilePic",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> updateProfile(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.put,
+      endpoint: "profile/updateProfile",
       reqBody: req,
     );
 

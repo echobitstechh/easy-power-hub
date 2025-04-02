@@ -268,7 +268,7 @@ class ProfileView extends StatelessWidget {
                           ListTile(
                             onTap: () {
                               //locator<NavigationService>().navigateToChangePasswordView();
-                              locator<NavigationService>().navigateToEnterEmailView();
+                              locator<NavigationService>().navigateToChangePasswordView();
                             },
                             leading: Icon(Icons.lock,
                               color: kcOrangeColor,
