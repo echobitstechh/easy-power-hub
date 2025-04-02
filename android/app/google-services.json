@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "875974620022-cnjh2q702m25k602gkuao6hc5o124ks6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.echobitstech.easyph",
+            "certificate_hash": "fa7f6c156f32d9fc22f4eb6f51dc95de7145b0d4"
+          }
+        },
+        {
           "client_id": "875974620022-i1j94dqj2hhoui35kpf6499bevnfovai.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
