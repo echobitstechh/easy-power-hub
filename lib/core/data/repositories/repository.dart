@@ -19,6 +19,17 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> googleSignIn(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "oauth/auth/google",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> modifyCartItem(String productId, String action) async {
     ApiResponse response = await api.call(
       method: HttpMethod.put,
