@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/core/data/models/order_info.dart';
 import 'package:easyph/core/data/models/profile.dart';
@@ -21,10 +23,8 @@ import '../../common/ui_helpers.dart';
 import '../../components/text_field_widget.dart';
 import 'add_shipping.dart';
 
-
 class Checkout extends StatefulWidget {
   final List<OrderInfo> infoList;
-
 
   const Checkout({
     required this.infoList,
@@ -43,6 +43,8 @@ class _CheckoutState extends State<Checkout> {
   bool makingDefault = false;
   String publicKeyTest = MoneyUtils().payStackPublicKey;
   List<Address> shippingAddresses = [];
+  int discountAmount = 0;
+  bool freeDelivery = false;
 
   final plugin = PaystackPlugin();
 
@@ -51,7 +53,6 @@ class _CheckoutState extends State<Checkout> {
   final TextEditingController cityController = TextEditingController();
   final TextEditingController stateController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
-
 
   @override
   void initState() {
@@ -113,14 +114,15 @@ class _CheckoutState extends State<Checkout> {
                           width: 65,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            image: (item.product?.images?.isNotEmpty == true && item.product!.images![0].isNotEmpty)
+                            image: (item.product?.images?.isNotEmpty == true &&
+                                item.product!.images![0].isNotEmpty)
                                 ? DecorationImage(
-                              image: NetworkImage(item.product!.images![0]),
+                              image:
+                              NetworkImage(item.product!.images![0]),
                               fit: BoxFit.cover, // Optional: Adjust the image fit
                             )
                                 : null,
-                          )
-
+                          ),
                         ),
                         horizontalSpaceMedium,
                         Expanded(
@@ -190,6 +192,35 @@ class _CheckoutState extends State<Checkout> {
                   ],
                 ),
                 verticalSpaceSmall,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Discount",
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        MoneyUtils().formatAmount(getTotalPrice()),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                verticalSpaceSmall,
+                if (freeDelivery)
+                  const Text(
+                    "Free Delivery Applied!",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
                 const Divider(
                   thickness: 2,
                 ),
@@ -199,12 +230,12 @@ class _CheckoutState extends State<Checkout> {
                   children: [
                     const Text(
                       "Total",
-                      style:
-                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       MoneyUtils().formatAmount(
-                          getSubTotal() + getDeliveryFee()),
+                          getSubTotal() + getDeliveryFee() - discountAmount.toInt()),
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -351,11 +382,11 @@ class _CheckoutState extends State<Checkout> {
                 //               )),
                 //           child: paymentMethod == "wallet"
                 //               ? const Center(
-                //             child: Icon(
-                //               Icons.check,
-                //               size: 12,
-                //             ),
-                //           )
+                //                   child: Icon(
+                //                     Icons.check,
+                //                     size: 12,
+                //                   ),
+                //                 )
                 //               : const SizedBox(),
                 //         ),
                 //         horizontalSpaceSmall,
@@ -445,6 +476,18 @@ class _CheckoutState extends State<Checkout> {
     return total;
   }
 
+  int getTotalPrice() {
+    int total = 0;
+
+    for (var element in cart.value) {
+      total = total +
+          (double.parse(element.product?.salePrice.toString() ?? '0').round() *
+              element.quantity!);
+    }
+
+    return total;
+  }
+
   int getDeliveryFee() {
     int total = 0;
 
@@ -455,70 +498,69 @@ class _CheckoutState extends State<Checkout> {
     return total;
   }
 
-
   Future<void> chargeCard(int amount) async {
     setState(() {
       isPaying = true;
     });
 
-    if (paymentMethod == 'paystack') {
-      var charge = Charge()
-        ..amount = (getSubTotal() + getDeliveryFee()) * 100 // amount in kobo
-        ..reference = MoneyUtils().getReference()
-        ..email = profile.value.email;
-
-      // Open the Paystack payment UI
-      CheckoutResponse response = await plugin.checkout(
-        context,
-        method: CheckoutMethod.card,
-        charge: charge,
-      );
-
-      if (response.status == true) {
-        print('Paystack payment successful');
-
-        // Build the new request body
-        Map<String, dynamic> requestBody = {
-          "orderType": "purchase",
-          "promoCode": "", // Replace with dynamic promoCode if available
-          "shippingFee": getDeliveryFee(),
-          "installmentPayment": false,
-          "productsData": cart.value.map((item) {
-            return {
-              "productId": item.product?.id,
-              "quantity": item.quantity,
-              "price": double.parse(item.product?.salePrice.toString() ?? '0').round(),
-            };
-          }).toList(),
+    // Build the new request body
+    Map<String, dynamic> requestBody = {
+      "orderType": "purchase",
+      "promoCode": "", // Replace with dynamic promoCode if available
+      "shippingFee": getDeliveryFee(),
+      "installmentPayment": false,
+      "productsData": cart.value.map((item) {
+        return {
+          "productId": item.product?.id,
+          "quantity": item.quantity,
+          "price": double.parse(item.product?.salePrice.toString() ?? '0').round(),
         };
+      }).toList(),
+    };
 
-        // Send the updated API request
-        ApiResponse res = await locator<Repository>().payForOrder(requestBody);
+    ApiResponse res = await locator<Repository>().payForOrder(requestBody);
 
-        if (res.statusCode == 201) {
-          // final orderData = res.data['order'];
-          // final Order order = Order.fromJson(orderData);
+    if (res.statusCode == 201) {
+      // final orderData = res.data['order'];
+      // final Order order = Order.fromJson(orderData);
+      if (paymentMethod == 'paystack') {
+        var charge = Charge()
+          ..amount = (getSubTotal() + getDeliveryFee()) * 100 // amount in kobo
+          ..reference = MoneyUtils().getReference()
+          ..email = profile.value.email;
 
-          // Navigate to the receipt page with the `Order` object
+        // Open the Paystack payment UI
+        CheckoutResponse response = await plugin.checkout(
+          context,
+          method: CheckoutMethod.card,
+          charge: charge,
+        );
+
+        if (response.status == true) {
+          print('Paystack payment successful');
+
+          // Send the updated API request
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => RaffleReceiptPage(
                 carts: cart.value, // Pass cleared cart or saved items
-                // order: order,    // Pass the parsed order
               ),
             ),
           );
         } else {
-          locator<SnackbarService>().showSnackbar(
-            message: res.data["message"] ?? "Failed to place the order",
-          );
+          print('Paystack payment failed');
+          locator<SnackbarService>().showSnackbar(message: "Payment failed. Please try again.");
         }
-      } else {
-        print('Paystack payment failed');
-        locator<SnackbarService>().showSnackbar(message: "Payment failed. Please try again.");
       }
+      // Navigate to the receipt page with the `Order` object
+
+    } else {
+      locator<SnackbarService>().showSnackbar(
+        message: res.data["message"] ?? "Failed to place the order",
+      );
     }
+
 
     setState(() {
       isPaying = false;
@@ -556,10 +598,7 @@ class _CheckoutState extends State<Checkout> {
           builder: (BuildContext context, StateSetter setModalState) {
             return Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery
-                    .of(context)
-                    .viewInsets
-                    .bottom,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: SingleChildScrollView(
                 child: Padding(
@@ -569,11 +608,9 @@ class _CheckoutState extends State<Checkout> {
                     children: [
                       const Text(
                         'Add Address',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight
-                            .bold),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
-
                       TextFieldWidget(
                         hint: 'House address',
                         controller: houseAddressController,
@@ -597,7 +634,6 @@ class _CheckoutState extends State<Checkout> {
                         controller: phoneNumberController,
                         onChanged: (value) => phoneNumber = value,
                       ),
-
                       const SizedBox(height: 16),
                       Row(
                         children: [
@@ -666,8 +702,7 @@ class _CheckoutState extends State<Checkout> {
           message: "Created address successfully",
           duration: const Duration(seconds: 2),
         );
-         Navigator.pop(context);
-
+        Navigator.pop(context);
       } else {
         locator<SnackbarService>().showSnackbar(
           message: response.data["message"],
@@ -700,7 +735,6 @@ class _CheckoutState extends State<Checkout> {
       if (response.statusCode == 200) {
         final List<dynamic> addressList = response.data['data'] ?? [];
 
-
         final List<Address> fetchedAddresses = addressList
             .map((item) => Address.fromJson(Map<String, dynamic>.from(item)))
             .toList();
@@ -729,5 +763,4 @@ class _CheckoutState extends State<Checkout> {
       });
     }
   }
-
 }

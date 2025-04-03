@@ -21,6 +21,7 @@ import 'package:workmanager/workmanager.dart';
 // import 'app/flutter_paystack/lib/flutter_paystack.dart';
 import 'firebase_options.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:uni_links/uni_links.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -182,7 +183,18 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     fetchUiState();
     checkForUpdates();
+    handleDeepLinks();
     super.initState();
+  }
+
+  void handleDeepLinks() async {
+    // Listen for deep links
+    uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        print("Deep Link Received: ${uri.toString()}");
+        // Handle navigation in the app
+      }
+    });
   }
 
   void fetchUiState() async {

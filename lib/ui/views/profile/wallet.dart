@@ -180,9 +180,11 @@ class _WalletState extends State<Wallet> {
                                 children: [
                                   Row(
                                     children: [
-                                      Text(
-                                        'Installment: 100,000.00',
-                                        style: TextStyle(fontSize: 20),
+                                      Expanded(
+                                        child: Text(
+                                          'Installment: 100,000.00',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
                                       ),
                                     ],
                                     mainAxisAlignment:
@@ -190,18 +192,22 @@ class _WalletState extends State<Wallet> {
                                   ),
                                   Row(
                                     children: [
-                                      Text(
-                                        'Balance: 100,000.00',
-                                        style: TextStyle(fontSize: 20),
+                                      Expanded(
+                                        child: Text(
+                                          'Balance: 100,000.00',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
                                       ),
                                     ],
                                   ),
                                   verticalSpaceSmall,
                                   Row(
                                     children: [
-                                      Text(
-                                        'Pending: 40,000.00',
-                                        style: TextStyle(fontSize: 20),
+                                      Expanded(
+                                        child: Text(
+                                          'Pending: 40,000.00',
+                                          style: TextStyle(fontSize: 20),
+                                        ),
                                       ),
                                     ],
                                   ),
