@@ -186,16 +186,8 @@ class _ProductCardState extends State<ProductCard> {
         actions: [
           IconButton(
             icon: Icon(Icons.share, size: 25),
-            onPressed: () async {
-              // Generate deep link
-              String deepLink = "https://com.echobitstech.easyph/product/${widget.product.id}";
+            onPressed: ()  {
 
-              // Share deep link
-              await Share.share(
-                'Check out this product: ${widget.product.productName}\n'
-                    '${widget.product.productDescription}\n\n'
-                    'View more: $deepLink',
-              );
             },
           ),
         ],
