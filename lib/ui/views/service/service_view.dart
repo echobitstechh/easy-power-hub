@@ -1,5 +1,6 @@
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
+import 'package:easyph/ui/views/cart/cart_viewmodel.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -303,14 +304,14 @@ class ServicesView extends StackedView<ServicesviewModel> {
                   isLoading: false,
                   label: "place Order",
                   submit: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Checkout(
-                          infoList: [],
-                        ),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => Checkout(
+                    //       infoList: [],
+                    //     ),
+                    //   ),
+                    // );
                   },
                   color: kcSecondaryColor,
                 )

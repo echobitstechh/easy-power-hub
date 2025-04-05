@@ -168,7 +168,9 @@ class CartView extends StackedView<CartViewModel> {
                                               ],
                                             ),
                                             child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                               children: [
                                                 Expanded(
                                                   child: Row(
@@ -184,13 +186,19 @@ class CartView extends StackedView<CartViewModel> {
                                                           image:
                                                               DecorationImage(
                                                             image:
-                                                            CachedNetworkImageProvider(
-                                                              (item.product?.images != null && item.product!.images!.isNotEmpty)
-                                                                  ? item.product!.images![0]
+                                                                CachedNetworkImageProvider(
+                                                              (item.product?.images !=
+                                                                          null &&
+                                                                      item
+                                                                          .product!
+                                                                          .images!
+                                                                          .isNotEmpty)
+                                                                  ? item
+                                                                      .product!
+                                                                      .images![0]
                                                                   : 'https://via.placeholder.com/120',
                                                             ),
-
-                                                                fit: BoxFit.cover,
+                                                            fit: BoxFit.cover,
                                                           ),
                                                         ),
                                                       ),
@@ -225,19 +233,23 @@ class CartView extends StackedView<CartViewModel> {
                                                             ),
                                                             verticalSpaceTiny,
                                                             Text(
-                                                              MoneyUtils().formatAmount(((item.product?.salePrice != null &&
+                                                              MoneyUtils().formatAmount(((item.product?.salePrice !=
+                                                                              null &&
                                                                           item.quantity !=
                                                                               null)
-                                                                      ? (double.parse(item.product!.salePrice!) *
+                                                                      ? (double.parse(item
+                                                                              .product!
+                                                                              .salePrice!) *
                                                                           item.quantity!)
                                                                       : 0)
                                                                   .toInt()),
-                                                              overflow: TextOverflow.ellipsis,
-                                                              style:
-                                                                  TextStyle(
-                                                                fontSize:
-                                                                    16,
-                                                                color: uiMode.value ==
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize: 16,
+                                                                color: uiMode
+                                                                            .value ==
                                                                         AppUiModes
                                                                             .dark
                                                                     ? Colors
@@ -264,7 +276,8 @@ class CartView extends StackedView<CartViewModel> {
                                                   children: [
                                                     InkWell(
                                                       onTap: () {
-                                                        viewModel.removeItem(item);
+                                                        viewModel
+                                                            .removeItem(item);
                                                       },
                                                       child: Icon(
                                                         Icons.delete,
@@ -277,8 +290,12 @@ class CartView extends StackedView<CartViewModel> {
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            if (item.quantity! > 1) {
-                                                              viewModel.modifyCartQuantity(item, "decrement");
+                                                            if (item.quantity! >
+                                                                1) {
+                                                              viewModel
+                                                                  .modifyCartQuantity(
+                                                                      item,
+                                                                      "decrement");
                                                             }
                                                           },
                                                           child: Container(
@@ -306,7 +323,10 @@ class CartView extends StackedView<CartViewModel> {
                                                         horizontalSpaceSmall,
                                                         InkWell(
                                                           onTap: () {
-                                                            viewModel.modifyCartQuantity(item, "increment");
+                                                            viewModel
+                                                                .modifyCartQuantity(
+                                                                    item,
+                                                                    "increment");
                                                           },
                                                           child: Container(
                                                             height: 30,
@@ -317,10 +337,15 @@ class CartView extends StackedView<CartViewModel> {
                                                                         kcLightGrey),
                                                                 borderRadius:
                                                                     BorderRadius
-                                                                        .circular(5)),
+                                                                        .circular(
+                                                                            5)),
                                                             child: const Align(
-                                                              alignment: Alignment.center,
-                                                              child: Icon(Icons.add, size: 18,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Icon(
+                                                                Icons.add,
+                                                                size: 18,
                                                               ),
                                                             ),
                                                           ),
@@ -373,82 +398,118 @@ class CartView extends StackedView<CartViewModel> {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text(
-                  "Total Amount",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: kcPrimaryColor, // Adjust text color to match design
-                    fontSize: 14, // Adjust font size to match design
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      MoneyUtils().formatAmount(viewModel.raffleSubTotal),
-                      style: const TextStyle(
-                          fontSize: 20,
-                          color: Colors.black,
-                          fontFamily: 'Roboto',
-                          fontWeight: FontWeight.w700),
-                    ),
-                  ],
-                )
-              ],
-            ),
-            InkWell(
-              onTap: () {
-                //_showPaymentModal(context, viewModel);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Checkout(
-                      infoList: [],
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                decoration: BoxDecoration(
-                  color: kcPrimaryColor,
-                  borderRadius: BorderRadius.circular(5),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4,
-                      offset: Offset(0, -2), // Shadow for the top edge
-                    ),
-                  ],
-                  border: Border.all(color: kcPrimaryColor),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      "Checkout",
-                      style: GoogleFonts.redHatDisplay(
-                        textStyle: const TextStyle(
-                          color: kcWhiteColor,
-                          fontSize: 20,
-                        ),
+      child: viewModel.isLoading
+          ? const SizedBox(
+              // width: 50,
+              // height: 50,
+              child: CircularProgressIndicator(
+                color: kcPrimaryColor,
+                strokeWidth: 2.0,
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            "Subtotal",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 14),
+                          ),
+                          horizontalSpaceTiny,
+                          Text(
+                            MoneyUtils().formatAmount(viewModel.cartSubtotal),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          horizontalSpaceSmall,
+                          const Text(
+                            "Discount",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500, fontSize: 14),
+                          ),
+                          horizontalSpaceTiny,
+                          Text(
+                            "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
+                            style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
+                      Row(
+                        children: [
+                          const Text(
+                            "Final Total",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          horizontalSpaceTiny,
+                          Text(
+                            MoneyUtils().formatAmount(viewModel.cartFinalTotal),
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          horizontalSpaceLarge,
+                          InkWell(
+                            onTap: () {
+                              //_showPaymentModal(context, viewModel);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context ) => Checkout(viewModel: viewModel,
+                                    infoList: [],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: kcPrimaryColor,
+                                borderRadius: BorderRadius.circular(5),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 4,
+                                    offset: Offset(
+                                        0, -2), // Shadow for the top edge
+                                  ),
+                                ],
+                                border: Border.all(color: kcPrimaryColor),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Checkout",
+                                    style: GoogleFonts.redHatDisplay(
+                                      textStyle: const TextStyle(
+                                        color: kcWhiteColor,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     ));
   }
 
