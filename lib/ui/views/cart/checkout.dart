@@ -22,13 +22,15 @@ import '../../../utils/money_util.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/text_field_widget.dart';
 import 'add_shipping.dart';
+import 'cart_viewmodel.dart';
 
 class Checkout extends StatefulWidget {
   final List<OrderInfo> infoList;
+  final CartViewModel viewModel;
 
   const Checkout({
     required this.infoList,
-    Key? key,
+    Key? key, required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -168,7 +170,7 @@ class _CheckoutState extends State<Checkout> {
                       ),
                     ),
                     Text(
-                      MoneyUtils().formatAmount(getSubTotal()),
+                      MoneyUtils().formatAmount(widget.viewModel.cartSubtotal),
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
@@ -202,7 +204,7 @@ class _CheckoutState extends State<Checkout> {
                         ),
                       ),
                       Text(
-                        MoneyUtils().formatAmount(getTotalPrice()),
+                          "- ${MoneyUtils().formatAmount(widget.viewModel.cartDiscount)}",
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -234,8 +236,7 @@ class _CheckoutState extends State<Checkout> {
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     Text(
-                      MoneyUtils().formatAmount(
-                          getSubTotal() + getDeliveryFee() - discountAmount.toInt()),
+                      MoneyUtils().formatAmount(widget.viewModel.cartFinalTotal),
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),
