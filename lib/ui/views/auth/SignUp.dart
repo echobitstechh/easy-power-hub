@@ -76,7 +76,7 @@ class _SignUpState extends State<SignUp> {
   @override
   void dispose() {
     super.dispose();
-    appLoading.value = false;
+   /// todo appLoading.value = false;
   }
 
   @override

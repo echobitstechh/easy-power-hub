@@ -449,6 +449,19 @@ class _CheckoutState extends State<Checkout> {
             icon: Icons.credit_card,
             iconColor: Colors.blue,
             iconIsPrefix: true,
+          ),
+          verticalSpaceSmall,
+          SubmitButton(
+            isLoading: loading,
+            label: "Pay on delivery",
+            submit: () async {
+
+            },
+            color: kcPrimaryColor,
+            boldText: true,
+            icon: Icons.credit_card,
+            iconColor: Colors.blue,
+            iconIsPrefix: true,
           )
         ],
       ),

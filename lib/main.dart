@@ -21,7 +21,6 @@ import 'package:workmanager/workmanager.dart';
 // import 'app/flutter_paystack/lib/flutter_paystack.dart';
 import 'firebase_options.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:uni_links/uni_links.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -46,9 +45,6 @@ void main() async{
   // Initialize Paystack with your public key
   // final  paystackPlugin = PaystackPlugin();
   // await paystackPlugin.initialize(publicKey: AppConfig.paystackApiKeyTest);
-
-
-  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
   // Request notification permissions (iOS)
@@ -189,12 +185,12 @@ class _MyAppState extends State<MyApp> {
 
   void handleDeepLinks() async {
     // Listen for deep links
-    uriLinkStream.listen((Uri? uri) {
-      if (uri != null) {
-        print("Deep Link Received: ${uri.toString()}");
-        // Handle navigation in the app
-      }
-    });
+    // uriLinkStream.listen((Uri? uri) {
+    //   if (uri != null) {
+    //     print("Deep Link Received: ${uri.toString()}");
+    //     // Handle navigation in the app
+    //   }
+    // });
   }
 
   void fetchUiState() async {

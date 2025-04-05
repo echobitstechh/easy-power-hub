@@ -168,19 +168,15 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     if (productTextEditingValue.text == '') {
                       return const Iterable<Product>.empty();
                     }
-                    return viewModel.filteredProductList
-                        .where((Product product) {
+                    return viewModel.filteredProductList.where((Product product) {
                       final query = productTextEditingValue.text.toLowerCase();
                       return (product.productName != null &&
-                              product.productName!
-                                  .toLowerCase()
-                                  .contains(query)) ||
+                          product.productName!.toLowerCase().contains(query)) ||
                           (product.brandName != null &&
                               product.brandName!.toLowerCase().contains(query));
                     });
                   },
-                  displayStringForOption: (Product product) =>
-                      product.productName ?? '',
+                  displayStringForOption: (Product product) => product.productName ?? '',
                   onSelected: (Product value) {
                     debugPrint('You just selected ${value.productName}');
                     showModalBottomSheet(
@@ -220,8 +216,39 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ),
                     );
                   },
+                  optionsViewBuilder: (BuildContext context,
+                      AutocompleteOnSelected<Product> onSelected,
+                      Iterable<Product> options) {
+                    return Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        constraints: BoxConstraints(maxHeight: 100),
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: options.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final Product product = options.elementAt(index);
+                            return ListTile(
+                              leading: product.images != null
+                                  ? Image.network(
+                                product.images!.first,
+                                width: 40,
+                                height: 40,
+                                fit: BoxFit.cover,
+                              )
+                                  : Icon(Icons.image, size: 40),
+                              title: Text(product.productName ?? ""),
+                              onTap: () => onSelected(product),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
-              ),
+              )
+
             ],
           ),
           centerTitle: false,
