@@ -46,19 +46,60 @@ class _ProfileScreen extends State<ProfileScreen> {
   }
 
   // New method to show the edit/add phone number dialog
-  void _showEditPhoneDialog(BuildContext context) {
-    final TextEditingController phoneController = TextEditingController(text: profile.value.phoneNumber);
+  void _showEditProfileDialog(BuildContext context) {
+    final TextEditingController firstNameController = TextEditingController(
+      text: profile.value.firstName,
+    );
+
+    final TextEditingController lastNameController = TextEditingController(
+      text: profile.value.lastName,
+    );
+
+    final TextEditingController emailController = TextEditingController(
+      text: profile.value.email,
+    );
+
+    final TextEditingController phoneController = TextEditingController(
+      text: profile.value.phoneNumber,
+    );
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Phone Number'),
-          content: TextField(
-            controller: phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
-              labelText: 'Phone Number',
-            ),
+          title: const Text('Edit Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: firstNameController,
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                ),
+              ),
+              TextField(
+                controller: lastNameController,
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                ),
+              ),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                ),
+              ),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
@@ -69,40 +110,30 @@ class _ProfileScreen extends State<ProfileScreen> {
             ),
             TextButton(
               child: const Text('Save'),
-              onPressed: () async {
+              onPressed: () {
+                String newFirstName = firstNameController.text.trim();
+                String newLastName = lastNameController.text.trim();
+                String newEmail = emailController.text.trim();
                 String newPhone = phoneController.text.trim();
-                if (newPhone.isNotEmpty) {
-                  // Optionally show a loading indicator here if needed.
-                  ApiResponse response = await repo.updateProfile({
-                    'phoneNumber': newPhone,
-                  });
-                  if (response.statusCode == 200) {
-                    // Update the profile's phone number and persist it locally.
-                    setState(() {
-                      profile.value.phoneNumber = newPhone;
-                    });
-                    // Optionally show a success message, e.g. via Snackbar:
-                    locator<SnackbarService>().showSnackbar(
-                      message: "Phone number updated successfully",
-                      duration: Duration(seconds: 2),
-                    );
-                  } else {
-                    // Handle error response
-                    locator<SnackbarService>().showSnackbar(
-                      message: response.data["message"] ?? "Failed to update phone number",
-                      duration: Duration(seconds: 2),
-                    );
-                  }
-                }
+
+                // Call your ViewModel method with the new values
+                widget.viewModel.updateProfileData(
+                  firstName: newFirstName,
+                  lastName: newLastName,
+                  email: newEmail,
+                  phoneNumber: newPhone,
+                );
+
                 Navigator.of(context).pop();
               },
-            ),
 
+            ),
           ],
         );
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -157,8 +188,16 @@ class _ProfileScreen extends State<ProfileScreen> {
                                         : Colors.black,
                                   ),
                                 ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => _showEditProfileDialog(context),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                        Row(
+                          children: [
                             Expanded(
                               flex: 4,
                               // This will give bounded constraints to the ListTile.
@@ -178,6 +217,10 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold),
                                 ),
+                                // trailing: IconButton(
+                                //   icon: const Icon(Icons.edit),
+                                //   onPressed: () => _showEditEmailDialog(context),
+                                // ),
                               ),
                             ),
                           ],
@@ -202,10 +245,10 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       fontWeight: FontWeight.bold),
                                 ),
                                 // Added edit button to allow editing/adding phone number
-                                trailing: IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () => _showEditPhoneDialog(context),
-                                ),
+                                // trailing: IconButton(
+                                //   icon: const Icon(Icons.edit),
+                                //   onPressed: () => _showEditPhoneDialog(context),
+                                // ),
                               ),
                             ),
                           ],

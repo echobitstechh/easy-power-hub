@@ -65,6 +65,39 @@ class ProfileViewModel extends BaseViewModel {
     setBusy(false);
   }
 
+  void updateProfileData({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String phoneNumber,
+  }) async {
+    Map<String, dynamic> updatedData = {
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'phoneNumber': phoneNumber,
+    };
+
+    ApiResponse response = await repo.updateProfile(updatedData);
+
+    if (response.statusCode == 200) {
+      profile.value.firstName = firstName;
+      profile.value.lastName = lastName;
+      profile.value.email = email;
+      profile.value.phoneNumber = phoneNumber;
+
+      locator<SnackbarService>().showSnackbar(
+        message: "Profile updated successfully",
+        duration: Duration(seconds: 2),
+      );
+    } else {
+      locator<SnackbarService>().showSnackbar(
+        message: response.data["message"] ?? "Failed to update profile",
+        duration: Duration(seconds: 2),
+      );
+    }
+  }
+
 
   void getProfile() async {
 
