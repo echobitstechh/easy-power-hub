@@ -176,52 +176,58 @@ class DashboardViewModel extends BaseViewModel {
 
 
   Future<void> loadCategories() async {
-    dynamic storedDonations = await locator<LocalStorage>()
-        .fetch(LocalStorageDir.donationsCategories);
-    if (storedDonations != null) {
-      categories = List<Map<String, dynamic>>.from(storedDonations)
-          .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-          .toList();
+    try {
+      // First try to load from API
+      await getCategories();
 
-      // Add the "All Categories" option
+      // If API fails, fall back to local storage
+      if (categories.isEmpty) {
+        dynamic storedDonations = await locator<LocalStorage>()
+            .fetch(LocalStorageDir.donationsCategories);
+        if (storedDonations != null) {
+          categories = List<Map<String, dynamic>>.from(storedDonations)
+              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
+              .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+              .toList();
+        }
+      }
+
+      // Always include "All" option and update filtered list
       filteredCategories = [
         Category(id: 0, name: 'All', status: CategoryStatus.active),
         ...categories,
       ];
       notifyListeners();
+    } catch (e) {
+      log.e("Error loading categories: $e");
     }
-    getCategories();
-    notifyListeners();
   }
 
   Future<void> getCategories() async {
     setBusy(true);
-    notifyListeners();
     try {
       ApiResponse res = await repo.getCategories();
-      if (res.statusCode == 200) {
-        if (res.data != null && res.data["categories"] != null) {
-          // Extract categories from the response
-          categories = (res.data["categories"] as List)
-              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
+      if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
+        // Update categories list with only active ones
+        categories = (res.data["categories"] as List)
+            .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
+            .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+            .toList();
 
-          // Save the categories locally
-          List<Map<String, dynamic>> storedCategories =
-              categories.map((e) => e.toJson()).toList();
-          locator<LocalStorage>()
-              .save(LocalStorageDir.donationsCategories, storedCategories);
+        // Save the active categories locally
+        List<Map<String, dynamic>> storedCategories =
+        categories.map((e) => e.toJson()).toList();
+        await locator<LocalStorage>()
+            .save(LocalStorageDir.donationsCategories, storedCategories);
 
-          // Apply any filtering logic if needed
-          filteredCategories = [
-            Category(id: 0, name: 'All', status: CategoryStatus.active),
-            ...categories,
-          ];
-        }
-        rebuildUi();
+        // Update filtered list
+        filteredCategories = [
+          Category(id: 0, name: 'All', status: CategoryStatus.active),
+          ...categories,
+        ];
       }
     } catch (e) {
-      print(e);
+      log.e("Error fetching categories: $e");
     } finally {
       setBusy(false);
       notifyListeners();
