@@ -340,7 +340,6 @@ class _WalletState extends State<Wallet> {
                     ),
                     SizedBox(
                       height: 800,
-
                       child: TabBarView(
                         physics: const BouncingScrollPhysics(),
                         children: [
@@ -543,645 +542,641 @@ class _WalletState extends State<Wallet> {
                                     child: TabBarView(
                                       physics: const BouncingScrollPhysics(),
                                       children: [
-                                        Expanded(
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            height: 150,
-                                            child: SingleChildScrollView(
-                                              child: Column(
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      // First Container
+                                        Container(
+                                          alignment: Alignment.center,
+                                          height: 150,
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    // First Container
 
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          locator<NavigationService>()
-                                                              .navigateToDrawsView();
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        locator<NavigationService>()
+                                                            .navigateToDrawsView();
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
 
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
 
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/glo.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/glo.png',
+                                                              fit: BoxFit
+                                                                  .cover,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-
-                                                      // Second Container
-
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          print(
-                                                              'there is the second click');
-
-                                                          locator<NavigationService>()
-                                                              .navigateToNotificationView();
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
-
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
-
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/mtn.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-
-                                                      // Third Container
-
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          // Action for the third container
-
-                                                          print(
-                                                              'Coming Soon clicked!');
-
-                                                          // You can navigate or perform other actions here
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
-
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
-
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/airtel.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          // Action for the third container
-
-                                                          print(
-                                                              'Coming Soon clicked!');
-
-                                                          // You can navigate or perform other actions here
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
-
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
-
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/etisalat.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  Container(
-                                                    alignment: Alignment.bottomRight,
-                                                    child: Text(
-                                                      textAlign: TextAlign.left,
-                                                      'No beneficiary',
                                                     ),
-                                                  ),
-                                                  TextFieldWidget(
-                                                    hint: "Mobile number",
-                                                    controller:
-                                                        _phoneNumberController,
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  TextFieldWidget(
-                                                    hint: "Amount",
-                                                    controller:
-                                                        _amountNumberController,
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  Container(
-                                                    alignment: Alignment.bottomLeft,
-                                                    child: Text(
-                                                        textAlign: TextAlign.left,
-                                                        'Select amount'),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Card(
-                                                          child: Padding(
+
+                                                    // Second Container
+
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        print(
+                                                            'there is the second click');
+
+                                                        locator<NavigationService>()
+                                                            .navigateToNotificationView();
+                                                      },
+                                                      child: Padding(
                                                         padding:
                                                             const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 200'),
-                                                      )),
-                                                      horizontalSpaceMedium,
-                                                      Card(
-                                                          child: Padding(
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
+
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/mtn.png',
+                                                              fit: BoxFit
+                                                                  .cover,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    // Third Container
+
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        // Action for the third container
+
+                                                        print(
+                                                            'Coming Soon clicked!');
+
+                                                        // You can navigate or perform other actions here
+                                                      },
+                                                      child: Padding(
                                                         padding:
                                                             const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 500'),
-                                                      )),
-                                                      horizontalSpaceMedium,
-                                                      Card(
-                                                          child: Padding(
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
+
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/airtel.png',
+                                                              fit: BoxFit
+                                                                  .cover,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        // Action for the third container
+
+                                                        print(
+                                                            'Coming Soon clicked!');
+
+                                                        // You can navigate or perform other actions here
+                                                      },
+                                                      child: Padding(
                                                         padding:
                                                             const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 1000'),
-                                                      )),
-                                                    ],
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
+
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/etisalat.png',
+                                                              fit: BoxFit
+                                                                  .cover,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                verticalSpaceMedium,
+                                                Container(
+                                                  alignment: Alignment.bottomRight,
+                                                  child: Text(
+                                                    textAlign: TextAlign.left,
+                                                    'No beneficiary',
                                                   ),
-                                                  verticalSpaceMedium,
-                                                  SubmitButton(
-                                                    isLoading: false,
-                                                    boldText: true,
-                                                    label: "Pay Up",
-                                                    submit: () {
-                                                      //locator<NavigationService>().clearStackAndShow(Routes.homeView);
-                                                    },
-                                                    color: kcPrimaryColor,
-                                                  ),
-                                                ],
-                                              ),
+                                                ),
+                                                TextFieldWidget(
+                                                  hint: "Mobile number",
+                                                  controller:
+                                                      _phoneNumberController,
+                                                ),
+                                                verticalSpaceMedium,
+                                                TextFieldWidget(
+                                                  hint: "Amount",
+                                                  controller:
+                                                      _amountNumberController,
+                                                ),
+                                                verticalSpaceMedium,
+                                                Container(
+                                                  alignment: Alignment.bottomLeft,
+                                                  child: Text(
+                                                      textAlign: TextAlign.left,
+                                                      'Select amount'),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 200'),
+                                                    )),
+                                                    horizontalSpaceMedium,
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 500'),
+                                                    )),
+                                                    horizontalSpaceMedium,
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 1000'),
+                                                    )),
+                                                  ],
+                                                ),
+                                                verticalSpaceMedium,
+                                                SubmitButton(
+                                                  isLoading: false,
+                                                  boldText: true,
+                                                  label: "Pay Up",
+                                                  submit: () {
+                                                    //locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                                                  },
+                                                  color: kcPrimaryColor,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
-                                        Expanded(
-                                          child: Container(
-                                            alignment: Alignment.center,
-                                            height: 150,
-                                            child: SingleChildScrollView(
-                                              child: Column(
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      // First Container
+                                        Container(
+                                          alignment: Alignment.center,
+                                          height: 150,
+                                          child: SingleChildScrollView(
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceEvenly,
+                                                  children: [
+                                                    // First Container
 
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          locator<NavigationService>()
-                                                              .navigateToDrawsView();
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        locator<NavigationService>()
+                                                            .navigateToDrawsView();
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
 
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
 
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/glo.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/glo.png',
+                                                              fit: BoxFit
+                                                                  .cover,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
+                                                    ),
 
-                                                      // Second Container
+                                                    // Second Container
 
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          print(
-                                                              'there is the second click');
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        print(
+                                                            'there is the second click');
 
-                                                          locator<NavigationService>()
-                                                              .navigateToNotificationView();
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
+                                                        locator<NavigationService>()
+                                                            .navigateToNotificationView();
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
 
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
 
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/mtn.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/mtn.png',
+                                                              fit: BoxFit
+                                                                  .cover,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
+                                                    ),
 
-                                                      // Third Container
+                                                    // Third Container
 
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          // Action for the third container
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        // Action for the third container
 
-                                                          print(
-                                                              'Coming Soon clicked!');
+                                                        print(
+                                                            'Coming Soon clicked!');
 
-                                                          // You can navigate or perform other actions here
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
+                                                        // You can navigate or perform other actions here
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
 
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
 
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/airtel.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/airtel.png',
+                                                              fit: BoxFit
+                                                                  .cover,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
+                                                    ),
 
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          // Action for the third container
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        // Action for the third container
 
-                                                          print(
-                                                              'Coming Soon clicked!');
+                                                        print(
+                                                            'Coming Soon clicked!');
 
-                                                          // You can navigate or perform other actions here
-                                                        },
-                                                        child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                                  left: 0.0,
-                                                                  right: 8.0),
-                                                          child: ClipRRect(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        10.0),
-                                                            child: Container(
-                                                              width:
-                                                                  80, // Adjust width according to your design
+                                                        // You can navigate or perform other actions here
+                                                      },
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 0.0,
+                                                                right: 8.0),
+                                                        child: ClipRRect(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                          child: Container(
+                                                            width:
+                                                                80, // Adjust width according to your design
 
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: Colors
-                                                                    .grey[200],
-                                                                boxShadow: [
-                                                                  const BoxShadow(
-                                                                    color: Colors
-                                                                        .black12,
-                                                                    blurRadius:
-                                                                        5.0,
-                                                                    spreadRadius:
-                                                                        1.0,
-                                                                    offset:
-                                                                        Offset(
-                                                                            0,
-                                                                            3),
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                              child:
-                                                                  Image.asset(
-                                                                'assets/images/etisalat.png',
-                                                                fit: BoxFit
-                                                                    .cover,
-                                                              ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .grey[200],
+                                                              boxShadow: [
+                                                                const BoxShadow(
+                                                                  color: Colors
+                                                                      .black12,
+                                                                  blurRadius:
+                                                                      5.0,
+                                                                  spreadRadius:
+                                                                      1.0,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0,
+                                                                          3),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child:
+                                                                Image.asset(
+                                                              'assets/images/etisalat.png',
+                                                              fit: BoxFit
+                                                                  .cover,
                                                             ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                verticalSpaceMedium,
+                                                Container(
+                                                  alignment: Alignment.bottomRight,
+                                                  child: Text(
+                                                    textAlign: TextAlign.left,
+                                                    'No beneficiary',
                                                   ),
-                                                  verticalSpaceMedium,
-                                                  Container(
-                                                    alignment: Alignment.bottomRight,
-                                                    child: Text(
+                                                ),
+                                                TextFieldWidget(
+                                                  hint: "Mobile number",
+                                                  controller:
+                                                      _phoneNumberController,
+                                                ),
+                                                verticalSpaceMedium,
+                                                SizedBox(height: 16.0),
+                                                DropdownButtonFormField<
+                                                    String>(
+                                                  value: selectedBundle,
+                                                  onChanged: (newValue) {
+                                                    setState(() {
+                                                      selectedBundle =
+                                                          newValue;
+                                                    });
+                                                  },
+                                                  items: <String>[
+                                                    'Bundle 1',
+                                                    'Bundle 2',
+                                                    'Bundle 3'
+                                                  ]
+                                                      .map((bundle) =>
+                                                          DropdownMenuItem(
+                                                            value: bundle,
+                                                            child:
+                                                                Text(bundle),
+                                                          ))
+                                                      .toList(),
+                                                  decoration: InputDecoration(
+                                                    labelText:
+                                                        'Select Bundles',
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 12),
+                                                  ),
+                                                ),
+                                                verticalSpaceMedium,
+                                                TextFieldWidget(
+                                                  hint: "Amount",
+                                                  controller:
+                                                      _amountNumberController,
+                                                ),
+                                                verticalSpaceMedium,
+                                                Container(
+                                                  alignment: Alignment.bottomLeft,
+                                                  child: Text(
                                                       textAlign: TextAlign.left,
-                                                      'No beneficiary',
-                                                    ),
-                                                  ),
-                                                  TextFieldWidget(
-                                                    hint: "Mobile number",
-                                                    controller:
-                                                        _phoneNumberController,
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  SizedBox(height: 16.0),
-                                                  DropdownButtonFormField<
-                                                      String>(
-                                                    value: selectedBundle,
-                                                    onChanged: (newValue) {
-                                                      setState(() {
-                                                        selectedBundle =
-                                                            newValue;
-                                                      });
-                                                    },
-                                                    items: <String>[
-                                                      'Bundle 1',
-                                                      'Bundle 2',
-                                                      'Bundle 3'
-                                                    ]
-                                                        .map((bundle) =>
-                                                            DropdownMenuItem(
-                                                              value: bundle,
-                                                              child:
-                                                                  Text(bundle),
-                                                            ))
-                                                        .toList(),
-                                                    decoration: InputDecoration(
-                                                      labelText:
-                                                          'Select Bundles',
-                                                      border:
-                                                          OutlineInputBorder(),
-                                                      contentPadding:
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 12),
-                                                    ),
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  TextFieldWidget(
-                                                    hint: "Amount",
-                                                    controller:
-                                                        _amountNumberController,
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  Container(
-                                                    alignment: Alignment.bottomLeft,
-                                                    child: Text(
-                                                        textAlign: TextAlign.left,
-                                                        'Select amount'),
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Card(
-                                                          child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 200'),
-                                                      )),
-                                                      horizontalSpaceMedium,
-                                                      Card(
-                                                          child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 500'),
-                                                      )),
-                                                      horizontalSpaceMedium,
-                                                      Card(
-                                                          child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Text('NGN 1000'),
-                                                      )),
-                                                    ],
-                                                  ),
-                                                  verticalSpaceMedium,
-                                                  SubmitButton(
-                                                    isLoading: false,
-                                                    boldText: true,
-                                                    label: "Pay Up",
-                                                    submit: () {
-                                                      //locator<NavigationService>().clearStackAndShow(Routes.homeView);
-                                                    },
-                                                    color: kcPrimaryColor,
-                                                  ),
-                                                ],
-                                              ),
+                                                      'Select amount'),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 200'),
+                                                    )),
+                                                    horizontalSpaceMedium,
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 500'),
+                                                    )),
+                                                    horizontalSpaceMedium,
+                                                    Card(
+                                                        child: Padding(
+                                                      padding:
+                                                          const EdgeInsets
+                                                              .all(8.0),
+                                                      child: Text('NGN 1000'),
+                                                    )),
+                                                  ],
+                                                ),
+                                                verticalSpaceMedium,
+                                                SubmitButton(
+                                                  isLoading: false,
+                                                  boldText: true,
+                                                  label: "Pay Up",
+                                                  submit: () {
+                                                    //locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                                                  },
+                                                  color: kcPrimaryColor,
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ),
