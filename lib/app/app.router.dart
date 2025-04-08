@@ -75,7 +75,7 @@ class Routes {
 
   static const shopCartView = '/shop-cart-view';
 
-  static const notificationView = '/notification-view';
+  static const ServicesView = '/notification-view';
 
   static const profileView = '/profile-view';
 
@@ -118,7 +118,7 @@ class Routes {
     drawsView,
     cartView,
     shopCartView,
-    notificationView,
+    ServicesView,
     profileView,
     checkout,
     productDetail,
@@ -177,7 +177,7 @@ class StackedRouter extends _i1.RouterBase {
       page: _i8.CartView,
     ),
     _i1.RouteDef(
-      Routes.notificationView,
+      Routes.ServicesView,
       page: _i9.ServicesView,
     ),
     _i1.RouteDef(
@@ -792,7 +792,7 @@ extension NavigatorStateExtension on _i27.NavigationService {
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return navigateTo<dynamic>(Routes.notificationView,
+    return navigateTo<dynamic>(Routes.ServicesView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -1107,7 +1107,7 @@ extension NavigatorStateExtension on _i27.NavigationService {
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return replaceWith<dynamic>(Routes.notificationView,
+    return replaceWith<dynamic>(Routes.ServicesView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

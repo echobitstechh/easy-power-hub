@@ -180,10 +180,12 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    fetchUiState();
-    checkForUpdates();
-    // handleDeepLinks();
     super.initState();
+    fetchUiState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkForUpdates();
+    });    // handleDeepLinks();
   }
 
   // void handleDeepLinks() async {
@@ -284,7 +286,9 @@ class _MyAppState extends State<MyApp> {
   void checkForUpdates() async {
     final availability = await getUpdateAvailability();
     if (availability is UpdateAvailable) {
-      showUpdateCard();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showUpdateCard();
+      });
     }
   }
 

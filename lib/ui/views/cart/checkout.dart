@@ -30,7 +30,8 @@ class Checkout extends StatefulWidget {
 
   const Checkout({
     required this.infoList,
-    Key? key, required this.viewModel,
+    Key? key,
+    required this.viewModel,
   }) : super(key: key);
 
   @override
@@ -75,384 +76,373 @@ class _CheckoutState extends State<Checkout> {
       body: isPaying
           ? CircularProgressIndicator() // Show loader when updating
           : ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Card(
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              title: const Text(
-                "Order review",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text("${getTotalItems()} items in cart"),
-              children: List.generate(cart.value.length, (index) {
-                CartItem item = cart.value[index];
-
-                return GestureDetector(
-                  onTap: () {
-                    // viewModel.addRemoveDelete(index);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    padding: const EdgeInsets.all(10),
-                    // height: 100,
-                    decoration: BoxDecoration(
-                      color: uiMode.value == AppUiModes.light
-                          ? kcWhiteColor
-                          : kcBlackColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                            color: const Color(0xFFE5E5E5).withOpacity(0.4),
-                            offset: const Offset(8.8, 8.8),
-                            blurRadius: 8.8)
-                      ],
+              padding: const EdgeInsets.all(20),
+              children: [
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    title: const Text(
+                      "Order review",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          height: 65,
-                          width: 65,
+                    subtitle: Text("${getTotalItems()} items in cart"),
+                    children: List.generate(cart.value.length, (index) {
+                      CartItem item = cart.value[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          // viewModel.addRemoveDelete(index);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.all(10),
+                          // height: 100,
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            image: (item.product?.images?.isNotEmpty == true &&
-                                item.product!.images![0].isNotEmpty)
-                                ? DecorationImage(
-                              image:
-                              NetworkImage(item.product!.images![0]),
-                              fit: BoxFit.cover, // Optional: Adjust the image fit
-                            )
-                                : null,
+                            color: uiMode.value == AppUiModes.light
+                                ? kcWhiteColor
+                                : kcBlackColor,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                  color:
+                                      const Color(0xFFE5E5E5).withOpacity(0.4),
+                                  offset: const Offset(8.8, 8.8),
+                                  blurRadius: 8.8)
+                            ],
                           ),
-                        ),
-                        horizontalSpaceMedium,
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(item.product!.productName ?? ""),
-                              verticalSpaceTiny,
-                              Text(
-                                "N${item.product!.salePrice}",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16),
-                              )
+                              Container(
+                                height: 65,
+                                width: 65,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: (item.product?.images?.isNotEmpty ==
+                                              true &&
+                                          item.product!.images![0].isNotEmpty)
+                                      ? DecorationImage(
+                                          image: NetworkImage(
+                                              item.product!.images![0]),
+                                          fit: BoxFit
+                                              .cover, // Optional: Adjust the image fit
+                                        )
+                                      : null,
+                                ),
+                              ),
+                              horizontalSpaceMedium,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(item.product!.productName ?? ""),
+                                    verticalSpaceTiny,
+                                    Text(
+                                      "N${item.product!.salePrice}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
+                      );
+                    }),
                   ),
-                );
-              }),
-            ),
-          ),
-          verticalSpaceMedium,
-          Card(
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              childrenPadding: const EdgeInsets.symmetric(horizontal: 20),
-              title: const Text(
-                "Billing summary",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              children: [
+                ),
                 verticalSpaceMedium,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Sub-total",
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    title: const Text(
+                      "Billing summary",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    Text(
-                      MoneyUtils().formatAmount(widget.viewModel.cartSubtotal),
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                verticalSpaceSmall,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Delivery-Fee",
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      getDeliveryFee() == 0 ? "Free" : "N${getDeliveryFee()}",
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                verticalSpaceSmall,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Discount",
-                        style: TextStyle(
-                          fontSize: 16,
+                      verticalSpaceMedium,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Sub-total",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            MoneyUtils()
+                                .formatAmount(widget.viewModel.cartSubtotal),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceSmall,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Delivery-Fee",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            getDeliveryFee() == 0
+                                ? "Free"
+                                : "N${getDeliveryFee()}",
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceSmall,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Discount",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            "- ${MoneyUtils().formatAmount(widget.viewModel.cartDiscount)}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceSmall,
+                      if (freeDelivery)
+                        const Text(
+                          "Free Delivery Applied!",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      const Divider(
+                        thickness: 2,
+                      ),
+                      verticalSpaceSmall,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Total",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            MoneyUtils()
+                                .formatAmount(widget.viewModel.cartFinalTotal),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceMedium
+                    ],
+                  ),
+                ),
+                verticalSpaceMedium,
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    title: const Text(
+                      "Shipping details",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      isShippingLoading == true
+                          ? const CircularProgressIndicator()
+                          : shippingAddresses.isEmpty
+                              ? Column(
+                                  children: [
+                                    const Text("No Shipping address found"),
+                                    TextButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                kcPrimaryColor),
+                                      ),
+                                      child: const Text(
+                                        "Add new shipping address",
+                                        style: TextStyle(color: kcWhiteColor),
+                                      ),
+                                      onPressed: showAddAddressBottomSheet,
+                                    ),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: shippingAddresses.length,
+                                  itemBuilder: (context, index) {
+                                    final address = shippingAddresses[index];
+                                    return ListTile(
+                                      title: Text(
+                                          "${address.address}, ${address.city}, ${address.state}"),
+                                      subtitle:
+                                          Text("Phone: ${address.phoneNumber}"),
+                                      trailing: Radio<String>(
+                                        value: address.id,
+                                        groupValue: shippingId,
+                                        onChanged: (String? value) {
+                                          setState(() {
+                                            shippingId = value!;
+                                          });
+                                        },
+                                      ),
+                                    );
+                                  },
+                                ),
+                    ],
+                  ),
+                ),
+                verticalSpaceMedium,
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+                    title: const Text(
+                      "Payment method",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      /// --- Paystack option ---
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            paymentMethod = "paystack";
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          height: 70,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: kcBlackColor, width: 0.5)),
+                          child: Row(
+                            children: [
+                              _buildRadioIcon("paystack"),
+                              horizontalSpaceSmall,
+                              const Text(
+                                "Paystack",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              horizontalSpaceSmall,
+                              const Expanded(
+                                child: Text(
+                                  "You will be redirected to the Paystack website after submitting your order",
+                                  style: TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                      Text(
-                          "- ${MoneyUtils().formatAmount(widget.viewModel.cartDiscount)}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                      verticalSpaceSmall,
+
+                      /// --- Pay on delivery option ---
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            paymentMethod = "delivery";
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          height: 70,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: kcBlackColor, width: 0.5)),
+                          child: Row(
+                            children: [
+                              _buildRadioIcon("delivery"),
+                              horizontalSpaceSmall,
+                              const Text(
+                                "Pay on delivery",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              horizontalSpaceSmall,
+                              const Expanded(
+                                child: Text(
+                                  "You can pay with your card or bank transfer at the time of delivery; simply inform our delivery agent when your order is being delivered.",
+                                  style: TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
+                      ),
+                      verticalSpaceSmall,
+
+                      /// --- Info Row ---
+                      Row(
+                        children: const [
+                          Icon(Icons.lock, color: kcSecondaryColor),
+                          horizontalSpaceSmall,
+                          Expanded(
+                            child: Text(
+                              "We protect your payment information using encryption to provide bank-level security.",
+                              style: TextStyle(fontSize: 11),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                verticalSpaceSmall,
-                if (freeDelivery)
-                  const Text(
-                    "Free Delivery Applied!",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                const Divider(
-                  thickness: 2,
                 ),
-                verticalSpaceSmall,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Total",
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      MoneyUtils().formatAmount(widget.viewModel.cartFinalTotal),
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-                verticalSpaceMedium
-              ],
-            ),
-          ),
-          verticalSpaceMedium,
-          Card(
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              title: const Text(
-                "Shipping details",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              children: [
-                isShippingLoading == true ? const CircularProgressIndicator() :
-                shippingAddresses.isEmpty
-                    ? Column(
-                  children: [
-                    const Text("No Shipping address found"),
-                    TextButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(kcPrimaryColor),
-                      ),
-                      child: const Text(
-                        "Add new shipping address",
-                        style: TextStyle(color: kcWhiteColor),
-                      ),
-                      onPressed: showAddAddressBottomSheet,
-                    ),
-                  ],
-                )
-                    : ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: shippingAddresses.length,
-                  itemBuilder: (context, index) {
-                    final address = shippingAddresses[index];
-                    return ListTile(
-                      title: Text("${address.address}, ${address.city}, ${address.state}"),
-                      subtitle: Text("Phone: ${address.phoneNumber}"),
-                      trailing: Radio<String>(
-                        value: address.id,
-                        groupValue: shippingId,
-                        onChanged: (String? value) {
-                          setState(() {
-                            shippingId = value!;
-                          });
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-          verticalSpaceMedium,
-          Card(
-            child: ExpansionTile(
-              initiallyExpanded: true,
-              childrenPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-              title: const Text(
-                "Payment method",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              children: [
-                InkWell(
-                  onTap: () {
+
+                verticalSpaceLarge,
+                SubmitButton(
+                  isLoading: loading,
+                  label: paymentMethod == "delivery"
+                      ? "Confirm Order"
+                      : "Pay ${MoneyUtils().formatAmount(getSubTotal() + getDeliveryFee())}",
+                  submit: () async {
+                    if (paymentMethod == null) {
+                     // showSnackbar(context, "Please select a payment method");
+                      return;
+                    }
+
                     setState(() {
-                      paymentMethod = "paystack";
+                      loading = true;
+                    });
+
+                    try {
+                      if (paymentMethod == "paystack") {
+                        await chargeCard(getSubTotal() + getDeliveryFee());
+                      } else if (paymentMethod == "delivery") {
+                        await confirmOrder(); // You can define this method based on your backend/order logic
+                      }
+                    } catch (e) {
+                      print("Payment Error: $e");
+                    }
+
+                    setState(() {
+                      loading = false;
                     });
                   },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    height: 50,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: kcBlackColor, width: 0.5)),
-                    child: Row(
-                      children: [
-                        Container(
-                          height: 15,
-                          width: 15,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: kcBlackColor,
-                                width: 1,
-                              )),
-                          child: paymentMethod == "paystack"
-                              ? const Center(
-                            child: Icon(
-                              Icons.check,
-                              size: 12,
-                            ),
-                          )
-                              : const SizedBox(),
-                        ),
-                        horizontalSpaceSmall,
-                        const Text(
-                          "Paystack",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        horizontalSpaceSmall,
-                        const Expanded(
-                          child: Text(
-                            "You will be redirected to the Paystack website after submitting your order",
-                            style: TextStyle(fontSize: 11),
-                          ),
-                        ),
-                        horizontalSpaceSmall,
-                        // Image.asset("assets/images/paypal.png")
-                      ],
-                    ),
-                  ),
+                  color: kcPrimaryColor,
+                  boldText: true,
+                  icon: paymentMethod == "delivery" ? Icons.shopping_bag : Icons.credit_card,
+                  iconColor: Colors.blue,
+                  iconIsPrefix: true,
                 ),
-                verticalSpaceSmall,
-                // InkWell(
-                //   onTap: () {
-                //     setState(() {
-                //       paymentMethod = "wallet";
-                //     });
-                //   },
-                //   child: Container(
-                //     padding: const EdgeInsets.symmetric(horizontal: 10),
-                //     height: 50,
-                //     decoration: BoxDecoration(
-                //         border: Border.all(color: kcBlackColor, width: 0.5)),
-                //     child: Row(
-                //       children: [
-                //         Container(
-                //           height: 15,
-                //           width: 15,
-                //           decoration: BoxDecoration(
-                //               shape: BoxShape.circle,
-                //               border: Border.all(
-                //                 color: kcBlackColor,
-                //                 width: 1,
-                //               )),
-                //           child: paymentMethod == "wallet"
-                //               ? const Center(
-                //                   child: Icon(
-                //                     Icons.check,
-                //                     size: 12,
-                //                   ),
-                //                 )
-                //               : const SizedBox(),
-                //         ),
-                //         horizontalSpaceSmall,
-                //         const Text(
-                //           "Wallet",
-                //           style: TextStyle(
-                //             fontWeight: FontWeight.bold,
-                //           ),
-                //         ),
-                //         horizontalSpaceSmall,
-                //         const Expanded(
-                //           child: Text(
-                //             "Make payment from your in-app wallet",
-                //             style: TextStyle(fontSize: 11),
-                //           ),
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                // verticalSpaceSmall,
-                Row(
-                  children: const [
-                    Icon(
-                      Icons.lock,
-                      color: kcSecondaryColor,
-                    ),
-                    horizontalSpaceSmall,
-                    Expanded(
-                      child: Text(
-                        "We protect your payment information using encryption to provide bank-level security.",
-                        style: TextStyle(fontSize: 11),
-                      ),
-                    ),
-                  ],
-                )
+
+
               ],
             ),
-          ),
-          verticalSpaceMassive,
-          SubmitButton(
-            isLoading: loading,
-            label: "Pay ${MoneyUtils().formatAmount(getSubTotal() + getDeliveryFee())}",
-            submit: () async {
-              setState(() {
-                loading = true;
-              });
-              try {
-                chargeCard(getSubTotal() + getDeliveryFee());
-              } catch (e) {
-                print(e);
-              }
-
-              setState(() {
-                loading = false;
-              });
-            },
-            color: kcPrimaryColor,
-            boldText: true,
-            icon: Icons.credit_card,
-            iconColor: Colors.blue,
-            iconIsPrefix: true,
-          )
-        ],
-      ),
     );
   }
 
@@ -514,7 +504,8 @@ class _CheckoutState extends State<Checkout> {
         return {
           "productId": item.product?.id,
           "quantity": item.quantity,
-          "price": double.parse(item.product?.salePrice.toString() ?? '0').round(),
+          "price":
+              double.parse(item.product?.salePrice.toString() ?? '0').round(),
         };
       }).toList(),
     };
@@ -551,17 +542,16 @@ class _CheckoutState extends State<Checkout> {
           );
         } else {
           print('Paystack payment failed');
-          locator<SnackbarService>().showSnackbar(message: "Payment failed. Please try again.");
+          locator<SnackbarService>()
+              .showSnackbar(message: "Payment failed. Please try again.");
         }
       }
       // Navigate to the receipt page with the `Order` object
-
     } else {
       locator<SnackbarService>().showSnackbar(
         message: res.data["message"] ?? "Failed to place the order",
       );
     }
-
 
     setState(() {
       isPaying = false;
@@ -609,7 +599,8 @@ class _CheckoutState extends State<Checkout> {
                     children: [
                       const Text(
                         'Add Address',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 16),
                       TextFieldWidget(
@@ -764,4 +755,24 @@ class _CheckoutState extends State<Checkout> {
       });
     }
   }
+  Widget _buildRadioIcon(String method) {
+    return Container(
+      height: 15,
+      width: 15,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: kcBlackColor, width: 1),
+      ),
+      child: paymentMethod == method
+          ? const Center(
+        child: Icon(Icons.check, size: 12),
+      )
+          : const SizedBox(),
+    );
+  }
+  Future<void> confirmOrder() async {
+    // Send order to backend without payment
+    print("Order confirmed for Pay on Delivery.");
+  }
+
 }

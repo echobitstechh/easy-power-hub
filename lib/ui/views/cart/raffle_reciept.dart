@@ -2,7 +2,6 @@ import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/utils/date_time_utils.dart';
 import 'package:easyph/utils/money_util.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +15,6 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
@@ -25,9 +23,12 @@ import '../../../widget/custom_clipper.dart';
 import '../../common/app_colors.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
+import '../service/service_view.dart';
+import '../service/service_view.dart';
 
-import '../profile/shipping_addresses_page.dart';
-// import '../profile/ticket_list.dart';
+
+
+
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -163,7 +164,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                   children: [
                                     Text(
                                       formatDate(DateTime.now()),
-                                      style:  TextStyle(
+                                      style: TextStyle(
                                           fontSize: 11,
                                           color: uiMode.value == AppUiModes.dark
                                               ? kcWhiteColor
@@ -182,25 +183,25 @@ class RaffleReceiptPage extends StatelessWidget {
                                     )
                                   ],
                                 ),
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      vertical: 16.0),
-                                  decoration: BoxDecoration(
-                                    color: kcPrimaryColor,
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  child: Image.asset(
-                                    "assets/images/receipt_header.png",
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                 Row(
+                                // Container(
+                                //   margin: const EdgeInsets.symmetric(
+                                //       vertical: 16.0),
+                                //   decoration: BoxDecoration(
+                                //     color: kcPrimaryColor,
+                                //     borderRadius: BorderRadius.circular(10.0),
+                                //   ),
+                                //   child: Image.asset(
+                                //     "assets/images/receipt_header.png",
+                                //     fit: BoxFit.cover,
+                                //   ),
+                                // ),
+                                Row(
                                   children: [
                                     Text(
                                       'TICKET SUMMARY',
                                       style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
                                         color: uiMode.value == AppUiModes.dark
                                             ? kcWhiteColor
                                             : kcBlackColor,
@@ -210,16 +211,17 @@ class RaffleReceiptPage extends StatelessWidget {
                                 ),
                                 verticalSpaceTiny,
                                 ...carts.map((cartItem) => ListTile(
-                                      leading:
-
-                                      Image.network(
-                                          (cartItem.product?.images != null && cartItem.product!.images!.isNotEmpty)
+                                      leading: Image.network(
+                                          (cartItem.product?.images != null &&
+                                                  cartItem.product!.images!
+                                                      .isNotEmpty)
                                               ? cartItem.product!.images![0]
                                               : 'https://via.placeholder.com/120',
                                           height: 44,
                                           width:
                                               48), // Replace with your image URL field
-                                      title: Text(cartItem.product!.productName!,
+                                      title: Text(
+                                          cartItem.product!.productName!,
                                           style:
                                               const TextStyle(fontSize: 10.61)),
                                       subtitle: Text('${cartItem.quantity}',
@@ -227,7 +229,9 @@ class RaffleReceiptPage extends StatelessWidget {
                                               const TextStyle(fontSize: 10.61)),
                                       trailing: Text(
                                           MoneyUtils().formatAmount(
-                                              double.parse(cartItem.product!.salePrice!).toInt()),
+                                              double.parse(cartItem
+                                                      .product!.salePrice!)
+                                                  .toInt()),
                                           style: TextStyle(
                                             fontSize: 10.61,
                                             fontWeight: FontWeight.bold,
@@ -312,17 +316,16 @@ class RaffleReceiptPage extends StatelessWidget {
           ),
         ],
       ),
+
       bottomNavigationBar: BottomAppBar(
+        height: 200,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
+          child: Column(
+            children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: () async {
-
                     try {
                       for (var item in cart.value) {
                         await repo.deleteFromCart(item.product!.id.toString());
@@ -356,8 +359,60 @@ class RaffleReceiptPage extends StatelessWidget {
                       // Icon(Icons.home, color: Colors.black,),
                       // horizontalSpaceTiny,
                       Expanded(
-                          child: Text('Back Home',
-                              style: TextStyle(fontSize: 15))),
+                        child: Text(
+                          'Back Home',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              verticalSpaceSmall,
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      for (var item in cart.value) {
+                        await repo.deleteFromCart(item.product!.id.toString());
+                      }
+                      cart.value.clear();
+                    } catch (e) {
+                      print(e);
+                    }
+
+                    await locator<LocalStorage>().delete(LocalStorageDir.cart);
+                    cart.notifyListeners();
+
+                    // First go to home
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+
+                    // Then navigate to ServicesView after a short delay
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      locator<NavigationService>().navigateTo(Routes.ServicesView);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: uiMode.value == AppUiModes.dark
+                        ? kcDarkGreyColor
+                        : kcWhiteColor,
+                    foregroundColor: uiMode.value == AppUiModes.dark
+                        ? kcWhiteColor
+                        : kcDarkGreyColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Order for service',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -479,8 +534,7 @@ class RaffleReceiptPage extends StatelessWidget {
 
   Future<pw.Widget> createCartItemWidget(CartItem cartItem) async {
     // Attempt to load the image from the network
-    final response =
-        await http.get(Uri.parse(cartItem.product!.images!.first));
+    final response = await http.get(Uri.parse(cartItem.product!.images!.first));
 
     pw.Widget imageWidget;
     if (response.statusCode == 200) {
@@ -518,9 +572,7 @@ class RaffleReceiptPage extends StatelessWidget {
             ),
           ),
           pw.Text(
-            '₦${MoneyUtils().formatAmount(
-                double.parse(cartItem.product!.salePrice!).toInt()
-                )}',
+            '₦${MoneyUtils().formatAmount(double.parse(cartItem.product!.salePrice!).toInt())}',
             style:
                 pw.TextStyle(fontSize: 10.61, fontWeight: pw.FontWeight.bold),
           ),
