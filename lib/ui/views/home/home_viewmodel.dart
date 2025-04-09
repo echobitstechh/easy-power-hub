@@ -172,22 +172,27 @@ class HomeViewModel extends BaseViewModel {
 
   Future<void> reviewRating(Order order) async {
     setBusy(true);
-    try {
-      for (var product in order.products) {
-        ApiResponse res = await repo.rating({
-          "reviewText": reviewController.text,
-          "rating": rating,
-          "productId": product.id,
-        });
 
-        if (res.statusCode == 200) {
-          print('Successfully submitted review for product: ${product.productName}');
-        } else {
-          print('Failed to submit review for product: ${product.productName}');
-        }
+    try {
+      List<Map<String, dynamic>> reviews = order.products.map((product) => {
+        "reviewText": reviewController.text,
+        "rating": rating,
+        "productId": product.id,
+        "userId": profile.value.id
+      }).toList();
+
+      ApiResponse res = await repo.rating({
+        "orderId": order.id,
+        "reviews": reviews,
+      });
+
+      if (res.statusCode == 200) {
+        print('Successfully submitted reviews for order: ${order.id}');
+        // fetchDeliveredOrders();
+      } else {
+        print('Failed to submit reviews.');
       }
 
-      // Handle local cart updates if needed
 
     } catch (e) {
       print('Error submitting reviews: $e');
@@ -210,11 +215,17 @@ class HomeViewModel extends BaseViewModel {
             .where((order) => order.status == "Delivered")
             .toList();
 
+
+        print("delivered orders are ${deliveredOrders.first.isReviewed}");
+        print("delivered orders are ${deliveredOrders.first.id}");
         List<Order> unratedOrders = deliveredOrders
             .where((order) => order.isReviewed == false)
             .toList();
 
+        print('unreviewed orders are: $unratedOrders');
+
         if (unratedOrders.isNotEmpty) {
+          print('found order with false review');
           Order unratedOrder = unratedOrders.first;
           _dialogService.showCustomDialog(
             variant: DialogType.ratingDialog,
@@ -222,6 +233,8 @@ class HomeViewModel extends BaseViewModel {
             description: "Please rate your recently delivered order.",
             data: unratedOrder,
           );
+        }else{
+          print('no order with false reviews');
         }
       }
     } catch (e) {
@@ -233,8 +246,4 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> submitReview() async {
-    // Make API call here
-    print("Submitting review: Rating - $rating, Review - ${reviewController.text}");
-  }
 }

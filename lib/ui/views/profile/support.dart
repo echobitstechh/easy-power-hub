@@ -76,7 +76,7 @@ class _SupportState extends State<Support> {
             title: "Lighting Customer Care Number",
             subtitle: "",
             onTap: () {
-              launchDialer('08081099871');
+              launchDialer('09059114923');
             },
           ),
 

@@ -465,7 +465,7 @@ class Repository extends IRepository {
   Future<ApiResponse> rating(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
-      endpoint: "reviews",
+      endpoint: "orders/review",
       reqBody: req,
     );
 

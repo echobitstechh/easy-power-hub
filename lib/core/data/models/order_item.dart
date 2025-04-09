@@ -59,7 +59,7 @@ class Order {
       products: (json['Products'] as List)
           .map((product) => Product.fromJson(product))
           .toList() ?? [],
-      isReviewed: json["isReviewed"] ?? false,
+      isReviewed: json["reviewStatus"] ?? false,
     );
   }
 
