@@ -1,10 +1,11 @@
 import 'dart:convert';
 
-
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:stacked/stacked.dart';
@@ -19,6 +20,8 @@ import '../../../core/network/api_response.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
+import '../../components/text_field_widget.dart';
+import 'authService.dart';
 import 'auth_view.dart';
 
 
@@ -27,12 +30,13 @@ import 'auth_view.dart';
 /// Feb, 2024
 ///
 
-
 enum RegistrationResult { success, failure }
+
 class AuthViewModel extends BaseViewModel {
   final log = getLogger("AuthViewModel");
   final repo = locator<Repository>();
   final snackBar = locator<SnackbarService>();
+  final authService = locator<AuthService>();
   final firstname = TextEditingController();
   final lastname = TextEditingController();
   final email = TextEditingController();
@@ -51,51 +55,47 @@ class AuthViewModel extends BaseViewModel {
   final initialEmail = TextEditingController();
   final otp = TextEditingController();
 
-
   bool isOtpRequested = false;
   bool isLoading = false;
 
-
   init() async {
-
     // bool rem = await locator<LocalStorage>().fetch(LocalStorageDir.remember);
-    String? token = await locator<LocalStorage>().fetch(LocalStorageDir.authToken);
-    String? lastEmail = await locator<LocalStorage>().fetch(LocalStorageDir.lastEmail);
+    String? token =
+        await locator<LocalStorage>().fetch(LocalStorageDir.authToken);
+    String? lastEmail =
+        await locator<LocalStorage>().fetch(LocalStorageDir.lastEmail);
     // remember = rem;
-
 
     // If remember me is true and we have a token, validate it
     if (remember && token != null && JwtDecoder.isExpired(token)) {
       // Here you should make a call to your backend to validate the token
       // bool isValidToken = await validateToken(token);
       // if (isValidToken) {
-        userLoggedIn.value = true;
-        // Retrieve and set user profile from saved JSON in local storage
-        String? userJson =
-        await locator<LocalStorage>().fetch(LocalStorageDir.authUser);
-        if (userJson != null) {
-          profile.value = Profile.fromJson(jsonDecode(userJson));
-        }
-        locator<NavigationService>().clearStackAndShow(Routes.homeView);
-        return;
+      userLoggedIn.value = true;
+      // Retrieve and set user profile from saved JSON in local storage
+      String? userJson =
+          await locator<LocalStorage>().fetch(LocalStorageDir.authUser);
+      if (userJson != null) {
+        profile.value = Profile.fromJson(jsonDecode(userJson));
+      }
+      locator<NavigationService>().clearStackAndShow(Routes.homeView);
+      return;
       // }
     }
 
-    if( token != null && !JwtDecoder.isExpired(token)){
-      await locator<LocalStorage>()
-          .delete(LocalStorageDir.authToken);
+    if (token != null && !JwtDecoder.isExpired(token)) {
+      await locator<LocalStorage>().delete(LocalStorageDir.authToken);
       userLoggedIn.value = false;
     }
 
     // Set the lastEmail if remember me is true
     if (remember) {
       String? lastEmail =
-      await locator<LocalStorage>().fetch(LocalStorageDir.lastEmail);
+          await locator<LocalStorage>().fetch(LocalStorageDir.lastEmail);
       if (lastEmail != null) {
         email.text = lastEmail;
       }
     }
-
 
     if (lastEmail != null) {
       email.text = lastEmail;
@@ -117,7 +117,6 @@ class AuthViewModel extends BaseViewModel {
     terms = !terms;
     rebuildUi();
   }
-
 
   Future<void> login(BuildContext context) async {
     appLoading.value = true;
@@ -150,7 +149,9 @@ class AuthViewModel extends BaseViewModel {
           // User not verified, redirect to verification
           print('user not verified, redirecting to verification');
           profile.value.id = data['userId'];
-          if (phone.text.isNotEmpty) profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
+          if (phone.text.isNotEmpty)
+            profile.value.reference =
+                data['sendTokenResponse']?['data']?['token'] ?? '';
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -159,7 +160,9 @@ class AuthViewModel extends BaseViewModel {
                 parameters: {
                   'isOtpRequested': true.toString(),
                   'userId': data['userId'] ?? '',
-                  if (phone.text.isNotEmpty) 'verificationCode': data['sendTokenResponse']?['data']?['token'] ?? '',
+                  if (phone.text.isNotEmpty)
+                    'verificationCode':
+                        data['sendTokenResponse']?['data']?['token'] ?? '',
                   if (phone.text.isNotEmpty) 'phone': phone.text,
                   if (email.text.isNotEmpty) 'email': email.text,
                 },
@@ -168,9 +171,12 @@ class AuthViewModel extends BaseViewModel {
           );
         } else if (data['incompleteBiodata'] == true) {
           // User verified but profile not completed
-          print('user is verified, but profile not completed. redirecting to verification');
+          print(
+              'user is verified, but profile not completed. redirecting to verification');
           profile.value.id = data['userId'];
-          if (phone.text.isNotEmpty) profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
+          if (phone.text.isNotEmpty)
+            profile.value.reference =
+                data['sendTokenResponse']?['data']?['token'] ?? '';
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -188,10 +194,14 @@ class AuthViewModel extends BaseViewModel {
         } else {
           // Successful login
           userLoggedIn.value = true;
-          profile.value = Profile.fromJson(Map<String, dynamic>.from(data["User"]));
-          locator<LocalStorage>().save(LocalStorageDir.authToken, data["token"]);
-          locator<LocalStorage>().save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
-          locator<LocalStorage>().save(LocalStorageDir.authUser, jsonEncode(data["User"]));
+          profile.value =
+              Profile.fromJson(Map<String, dynamic>.from(data["User"]));
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authToken, data["token"]);
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authUser, jsonEncode(data["User"]));
           locator<LocalStorage>().save(LocalStorageDir.remember, remember);
 
           if (remember) {
@@ -215,7 +225,6 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
-
   Future<RegistrationResult> register() async {
     appLoading.value = true;
 
@@ -229,8 +238,8 @@ class AuthViewModel extends BaseViewModel {
         "firstName": firstname.text,
         "lastName": lastname.text,
 
-        "userId":  profile.value.id,
-        
+        "userId": profile.value.id,
+
         "userId": profile.value.id,
         "email": email.text,
         "phoneNumber": phone.text,
@@ -245,9 +254,12 @@ class AuthViewModel extends BaseViewModel {
         userLoggedIn.value = true;
         profile.value =
             Profile.fromJson(Map<String, dynamic>.from(res.data["User"]));
-        locator<LocalStorage>().save(LocalStorageDir.authToken, res.data["token"]);
-        locator<LocalStorage>().save(LocalStorageDir.authRefreshToken, res.data["refreshToken"]);
-        locator<LocalStorage>().save(LocalStorageDir.authUser, jsonEncode(res.data["User"]));
+        locator<LocalStorage>()
+            .save(LocalStorageDir.authToken, res.data["token"]);
+        locator<LocalStorage>()
+            .save(LocalStorageDir.authRefreshToken, res.data["refreshToken"]);
+        locator<LocalStorage>()
+            .save(LocalStorageDir.authUser, jsonEncode(res.data["User"]));
 
         snackBar.showSnackbar(message: res.data["message"]);
         locator<NavigationService>().clearStackAndShow(Routes.homeView);
@@ -286,7 +298,9 @@ class AuthViewModel extends BaseViewModel {
       print('response is ${res.data}');
       if (res.statusCode == 200) {
         print("OTP Verified Successfully. Navigating to registerView...");
-        snackBar.showSnackbar(message: 'OTP verified successfully', duration: Duration(seconds: 5));
+        snackBar.showSnackbar(
+            message: 'OTP verified successfully',
+            duration: Duration(seconds: 5));
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -296,13 +310,15 @@ class AuthViewModel extends BaseViewModel {
           ),
         );
         notifyListeners();
-      }else if(res.statusCode == 400){
-        snackBar.showSnackbar(message: 'Invalid verification code', duration: Duration(seconds: 5));
-      }
-      else {
+      } else if (res.statusCode == 400) {
+        snackBar.showSnackbar(
+            message: 'Invalid verification code',
+            duration: Duration(seconds: 5));
+      } else {
         final responseMessage = res.data["message"] ?? 'Verification failed';
-        isLoading =false;
-        snackBar.showSnackbar(message: responseMessage, duration: Duration(seconds: 5));
+        isLoading = false;
+        snackBar.showSnackbar(
+            message: responseMessage, duration: Duration(seconds: 5));
         appLoading.value = false;
       }
     } catch (e, stacktrace) {
@@ -311,7 +327,6 @@ class AuthViewModel extends BaseViewModel {
       log.i(e);
       if (e is TypeError) {
         log.i('TypeError: ${e.toString()}');
-
       } else {
         log.i('Unexpected Error: ${e.toString()}');
       }
@@ -320,14 +335,13 @@ class AuthViewModel extends BaseViewModel {
         message: 'An error occurred. Please try again later.',
         duration: Duration(seconds: 5),
       );
-    }finally{
+    } finally {
       appLoading.value = false;
       notifyListeners();
     }
 
     setBusy(false);
   }
-
 
   Future<ApiResponse?> requestOtp() async {
     appLoading.value = true;
@@ -354,7 +368,8 @@ class AuthViewModel extends BaseViewModel {
         profile.value.email = email.text;
         if (phone.text.isNotEmpty) {
           profile.value.phoneNumber = phone.text;
-          profile.value.reference = res.data['data']["sendTokenResponse"]["data"]["reference"];
+          profile.value.reference =
+              res.data['data']["sendTokenResponse"]["data"]["reference"];
         }
 
         // Return success response
@@ -381,4 +396,119 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+  Future<void> signInWithGoogle(BuildContext context) async {
+    appLoading.value = true;
+    rebuildUi();
+
+    try {
+      final authService = locator<AuthService>();
+      final Map<String, dynamic>? googleSignInResult =
+      await authService.signInWithGoogle();
+
+      if (googleSignInResult == null) {
+        snackBar.showSnackbar(message: "Google Sign-In was cancelled", duration: Duration(seconds: 3));
+      }
+
+      // Validate required fields
+      if (googleSignInResult?['idToken'] == null ||
+          googleSignInResult?['email'] == null) {
+        snackBar.showSnackbar(
+            message: "Unable to retrieve Google account details", duration: Duration(seconds: 3)
+        );
+      }
+
+      // Get FCM token
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      // Retrieve phone number if available
+      String? phoneNumber = googleSignInResult?['phoneNumber'];
+      // If phone number is not provided, prompt the user to enter it
+
+      if (phoneNumber == null || phoneNumber.isEmpty) {
+        phoneNumber = await showPhoneNumberDialog(context);
+        if (phoneNumber == null || phoneNumber.isEmpty) {
+          snackBar.showSnackbar(message: "Phone number is required", duration: Duration(seconds: 3));
+          return;
+        }
+      }
+      // Prepare API request body
+      final requestBody = {
+        "fcmToken": fcmToken,
+        "idToken": googleSignInResult?['idToken'],
+        "phoneNumber": phoneNumber,
+
+      };
+
+      // todo: add phone number
+
+
+      // Make API call to your backend
+      ApiResponse res = await repo.googleSignIn(requestBody);
+
+      if (res.statusCode == 200) {
+        final data = res.data;
+
+          // Successful login
+          userLoggedIn.value = true;
+          profile.value =
+              Profile.fromJson(Map<String, dynamic>.from(data["user"]));
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authToken, data["token"]);
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
+          locator<LocalStorage>()
+              .save(LocalStorageDir.authUser, jsonEncode(data["user"]));
+          locator<LocalStorage>().save(LocalStorageDir.remember, remember);
+
+          if (remember) {
+            locator<LocalStorage>().save(LocalStorageDir.lastEmail, email.text);
+          } else {
+            locator<LocalStorage>().delete(LocalStorageDir.lastEmail);
+          }
+
+          locator<NavigationService>().clearStackAndShow(Routes.homeView);
+
+      } else {
+        snackBar.showSnackbar(message: res.data["message"]);
+      }
+    } catch (e) {
+      log.e("Google Sign-In Error: $e");
+      snackBar.showSnackbar(
+          message: "An error occurred during Google Sign-In: $e", duration: Duration(seconds: 3)
+      );
+    } finally {
+      appLoading.value = false;
+      rebuildUi();
+    }
+  }
 }
+
+Future<String?> showPhoneNumberDialog(BuildContext context) async {
+  TextEditingController phoneController = TextEditingController();
+
+  return await showDialog<String>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Enter Your Phone Number", style: TextStyle(fontSize: 16),),
+        content: TextFieldWidget(
+          hint: "Phone number",
+        controller: phoneController,
+        keyboardType: TextInputType.phone,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, phoneController.text.trim());
+            },
+            child: Text("Submit"),
+          ),
+        ],
+      );
+    },
+  );
+}
+

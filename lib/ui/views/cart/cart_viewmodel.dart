@@ -33,6 +33,10 @@ class CartViewModel extends BaseViewModel {
   int shopSubTotal = 0;
   int raffleSubTotal = 0;
   int deliveryFee = 0;
+  int cartSubtotal = 0;
+  int cartDiscount = 0;
+  int cartFinalTotal = 0;
+  bool isLoading = false;
   final refferalCode = TextEditingController();
 
   ValueNotifier<PaymentMethod> selectedPaymentMethod =
@@ -263,46 +267,36 @@ class CartViewModel extends BaseViewModel {
 
   Future<void> fetchOnlineCart() async {
     setBusy(true);
+    isLoading = true;
     try {
       ApiResponse res = await repo.cartList();
       if (res.statusCode == 200) {
-        // Corrected the key to "cartItems" and added a null check
         List<dynamic> items = res.data["cartItems"] ?? [];
+        Map<String, dynamic> summary = res.data["summary"] ?? {};
 
-        print('online cart items: $items');
+        cartSubtotal = summary["totalPrice"] ?? 0;
+        cartDiscount = summary["discountAmount"] ?? 0;
+        cartFinalTotal = summary["finalPrice"] ?? 0;
 
-        // Map the items list to List<CartItem>
         if (items.isNotEmpty) {
           List<CartItem> onlineItems = items
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
-
-          print('Saved items are: ${onlineItems.first.product?.productName}');
-
-          // Sync online items with the local cart
           cart.value = onlineItems;
-          getRaffleSubTotal();
           notifyListeners();
-          print(
-              'Saved raffle cart are: ${cart.value.first.product?.productName}');
-
-          // Update local storage
-          List<Map<String, dynamic>> storedList =
-              cart.value.map((e) => e.toJson()).toList();
-          await locator<LocalStorage>()
-              .save(LocalStorageDir.raffleCart, storedList);
         } else {
           cart.value.clear();
           await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
           notifyListeners();
-        }
-      }
+    }
+    }
     } catch (e) {
       locator<SnackbarService>()
           .showSnackbar(message: "Failed to load cart from server: $e");
       print('Couldn\'t get online cart: $e');
     } finally {
       setBusy(false);
+      isLoading = false;
     }
   }
 

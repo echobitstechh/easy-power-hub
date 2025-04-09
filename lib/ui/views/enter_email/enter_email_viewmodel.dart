@@ -3,6 +3,7 @@ import 'package:easyph/app/app.logger.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -49,7 +50,9 @@ class EnterEmailViewModel extends BaseViewModel {
       debugPrint('Error in sendCode: $e');
       snackBar.showSnackbar(message: "Unable to send code: $e");
     } finally {
-      setBusy(false); // Ensure busy state is reset
+      setBusy(false);// Ensure busy state is reset
+      _codeSent = true;
+      notifyListeners();
     }
 
     debugPrint('Completed sendCode process');
@@ -60,14 +63,29 @@ class EnterEmailViewModel extends BaseViewModel {
 
     try {
       ApiResponse res = await repo.newPassword({
-        "email": emailController.text,
-        "otp": codeController.text,
+        // "email": emailController.text,
+        "token": codeController.text,
         "password": password.text,
-        "confirm_password": cPassword.text,
+        // "confirm_password": cPassword.text,
       });
 
-      if (res.statusCode == 201) {
-        snackBar.showSnackbar(message: "Password Successfully changed");
+      if (res.statusCode == 200) {
+        // Retrieve the current BuildContext from the NavigationService.
+        final currentContext = locator<NavigationService>().navigatorKey?.currentContext;
+        if (currentContext != null) {
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            SnackBar(
+              content: Text("Password changed successfully."),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.only(
+                bottom: MediaQuery.of(currentContext).size.height - 150,
+                left: 20,
+                right: 20,
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
         locator<NavigationService>().clearStackAndShow(Routes.authView);
       }
     } catch (e) {

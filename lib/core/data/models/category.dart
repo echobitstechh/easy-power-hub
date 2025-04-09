@@ -39,7 +39,7 @@ class Category {
       case 'deleted':
         return CategoryStatus.deleted;
       default:
-        return CategoryStatus.unknown;
+        return CategoryStatus.active;
     }
   }
 
@@ -58,4 +58,4 @@ class Category {
 }
 
 
-enum CategoryStatus { active, inactive, deleted, unknown }
+enum CategoryStatus { active, deleted}

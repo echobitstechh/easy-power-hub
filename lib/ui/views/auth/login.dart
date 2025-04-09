@@ -5,6 +5,7 @@ import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/components/submit_button.dart';
 import 'package:easyph/ui/components/text_field_widget.dart';
 import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -13,6 +14,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../state.dart';
+import 'authService.dart';
 import 'auth_view.dart';
 
 
@@ -20,7 +22,6 @@ import 'auth_view.dart';
 /// email: georgequin19@gmail.com
 /// Feb, 2024
 ///
-
 
 class Login extends StatefulWidget {
   final Function(PresentPage) updateIsLogin;
@@ -33,6 +34,8 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool terms = false;
   bool isPhoneNumber = false;
+
+  final AuthService _authService = AuthService(); // Ensure AuthService is imported and instantiated
 
   @override
   void dispose() {
@@ -76,23 +79,25 @@ class _LoginState extends State<Login> {
                   ],
                 ),
               ),
-
               verticalSpaceTiny,
-
               verticalSpaceMedium,
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextField(
-                  controller: isPhoneNumber ? model.phone : model.email, // A single controller for both
+                  controller: isPhoneNumber
+                      ? model.phone
+                      : model.email, // A single controller for both
                   decoration: InputDecoration(
                     hintText: isPhoneNumber
                         ? "Enter phone number"
                         : "Enter email or Phone",
-                    prefixText: isPhoneNumber ? "+234 " : null, // Default to Nigeria
+                    prefixText:
+                        isPhoneNumber ? "+234 " : null, // Default to Nigeria
                     border: const OutlineInputBorder(),
                   ),
-                  keyboardType:
-                  isPhoneNumber ? TextInputType.phone : TextInputType.emailAddress,
+                  keyboardType: isPhoneNumber
+                      ? TextInputType.phone
+                      : TextInputType.emailAddress,
                   onChanged: (value) {
                     setState(() {
                       if (value.isNotEmpty && RegExp(r'^\d').hasMatch(value)) {
@@ -119,8 +124,9 @@ class _LoginState extends State<Login> {
                     onTap: () {
                       model.toggleObscure();
                     },
-                    child: Icon(
-                        model.obscure ? Icons.visibility_off : Icons.visibility),
+                    child: Icon(model.obscure
+                        ? Icons.visibility_off
+                        : Icons.visibility),
                   ),
                 ),
               ),
@@ -165,7 +171,7 @@ class _LoginState extends State<Login> {
                   InkWell(
                     onTap: () {
                       locator<NavigationService>()
-                          .navigateToChangePasswordView(isResetPassword: true);
+                          .navigateToEnterEmailView();
                     },
                     child: const Text(
                       "Forgot password?",
@@ -184,7 +190,8 @@ class _LoginState extends State<Login> {
                   valueListenable: appLoading,
                   builder: (context, isLoading, child) {
                     return SubmitButton(
-                      isLoading: isLoading, // Dynamically updates based on `appLoading.value`
+                      isLoading:
+                          isLoading, // Dynamically updates based on `appLoading.value`
                       boldText: true,
                       label: "Login",
                       submit: () async {
@@ -195,37 +202,68 @@ class _LoginState extends State<Login> {
                   },
                 ),
               ),
-              // verticalSpaceMedium,
-              // Row(
-              //   mainAxisAlignment: MainAxisAlignment.center,
-              //   children: const <Widget>[
-              //     Expanded(
-              //       child: Divider(
-              //         color: Colors.grey,
-              //         thickness: 1,
-              //       ),
-              //     ),
-              //     Padding(
-              //       padding: EdgeInsets.symmetric(horizontal: 8),
-              //       child: Text(
-              //         "OR",
-              //         style: TextStyle(
-              //           fontSize: 14,
-              //           color: Colors.grey,
-              //         ),
-              //       ),
-              //     ),
-              //     Expanded(
-              //       child: Divider(
-              //         color: Colors.grey,
-              //         thickness: 1,
-              //       ),
-              //     ),
-              //   ],
-              // ),
-
-              // verticalSpaceMedium,
-              //
+              verticalSpaceMedium,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const <Widget>[
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      "OR",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Divider(
+                      color: Colors.grey,
+                      thickness: 1,
+                    ),
+                  ),
+                ],
+              ),
+              verticalSpaceMedium,
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white, // Text color
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 2, // Subtle shadow
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  minimumSize: const Size(double.infinity, 54), // Full-width button
+                ),
+                onPressed: () {
+                  model.signInWithGoogle(context);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/crypto%2Fsearch%20(2).png?alt=media&token=24a918f7-3564-4290-b7e4-08ff54b3c94c",
+                      width: 20,
+                    ),
+                    const SizedBox(width: 20),
+                    const Text(
+                      'Sign in with Google',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               // SubmitButton(
               //   isLoading: model.isBusy,
               //   boldText: true,
@@ -233,48 +271,37 @@ class _LoginState extends State<Login> {
               //   icon: FontAwesomeIcons.google,
               //   label: "Sign in with Google",
               //   textColor: Colors.black,
-              //   submit: () {
-              //     Fluttertoast.showToast(msg: 'Coming soon',
-              //         toastLength: Toast.LENGTH_LONG
-              //     );
+              //   submit:() {
+              //     model.signInWithGoogle(context);
               //   },
               //   color: Colors.grey,
               // ),
-
               verticalSpaceMedium,
-
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:  [
-                    const Text(
-                      "Don't have an account? ",
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                const Text(
+                  "Don't have an account? ",
+                  style: TextStyle(
+                    fontSize: 12,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    widget.updateIsLogin(PresentPage.signup);
+                    //gotoRegister();
+                  },
+                  child: const Text(
+                    "Create Account",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: kcSecondaryColor,
                     ),
-                    GestureDetector(
-                      onTap: () {
-
-                        widget.updateIsLogin(PresentPage.signup);
-                        //gotoRegister();
-
-                      },
-                      child: const Text(
-                        "Create Account",
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: kcSecondaryColor,
-                        ),
-                      ),
-                    )
-
-                  ]
-              ),
+                  ),
+                )
+              ]),
             ],
           ),
         ),
       ),
     );
   }
-
 }

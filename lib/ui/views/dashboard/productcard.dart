@@ -186,10 +186,8 @@ class _ProductCardState extends State<ProductCard> {
         actions: [
           IconButton(
             icon: Icon(Icons.share, size: 25),
-            onPressed: () async {
-              // Sharing content
-              await Share.share(
-                  'Check out this product: ${widget.product.productName} - ${widget.product.productDescription}');
+            onPressed: ()  {
+
             },
           ),
         ],

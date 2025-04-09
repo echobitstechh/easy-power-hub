@@ -440,7 +440,7 @@ class ShopView extends StackedView<ShopViewModel> {
             : Colors.grey[100]!,
         labelStyle: TextStyle(
           color:
-              category.id == viewModel.selectedId ? Colors.white : Colors.black,
+          category.id == viewModel.selectedId ? Colors.white : Colors.black,
         ),
         shape: RoundedRectangleBorder(
           side: BorderSide(

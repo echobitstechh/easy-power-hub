@@ -1,4 +1,3 @@
-
 import 'package:easyph/ui/views/profile/profile_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -30,8 +29,6 @@ class _ProfileScreen extends State<ProfileScreen> {
   bool isUpdating = false;
   final snackBar = locator<SnackbarService>();
 
-
-
   void getProfile(ProfileViewModel viewModel) async {
     try {
       ApiResponse res = await repo.getProfile();
@@ -40,7 +37,7 @@ class _ProfileScreen extends State<ProfileScreen> {
             Profile.fromJson(Map<String, dynamic>.from(res.data["user"]));
 
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) =>  ProfileScreen(viewModel: viewModel,),
+          builder: (context) => ProfileScreen(viewModel: viewModel,),
         ));
       }
     } catch (e) {
@@ -48,12 +45,102 @@ class _ProfileScreen extends State<ProfileScreen> {
     }
   }
 
+  // New method to show the edit/add phone number dialog
+  void _showEditProfileDialog(BuildContext context) {
+    final TextEditingController firstNameController = TextEditingController(
+      text: profile.value.firstName,
+    );
+
+    final TextEditingController lastNameController = TextEditingController(
+      text: profile.value.lastName,
+    );
+
+    final TextEditingController emailController = TextEditingController(
+      text: profile.value.email,
+    );
+
+    final TextEditingController phoneController = TextEditingController(
+      text: profile.value.phoneNumber,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Profile'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: firstNameController,
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                ),
+              ),
+              TextField(
+                controller: lastNameController,
+                keyboardType: TextInputType.name,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                ),
+              ),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                ),
+              ),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Save'),
+              onPressed: () {
+                String newFirstName = firstNameController.text.trim();
+                String newLastName = lastNameController.text.trim();
+                String newEmail = emailController.text.trim();
+                String newPhone = phoneController.text.trim();
+
+                // Call your ViewModel method with the new values
+                widget.viewModel.updateProfileData(
+                  firstName: newFirstName,
+                  lastName: newLastName,
+                  email: newEmail,
+                  phoneNumber: newPhone,
+                );
+
+                Navigator.of(context).pop();
+              },
+
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
       backgroundColor:
-          uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
+      uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
       appBar: AppBar(
         toolbarHeight: 100.0,
         title: const Text('Profile Details'),
@@ -67,9 +154,9 @@ class _ProfileScreen extends State<ProfileScreen> {
       body: ListView(
         children: <Widget>[
           ProfilePicturePicker(
-              selectedFile: widget.viewModel.selectedFile,
-              onImagePicked: widget.viewModel.updateProfileImage,
-              ),
+            selectedFile: widget.viewModel.selectedFile,
+            onImagePicked: widget.viewModel.updateProfileImage,
+          ),
           Padding(
             padding: const EdgeInsets.all(16.0), // Add padding inside the card
             child: Column(
@@ -101,8 +188,16 @@ class _ProfileScreen extends State<ProfileScreen> {
                                         : Colors.black,
                                   ),
                                 ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => _showEditProfileDialog(context),
+                                ),
                               ),
                             ),
+                          ],
+                        ),
+                        Row(
+                          children: [
                             Expanded(
                               flex: 4,
                               // This will give bounded constraints to the ListTile.
@@ -122,6 +217,10 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold),
                                 ),
+                                // trailing: IconButton(
+                                //   icon: const Icon(Icons.edit),
+                                //   onPressed: () => _showEditEmailDialog(context),
+                                // ),
                               ),
                             ),
                           ],
@@ -145,6 +244,11 @@ class _ProfileScreen extends State<ProfileScreen> {
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold),
                                 ),
+                                // Added edit button to allow editing/adding phone number
+                                // trailing: IconButton(
+                                //   icon: const Icon(Icons.edit),
+                                //   onPressed: () => _showEditPhoneDialog(context),
+                                // ),
                               ),
                             ),
                           ],
@@ -156,14 +260,12 @@ class _ProfileScreen extends State<ProfileScreen> {
                   horizontalSpaceLarge,
                   Card(
                     child: Padding(
-                      padding: const EdgeInsets.all(
-                          8.0), // Optional padding for spacing
+                      padding: const EdgeInsets.all(8.0), // Optional padding for spacing
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment
-                                .spaceBetween, // Aligns items properly
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Aligns items properly
                             children: [
                               // Text(
                               //   "Create Afritag",
@@ -189,41 +291,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                             ),
                           ),
                           verticalSpaceSmall,
-                          // Row(
-                          //   children: [
-                          //    Container(
-                          //       width: 25, // Width and height of the circle
-                          //       height: 25,
-                          //       decoration: BoxDecoration(
-                          //         color:
-                          //         kcSecondaryColor, // Background color of the circle
-                          //         shape: BoxShape.circle,
-                          //         border: Border.all(
-                          //           color:
-                          //           kcWhiteColor, // Border color of the circle
-                          //           width: 2, // Border width
-                          //         ),
-                          //       ),
-                          //       child: const Icon(
-                          //         Icons.add,
-                          //         color: kcWhiteColor, // Icon color
-                          //         size: 12, // Icon size
-                          //       ),
-                          //     ),
-                          //     SizedBox(width: 8),
-                          //     // Adds spacing between the icon and text
-                          //     // Text(
-                          //     //   "Create Afri Tag",
-                          //     //   style: TextStyle(
-                          //     //     color: uiMode.value == AppUiModes.dark
-                          //     //         ? Colors.white
-                          //     //         : kcSecondaryColor,
-                          //     //     fontSize: 12,
-                          //     //     fontWeight: FontWeight.bold,
-                          //     //   ),
-                          //     // ),
-                          //   ],
-                          // ),
+                          // Row(... commented out section ...),
                         ],
                       ),
                     ),

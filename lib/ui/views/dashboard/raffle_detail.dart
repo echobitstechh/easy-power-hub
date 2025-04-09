@@ -391,8 +391,8 @@ class _RaffleDetailState extends State<RaffleDetail> {
                                     child:  Row(
                                       children: [
                                         InkWell(
-                                          onTap: () => viewModel
-                                              .decreaseRaffleQuantity(cartItem),
+                                          // onTap: () => viewModel
+                                          //     .decreaseRaffleQuantity(cartItem),
                                           child: Container(
                                             height: 30,
                                             width: 30,
@@ -415,8 +415,8 @@ class _RaffleDetailState extends State<RaffleDetail> {
                                         ),
                                         horizontalSpaceSmall,
                                         InkWell(
-                                          onTap: () => viewModel
-                                              .increaseRaffleQuantity(cartItem),
+                                          // onTap: () => viewModel
+                                          //     .increaseRaffleQuantity(cartItem),
                                           child: Container(
                                             height: 30,
                                             width: 30,

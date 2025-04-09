@@ -25,6 +25,7 @@ ValueNotifier<bool> isLoginByEmail = ValueNotifier(false);
 ValueNotifier<bool> isOtpRequestedByEmail = ValueNotifier(false);
 
 
+
 void switchModule(AppModules module) {
   currentModuleNotifier.value = module;
 }

@@ -2,6 +2,7 @@ import 'package:easyph/core/utils/config.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/state.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -179,11 +180,23 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
-    fetchUiState();
-    checkForUpdates();
     super.initState();
+    fetchUiState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkForUpdates();
+    });    // handleDeepLinks();
   }
 
+  // void handleDeepLinks() async {
+  //   // Listen for deep links
+  //   uriLinkStream.listen((Uri? uri) {
+  //     if (uri != null) {
+  //       print("Deep Link Received: ${uri.toString()}");
+  //       // Handle navigation in the app
+  //     }
+  //   });
+  // }
   void fetchUiState() async {
     String? savedMode =
         await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
@@ -200,24 +213,35 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AppUiModes>(
-      valueListenable: uiMode,
-      builder: (context, value, child) => MaterialApp(
-        title: 'Easyph',
-        // theme: value == AppUiModes.dark ? darkTheme() : lightTheme(),
-        theme: ThemeData.light(useMaterial3: true),
-        darkTheme: ThemeData.dark(),
-        themeMode: value == AppUiModes.dark ? ThemeMode.dark : ThemeMode.light,
-        initialRoute: Routes.startupView,
-        onGenerateRoute: StackedRouter().onGenerateRoute,
-        navigatorKey: StackedService.navigatorKey,
-        debugShowCheckedModeBanner: false,
-        navigatorObservers: [
-          StackedService.routeObserver,
-        ],
-      ),
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        bool isAuthenticated = snapshot.hasData && snapshot.data != null;
+
+        return ValueListenableBuilder<AppUiModes>(
+          valueListenable: uiMode,
+          builder: (context, value, child) => MaterialApp(
+            title: 'Easyph',
+            theme: ThemeData.light(useMaterial3: true),
+            darkTheme: ThemeData.dark(),
+            themeMode: value == AppUiModes.dark ? ThemeMode.dark : ThemeMode.light,
+            initialRoute: isAuthenticated ? Routes.homeView : Routes.startupView,
+            onGenerateRoute: StackedRouter().onGenerateRoute,
+            navigatorKey: StackedService.navigatorKey,
+            debugShowCheckedModeBanner: false,
+            navigatorObservers: [
+              StackedService.routeObserver,
+            ],
+          ),
+        );
+      },
     );
   }
+
 
   ThemeData darkTheme() {
     return ThemeData.dark().copyWith(
@@ -262,7 +286,9 @@ class _MyAppState extends State<MyApp> {
   void checkForUpdates() async {
     final availability = await getUpdateAvailability();
     if (availability is UpdateAvailable) {
-      showUpdateCard();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showUpdateCard();
+      });
     }
   }
 
