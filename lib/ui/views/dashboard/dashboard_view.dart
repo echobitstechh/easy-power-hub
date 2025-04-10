@@ -6,7 +6,6 @@ import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/views/dashboard/productcard.dart';
-import 'package:easyph/ui/views/dashboard/raffle_detail.dart';
 import 'package:easyph/ui/views/service/service_view.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -23,7 +22,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:palette_generator/palette_generator.dart';
-import 'package:slide_countdown/slide_countdown.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:shimmer/shimmer.dart';
@@ -31,10 +29,6 @@ import 'package:top_bottom_sheet_flutter/top_bottom_sheet_flutter.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
-import '../../../core/data/models/project.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
-import '../../components/profile_picture.dart';
-import '../service/projectDetailsPage.dart';
 import '../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
 
@@ -48,93 +42,86 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
   final PageController _pageController = PageController();
 
-  List<StaggeredGridTile> buildCardTiles(
-      BuildContext context, DashboardViewModel model) {
-    return [
-      StaggeredGridTile.count(
+  List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
+    List<StaggeredGridTile> tiles = [];
+
+    final solar = model.filteredCategories.firstWhere(
+          (cat) => cat.name.toLowerCase().contains("solar"),
+      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+    );
+
+    if (solar.id != -1) {
+      tiles.add(StaggeredGridTile.count(
         crossAxisCellCount: 2,
         mainAxisCellCount: 2,
         child: GestureDetector(
           onTap: () {
-            // Navigator.of(context).push(MaterialPageRoute(builder: (c) {
-            //   return ShopView(category: "solar energy");
-            // }));
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (c) {
-                  return ShopView(
-                    filter: model.filteredCategories
-                        .where((element) =>
-                            element.name.toLowerCase().contains("solar"))
-                        .first,
-                  );
-                },
-              ),
-            );
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (c) => ShopView(filter: solar),
+            ));
           },
-          child: actionContainer(
-              'assets/images/solar.jpg', "Solar Energy", context),
+          child: actionContainer('assets/images/solar.jpg', "Solar Energy", context),
         ),
-      ),
-      StaggeredGridTile.count(
+      ));
+    }
+
+    final electronics = model.filteredCategories.firstWhere(
+          (cat) => cat.name.toLowerCase().contains("electronics"),
+      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+    );
+
+    if (electronics.id != -1) {
+      tiles.add(StaggeredGridTile.count(
         crossAxisCellCount: 2,
         mainAxisCellCount: 1,
         child: GestureDetector(
           onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (c) {
-                  return ShopView(
-                    filter: model.filteredCategories
-                        .where((element) =>
-                            element.name.toLowerCase().contains("electronics"))
-                        .first,
-                  );
-                },
-              ),
-            );
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (c) => ShopView(filter: electronics),
+            ));
           },
-          child: actionContainer(
-              'assets/images/2148254069.jpg', "Electronices", context),
+          child: actionContainer('assets/images/2148254069.jpg', "Electronics", context),
         ),
-      ),
-      StaggeredGridTile.count(
+      ));
+    }
+
+    final light = model.filteredCategories.firstWhere(
+          (cat) => cat.name.toLowerCase().contains("light"),
+      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+    );
+
+    if (light.id != -1) {
+      tiles.add(StaggeredGridTile.count(
         crossAxisCellCount: 1,
         mainAxisCellCount: 1,
         child: GestureDetector(
           onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(builder: (c) {
-              return ServicesView();
-            }));
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (c) => ShopView(filter: light),
+            ));
           },
-          child: actionContainer(
-              'assets/images/2148087576.jpg', "Services", context),
+          child: actionContainer('assets/images/107.jpg', "Lightening", context),
         ),
+      ));
+    }
+
+    // Services card (always shown)
+    tiles.add(StaggeredGridTile.count(
+      crossAxisCellCount: 1,
+      mainAxisCellCount: 1,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (c) => ServicesView(),
+          ));
+        },
+        child: actionContainer('assets/images/2148087576.jpg', "Services", context),
       ),
-      StaggeredGridTile.count(
-        crossAxisCellCount: 1,
-        mainAxisCellCount: 1,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (c) {
-                  return ShopView(
-                    filter: model.filteredCategories
-                        .where((element) =>
-                            element.name.toLowerCase().contains("light"))
-                        .first,
-                  );
-                },
-              ),
-            );
-          },
-          child:
-              actionContainer('assets/images/107.jpg', "Lightening", context),
-        ),
-      ),
-    ];
+    ));
+
+    return tiles;
   }
+
 
   @override
   Widget builder(
@@ -511,11 +498,11 @@ class DashboardView extends StackedView<DashboardViewModel> {
           shrinkWrap: true,
           padding: EdgeInsets.only(top: 20),
           physics: NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
-            childAspectRatio: 0.75, // Adjusted aspect ratio
+            childAspectRatio: 0.75,
           ),
           itemCount: viewModel.filteredProductList.length,
           itemBuilder: (context, index) {
@@ -538,141 +525,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   },
                 );
               },
-              // child: Card(
-              //   margin: const EdgeInsets.all(8.0),
-              //   elevation: 3,
-              //   shape: RoundedRectangleBorder(
-              //     borderRadius: BorderRadius.circular(20),
-              //   ),
-              //   child: Column(
-              //     crossAxisAlignment: CrossAxisAlignment.start,
-              //     mainAxisSize: MainAxisSize.min,
-              //     children: [
-              //       Stack(
-              //         children: [
-              //           ClipRRect(
-              //             borderRadius: const BorderRadius.only(
-              //               topLeft: Radius.circular(20),
-              //               topRight: Radius.circular(20),
-              //             ),
-              //             child: CachedNetworkImage(
-              //               placeholder: (context, url) => const Center(
-              //                 child: CircularProgressIndicator(
-              //                   strokeWidth: 2.0,
-              //                   valueColor:
-              //                   AlwaysStoppedAnimation<Color>(kcSecondaryColor),
-              //                 ),
-              //               ),
-              //               imageUrl: (item.images != null && item.images!.isNotEmpty)
-              //                   ? item.images!.first
-              //                   : 'https://via.placeholder.com/120',
-              //               height: MediaQuery.of(context).size.height * 0.14, // Reduced image size
-              //               width: double.infinity,
-              //               fit: BoxFit.fitHeight, // Ensures it fits properly
-              //               errorWidget: (context, url, error) =>
-              //               const Icon(Icons.error),
-              //               fadeInDuration: const Duration(milliseconds: 500),
-              //               fadeOutDuration: const Duration(milliseconds: 300),
-              //             ),
-              //           ),
-              //           Positioned(
-              //             top: 8,
-              //             left: 8,
-              //             child: Container(
-              //               padding: const EdgeInsets.symmetric(
-              //                   horizontal: 8.0, vertical: 4.0),
-              //               decoration: BoxDecoration(
-              //                 color: Colors.black,
-              //                 borderRadius: BorderRadius.circular(12),
-              //               ),
-              //               child: const Text(
-              //                 'NEW',
-              //                 style: TextStyle(
-              //                   color: Colors.white,
-              //                   fontSize: 12,
-              //                 ),
-              //               ),
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //       Padding(
-              //         padding: const EdgeInsets.symmetric(
-              //             horizontal: 8.0, vertical: 4.0),
-              //         child: Row(
-              //           children: List.generate(5, (starIndex) {
-              //             return Icon(
-              //               Icons.star,
-              //               color: starIndex < (item.rating?.toInt() ?? 0)
-              //                   ? kcStarColor
-              //                   : Colors.grey,
-              //               size: 16,
-              //             );
-              //           }),
-              //         ),
-              //       ),
-              //       Padding(
-              //         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //         child: Text(
-              //           item.productName ?? 'Product name',
-              //           style: const TextStyle(
-              //             fontSize: 14,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //           maxLines: 1,
-              //           overflow: TextOverflow.ellipsis,
-              //         ),
-              //       ),
-              //       Padding(
-              //         padding: const EdgeInsets.symmetric(
-              //             horizontal: 8.0, vertical: 4.0),
-              //         child: Row(
-              //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //           children: [
-              //             Expanded(
-              //               child: Text(
-              //                 '₦${item.price ?? 0}',
-              //                 style: const TextStyle(
-              //                   fontSize: 14,
-              //                   fontWeight: FontWeight.bold,
-              //                   color: kcPrimaryColor,
-              //                 ),
-              //                 maxLines: 1,
-              //                 overflow: TextOverflow.ellipsis,
-              //               ),
-              //             ),
-              //             GestureDetector(
-              //               onTap: () {
-              //                 RaffleCartItem newItem =
-              //                 RaffleCartItem(raffle: item, quantity: 1);
-              //                 viewModel.addToRaffleCart(item);
-              //                 viewModel.notifyListeners();
-              //               },
-              //               child: Container(
-              //                 padding: const EdgeInsets.all(8.0),
-              //                 decoration: BoxDecoration(
-              //                   color: Colors.white,
-              //                   shape: BoxShape.circle,
-              //                 ),
-              //                 child: GestureDetector(
-              //                   onTap: (){
-              //                     locator<NavigationService>().navigateToCartView();
-              //                   },
-              //                   child: const Icon(
-              //                     Icons.shopping_cart_outlined,
-              //                     color: kcSecondaryColor,
-              //                     size: 16,
-              //                   ),
-              //                 ),
-              //               ),
-              //             )
-              //           ],
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -774,14 +626,23 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              GestureDetector(
+                              InkWell(
                                 onTap: () {
-                                 viewModel.addToRaffleCart(item);
+                                  viewModel.addToRaffleCart(item);
                                 },
-                                child: const Icon(
+                                child: viewModel.loadingItems.contains(item.id)
+                                    ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: kcSecondaryColor,
+                                  ),
+                                )
+                                    : const Icon(
                                   Icons.shopping_cart_outlined,
                                   color: kcSecondaryColor,
-                                  size: 16,
+                                  size: 20,
                                 ),
                               ),
                             ],
@@ -1278,7 +1139,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
   @override
   void onDispose(DashboardViewModel viewModel) {
-    viewModel.dispose();
+    // viewModel.dispose();
     _pageController.dispose();
   }
 

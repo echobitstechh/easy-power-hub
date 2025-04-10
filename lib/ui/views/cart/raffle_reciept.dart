@@ -45,38 +45,38 @@ class RaffleReceiptPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: <Widget>[
-                ElevatedButton(
-                  onPressed: () {
-                    createAndSharePdf();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: uiMode.value == AppUiModes.dark
-                        ? kcDarkGreyColor
-                        : kcWhiteColor, // Text and icon color based on theme
-                    backgroundColor: uiMode.value == AppUiModes.dark
-                        ? kcDarkGreyColor
-                        : kcWhiteColor, // Background color based on theme
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.share_outlined, size: 10.0),
-                      SizedBox(width: 4), // This replaces horizontalSpaceTiny
-                      Text('Share Receipt', style: TextStyle(fontSize: 15)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.end,
+          //     crossAxisAlignment: CrossAxisAlignment.end,
+          //     children: <Widget>[
+          //       ElevatedButton(
+          //         onPressed: () {
+          //           createAndSharePdf();
+          //         },
+          //         style: ElevatedButton.styleFrom(
+          //           foregroundColor: uiMode.value == AppUiModes.dark
+          //               ? kcDarkGreyColor
+          //               : kcWhiteColor, // Text and icon color based on theme
+          //           backgroundColor: uiMode.value == AppUiModes.dark
+          //               ? kcDarkGreyColor
+          //               : kcWhiteColor, // Background color based on theme
+          //           shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(10),
+          //           ),
+          //         ),
+          //         child: const Row(
+          //           children: [
+          //             Icon(Icons.share_outlined, size: 10.0),
+          //             SizedBox(width: 4), // This replaces horizontalSpaceTiny
+          //             Text('Share Receipt', style: TextStyle(fontSize: 15)),
+          //           ],
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
           SingleChildScrollView(
             // Use SingleChildScrollView for a single child scrollable widget
             child: ClipPath(
@@ -92,43 +92,43 @@ class RaffleReceiptPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0, vertical: 4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: <Widget>[
-                            ElevatedButton(
-                              onPressed: () {
-                                createAndSharePdf();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                foregroundColor: uiMode.value == AppUiModes.dark
-                                    ? kcWhiteColor
-                                    : kcDarkGreyColor,
-                                backgroundColor: uiMode.value == AppUiModes.dark
-                                    ? kcDarkGreyColor
-                                    : kcWhiteColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Icon(
-                                    Icons.share_outlined,
-                                    size: 20.0,
-                                  ),
-                                  horizontalSpaceTiny,
-                                  Text('Share Receipt',
-                                      style: TextStyle(fontSize: 15)),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(
+                      //       horizontal: 8.0, vertical: 4.0),
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.end,
+                      //     crossAxisAlignment: CrossAxisAlignment.end,
+                      //     children: <Widget>[
+                      //       ElevatedButton(
+                      //         onPressed: () {
+                      //           createAndSharePdf();
+                      //         },
+                      //         style: ElevatedButton.styleFrom(
+                      //           foregroundColor: uiMode.value == AppUiModes.dark
+                      //               ? kcWhiteColor
+                      //               : kcDarkGreyColor,
+                      //           backgroundColor: uiMode.value == AppUiModes.dark
+                      //               ? kcDarkGreyColor
+                      //               : kcWhiteColor,
+                      //           shape: RoundedRectangleBorder(
+                      //             borderRadius: BorderRadius.circular(10),
+                      //           ),
+                      //         ),
+                      //         child: const Row(
+                      //           children: [
+                      //             Icon(
+                      //               Icons.share_outlined,
+                      //               size: 20.0,
+                      //             ),
+                      //             horizontalSpaceTiny,
+                      //             Text('Share Receipt',
+                      //                 style: TextStyle(fontSize: 15)),
+                      //           ],
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                       verticalSpaceMedium,
 
                       Card(
@@ -318,58 +318,14 @@ class RaffleReceiptPage extends StatelessWidget {
       ),
 
       bottomNavigationBar: BottomAppBar(
-        height: 200,
+        height: 300,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    try {
-                      for (var item in cart.value) {
-                        await repo.deleteFromCart(item.product!.id.toString());
-                      }
-                      // Clear the cart after successful deletion
-                      cart.value.clear();
-                    } catch (e) {
-                      print(e); // Handle errors if necessary
-                    }
-                    await locator<LocalStorage>().delete(LocalStorageDir.cart);
-                    cart.notifyListeners();
-
-                    locator<NavigationService>()
-                        .clearStackAndShow(Routes.homeView);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: uiMode.value == AppUiModes.dark
-                        ? kcDarkGreyColor
-                        : kcWhiteColor,
-                    foregroundColor: uiMode.value == AppUiModes.dark
-                        ? kcWhiteColor
-                        : kcDarkGreyColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Icon(Icons.home, color: Colors.black,),
-                      // horizontalSpaceTiny,
-                      Expanded(
-                        child: Text(
-                          'Back Home',
-                          style: TextStyle(fontSize: 15),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              verticalSpaceSmall,
-              Expanded(
+              SizedBox(
+                width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
                     try {
@@ -380,17 +336,10 @@ class RaffleReceiptPage extends StatelessWidget {
                     } catch (e) {
                       print(e);
                     }
-
                     await locator<LocalStorage>().delete(LocalStorageDir.cart);
                     cart.notifyListeners();
 
-                    // First go to home
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);
-
-                    // Then navigate to ServicesView after a short delay
-                    Future.delayed(const Duration(milliseconds: 100), () {
-                      locator<NavigationService>().navigateTo(Routes.ServicesView);
-                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: uiMode.value == AppUiModes.dark
@@ -403,17 +352,60 @@ class RaffleReceiptPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'Order for service',
-                          style: TextStyle(fontSize: 15),
-                        ),
-                      ),
-                    ],
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: Text(
+                      'Back Home',
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Need help setting up or installing your product?\nYou can request a professional installer!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 10),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      for (var item in cart.value) {
+                        await repo.deleteFromCart(item.product!.id.toString());
+                      }
+                      cart.value.clear();
+                    } catch (e) {
+                      print(e);
+                    }
+                    await locator<LocalStorage>().delete(LocalStorageDir.cart);
+                    cart.notifyListeners();
+
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      locator<NavigationService>().navigateTo(Routes.ServicesView);
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kcSecondaryColor,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12.0),
+                    child: Text(
+                      'Request Installation Service',
+                      style: TextStyle(fontSize: 15),
+                    ),
                   ),
                 ),
               ),

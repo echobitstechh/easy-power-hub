@@ -171,6 +171,7 @@ class ShopViewModel extends BaseViewModel {
         // Fetch updated products from API
         List<Product> updatedProductList = (res.data["products"] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active') // Filter out inactive
             .toList();
 
         // Update the product list

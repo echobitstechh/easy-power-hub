@@ -119,20 +119,6 @@ class CartViewModel extends BaseViewModel {
     }
   }
 
-
-  // void clearRaffleCart() async{
-  //   for (var element in itemsToDeleteRaffle) {
-  //     raffleCart.value.remove(element);
-  //   }
-  //   itemsToDelete.clear();
-  //   raffleCart.notifyListeners();
-  //   List<Map<String, dynamic>> storedList =
-  //   raffleCart.value.map((e) => e.toJson()).toList();
-  //   await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-  //   rebuildUi();
-  //   getRaffleSubTotal();
-  // }
-
   void clearRaffleCart(int index) async {
     setBusy(true);
     try {
@@ -283,6 +269,8 @@ class CartViewModel extends BaseViewModel {
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
           cart.value = onlineItems;
+          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
+          cart.notifyListeners();
           notifyListeners();
         } else {
           cart.value.clear();
@@ -296,6 +284,7 @@ class CartViewModel extends BaseViewModel {
       print('Couldn\'t get online cart: $e');
     } finally {
       setBusy(false);
+      cart.notifyListeners();
       isLoading = false;
     }
   }

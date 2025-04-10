@@ -54,7 +54,6 @@ class HomeViewModel extends BaseViewModel {
 
   @override
   void dispose() {
-    // Don't forget to remove the listener when the view model is disposed.
     currentModuleNotifier.removeListener(notifyListeners);
     super.dispose();
   }
@@ -202,7 +201,6 @@ class HomeViewModel extends BaseViewModel {
   }
 
 
-
   Future<void> fetchDeliveredOrders() async {
     setBusy(true);
     try {
@@ -215,14 +213,9 @@ class HomeViewModel extends BaseViewModel {
             .where((order) => order.status == "Delivered")
             .toList();
 
-
-        print("delivered orders are ${deliveredOrders.first.isReviewed}");
-        print("delivered orders are ${deliveredOrders.first.id}");
         List<Order> unratedOrders = deliveredOrders
             .where((order) => order.isReviewed == false)
             .toList();
-
-        print('unreviewed orders are: $unratedOrders');
 
         if (unratedOrders.isNotEmpty) {
           print('found order with false review');
@@ -241,6 +234,34 @@ class HomeViewModel extends BaseViewModel {
       locator<SnackbarService>()
           .showSnackbar(message: "Failed to load orders", duration: Duration(seconds: 2));
       print("Failed to load orders: $e");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> fetchOnlineCart() async {
+    setBusy(true);
+    try {
+      ApiResponse res = await repo.cartList();
+      if (res.statusCode == 200) {
+        List<dynamic> items = res.data["cartItems"] ?? [];
+
+        if (items.isNotEmpty) {
+          List<CartItem> onlineItems = items
+              .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
+              .toList();
+          cart.value = onlineItems;
+          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
+          cart.notifyListeners();
+          notifyListeners();
+        } else {
+          cart.value.clear();
+          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      print('Couldn\'t get online cart: $e');
     } finally {
       setBusy(false);
     }

@@ -19,6 +19,7 @@ class Product {
   String? createdAt;
   String? updatedAt;
   bool? installment;
+  String? status;
   List<String>? reviews;
   List<String>? images;
 
@@ -42,7 +43,8 @@ class Product {
     this.updatedAt,
     this.reviews,
     this.images,
-    this.installment
+    this.installment,
+    this.status,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -66,6 +68,7 @@ class Product {
     reviews = json['reviews'] != null ? List<String>.from(json['reviews']) : null;
     images = json['images'] != null ? List<String>.from(json['images']) : null;
     installment = json['installment'];
+    status = json['status'];
   }
 
   Map<String, dynamic> toJson() {
@@ -88,6 +91,7 @@ class Product {
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
     data['installment'] = installment;
+    data['status'] = status;
     if (reviews != null) {
       data['reviews'] = reviews;
     }

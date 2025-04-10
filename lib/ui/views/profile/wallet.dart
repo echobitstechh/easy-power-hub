@@ -1,48 +1,26 @@
 import 'package:easyph/app/app.locator.dart';
-
 import 'package:easyph/app/app.router.dart';
-
 import 'package:easyph/core/data/models/profile.dart';
-
 import 'package:easyph/core/data/repositories/repository.dart';
-
 import 'package:easyph/core/network/api_response.dart';
-
 import 'package:easyph/ui/common/app_colors.dart';
-
 import 'package:easyph/ui/common/ui_helpers.dart';
-
-import 'package:easyph/ui/components/submit_button.dart';
-
 import 'package:animated_segmented_tab_control/animated_segmented_tab_control.dart';
-
-import 'package:flutter/cupertino.dart';
-
 import 'package:flutter/material.dart';
-
 import 'package:easyph/core/data/models/profile.dart' as pro;
-
-import 'package:flutter/widgets.dart';
-
 import 'package:flutter_svg/svg.dart';
-
 import 'package:google_fonts/google_fonts.dart';
-
-import 'package:intl/intl.dart';
-
 import 'package:stacked_services/stacked_services.dart';
-
 import '../../../core/data/models/transaction.dart';
-
 import '../../../state.dart';
-
 import '../../../utils/depositPaymentModal.dart';
 import '../../../utils/withdrawalPaymentModal.dart';
 import '../../components/empty_state.dart';
+import 'package:intl/intl.dart';
 
+import '../../components/submit_button.dart';
 import '../../components/text_field_widget.dart';
 
-import 'full_transaction_page.dart';
 
 class Wallet extends StatefulWidget {
   const Wallet({Key? key}) : super(key: key);

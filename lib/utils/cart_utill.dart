@@ -8,7 +8,7 @@ double getRaffleSubTotal(List<CartItem> cart) {
 
   for (var element in cart) {
     // Convert the price from string to double before performing the multiplication
-    double price = double.parse(element.product!.price!);
+    double price = double.parse(element.product!.salePrice!);
 
     total = total + (price * element.quantity!);
   }

@@ -28,6 +28,7 @@ class DashboardViewModel extends BaseViewModel {
   List<Category> categories = [];
   double discountAmount = 0.0;
   bool freeDelivery = false;
+  Set<String> loadingItems = {};
 
   static const int allCategoriesId = 0;
 
@@ -37,13 +38,6 @@ class DashboardViewModel extends BaseViewModel {
 
   bool appBarLoading = false;
   final snackBar = locator<SnackbarService>();
-
-  // File? selectedFile;
-  //
-  // void updateProfileImage(File? file) {
-  //     selectedFile = file;
-  //     notifyListeners();
-  // }
 
   void setSelectedCategory(int id) {
     selectedId = id;
@@ -65,11 +59,11 @@ class DashboardViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  @override
-  void dispose() {
-    // controller.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   // controller.dispose();
+  //   super.dispose();
+  // }
 
 
   void initialise() {
@@ -155,6 +149,7 @@ class DashboardViewModel extends BaseViewModel {
         // Fetch updated products from API
         List<Product> updatedProductList = (res.data["products"] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active') // Filter out inactive
             .toList();
 
         // Update the product list
@@ -173,7 +168,6 @@ class DashboardViewModel extends BaseViewModel {
       log.e("Error fetching products: $e");
     }
   }
-
 
   Future<void> loadCategories() async {
     try {
@@ -235,6 +229,8 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void addToRaffleCart(Product product) async {
+    loadingItems.add(product.id!);
+    notifyListeners();
     try {
       final existingIndex = cart.value.indexWhere(
             (raffleItem) => raffleItem.product?.id == product.id,
@@ -288,6 +284,7 @@ class DashboardViewModel extends BaseViewModel {
           message: "Failed to add raffle to cart: $e",
           duration: Duration(seconds: 2));
     } finally {
+      loadingItems.remove(product.id);
       notifyListeners();
     }
   }
@@ -306,6 +303,7 @@ class DashboardViewModel extends BaseViewModel {
     print("Discount Applied: \$${discountAmount.toStringAsFixed(2)}");
     print("Free Delivery: $freeDelivery");
   }
+
   void onEnd() {
     print('onEnd');
     //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT

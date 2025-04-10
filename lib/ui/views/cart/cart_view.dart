@@ -5,6 +5,7 @@ import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/components/empty_state.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
@@ -40,22 +41,6 @@ class CartView extends StackedView<CartViewModel> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          // viewModel.itemsToDeleteRaffle.isNotEmpty
-          //     ? InkWell(
-          //   onTap: () {
-          //     viewModel.clearRaffleCart();
-          //   },
-          //   child: const Padding(
-          //     padding: EdgeInsets.all(20.0),
-          //     child: Text(
-          //       "Delete",
-          //       style: TextStyle(color: Colors.red),
-          //     ),
-          //   ),
-          // )
-          //     : const SizedBox()
-        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -412,214 +397,119 @@ class CartView extends StackedView<CartViewModel> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text(
+                              "Subtotal:",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w500, fontSize: 14),
+                            ),
+                            horizontalSpaceTiny,
+                            Text(
+                              MoneyUtils().formatAmount(viewModel.cartSubtotal),
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Text(
+                              "Discount:",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w500, fontSize: 14),
+                            ),
+                            horizontalSpaceTiny,
+                            Text(
+                              "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold),
+                            ),
+
+                          ],
+                        ),
+
+                        Row(
+                          children: [
+                            const Text(
+                              "Total",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            horizontalSpaceTiny,
+                            Text(
+                              MoneyUtils().formatAmount(viewModel.cartFinalTotal),
+                              style: const TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            horizontalSpaceLarge,
+                    
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          const Text(
-                            "Subtotal",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500, fontSize: 14),
-                          ),
-                          horizontalSpaceTiny,
-                          Text(
-                            MoneyUtils().formatAmount(viewModel.cartSubtotal),
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          horizontalSpaceSmall,
-                          const Text(
-                            "Discount",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500, fontSize: 14),
-                          ),
-                          horizontalSpaceTiny,
-                          Text(
-                            "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
-                            style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          const Text(
-                            "Final Total",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          horizontalSpaceTiny,
-                          Text(
-                            MoneyUtils().formatAmount(viewModel.cartFinalTotal),
-                            style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          horizontalSpaceLarge,
-                          InkWell(
-                            onTap: () {
-                              //_showPaymentModal(context, viewModel);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context ) => Checkout(viewModel: viewModel,
-                                    infoList: [],
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 8.0),
-                              margin: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: kcPrimaryColor,
-                                borderRadius: BorderRadius.circular(5),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 4,
-                                    offset: Offset(
-                                        0, -2), // Shadow for the top edge
-                                  ),
-                                ],
-                                border: Border.all(color: kcPrimaryColor),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "Checkout",
-                                    style: GoogleFonts.redHatDisplay(
-                                      textStyle: const TextStyle(
-                                        color: kcWhiteColor,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                      InkWell(
+                        onTap: () {
+                          //_showPaymentModal(context, viewModel);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context ) => Checkout(viewModel: viewModel,
                               ),
                             ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 8.0),
+                          margin: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: kcPrimaryColor,
+                            borderRadius: BorderRadius.circular(5),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4,
+                                offset: Offset(
+                                    0, -2), // Shadow for the top edge
+                              ),
+                            ],
+                            border: Border.all(color: kcPrimaryColor),
                           ),
-                        ],
+                          child: Row(
+                            children: [
+                              Text(
+                                "Checkout",
+                                style: GoogleFonts.redHatDisplay(
+                                  textStyle: const TextStyle(
+                                    color: kcWhiteColor,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ],
-                  ),
+                  )
                 ],
               ),
             ),
     ));
   }
 
-  Widget _buildProceedToPayButton(
-      BuildContext context, CartViewModel viewModel) {
-    return ElevatedButton(
-      onPressed: () {
-        _showPaymentModal(context, viewModel);
-      },
-      style: ElevatedButton.styleFrom(
-        foregroundColor: kcPrimaryColor,
-        backgroundColor: kcSecondaryColor, // Text color
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8), // Button corner radius
-        ),
-        elevation: 0, // Remove elevation
-        textStyle: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16, // Adjust the font size as needed
-        ),
-      ),
-      child: const Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Proceed to Pay",
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Panchang"),
-          ),
-          SizedBox(width: 8),
-          Icon(
-            Icons.arrow_forward, // Use the appropriate icon
-          ),
-        ],
-      ),
-    );
-  }
-
-  // void _showPaymentModal(BuildContext context, CartViewModel viewModel) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: Colors.transparent,
-  //     builder: (BuildContext context) {
-  //     return ValueListenableBuilder<PaymentMethod>(
-  //         valueListenable: viewModel.selectedPaymentMethod,
-  //         builder: (context, value, child) {
-  //       return DraggableScrollableSheet(
-  //       expand: false,
-  //       builder: (_, controller) {
-  //         return ValueListenableBuilder<bool>(
-  //           valueListenable: viewModel.isPaymentProcessing,
-  //           builder: (context, isProcessing, child) {
-  //             return PaymentModalWidget(
-  //               onPaymentMethodSelected: (PaymentMethod method) {
-  //                 viewModel.selectMethod(method);
-  //               },
-  //               onProceedWithPayment: ()  async {
-  //                 viewModel.checkoutRaffle(context);
-  //               },
-  //               totalAmount: (viewModel.raffleSubTotal),
-  //               selectedPaymentMethod: viewModel.selectedPaymentMethod.value,
-  //               isPaymentProcessing: isProcessing,
-  //             );
-  //           });
-  //       },
-  //     );
-  //       });
-  //     },
-  //   );
-  // }
-
-  void _showPaymentModal(BuildContext context, CartViewModel viewModel) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return ValueListenableBuilder<PaymentMethod>(
-          valueListenable: viewModel.selectedPaymentMethod,
-          builder: (context, value, child) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(25.0),
-                  topRight: Radius.circular(25.0),
-                ),
-              ),
-              child: PaymentModalWidget(
-                onPaymentMethodSelected: (PaymentMethod method) {
-                  viewModel.selectMethod(method);
-                },
-                onProceedWithPayment: () async {
-                  viewModel.checkoutRaffle(context);
-                },
-                totalAmount: viewModel.raffleSubTotal,
-                selectedPaymentMethod: viewModel.selectedPaymentMethod.value,
-                isPaymentProcessing: viewModel.isPaymentProcessing.value,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
 
   @override
   void onViewModelReady(CartViewModel viewModel) {

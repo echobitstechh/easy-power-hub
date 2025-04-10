@@ -13,11 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/cart_item.dart';
-import '../../../core/data/models/order_item.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
 import '../../../core/network/interceptors.dart';
-import '../../../core/utils/local_store_dir.dart';
-import '../../../core/utils/local_stotage.dart';
 import '../../../utils/money_util.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/text_field_widget.dart';
@@ -25,11 +21,9 @@ import 'add_shipping.dart';
 import 'cart_viewmodel.dart';
 
 class Checkout extends StatefulWidget {
-  final List<OrderInfo> infoList;
   final CartViewModel viewModel;
 
   const Checkout({
-    required this.infoList,
     Key? key,
     required this.viewModel,
   }) : super(key: key);
@@ -42,6 +36,7 @@ class _CheckoutState extends State<Checkout> {
   bool loading = false;
   bool isShippingLoading = false;
   String paymentMethod = "paystack";
+  String pickUpOption = "Pickup";
   String shippingId = "";
   bool makingDefault = false;
   String publicKeyTest = MoneyUtils().payStackPublicKey;
@@ -89,33 +84,31 @@ class _CheckoutState extends State<Checkout> {
                     children: List.generate(cart.value.length, (index) {
                       CartItem item = cart.value[index];
 
-                      return GestureDetector(
-                        onTap: () {
-                          // viewModel.addRemoveDelete(index);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 10),
-                          padding: const EdgeInsets.all(10),
-                          // height: 100,
-                          decoration: BoxDecoration(
-                            color: uiMode.value == AppUiModes.light
-                                ? kcWhiteColor
-                                : kcBlackColor,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                  color:
-                                      const Color(0xFFE5E5E5).withOpacity(0.4),
-                                  offset: const Offset(8.8, 8.8),
-                                  blurRadius: 8.8)
-                            ],
-                          ),
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 5),
+                        padding: const EdgeInsets.all(10),
+                        // height: 100,
+                        decoration: BoxDecoration(
+                          color: uiMode.value == AppUiModes.light
+                              ? kcWhiteColor
+                              : kcBlackColor,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                                color:
+                                    const Color(0xFFE5E5E5).withOpacity(0.4),
+                                offset: const Offset(8.8, 8.8),
+                                blurRadius: 8.8)
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                height: 65,
-                                width: 65,
+                                height: 25,
+                                width: 25,
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(8),
                                   image: (item.product?.images?.isNotEmpty ==
@@ -136,13 +129,14 @@ class _CheckoutState extends State<Checkout> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(item.product!.productName ?? ""),
+                                    Text(item.product!.productName ?? "", style: const TextStyle(
+                                        fontSize: 10),),
                                     verticalSpaceTiny,
                                     Text(
                                       "N${item.product!.salePrice}",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16),
+                                          fontSize: 12),
                                     )
                                   ],
                                 ),
@@ -154,7 +148,7 @@ class _CheckoutState extends State<Checkout> {
                     }),
                   ),
                 ),
-                verticalSpaceMedium,
+                verticalSpaceSmall,
                 Card(
                   child: ExpansionTile(
                     initiallyExpanded: true,
@@ -164,7 +158,7 @@ class _CheckoutState extends State<Checkout> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     children: [
-                      verticalSpaceMedium,
+                      verticalSpaceSmall,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -182,7 +176,7 @@ class _CheckoutState extends State<Checkout> {
                           ),
                         ],
                       ),
-                      verticalSpaceSmall,
+                      verticalSpaceTiny,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -194,14 +188,14 @@ class _CheckoutState extends State<Checkout> {
                           ),
                           Text(
                             getDeliveryFee() == 0
-                                ? "Free"
+                                ? "-"
                                 : "N${getDeliveryFee()}",
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                      verticalSpaceSmall,
+                      verticalSpaceTiny,
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -221,7 +215,7 @@ class _CheckoutState extends State<Checkout> {
                           ),
                         ],
                       ),
-                      verticalSpaceSmall,
+                      verticalSpaceTiny,
                       if (freeDelivery)
                         const Text(
                           "Free Delivery Applied!",
@@ -251,11 +245,11 @@ class _CheckoutState extends State<Checkout> {
                           ),
                         ],
                       ),
-                      verticalSpaceMedium
+                      verticalSpaceSmall
                     ],
                   ),
                 ),
-                verticalSpaceMedium,
+                verticalSpaceSmall,
                 Card(
                   child: ExpansionTile(
                     initiallyExpanded: true,
@@ -310,7 +304,84 @@ class _CheckoutState extends State<Checkout> {
                     ],
                   ),
                 ),
-                verticalSpaceMedium,
+                verticalSpaceSmall,
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    title: const Text(
+                      "Delivery method",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+
+                      /// pickup station
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            pickUpOption = "Pickup";
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          height: 70,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: kcBlackColor, width: 0.5)),
+                          child: Row(
+                            children: [
+                              _buildDeliveryRadioIcon("Pickup"),
+                              horizontalSpaceSmall,
+                              const Text(
+                                "Pickup station",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              horizontalSpaceSmall,
+                              const Expanded(
+                                child: Text(
+                                  "You will be notified when your order is ready for pickup",
+                                  style: TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      verticalSpaceSmall,
+                      /// home delivery
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            pickUpOption = "Delivery";
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          height: 70,
+                          decoration: BoxDecoration(
+                              border: Border.all(color: kcBlackColor, width: 0.5)),
+                          child: Row(
+                            children: [
+                              _buildDeliveryRadioIcon("Delivery"),
+                              horizontalSpaceSmall,
+                              const Text(
+                                "Home delivery",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              horizontalSpaceSmall,
+                              const Expanded(
+                                child: Text(
+                                  "Your order will be delivered to your address",
+                                  style: TextStyle(fontSize: 11),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                verticalSpaceSmall,
                 Card(
                   child: ExpansionTile(
                     initiallyExpanded: true,
@@ -385,7 +456,6 @@ class _CheckoutState extends State<Checkout> {
                         ),
                       ),
                       verticalSpaceSmall,
-
                       /// --- Info Row ---
                       Row(
                         children: const [
@@ -420,11 +490,7 @@ class _CheckoutState extends State<Checkout> {
                     });
 
                     try {
-                      if (paymentMethod == "paystack") {
-                        await chargeCard(getSubTotal() + getDeliveryFee());
-                      } else if (paymentMethod == "delivery") {
-                        await confirmOrder(); // You can define this method based on your backend/order logic
-                      }
+                        await chargeCard(getSubTotal() + getDeliveryFee(), paymentMethod);
                     } catch (e) {
                       print("Payment Error: $e");
                     }
@@ -489,15 +555,16 @@ class _CheckoutState extends State<Checkout> {
     return total;
   }
 
-  Future<void> chargeCard(int amount) async {
+  Future<void> chargeCard(int amount, String paymentMethod) async {
     setState(() {
       isPaying = true;
     });
 
     // Build the new request body
     Map<String, dynamic> requestBody = {
-      "orderType": "purchase",
-      "promoCode": "", // Replace with dynamic promoCode if available
+      "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
+      "deliveryOption": pickUpOption,
+      "promoCode": "",
       "shippingFee": getDeliveryFee(),
       "installmentPayment": false,
       "productsData": cart.value.map((item) {
@@ -546,6 +613,24 @@ class _CheckoutState extends State<Checkout> {
               .showSnackbar(message: "Payment failed. Please try again.");
         }
       }
+      else{
+        // Handle other payment methods here
+        print('Payment method: $paymentMethod');
+        // Show success message or navigate to receipt page
+        locator<SnackbarService>().showSnackbar(
+          message: "Order placed successfully",
+          duration: const Duration(seconds: 2),
+        );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RaffleReceiptPage(
+              carts: cart.value, // Pass cleared cart or saved items
+            ),
+          ),
+        );
+
+      }
       // Navigate to the receipt page with the `Order` object
     } else {
       locator<SnackbarService>().showSnackbar(
@@ -557,18 +642,6 @@ class _CheckoutState extends State<Checkout> {
       isPaying = false;
     });
   }
-  // void showReceipt(Map<String, dynamic> info) {
-  //   print(getSubTotal());
-  //   showModalBottomSheet(
-  //     isScrollControlled: true,
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return ReceiptWidget(
-  //         info: info,
-  //       );
-  //     },
-  //   );
-  // }
 
   void showAddAddressBottomSheet() {
     String name = '';
@@ -707,10 +780,13 @@ class _CheckoutState extends State<Checkout> {
         duration: const Duration(seconds: 2),
       );
     } finally {
-      setState(() async {
-        await getShippings();
-        loading = false;
-      });
+      if(mounted){
+        setState(() async {
+          await getShippings();
+          loading = false;
+        });
+      }
+
     }
   }
 
@@ -735,6 +811,9 @@ class _CheckoutState extends State<Checkout> {
 
         setState(() {
           shippingAddresses = fetchedAddresses;
+          shippingId = fetchedAddresses.isNotEmpty
+              ? fetchedAddresses[0].id
+              : "";
         });
       } else {
         locator<SnackbarService>().showSnackbar(
@@ -750,11 +829,15 @@ class _CheckoutState extends State<Checkout> {
       );
     } finally {
       // Stop the loading state
-      setState(() {
-        isShippingLoading = false;
-      });
+      if(mounted){
+        setState(() {
+          isShippingLoading = false;
+        });
+      }
+
     }
   }
+
   Widget _buildRadioIcon(String method) {
     return Container(
       height: 15,
@@ -770,9 +853,21 @@ class _CheckoutState extends State<Checkout> {
           : const SizedBox(),
     );
   }
-  Future<void> confirmOrder() async {
-    // Send order to backend without payment
-    print("Order confirmed for Pay on Delivery.");
+
+  Widget _buildDeliveryRadioIcon(String method) {
+    return Container(
+      height: 15,
+      width: 15,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: kcBlackColor, width: 1),
+      ),
+      child: pickUpOption == method
+          ? const Center(
+        child: Icon(Icons.check, size: 12),
+      )
+          : const SizedBox(),
+    );
   }
 
 }

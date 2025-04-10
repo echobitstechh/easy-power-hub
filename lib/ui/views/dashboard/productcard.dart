@@ -101,10 +101,12 @@ class _ProductCardState extends State<ProductCard> {
             .toList();
         print('loaded products from local storage list ${productList.length}');
         print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
-        setState(() {
-          productList = productList;
-          filteredProductList = productList.where((product) => product.categoryId == widget.product.categoryId).toList();
-        });
+        if(mounted){
+          setState(() {
+            productList = productList;
+            filteredProductList = productList.where((product) => product.categoryId == widget.product.categoryId).toList();
+          });
+        }
       }else{
         print('no value to load');
       }
@@ -170,9 +172,11 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   void updateImage(String imagePath) {
-    setState(() {
-      selectedImage = imagePath;
-    });
+    if(mounted) {
+      setState(() {
+        selectedImage = imagePath;
+      });
+    }
   }
 
   @override
@@ -346,9 +350,11 @@ class _ProductCardState extends State<ProductCard> {
                                       children: [
                                         InkWell(
                                           onTap: (){
-                                            setState(() {
-                                              decreaseRaffleQuantity(cartItem);
-                                            });
+                                            if(mounted){
+                                              setState(() {
+                                                decreaseRaffleQuantity(cartItem);
+                                              });
+                                            }
                                             },
                                           child: Container(
                                             height: 30,
@@ -373,9 +379,11 @@ class _ProductCardState extends State<ProductCard> {
                                         horizontalSpaceSmall,
                                         InkWell(
                                           onTap: (){
-                                            setState(() {
-                                              increaseRaffleQuantity(cartItem);
-                                            });
+                                            if(mounted){
+                                              setState(() {
+                                                increaseRaffleQuantity(cartItem);
+                                              });
+                                            }
                                             },
                                           child: Container(
                                             height: 30,
@@ -401,9 +409,11 @@ class _ProductCardState extends State<ProductCard> {
                             )
                                 : InkWell(
                               onTap: () async {
-                                setState(() {
-                                  addToRaffleCart(widget.product);
-                                });
+                                if(mounted){
+                                  setState(() {
+                                    addToRaffleCart(widget.product);
+                                  });
+                                }
                               },
                               child: Container(
                                 height: 50,
@@ -441,9 +451,11 @@ class _ProductCardState extends State<ProductCard> {
                         color: isFavorited ? kcSecondaryColor : iconColor, // Toggle color
                       ),
                       onPressed: () {
-                        setState(() {
-                          isFavorited = !isFavorited; // Toggle the boolean
-                        });
+                        if(mounted){
+                          setState(() {
+                            isFavorited = !isFavorited; // Toggle the boolean
+                          });
+                        }
                       },
                     ),
 

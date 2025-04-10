@@ -55,11 +55,8 @@ class HomeView extends StackedView<HomeViewModel> {
   @override
   void onViewModelReady(HomeViewModel viewModel) {
     if (userLoggedIn.value == true) {
-      // Instead of fetching the online cart, we now fetch delivered orders.
       viewModel.fetchDeliveredOrders();
-      // If you need to keep both functionalities, you can call both:
-      // viewModel.fetchOnlineCart();
-      // viewModel.fetchDeliveredOrders();
+      viewModel.fetchOnlineCart();
     }
     super.onViewModelReady(viewModel);
   }
