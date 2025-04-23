@@ -10,8 +10,14 @@ import 'package:easyph/ui/components/empty_state.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:stacked_services/stacked_services.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/order_item.dart';
+import '../../../core/network/interceptors.dart';
+import '../../../core/utils/paystack_util.dart';
+import '../../../state.dart';
+import '../../components/submit_button.dart';
 
 /// Define the backend OrderStatus enum
 enum OrderStatus { Pending, Processing, Delivered, Cancelled, Returns }
@@ -21,6 +27,7 @@ OrderStatus getOrderStatusEnum(String status) {
   if (status == "Pending") return OrderStatus.Pending;
   if (status == "Processing") return OrderStatus.Processing;
   if (status == "Completed") return OrderStatus.Delivered;
+  if (status == "Delivered") return OrderStatus.Delivered;
   if (status == "Cancelled") return OrderStatus.Cancelled;
   if (status == "Returns") return OrderStatus.Returns;
   return OrderStatus.Pending;
@@ -41,7 +48,7 @@ List<Map<String, dynamic>> getTimelineSteps(OrderStatus currentStatus) {
     },
     {
       'status': OrderStatus.Delivered,
-      'title': 'Order Shipped',
+      'title': 'Order Delivered',
       'description': 'We have shipped your order',
     },
     {
@@ -58,11 +65,11 @@ List<Map<String, dynamic>> getTimelineSteps(OrderStatus currentStatus) {
 
   // Filter out "Returns"
   final filteredSteps =
-  allSteps.where((step) => step['status'] != OrderStatus.Returns).toList();
+      allSteps.where((step) => step['status'] != OrderStatus.Returns).toList();
 
   // Determine the index of the current status
   final currentIndex =
-  filteredSteps.indexWhere((step) => step['status'] == currentStatus);
+      filteredSteps.indexWhere((step) => step['status'] == currentStatus);
 
   // Mark each step with flags for first, last, completed and active
   for (int i = 0; i < filteredSteps.length; i++) {
@@ -99,11 +106,15 @@ class _OrderListState extends State<OrderList> {
       debugPrint("API Response: ${res.data}"); // Print full response data
 
       if (res.statusCode == 200) {
+        final fetchedOrders = (res.data["orders"] as List)
+            .map((order) => Order.fromJson(Map<String, dynamic>.from(order)))
+            .toList();
+
+        // Sort the orders by createdAt in descending order (latest first)
+        fetchedOrders.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         setState(() {
-          orders = (res.data["orders"] as List)
-              .map((order) =>
-              Order.fromJson(Map<String, dynamic>.from(order)))
-              .toList();
+          orders = fetchedOrders;
         });
       }
     } catch (e) {
@@ -114,13 +125,22 @@ class _OrderListState extends State<OrderList> {
   }
 
   List<Order> _pendingOrders() {
-    return orders.where((order) => order.status == "Pending").toList();
+    return orders
+        .where((order) =>
+            order.status == "Pending")
+        .toList();
+  }
+
+  List<Order> _processingOrders() {
+    return orders
+        .where((order) => order.status == "Processing")
+        .toList();
   }
 
   List<Order> _completedOrders() {
     return orders
         .where((order) =>
-    order.status == "Cancelled" || order.status == "Completed")
+            order.status == "Cancelled" || order.status == "Delivered")
         .toList();
   }
 
@@ -137,25 +157,26 @@ class _OrderListState extends State<OrderList> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : orders.isEmpty
-          ? const EmptyState(
-          animation: "empty_order.json", label: "No Orders Yet")
-          : DefaultTabController(
-        length: 2,
-        child: Column(
-          children: [
-            _buildTabBar(),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  _buildOrderList(_pendingOrders(), "Pending Orders"),
-                  _buildOrderList(
-                      _completedOrders(), "Completed Orders"),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+              ? const EmptyState(
+                  animation: "empty_order.json", label: "No Orders Yet")
+              : DefaultTabController(
+                  length: 2,
+                  child: Column(
+                    children: [
+                      _buildTabBar(),
+                      Expanded(
+                        child: TabBarView(
+                          children: [
+                            _buildOrderList(_pendingOrders(), "Pending Orders"),
+                            _buildOrderList(_processingOrders(), "Processing Orders"),
+                            _buildOrderList(
+                                _completedOrders(), "Completed Orders"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 
@@ -169,11 +190,14 @@ class _OrderListState extends State<OrderList> {
           unselectedLabelColor: Colors.black,
           indicator: const BoxDecoration(
             color: kcPrimaryColor,
-            borderRadius: BorderRadius.all(Radius.circular(8)), // Optional for rounded edges
+            borderRadius: BorderRadius.all(
+                Radius.circular(8)), // Optional for rounded edges
           ),
-          indicatorSize: TabBarIndicatorSize.tab, // Makes the indicator cover full tab width
+          indicatorSize: TabBarIndicatorSize
+              .tab, // Makes the indicator cover full tab width
           tabs: [
             Tab(text: "Pending (${_pendingOrders().length})"),
+            Tab(text: "Processing (${_processingOrders().length})"),
             Tab(text: "Completed (${_completedOrders().length})"),
           ],
         ),
@@ -197,8 +221,7 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildOrderCard(Order order) {
-    Product? product =
-    order.products.isNotEmpty ? order.products.first : null;
+    Product? product = order.products.isNotEmpty ? order.products.first : null;
     final imageUrl = product != null && product.images!.isNotEmpty
         ? product.images!.first
         : "https://via.placeholder.com/120";
@@ -208,8 +231,7 @@ class _OrderListState extends State<OrderList> {
       onTap: () => showTimelineBottomSheet(context, order),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
@@ -221,7 +243,7 @@ class _OrderListState extends State<OrderList> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
-                    onTap: () => showTimelineBottomSheet(context,order),
+                    onTap: () => showTimelineBottomSheet(context, order),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
@@ -238,8 +260,8 @@ class _OrderListState extends State<OrderList> {
                     ),
                   ),
                   Text(" ${order.status}",
-                      style: const TextStyle(
-                          fontSize: 14, color: kcOrangeColor)),
+                      style:
+                          const TextStyle(fontSize: 14, color: kcOrangeColor)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -274,14 +296,13 @@ class _OrderListState extends State<OrderList> {
               ),
               const Divider(),
               ...order.products.map((product) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: _buildOrderDetails(
-                    product,
-                    product.images != null &&
-                        product.images!.isNotEmpty
-                        ? product.images!.first
-                        : "https://placehold.co/400"),
-              )),
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: _buildOrderDetails(
+                        product,
+                        product.images != null && product.images!.isNotEmpty
+                            ? product.images!.first
+                            : "https://placehold.co/400"),
+                  )),
               const SizedBox(height: 20),
             ],
           ),
@@ -292,6 +313,7 @@ class _OrderListState extends State<OrderList> {
 
   /// Modified to accept the tapped order so we can build the timeline dynamically
   void showTimelineBottomSheet(BuildContext context, Order order) {
+    print("Order Status: ${order.status}");
     final orderStatusEnum = getOrderStatusEnum(order.status);
     showModalBottomSheet(
       context: context,
@@ -303,6 +325,7 @@ class _OrderListState extends State<OrderList> {
 
   /// Modified bottom sheet content that builds the timeline dynamically
   Widget _buildBottomSheetContent(OrderStatus currentStatus) {
+    print("Current Status: $currentStatus");
     final timelineEntries = getTimelineSteps(currentStatus);
 
     return DraggableScrollableSheet(
@@ -314,8 +337,7 @@ class _OrderListState extends State<OrderList> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -338,8 +360,7 @@ class _OrderListState extends State<OrderList> {
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(
-                  controller:
-                  scrollController, // Allows scrolling inside sheet
+                  controller: scrollController, // Allows scrolling inside sheet
                   itemCount: timelineEntries.length,
                   itemBuilder: (context, index) {
                     final entry = timelineEntries[index];
@@ -358,22 +379,21 @@ class _OrderListState extends State<OrderList> {
                         color: isActive
                             ? kcPrimaryColor
                             : isCompleted
-                            ? kcVeryLightGrey
-                            : kcVeryLightGrey,
+                                ? kcVeryLightGrey
+                                : kcVeryLightGrey,
                         iconStyle: isCompleted
                             ? IconStyle(
-                          iconData: Icons.check,
-                          color: kcPrimaryColor,
-                        )
+                                iconData: Icons.check,
+                                color: kcPrimaryColor,
+                              )
                             : null,
                       ),
                       beforeLineStyle: LineStyle(
-                        color:
-                        isCompleted ? kcPrimaryColor : kcPrimaryColor,
+                        color: isCompleted ? kcPrimaryColor : kcPrimaryColor,
                         thickness: 3,
                       ),
-                      afterLineStyle: const LineStyle(
-                          color: kcPrimaryColor, thickness: 3),
+                      afterLineStyle:
+                          const LineStyle(color: kcPrimaryColor, thickness: 3),
                       endChild: _buildTimelineCard(
                         title: entry['title'] as String,
                         description: entry['description'] as String,
@@ -393,16 +413,14 @@ class _OrderListState extends State<OrderList> {
   /// Modified timeline card that changes its background based on active state
   Widget _buildTimelineCard(
       {required String title,
-        required String description,
-        bool isActive = false}) {
+      required String description,
+      bool isActive = false}) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
         // constraints: const BoxConstraints(minHeight: 10),
         decoration: BoxDecoration(
-          color: isActive
-              ? kcPrimaryColor
-              : Colors.grey.withOpacity(0.9),
+          color: isActive ? kcPrimaryColor : Colors.grey.withOpacity(0.9),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white, width: 1),
         ),
@@ -419,8 +437,7 @@ class _OrderListState extends State<OrderList> {
                         fontSize: 18)),
                 const SizedBox(height: 8),
                 Text(description,
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: 14)),
+                    style: const TextStyle(color: Colors.white, fontSize: 14)),
               ],
             ),
           ),
@@ -442,11 +459,9 @@ class _OrderListState extends State<OrderList> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             Text("Quantity: ${order.quantity}",
-                style:
-                const TextStyle(fontSize: 12, color: Colors.grey)),
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
             Text("Tracking: ${order.trackingNumber}",
-                style:
-                const TextStyle(fontSize: 12, color: Colors.grey)),
+                style: const TextStyle(fontSize: 12, color: Colors.grey)),
             verticalSpaceSmall,
             Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
                 style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -479,8 +494,8 @@ class _OrderListState extends State<OrderList> {
             children: [
               Text(
                 product?.productName ?? "Unknown Product",
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16),
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 4),
               Text(
@@ -494,33 +509,84 @@ class _OrderListState extends State<OrderList> {
   }
 
   Widget _buildOrderActions(Order order) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        if (order.status == "Pending")
-        // ElevatedButton.icon(
-        //   onPressed: () {},
-        //   icon: const Icon(Icons.payment, size: 16),
-        //   label: const Text("Make Payment"),
-        //   style: ElevatedButton.styleFrom(backgroundColor: kcSecondaryColor),
-        // ),
-          if (order.status == "Cancelled")
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.cancel_outlined, size: 16),
-              label: const Text("Cancelled"),
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent),
-            ),
-        if (order.status == "Completed")
-          ElevatedButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.star, size: 16),
-            label: const Text("Leave Review"),
-            style:
-            ElevatedButton.styleFrom(backgroundColor: kcPrimaryColor),
+    List<Widget> actions = [];
+
+    if (order.isPaid == false &&
+        order.status != "Cancelled" &&
+        order.status != "Completed") {
+      actions.add(
+        SubmitButton(
+          isLoading: false,
+          label: "Make Payment",
+          submit: () async {
+            final miniCartItems = order.products.map((item) => CartItem(
+              product: item,
+              quantity: order.quantity,
+              price: double.tryParse(item.salePrice ?? '0.0') ?? 0.0,
+            )).toList();
+
+              ApiResponse response = await repo.initializePayment({
+                'paymentMethod': 'CreditCard',
+                'paymentType': 'Paystack',
+                'orderId': order.id,
+              });
+              if (response.statusCode == 200) {
+                print('Payment initialized successfully');
+                await PaystackUtil.processPayment(
+                  context: context,
+                  ref: response.data['data']['reference'],
+                  amountInNaira: order.totalPrice,
+                  email: profile.value.email!,
+                  cartItems: cart.value,
+                  deliveryFee: 0,
+                );
+              }else{
+                locator<SnackbarService>().showSnackbar(message: "Payment processing failed",
+                    duration: const Duration(seconds: 3));
+              }
+
+          },
+          boldText: true,
+          color: kcPrimaryColor,
+        ),
+      );
+    }
+
+    if (order.status == "Cancelled") {
+      actions.add(
+        ElevatedButton.icon(
+          onPressed: null,
+          icon: const Icon(Icons.cancel_outlined, size: 16),
+          label: const Text("Cancelled"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+            disabledForegroundColor: Colors.white,
           ),
-      ],
-    );
+        ),
+      );
+    }
+
+    if (order.status == "Completed") {
+      actions.add(
+        ElevatedButton.icon(
+          onPressed: () {},
+          icon: const Icon(Icons.star, size: 16),
+          label: const Text("Leave Review"),
+          style: ElevatedButton.styleFrom(backgroundColor: kcPrimaryColor),
+        ),
+      );
+    }
+
+    return actions.isNotEmpty
+        ? Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: actions.map((e) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: e,
+      )).toList(),
+    )
+        : const SizedBox();
   }
+
+
 }

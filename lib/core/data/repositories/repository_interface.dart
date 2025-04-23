@@ -19,7 +19,11 @@ abstract class IRepository {
 
   Future<ApiResponse> sendOtp(Map<String, dynamic> req);
 
+  Future<ApiResponse> initializePayment(Map<String, dynamic> req);
+
   Future<ApiResponse> getProducts();
+
+  Future<ApiResponse> getReviews( String productId);
 
   Future<ApiResponse> getRaffle();
 

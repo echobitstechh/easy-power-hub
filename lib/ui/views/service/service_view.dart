@@ -68,6 +68,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                             service.image ?? 'assets/images/default.png',
                             service.name,
                             service.description,
+                            service.phoneNumber ?? 'N/A',
                             '\$${service.price.toStringAsFixed(2)}',
                             viewModel
                           );
@@ -82,7 +83,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
   }
 
   Widget _buildServiceItem(BuildContext context, String imagePath, String title,
-      String description, String price,ServicesviewModel viewModel) {
+      String description,String phoneNumber, String price,ServicesviewModel viewModel) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       shape: RoundedRectangleBorder(
@@ -143,7 +144,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 SizedBox(height: 0.0),
                 IconButton(
                   icon: Icon(Icons.phone, color: Colors.green), // Phone icon
-                  onPressed: _openDialer, // Opens the dialer without a number
+                  onPressed:()=> _openDialer(phoneNumber), // Opens the dialer without a number
                 ),
 
               ],
@@ -335,8 +336,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
   }
 }
 
-void _openDialer() async {
-  const String phoneNumber = AppConfig.companyPhone;
+void _openDialer(String phoneNumber) async {
   final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
 
   if (await canLaunchUrl(phoneUri)) {

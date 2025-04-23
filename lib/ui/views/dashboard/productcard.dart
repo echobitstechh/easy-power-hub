@@ -38,11 +38,13 @@ class _ProductCardState extends State<ProductCard> {
 
   List<Product> filteredProductList = [];
   List<Product> productList = [];
+  List<Review> productReviews = [];
 
   @override
   void initState() {
     super.initState();
     loadProduct();
+    fetchProductReviews();
     selectedImage = (widget.product.images != null && widget.product.images!.isNotEmpty)
         ? widget.product.images!.first
         : ''; // Fallback value
@@ -171,6 +173,25 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
+  Future<void> fetchProductReviews() async {
+    try {
+      final response = await repo.getReviews(widget.product.id!);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> reviewJson = response.data["reviews"];
+        if (mounted) {
+          setState(() {
+            productReviews = reviewJson.map((r) => Review.fromJson(r)).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print("Failed to load reviews: $e");
+    }
+  }
+
+
+
   void updateImage(String imagePath) {
     if(mounted) {
       setState(() {
@@ -241,8 +262,7 @@ class _ProductCardState extends State<ProductCard> {
                 ),
               ),
             ],
-          )
-,
+          ),
           Divider(),
           Column(
             children: [
@@ -442,22 +462,22 @@ class _ProductCardState extends State<ProductCard> {
                             );
                           }),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        isFavorited
-                            ? Icons.favorite // Icon when favorited
-                            : Icons.favorite_border_outlined, // Icon when not favorited
-                        size: 30,
-                        color: isFavorited ? kcSecondaryColor : iconColor, // Toggle color
-                      ),
-                      onPressed: () {
-                        if(mounted){
-                          setState(() {
-                            isFavorited = !isFavorited; // Toggle the boolean
-                          });
-                        }
-                      },
-                    ),
+                    // IconButton(
+                    //   icon: Icon(
+                    //     isFavorited
+                    //         ? Icons.favorite // Icon when favorited
+                    //         : Icons.favorite_border_outlined, // Icon when not favorited
+                    //     size: 30,
+                    //     color: isFavorited ? kcSecondaryColor : iconColor, // Toggle color
+                    //   ),
+                    //   onPressed: () {
+                    //     if(mounted){
+                    //       setState(() {
+                    //         isFavorited = !isFavorited; // Toggle the boolean
+                    //       });
+                    //     }
+                    //   },
+                    // ),
 
 
                   ],
@@ -584,6 +604,75 @@ class _ProductCardState extends State<ProductCard> {
               },
             ),
           ),
+          verticalSpaceSmall,
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Product Rating & Reviews',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "${productReviews.length} reviews",
+                  style: TextStyle(color: Colors.grey),
+                )
+              ],
+            ),
+          ),
+          verticalSpaceSmall,
+          Column(
+            children: productReviews.map((review) {
+              return Container(
+                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: EdgeInsets.all(12.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: Offset(0, 2)),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ⭐ Rating stars
+                    Row(
+                      children: List.generate(
+                        review.rating.toInt(),
+                            (index) => Icon(Icons.star, color: Colors.orange, size: 16),
+                      ),
+                    ),
+                    SizedBox(height: 6),
+
+                    // 📝 Review Title / Summary
+                    Text(
+                      review.content,
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                    SizedBox(height: 6),
+
+                    // 👤 By reviewer
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "by ${review.reviewerName}",
+                          style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey.shade700),
+                        ),
+                        Text(
+                          "${review.date.day.toString().padLeft(2, '0')}-${review.date.month.toString().padLeft(2, '0')}-${review.date.year}",
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          )
         ],
       ),
     );

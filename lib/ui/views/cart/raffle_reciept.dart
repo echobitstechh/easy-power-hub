@@ -37,8 +37,9 @@ import '../service/service_view.dart';
 
 class RaffleReceiptPage extends StatelessWidget {
   final List<CartItem> carts;
+  final int totalAmount;
 
-  const RaffleReceiptPage({Key? key, required this.carts}) : super(key: key);
+  const RaffleReceiptPage({Key? key, required this.carts, required this.totalAmount}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -228,10 +229,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                           style:
                                               const TextStyle(fontSize: 10.61)),
                                       trailing: Text(
-                                          MoneyUtils().formatAmount(
-                                              double.parse(cartItem
-                                                      .product!.salePrice!)
-                                                  .toInt()),
+                                          MoneyUtils().formatAmount(totalAmount ),
                                           style: TextStyle(
                                             fontSize: 10.61,
                                             fontWeight: FontWeight.bold,
@@ -254,8 +252,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                           fontWeight: FontWeight.w100),
                                     ),
                                     Text(
-                                      MoneyUtils().formatAmount(
-                                          getRaffleSubTotal(carts).toInt()),
+                                      MoneyUtils().formatAmount(totalAmount),
                                       style: TextStyle(
                                         fontWeight: FontWeight.normal,
                                         fontSize: 12,

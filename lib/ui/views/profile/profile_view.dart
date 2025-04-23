@@ -161,33 +161,11 @@ class ProfileView extends StatelessWidget {
                                   .navigateToWallet()
                                   .whenComplete(() => viewModel.getProfile());
                             },
-                            leading: Icon(Icons.wallet,
+                            leading: const Icon(Icons.wallet,
                               color: kcOrangeColor,
                             ),
                             title: const Text("Wallet"),
                           ),
-                          // ListTile(
-                          //   onTap: () {
-                          //     // showModalBottomSheet(
-                          //     //   context: context,
-                          //     //   isScrollControlled: true,
-                          //     //   // barrierColor: Colors.black.withAlpha(50),
-                          //     //   // backgroundColor: Colors.transparent,
-                          //     //   backgroundColor: Colors.black.withOpacity(0.7),
-                          //     //   builder: (BuildContext context) {
-                          //     //     return const FractionallySizedBox(
-                          //     //       heightFactor:
-                          //     //           1.0, // 70% of the screen's height
-                          //     //       child: ProfileScreen(),
-                          //     //     );
-                          //     //   },
-                          //     // );
-                          //   },
-                          //   leading: Icon(Icons.shopping_cart,
-                          //     color: kcOrangeColor,
-                          //   ),
-                          //   title: const Text("My orders"),
-                          // ),
                           ListTile(
                             onTap: () {
                               // locator<NavigationService>().navigateToTrack();
@@ -210,7 +188,7 @@ class ProfileView extends StatelessWidget {
                                 return const ShippingAddressesPage();
                               }));
                             },
-                            leading: Icon(Icons.location_on,
+                            leading: const Icon(Icons.location_on,
                               color: kcOrangeColor,
                             ),
                             title: const Text("Shipping addresses"),
@@ -223,61 +201,24 @@ class ProfileView extends StatelessWidget {
                                 return const Support();
                               }));
                             },
-                            leading: Icon(Icons.support_agent,
+                            leading: const Icon(Icons.support_agent,
                               color: kcOrangeColor,
                             ),
                             title: const Text("Support"),
                           ),
-                          // ListTile(
-                          //   onTap: () {
-                          //     // locator<NavigationService>().navigateToTrack();
-                          //     Navigator.of(context)
-                          //         .push(MaterialPageRoute(builder: (c) {
-                          //       return const Referral();
-                          //     }));
-                          //   },
-                          //   leading: Icon(Icons.credit_card,
-                          //     color: kcOrangeColor,
-                          //   ),
-                          //   title: const Text("Payment method"),
-                          // ),
-                          // ListTile(
-                          //   onTap: () {
-                          //     Navigator.of(context)
-                          //         .push(MaterialPageRoute(builder: (c) {
-                          //       return const Support();
-                          //     }));
-                          //   },
-                          //   leading: Icon(Icons.local_offer,
-                          //     color: kcOrangeColor,
-                          //   ),
-                          //   title: const Text("Promocodes"),
-                          // ),
-                          // ListTile(
-                          //   onTap: () {
-                          //     Navigator.of(context)
-                          //         .push(MaterialPageRoute(builder: (c) {
-                          //       return  Settings();
-                          //     }));
-                          //   },
-                          //   leading: Icon(Icons.settings,
-                          //       color: kcOrangeColor,
-                          //       ),
-                          //   title: const Text("Settings"),
-                          // ),
                           ListTile(
                             onTap: () {
                               //locator<NavigationService>().navigateToChangePasswordView();
                               locator<NavigationService>().navigateToChangePasswordView();
                             },
-                            leading: Icon(Icons.lock,
+                            leading: const Icon(Icons.lock,
                               color: kcOrangeColor,
                             ),
                             title: const Text("Change password"),
                           ),
                           ListTile(
                             onTap: () {},
-                            leading: Icon(Icons.light_mode_sharp,
+                            leading: const Icon(Icons.light_mode_sharp,
                               color: kcOrangeColor,
                             ),
                             title: const Text("Dark Theme"),
@@ -322,10 +263,10 @@ class ProfileView extends StatelessWidget {
                                       .clearStackAndShow(Routes.authView);
                                 }
                               },
-                              leading: Icon(Icons.logout,
+                              leading: const Icon(Icons.logout,
                                 color: kcOrangeColor,
                               ),
-                              title: Text("Signout")),
+                              title: const Text("Signout")),
                         ],
                       ),
                       verticalSpaceMedium,
@@ -337,7 +278,7 @@ class ProfileView extends StatelessWidget {
                               locator<NavigationService>()
                                   .navigateToDeleteAccountView();
                             },
-                            child: Row(
+                            child: const Row(
                               mainAxisSize: MainAxisSize
                                   .min, // Ensures the Row takes only the space of its children
                               children: [

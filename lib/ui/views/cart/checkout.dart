@@ -12,11 +12,16 @@ import 'package:easyph/ui/views/cart/raffle_reciept.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:stacked_services/stacked_services.dart';
+import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/network/interceptors.dart';
+import '../../../core/utils/local_store_dir.dart';
+import '../../../core/utils/local_stotage.dart';
+import '../../../core/utils/paystack_util.dart';
 import '../../../utils/money_util.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/text_field_widget.dart';
+import '../profile/order_list.dart';
 import 'add_shipping.dart';
 import 'cart_viewmodel.dart';
 
@@ -56,6 +61,7 @@ class _CheckoutState extends State<Checkout> {
   void initState() {
     plugin.initialize(publicKey: publicKeyTest);
     getShippings();
+    fetchOnlineCart();
     super.initState();
   }
 
@@ -133,7 +139,7 @@ class _CheckoutState extends State<Checkout> {
                                         fontSize: 10),),
                                     verticalSpaceTiny,
                                     Text(
-                                      "N${item.product!.salePrice}",
+                                      "N${item.price}",
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 12),
@@ -478,7 +484,7 @@ class _CheckoutState extends State<Checkout> {
                   isLoading: loading,
                   label: paymentMethod == "delivery"
                       ? "Confirm Order"
-                      : "Pay ${MoneyUtils().formatAmount(getSubTotal() + getDeliveryFee())}",
+                      : "Pay ${MoneyUtils().formatAmount(widget.viewModel.cartFinalTotal + getDeliveryFee())}",
                   submit: () async {
                     if (paymentMethod == null) {
                      // showSnackbar(context, "Please select a payment method");
@@ -490,7 +496,7 @@ class _CheckoutState extends State<Checkout> {
                     });
 
                     try {
-                        await chargeCard(getSubTotal() + getDeliveryFee(), paymentMethod);
+                        await chargeCard(widget.viewModel.cartFinalTotal + getDeliveryFee(), paymentMethod);
                     } catch (e) {
                       print("Payment Error: $e");
                     }
@@ -521,17 +527,6 @@ class _CheckoutState extends State<Checkout> {
     return quantity;
   }
 
-  int getSubTotal() {
-    int total = 0;
-
-    for (var element in cart.value) {
-      total = total +
-          (double.parse(element.product?.salePrice.toString() ?? '0').round() *
-              element.quantity!);
-    }
-
-    return total;
-  }
 
   int getTotalPrice() {
     int total = 0;
@@ -560,21 +555,19 @@ class _CheckoutState extends State<Checkout> {
       isPaying = true;
     });
 
+    final hasInstallment = cart.value.any((e) => e.isInstallment == true);
+    final firstInstallmentItem = cart.value.firstWhere((e) => e.isInstallment == true, orElse: () => cart.value.first);
+
+
     // Build the new request body
     Map<String, dynamic> requestBody = {
       "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
       "deliveryOption": pickUpOption,
       "promoCode": "",
       "shippingFee": getDeliveryFee(),
-      "installmentPayment": false,
-      "productsData": cart.value.map((item) {
-        return {
-          "productId": item.product?.id,
-          "quantity": item.quantity,
-          "price":
-              double.parse(item.product?.salePrice.toString() ?? '0').round(),
-        };
-      }).toList(),
+      "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
+      "installmentPayment": hasInstallment,
+      "deliveryAddressId": shippingId,
     };
 
     ApiResponse res = await locator<Repository>().payForOrder(requestBody);
@@ -582,41 +575,31 @@ class _CheckoutState extends State<Checkout> {
     if (res.statusCode == 201) {
       // final orderData = res.data['order'];
       // final Order order = Order.fromJson(orderData);
+
       if (paymentMethod == 'paystack') {
-        var charge = Charge()
-          ..amount = (getSubTotal() + getDeliveryFee()) * 100 // amount in kobo
-          ..reference = MoneyUtils().getReference()
-          ..email = profile.value.email;
-
-        // Open the Paystack payment UI
-        CheckoutResponse response = await plugin.checkout(
-          context,
-          method: CheckoutMethod.card,
-          charge: charge,
-        );
-
-        if (response.status == true) {
-          print('Paystack payment successful');
-
-          // Send the updated API request
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RaffleReceiptPage(
-                carts: cart.value, // Pass cleared cart or saved items
-              ),
-            ),
+        ApiResponse response = await repo.initializePayment({
+          'paymentMethod': 'CreditCard',
+          'paymentType': 'Paystack',
+          'orderId': res.data['order']['id'],
+        });
+        if (response.statusCode == 200) {
+          print('Payment initialized successfully');
+          await PaystackUtil.processPayment(
+            context: context,
+            ref: response.data['data']['reference'],
+            amountInNaira: amount,
+            email: profile.value.email!,
+            cartItems: cart.value,
+            deliveryFee: getDeliveryFee(),
           );
-        } else {
-          print('Paystack payment failed');
-          locator<SnackbarService>()
-              .showSnackbar(message: "Payment failed. Please try again.");
+        }else{
+          locator<SnackbarService>().showSnackbar(message: "Payment processing failed",
+              duration: const Duration(seconds: 3));
         }
       }
       else{
-        // Handle other payment methods here
+
         print('Payment method: $paymentMethod');
-        // Show success message or navigate to receipt page
         locator<SnackbarService>().showSnackbar(
           message: "Order placed successfully",
           duration: const Duration(seconds: 2),
@@ -625,13 +608,15 @@ class _CheckoutState extends State<Checkout> {
           context,
           MaterialPageRoute(
             builder: (context) => RaffleReceiptPage(
-              carts: cart.value, // Pass cleared cart or saved items
+              carts: cart.value,
+              totalAmount: amount,
             ),
           ),
         );
 
       }
-      // Navigate to the receipt page with the `Order` object
+
+
     } else {
       locator<SnackbarService>().showSnackbar(
         message: res.data["message"] ?? "Failed to place the order",
@@ -719,24 +704,24 @@ class _CheckoutState extends State<Checkout> {
                       ),
                       const SizedBox(height: 16),
                       SubmitButton(
-                          isLoading: false,
-                          label: 'Add Address',
-                          submit: () {
-                            if (houseAddressController.text.isNotEmpty &&
-                                cityController.text.isNotEmpty &&
-                                stateController.text.isNotEmpty &&
-                                phoneNumberController.text.isNotEmpty) {
-                              createNewShipping();
-                              // addAddress(
-                              //     name, houseAddress, city, state, phoneNumber,
-                              //     isDefaultPayment);
-                            }
-                            houseAddressController.clear();
-                            cityController.clear();
-                            stateController.clear();
-                            phoneNumberController.clear();
-                          },
-                          color: kcPrimaryColor),
+                        isLoading: false,
+                        label: 'Add Address',
+                        submit: () {
+                          if (houseAddressController.text.isNotEmpty &&
+                              cityController.text.isNotEmpty &&
+                              stateController.text.isNotEmpty &&
+                              phoneNumberController.text.isNotEmpty) {
+                            createNewShipping().then((_) {
+                              Navigator.pop(context); // ✅ Only pop when successful
+                            });
+                          }
+                          houseAddressController.clear();
+                          cityController.clear();
+                          stateController.clear();
+                          phoneNumberController.clear();
+                        },
+                        color: kcPrimaryColor,
+                      ),
                     ],
                   ),
                 ),
@@ -767,7 +752,7 @@ class _CheckoutState extends State<Checkout> {
           message: "Created address successfully",
           duration: const Duration(seconds: 2),
         );
-        Navigator.pop(context);
+        await getShippings();
       } else {
         locator<SnackbarService>().showSnackbar(
           message: response.data["message"],
@@ -781,8 +766,7 @@ class _CheckoutState extends State<Checkout> {
       );
     } finally {
       if(mounted){
-        setState(() async {
-          await getShippings();
+        setState(() {
           loading = false;
         });
       }
@@ -835,6 +819,30 @@ class _CheckoutState extends State<Checkout> {
         });
       }
 
+    }
+  }
+
+  Future<void> fetchOnlineCart() async {
+    try {
+      ApiResponse res = await repo.cartList();
+      if (res.statusCode == 200) {
+        List<dynamic> items = res.data["cartItems"] ?? [];
+
+        if (items.isNotEmpty) {
+          List<CartItem> onlineItems = items
+              .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
+              .toList();
+          cart.value = onlineItems;
+          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
+          cart.notifyListeners();
+          setState(() {});
+        } else {
+          cart.value.clear();
+          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
+        }
+      }
+    } catch (e) {
+      print('Couldn\'t get online cart: $e');
     }
   }
 

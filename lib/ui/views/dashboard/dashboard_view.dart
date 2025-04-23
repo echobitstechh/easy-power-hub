@@ -10,6 +10,7 @@ import 'package:easyph/ui/views/service/service_view.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:easyph/utils/string_entension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,65 +46,36 @@ class DashboardView extends StackedView<DashboardViewModel> {
   List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
     List<StaggeredGridTile> tiles = [];
 
-    final solar = model.filteredCategories.firstWhere(
-          (cat) => cat.name.toLowerCase().contains("solar"),
-      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
-    );
+    final categories = {
+      "solar": 'assets/images/solar.jpg',
+      "electronics": 'assets/images/2148254069.jpg',
+      "light": 'assets/images/107.jpg',
+    };
 
-    if (solar.id != -1) {
-      tiles.add(StaggeredGridTile.count(
-        crossAxisCellCount: 2,
-        mainAxisCellCount: 2,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (c) => ShopView(filter: solar),
-            ));
-          },
-          child: actionContainer('assets/images/solar.jpg', "Solar Energy", context),
-        ),
-      ));
-    }
+    categories.forEach((key, imagePath) {
+      final category = model.filteredCategories.firstWhere(
+            (cat) => cat.name.toLowerCase().contains(key),
+        orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+      );
 
-    final electronics = model.filteredCategories.firstWhere(
-          (cat) => cat.name.toLowerCase().contains("electronics"),
-      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
-    );
-
-    if (electronics.id != -1) {
-      tiles.add(StaggeredGridTile.count(
-        crossAxisCellCount: 2,
-        mainAxisCellCount: 1,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (c) => ShopView(filter: electronics),
-            ));
-          },
-          child: actionContainer('assets/images/2148254069.jpg', "Electronics", context),
-        ),
-      ));
-    }
-
-    final light = model.filteredCategories.firstWhere(
-          (cat) => cat.name.toLowerCase().contains("light"),
-      orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
-    );
-
-    if (light.id != -1) {
-      tiles.add(StaggeredGridTile.count(
-        crossAxisCellCount: 1,
-        mainAxisCellCount: 1,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(MaterialPageRoute(
-              builder: (c) => ShopView(filter: light),
-            ));
-          },
-          child: actionContainer('assets/images/107.jpg', "Lightening", context),
-        ),
-      ));
-    }
+      if (category.id != -1) {
+        tiles.add(StaggeredGridTile.count(
+          crossAxisCellCount: 1,
+          mainAxisCellCount: 1,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (c) => ShopView(filter: category)),
+              );
+            },
+            child: SizedBox(
+              height: 50, //
+              child: actionContainer(imagePath, key.capitalize(), context),
+            ),
+          ),
+        ));
+      }
+    });
 
     // Services card (always shown)
     tiles.add(StaggeredGridTile.count(
@@ -121,6 +93,52 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
     return tiles;
   }
+
+  List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
+    List<Widget> tiles = [];
+
+    final categories = {
+      "solar": 'assets/images/solar.jpg',
+      "electronics": 'assets/images/2148254069.jpg',
+      "light": 'assets/images/107.jpg',
+    };
+
+    categories.forEach((key, imagePath) {
+      final category = model.filteredCategories.firstWhere(
+            (cat) => cat.name.toLowerCase().contains(key),
+        orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+      );
+
+      if (category.id != -1) {
+        tiles.add(
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (c) => ShopView(filter: category)),
+              );
+            },
+            child: actionContainer(imagePath, key.capitalize(), context),
+          ),
+        );
+      }
+    });
+
+    // Services card (always shown)
+    tiles.add(
+      GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (c) => ServicesView(),
+          ));
+        },
+        child: actionContainer('assets/images/2148087576.jpg', "Services", context),
+      ),
+    );
+
+    return tiles;
+  }
+
+
 
 
   @override
@@ -206,29 +224,48 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   optionsViewBuilder: (BuildContext context,
                       AutocompleteOnSelected<Product> onSelected,
                       Iterable<Product> options) {
-                    return Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        constraints: BoxConstraints(maxHeight: 100),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final Product product = options.elementAt(index);
-                            return ListTile(
-                              leading: product.images != null
-                                  ? Image.network(
-                                product.images!.first,
-                                width: 40,
-                                height: 40,
-                                fit: BoxFit.cover,
-                              )
-                                  : Icon(Icons.image, size: 40),
-                              title: Text(product.productName ?? ""),
-                              onTap: () => onSelected(product),
-                            );
-                          },
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxHeight: 250, // scrollable max height
+                            maxWidth: 350,  // limits width of dropdown
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final Product product = options.elementAt(index);
+                              return ListTile(
+                                leading: (product.images != null && product.images!.isNotEmpty)
+                                    ? Image.network(
+                                  product.images!.first,
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.cover,
+                                )
+                                    : const Icon(Icons.image, size: 30),
+                                title: Text(
+                                  product.productName ?? "",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  maxLines: 2,
+                                ),
+                                onTap: () => onSelected(product),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     );
@@ -751,20 +788,39 @@ class DashboardView extends StackedView<DashboardViewModel> {
           // quickActions(context),
           verticalSpaceSmall,
           Container(
-            // Staggered Grid View starts here
-            child: StaggeredGrid.count(
-              crossAxisCount: 4,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              children: buildCardTiles(context, viewModel),
-            ),
+            padding: const EdgeInsets.all(0),
+            // child: StaggeredGrid.count(
+            //   crossAxisCount: 2,
+            //   mainAxisSpacing: 6.0,
+            //   crossAxisSpacing: 6.0,
+            //   children: buildCardTiles(context, viewModel),
+            // ),
+            child: GridView.count(
+              crossAxisCount: 2,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              childAspectRatio: 2, // 👈 makes them wider (more rectangle-like)
+              padding: const EdgeInsets.all(0),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              children: buildGridItems(context, viewModel),
+            )
+
           ),
           verticalSpaceMedium,
+          // SingleChildScrollView(
+          //   scrollDirection: Axis.horizontal,
+          //   child: Row(
+          //     children: viewModel.filteredCategories.map((category) {
+          //       return _buildCategoryChip(category, viewModel);
+          //     }).toList(),
+          //   ),
+          // ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
-              children: viewModel.filteredCategories.map((category) {
-                return _buildCategoryChip(category, viewModel);
+              children: viewModel.brands.map((brand) {
+                return _buildBrandChip(brand, viewModel);
               }).toList(),
             ),
           ),
@@ -1003,6 +1059,45 @@ class DashboardView extends StackedView<DashboardViewModel> {
         labelStyle: TextStyle(
           color:
               category.id == viewModel.selectedId ? Colors.white : Colors.black,
+        ),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: uiMode.value == AppUiModes.dark
+                ? Colors.grey[500]!
+                : Colors.grey[100]!, // Set the border color to light grey
+            width: 1.0, // Set the border width
+          ),
+          borderRadius: BorderRadius.circular(
+              30.0), // Reduce the border radius (adjust this value)
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrandChip(String brand, DashboardViewModel viewModel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: ChoiceChip(
+        label: Text(
+          brand ?? '',
+          style: GoogleFonts.redHatDisplay(
+            textStyle: const TextStyle(),
+          ),
+        ),
+        selected: brand ==
+            viewModel.selectedBrand, // Check if this category is selected
+        onSelected: (bool selected) {
+          viewModel.setSelectedBrand(
+              selected ? brand : '');
+          viewModel.notifyListeners();
+        },
+        selectedColor: kcSecondaryColor,
+        backgroundColor: uiMode.value == AppUiModes.dark
+            ? Colors.grey[500]!
+            : Colors.grey[100]!,
+        labelStyle: TextStyle(
+          color:
+          brand == viewModel.selectedBrand ? Colors.white : Colors.black,
         ),
         shape: RoundedRectangleBorder(
           side: BorderSide(

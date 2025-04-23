@@ -46,6 +46,8 @@ class CartViewModel extends BaseViewModel {
   PaymentMethod get selectedMethod => selectedPaymentMethod.value;
 
   final bool _isDisposed = false;
+  final Map<String, int> selectedInstallments = {}; // productId -> selected frequency
+
 
   @override
   void dispose() {
@@ -90,6 +92,7 @@ class CartViewModel extends BaseViewModel {
     setBusy(true);
     notifyListeners();
     // getResourceList();
+    fetchOnlineCart();
     setBusy(false);
     notifyListeners();
   }
@@ -107,6 +110,7 @@ class CartViewModel extends BaseViewModel {
         }
 
         getRaffleSubTotal();
+        await refreshData();
         cart.notifyListeners();
       } else {
         snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}");
@@ -169,88 +173,6 @@ class CartViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  void checkoutRaffle(BuildContext context) async {
-    if (cart.value.isEmpty) {
-      return null;
-    }
-    isPaymentProcessing.value = true;
-    setBusy(true);
-    try {
-      ApiResponse res =
-          await repo.saveOrder({"payment_method": selectedMethod.name});
-      if (res.statusCode == 201) {
-        // String paymentLink = res.data['data']['payment_link'];
-        String orderId = res.data['data']['order']['_id'];
-        print('oder id $orderId');
-        // final Uri toLaunch = Uri.parse(paymentLink);
-
-        // if (!await launchUrl(toLaunch, mode: LaunchMode.inAppBrowserView)) {
-        //   snackBar.showSnackbar(message: "Could not launch payment link");
-        //   throw Exception('Could not launch $paymentLink');
-        // }
-        processPayment(selectedMethod, context, AppModules.raffle, orderId);
-      } else {
-        snackBar.showSnackbar(message: res.data["message"]);
-        isPaymentProcessing.value = false;
-        notifyListeners();
-      }
-    } catch (e) {
-      log.e(e);
-      snackBar.showSnackbar(message: 'network error, try again');
-      isPaymentProcessing.value = false;
-      notifyListeners();
-    }
-  }
-
-  processPayment(PaymentMethod paymentMethod, BuildContext context,
-      AppModules module, String orderId) async {
-    // Calculate the amount
-    int amount = raffleSubTotal;
-
-    try {
-      ApiResponse res = await MoneyUtils()
-          .chargeCardUtil(paymentMethod, context, amount, orderId);
-
-      if (res.statusCode == 200) {
-        Navigator.pop(context);
-        showReceipt(module, context);
-      } else {
-        Navigator.pop(context);
-        locator<SnackbarService>().showSnackbar(message: res.data["message"]);
-        locator<NavigationService>().replaceWithHomeView();
-      }
-    } catch (e) {
-      log.e(e);
-    } finally {
-      isPaymentProcessing.value = false;
-      setBusy(false);
-    }
-  }
-
-  Future<void> showReceipt(AppModules module, BuildContext context) async {
-    if (module == AppModules.raffle) {
-      List<CartItem> receiptCart = List<CartItem>.from(cart.value);
-
-      cart.notifyListeners();
-      List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-      locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
-      showModalBottomSheet(
-        isScrollControlled: true,
-        isDismissible: false,
-        backgroundColor: Colors.white,
-        context: context,
-        builder: (BuildContext context) {
-          return RaffleReceiptPage(carts: receiptCart);
-        },
-      );
-      cart.value.clear();
-      // clearRaffleCart();
-      await repo.clearCart();
-    }
-  }
-
   Future<void> fetchOnlineCart() async {
     setBusy(true);
     isLoading = true;
@@ -289,8 +211,22 @@ class CartViewModel extends BaseViewModel {
     }
   }
 
-  // Future<void> loadPayStackPlugin() async{
-  //   final plugin = PaystackPlugin();
-  //   plugin.initialize(publicKey: AppConfig.paystackApiKeyTest);
-  // }
+  Future<void> selectInstallmentOption(CartItem item, int frequency) async {
+    try {
+      selectedInstallments[item.product!.id!] = frequency;
+      item.installmentFrequency = frequency;
+      notifyListeners();
+
+      final res = await repo.modifyCartItem(item.product!.id!, "installment", newFrequency: frequency);
+
+      if (res.statusCode == 200) {
+        await refreshData();
+      } else {
+        snackBar.showSnackbar(message: res.data["message"] ?? "Failed to update installment");
+      }
+    } catch (e) {
+      snackBar.showSnackbar(message: "An error occurred: $e");
+    }
+  }
+
 }

@@ -15,6 +15,7 @@ import 'package:easyph/ui/views/auth/register.dart';
 import 'package:easyph/ui/views/cart/add_shipping.dart';
 import 'package:easyph/ui/views/cart/cart_view.dart' as _i8;
 import 'package:easyph/ui/views/cart/add_shipping.dart' as _i13;
+import 'package:easyph/ui/views/cart/raffle_reciept.dart' as _i13;
 import 'package:easyph/ui/views/change_password/change_password_view.dart'
     as _i17;
 import 'package:easyph/ui/views/dashboard/dashboard_view.dart' as _i6;
@@ -135,6 +136,7 @@ class Routes {
     successView,
     shippingView,
     detailsView,
+    orderView
   };
 }
 
@@ -148,10 +150,10 @@ class StackedRouter extends _i1.RouterBase {
       Routes.ticketView,
       page: _i28.ShippingAddressesPage,
     ),
-    // _i1.RouteDef(
-    //   Routes.orderView,
-    //   page: OrderList,
-    // ),
+    _i1.RouteDef(
+      Routes.orderView,
+      page: OrderList,
+    ),
     _i1.RouteDef(
       Routes.startupView,
       page: _i3.StartupView,
@@ -188,10 +190,10 @@ class StackedRouter extends _i1.RouterBase {
       Routes.productDetail,
       page: _i12.RaffleDetail,
     ),
-    // _i1.RouteDef(
-    //   Routes.receipt,
-    //   page: _i13.Receipt,
-    // ),
+    _i1.RouteDef(
+      Routes.receipt,
+      page: _i13.RaffleReceiptPage,
+    ),
     _i1.RouteDef(
       Routes.wallet,
       page: _i14.Wallet,
@@ -260,12 +262,12 @@ class StackedRouter extends _i1.RouterBase {
         settings: data,
       );
     },
-    // OrderList: (data) {
-    //   return _i21.MaterialPageRoute<dynamic>(
-    //     builder: (context) => const OrderList(),
-    //     settings: data,
-    //   );
-    // },
+    OrderList: (data) {
+      return _i21.MaterialPageRoute<dynamic>(
+        builder: (context) => const OrderList(),
+        settings: data,
+      );
+    },
     _i3.StartupView: (data) {
       return _i21.MaterialPageRoute<dynamic>(
         builder: (context) => const _i3.StartupView(),
@@ -376,12 +378,15 @@ class StackedRouter extends _i1.RouterBase {
         settings: data,
       );
     },
-    // Register: (data) {
-    //   return _i21.MaterialPageRoute<dynamic>(
-    //     builder: (context) => Register(),
-    //     settings: data,
-    //   );
-    // },
+    _i13.RaffleReceiptPage: (data) {
+      final args = data.getArgs<RaffleReceiptArguments>(
+        orElse: () => const RaffleReceiptArguments(carts: [], amount: 0),
+      );
+      return _i21.MaterialPageRoute<dynamic>(
+        builder: (context) => _i13.RaffleReceiptPage(carts: args.carts, totalAmount: args.amount, key: args.key),
+        settings: data,
+      );
+    },
 
 
     
@@ -608,6 +613,36 @@ class ChangePasswordViewArguments {
   @override
   int get hashCode {
     return isResetPassword.hashCode ^ key.hashCode;
+  }
+}
+
+class RaffleReceiptArguments {
+  const RaffleReceiptArguments({
+    required this.carts,
+    required this.amount,
+    this.key,
+  });
+
+  final List<CartItem> carts;
+
+  final int amount;
+
+  final _i23.Key? key;
+
+  @override
+  String toString() {
+    return '{ "carts": "$carts", "amount": "$amount", "key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant RaffleReceiptArguments other) {
+    if (identical(this, other)) return true;
+    return  other.carts == carts && other.amount == amount && other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return carts.hashCode ^ amount.hashCode ^ key.hashCode;
   }
 }
 

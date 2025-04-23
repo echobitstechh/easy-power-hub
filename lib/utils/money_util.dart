@@ -15,7 +15,7 @@ import '../state.dart';
 import 'flutterwave-service.dart';
 
 class MoneyUtils extends TextInputFormatter {
-  String payStackPublicKey = 'pk_test_aae035e8425d5319b6500ef86c0472474a38a5fd';
+  String payStackPublicKey = 'pk_test_6dacffb10a1fe6c809a81ee5e1e9d7d2076b5b6d';
   // final plugin = PaystackPlugin();
 
   @override
@@ -53,6 +53,8 @@ class MoneyUtils extends TextInputFormatter {
     amount =  1450 * amount;
     return amount;
   }
+
+
 
   String formatAmountToDollars(int amount) {
     final formatter = NumberFormat("#,##0", "en_US");

@@ -30,11 +30,15 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> modifyCartItem(String productId, String action) async {
+  Future<ApiResponse> modifyCartItem(String productId, String action, {int? newFrequency}) async {
+    final body = {
+      "action": action,
+      if (newFrequency != null) "newFrequency": newFrequency,
+    };
     ApiResponse response = await api.call(
       method: HttpMethod.put,
       endpoint: "cart/modify/$productId",
-      reqBody: {"action": action},
+      reqBody: body,
     );
     return response;
   }
@@ -117,6 +121,17 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> initializePayment(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "wallet/initializePayment",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> getProducts() async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
@@ -125,6 +140,16 @@ class Repository extends IRepository {
 
     return response;
   }
+
+  @override
+    Future<ApiResponse> getReviews( String productId) async {
+      ApiResponse response = await api.call(
+        method: HttpMethod.get,
+        endpoint: "reviews/$productId",
+      );
+
+      return response;
+    }
 
   @override
   Future<ApiResponse> getServices() async {

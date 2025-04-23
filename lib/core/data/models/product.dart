@@ -19,6 +19,7 @@ class Product {
   String? createdAt;
   String? updatedAt;
   bool? installment;
+  int? installmentFrequency;
   String? status;
   List<String>? reviews;
   List<String>? images;
@@ -45,6 +46,7 @@ class Product {
     this.images,
     this.installment,
     this.status,
+    this.installmentFrequency,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -68,6 +70,7 @@ class Product {
     reviews = json['reviews'] != null ? List<String>.from(json['reviews']) : null;
     images = json['images'] != null ? List<String>.from(json['images']) : null;
     installment = json['installment'];
+    installmentFrequency = json['installmentFrequency'];
     status = json['status'];
   }
 
@@ -91,6 +94,7 @@ class Product {
     data['createdAt'] = createdAt;
     data['updatedAt'] = updatedAt;
     data['installment'] = installment;
+    data['installmentFrequency'] = installmentFrequency;
     data['status'] = status;
     if (reviews != null) {
       data['reviews'] = reviews;
@@ -366,6 +370,30 @@ class ProfilePic {
     return data;
   }
 }
+
+class Review {
+  final String content;
+  final String reviewerName;
+  final DateTime date;
+  final double rating;
+
+  Review({
+    required this.content,
+    required this.reviewerName,
+    required this.date,
+    required this.rating,
+  });
+
+  factory Review.fromJson(Map<String, dynamic> json) {
+    return Review(
+      content: json['reviewText'],
+      reviewerName: "${json['User']['firstName']} ${json['User']['lastName']}",
+      date: DateTime.parse(json['createdAt']),
+      rating: (json['rating'] as num).toDouble(),
+    );
+  }
+}
+
 
 
 

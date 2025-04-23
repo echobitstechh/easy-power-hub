@@ -13,7 +13,6 @@ import '../../components/submit_button.dart';
 import '../auth/login.dart';
 import 'onboading_view2.dart';
 
-
 class OnboardingView extends StatefulWidget {
   @override
   State<OnboardingView> createState() => _OnboardingViewState();
@@ -38,102 +37,77 @@ class _OnboardingViewState extends State<OnboardingView> {
                 ),
               ),
             ),
-            // Main content
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Skip button
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16.0, top: 16.0),
-                    child: Align(
-                      alignment: Alignment.topRight,
-                      child: TextButton(
-                        onPressed: () async {
-                          await locator<LocalStorage>().save(
-                          LocalStorageDir.onboarded, true);
-                          locator<NavigationService>().clearStackAndShow(Routes.homeView);
-                        },
-                        child: const Text(
-                          "Skip",
-                          style: TextStyle(
-                            color: kcDarkGreyColor,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
+
+            // Main content (full height, non-scrollable)
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Skip button
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 16.0, right: 16.0),
+                    child: TextButton(
+                      onPressed: () async {
+                        await locator<LocalStorage>()
+                            .save(LocalStorageDir.onboarded, true);
+                        locator<NavigationService>()
+                            .clearStackAndShow(Routes.homeView);
+                      },
+                      child: const Text("Skip",
+                          style:
+                              TextStyle(color: kcDarkGreyColor, fontSize: 16)),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: SvgPicture.asset(
-                      'assets/images/welcome.svg', // Replace with your asset path
-                      height: 400,
+                ),
+
+                // Image and text
+                Column(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/images/welcome.svg',
+                      height: 300,
                     ),
-                  ),
-                  // verticalSpaceMassive,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: const [
                           Text(
                             "Welcome to Easy Power Hub!",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontSize: 22, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 10),
                           Text(
                             "We're excited to have you here. Browse our comprehensive selection of solar solutions, electronics, and Lightening to find exactly what you need.",
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
+                            style: TextStyle(fontSize: 16, color: Colors.grey),
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+
+                // Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 16.0, horizontal: 16.0),
+                  child: SubmitButton(
+                    isLoading: false,
+                    boldText: true,
+                    label: "GET STARTED",
+                    submit: () async {
+                      await _localStorage.save(LocalStorageDir.onboarded, true);
+                      locator<NavigationService>()
+                          .clearStackAndShow(Routes.homeView);
+                    },
+                    color: kcPrimaryColor,
                   ),
-                  verticalSpaceMassive,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16.0),
-                    child: SubmitButton(
-                      isLoading: false,
-                      boldText: true,
-                      label: "GET STARTED",
-                      submit: () async {
-                        await _localStorage.save(
-                            LocalStorageDir.onboarded, true);
-                        locator<NavigationService>().clearStackAndShow(Routes.homeView);
-                      },
-                      color: kcPrimaryColor,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(36.0),
-            //   child: Align(
-            //     alignment: Alignment.bottomCenter,
-            //     child: Row(
-            //       mainAxisAlignment: MainAxisAlignment.center,
-            //       children: [
-            //         IndicatorDot(isActive: true),
-            //         const SizedBox(width: 8),
-            //         IndicatorDot(isActive: false),
-            //         const SizedBox(width: 8),
-            //         IndicatorDot(isActive: false),
-            //       ],
-            //     ),
-            //   ),
-            // ),
           ],
         ),
       ),

@@ -152,195 +152,240 @@ class CartView extends StackedView<CartViewModel> {
                                                     blurRadius: 8.8)
                                               ],
                                             ),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                            child: Column(
                                               children: [
-                                                Expanded(
-                                                  child: Row(
-                                                    children: [
-                                                      Container(
-                                                        height: 70,
-                                                        width: 70,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                          image:
-                                                              DecorationImage(
-                                                            image:
-                                                                CachedNetworkImageProvider(
-                                                              (item.product?.images !=
-                                                                          null &&
-                                                                      item
-                                                                          .product!
-                                                                          .images!
-                                                                          .isNotEmpty)
-                                                                  ? item
-                                                                      .product!
-                                                                      .images![0]
-                                                                  : 'https://via.placeholder.com/120',
-                                                            ),
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      horizontalSpaceSmall,
-                                                      Expanded(
-                                                        child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              item.product
-                                                                      ?.productName ??
-                                                                  'Product Name',
-                                                              style: GoogleFonts
-                                                                  .bricolageGrotesque(
-                                                                textStyle:
-                                                                    const TextStyle(
-                                                                  fontSize: 15,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w700,
-                                                                ),
-                                                              ),
-                                                              maxLines: 2,
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                            ),
-                                                            verticalSpaceTiny,
-                                                            Text(
-                                                              MoneyUtils().formatAmount(((item.product?.salePrice !=
-                                                                              null &&
-                                                                          item.quantity !=
-                                                                              null)
-                                                                      ? (double.parse(item
-                                                                              .product!
-                                                                              .salePrice!) *
-                                                                          item.quantity!)
-                                                                      : 0)
-                                                                  .toInt()),
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .ellipsis,
-                                                              style: TextStyle(
-                                                                fontSize: 16,
-                                                                color: uiMode
-                                                                            .value ==
-                                                                        AppUiModes
-                                                                            .dark
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black,
-                                                                fontFamily:
-                                                                    "Satoshi",
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w700,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-
-                                                Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.end,
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
-                                                    InkWell(
-                                                      onTap: () {
-                                                        viewModel
-                                                            .removeItem(item);
-                                                      },
-                                                      child: Icon(
-                                                        Icons.delete,
-                                                        size: 18,
-                                                        color: Colors.red[100],
+                                                    Expanded(
+                                                      child: Row(
+                                                        children: [
+                                                          Container(
+                                                            height: 70,
+                                                            width: 70,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(8),
+                                                              image:
+                                                                  DecorationImage(
+                                                                image:
+                                                                    CachedNetworkImageProvider(
+                                                                  (item.product?.images !=
+                                                                              null &&
+                                                                          item
+                                                                              .product!
+                                                                              .images!
+                                                                              .isNotEmpty)
+                                                                      ? item
+                                                                          .product!
+                                                                          .images![0]
+                                                                      : 'https://via.placeholder.com/120',
+                                                                ),
+                                                                fit: BoxFit.cover,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          horizontalSpaceSmall,
+                                                          Expanded(
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Text(
+                                                                  item.product
+                                                                          ?.productName ??
+                                                                      'Product Name',
+                                                                  style: GoogleFonts
+                                                                      .bricolageGrotesque(
+                                                                    textStyle:
+                                                                        const TextStyle(
+                                                                      fontSize: 15,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                    ),
+                                                                  ),
+                                                                  maxLines: 2,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                ),
+                                                                verticalSpaceTiny,
+                                                                Text(
+                                                                  MoneyUtils().formatAmount(((item.product?.salePrice !=
+                                                                                  null &&
+                                                                              item.quantity !=
+                                                                                  null)
+                                                                          ? (double.parse(item
+                                                                                  .product!
+                                                                                  .salePrice!) *
+                                                                              item.quantity!)
+                                                                          : 0)
+                                                                      .toInt()),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: TextStyle(
+                                                                    fontSize: 16,
+                                                                    color: uiMode
+                                                                                .value ==
+                                                                            AppUiModes
+                                                                                .dark
+                                                                        ? Colors
+                                                                            .white
+                                                                        : Colors
+                                                                            .black,
+                                                                    fontFamily:
+                                                                        "Satoshi",
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
-                                                    verticalSpaceSmall,
-                                                    Row(
+
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment.end,
                                                       children: [
                                                         InkWell(
                                                           onTap: () {
-                                                            if (item.quantity! >
-                                                                1) {
-                                                              viewModel
-                                                                  .modifyCartQuantity(
-                                                                      item,
-                                                                      "decrement");
-                                                            }
+                                                            viewModel
+                                                                .removeItem(item);
                                                           },
-                                                          child: Container(
-                                                            height: 30,
-                                                            width: 30,
-                                                            decoration: BoxDecoration(
-                                                                border: Border.all(
-                                                                    color:
-                                                                        kcLightGrey),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5)),
-                                                            child: const Center(
-                                                              child: Icon(
-                                                                Icons.remove,
-                                                                size: 18,
-                                                              ),
-                                                            ),
+                                                          child: Icon(
+                                                            Icons.delete,
+                                                            size: 18,
+                                                            color: Colors.red[100],
                                                           ),
                                                         ),
-                                                        horizontalSpaceSmall,
-                                                        Text(
-                                                            "${item.quantity!}"),
-                                                        horizontalSpaceSmall,
-                                                        InkWell(
-                                                          onTap: () {
-                                                            viewModel
-                                                                .modifyCartQuantity(
-                                                                    item,
-                                                                    "increment");
-                                                          },
-                                                          child: Container(
-                                                            height: 30,
-                                                            width: 30,
-                                                            decoration: BoxDecoration(
-                                                                border: Border.all(
-                                                                    color:
-                                                                        kcLightGrey),
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            5)),
-                                                            child: const Align(
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Icon(
-                                                                Icons.add,
-                                                                size: 18,
+                                                        verticalSpaceSmall,
+                                                        Row(
+                                                          children: [
+                                                            InkWell(
+                                                              onTap: () {
+                                                                if (item.quantity! >
+                                                                    1) {
+                                                                  viewModel
+                                                                      .modifyCartQuantity(
+                                                                          item,
+                                                                          "decrement");
+                                                                }
+                                                              },
+                                                              child: Container(
+                                                                height: 30,
+                                                                width: 30,
+                                                                decoration: BoxDecoration(
+                                                                    border: Border.all(
+                                                                        color:
+                                                                            kcLightGrey),
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                                5)),
+                                                                child: const Center(
+                                                                  child: Icon(
+                                                                    Icons.remove,
+                                                                    size: 18,
+                                                                  ),
+                                                                ),
                                                               ),
                                                             ),
-                                                          ),
-                                                        )
+                                                            horizontalSpaceSmall,
+                                                            Text(
+                                                                "${item.quantity!}"),
+                                                            horizontalSpaceSmall,
+                                                            InkWell(
+                                                              onTap: () {
+                                                                viewModel
+                                                                    .modifyCartQuantity(
+                                                                        item,
+                                                                        "increment");
+                                                              },
+                                                              child: Container(
+                                                                height: 30,
+                                                                width: 30,
+                                                                decoration: BoxDecoration(
+                                                                    border: Border.all(
+                                                                        color:
+                                                                            kcLightGrey),
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                                5)),
+                                                                child: const Align(
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  child: Icon(
+                                                                    Icons.add,
+                                                                    size: 18,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            )
+                                                          ],
+                                                        ),
                                                       ],
                                                     ),
+
+                                                  ],
+                                                ),
+                                                if (item.product?.installment == true &&
+                                                    item.product?.installmentFrequency != null)
+                                                  Row(
+                                                  children: [
+                                                    Text(
+                                                      "Installment Options",
+                                                      style: GoogleFonts
+                                                          .redHatDisplay(
+                                                        textStyle:
+                                                            const TextStyle(
+                                                          fontSize: 12,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    horizontalSpaceSmall,
+                                                    Padding(
+                                                        padding: const EdgeInsets.only(top: 8.0),
+                                                        child: Wrap(
+                                                          spacing: 8,
+                                                          children: List.generate(
+                                                            item.product!.installmentFrequency!,
+                                                                (i) {
+                                                              final selectedFrequency = viewModel.selectedInstallments[item.product!.id] ?? item.installmentFrequency ?? 1;
+
+                                                              return ChoiceChip(
+                                                                label: Text("${i + 1}x"),
+                                                                backgroundColor: Colors.grey.shade200,
+                                                                selectedColor: kcPrimaryColor,
+                                                                selected: selectedFrequency == (i + 1),
+                                                                onSelected: (_) {
+                                                                  viewModel.selectInstallmentOption(item, i + 1);
+                                                                },
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ),
                                                   ],
                                                 )
 
-                                                // Continue with other components, ensuring null checks
                                               ],
                                             ),
                                           ),

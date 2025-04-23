@@ -1,9 +1,12 @@
 import 'package:easyph/core/data/models/product.dart';
 
-
 class CartItem {
-  int? id;
+  String? id;
   int? quantity;
+  double? price;
+  double? installmentTotalPrice;
+  bool? isInstallment;
+  int? installmentFrequency;
   DateTime? createdAt;
   DateTime? updatedAt;
   Product? product;
@@ -11,6 +14,10 @@ class CartItem {
   CartItem({
     this.id,
     this.quantity,
+    this.price,
+    this.installmentTotalPrice,
+    this.isInstallment,
+    this.installmentFrequency,
     this.createdAt,
     this.updatedAt,
     this.product,
@@ -19,8 +26,12 @@ class CartItem {
   // Factory method to create a CartItem from JSON
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
-      id: json['id'] as int?,
+      id: json['id']?.toString(),
       quantity: json['quantity'] as int?,
+      price: (json['price'] as num?)?.toDouble(),
+      installmentTotalPrice: (json['installmentTotalPrice'] as num?)?.toDouble(),
+      isInstallment: json['isInstallment'] as bool?,
+      installmentFrequency: json['installmentFrequency'] as int?,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
       product: json['product'] != null ? Product.fromJson(json['product']) : null,
@@ -32,10 +43,13 @@ class CartItem {
     return {
       'id': id,
       'quantity': quantity,
+      'price': price,
+      'installmentTotalPrice': installmentTotalPrice,
+      'isInstallment': isInstallment,
+      'installmentFrequency': installmentFrequency,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'product': product?.toJson(),
     };
   }
 }
-

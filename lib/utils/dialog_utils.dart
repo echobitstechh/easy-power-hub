@@ -29,7 +29,7 @@ Future<bool?> showDialog(String title, String? description, bool isDialogBeingDi
     //   title: title,
     //   description: description,
     // );
-    locator<SnackbarService>().showSnackbar(title: title,message: description ?? '' );
+    locator<SnackbarService>().showSnackbar(title: title,message: description ?? '', duration: const Duration(seconds: 2));
     isDialogBeingDisplayed = false;
     appLoading.value = false;
     return isDialogBeingDisplayed;

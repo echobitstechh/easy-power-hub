@@ -24,6 +24,7 @@ class DashboardViewModel extends BaseViewModel {
   List<Product> productList = [];
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
+  List<String> brands = [];
   List<Category> filteredCategoriesList = [];
   List<Category> categories = [];
   double discountAmount = 0.0;
@@ -33,6 +34,7 @@ class DashboardViewModel extends BaseViewModel {
   static const int allCategoriesId = 0;
 
   int selectedId = allCategoriesId;
+  String selectedBrand = '';
 
   bool? onboarded;
 
@@ -44,10 +46,26 @@ class DashboardViewModel extends BaseViewModel {
 
     if (id == allCategoriesId) {
       filteredProductList = productList;
+      brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
     } else {
       print('id is: $id');
       filteredProductList = productList.where((product) {
         return product.categoryId == id;
+      }).toList();
+      brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+    }
+
+    notifyListeners();
+  }
+
+  void setSelectedBrand(String brand) {
+    selectedBrand = brand;
+
+    if (brand.isEmpty) {
+      filteredProductList = productList;
+    } else {
+      filteredProductList = productList.where((product) {
+        return product.brandName == brand;
       }).toList();
     }
 
@@ -109,6 +127,8 @@ class DashboardViewModel extends BaseViewModel {
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
         filteredProductList = productList;
+        brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+
         print('loaded products from local storage list ${productList.length}');
         print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
         rebuildUi();
@@ -155,6 +175,7 @@ class DashboardViewModel extends BaseViewModel {
         // Update the product list
         productList = updatedProductList;
         filteredProductList = productList;
+        brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
 
         // Save updated data to local storage
         List<Map<String, dynamic>> storedProducts =
@@ -286,6 +307,7 @@ class DashboardViewModel extends BaseViewModel {
     } finally {
       loadingItems.remove(product.id);
       notifyListeners();
+      cart.notifyListeners();
     }
   }
 

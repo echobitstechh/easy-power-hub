@@ -1,34 +1,17 @@
-import 'dart:async';
-import 'package:easyph/app/app.router.dart';
+
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
-import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/views/dashboard/productcard.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
-import 'package:flutter_countdown_timer/current_remaining_time.dart';
-import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:stacked/stacked.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:stacked_services/stacked_services.dart';
-import '../../../app/app.locator.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
-import '../../../core/utils/local_store_dir.dart';
-import '../../../core/utils/local_stotage.dart';
 import '../../../utils/money_util.dart';
-import '../../../widget/AdventureDialog.dart';
 import 'shop_viewmodel.dart';
 
 /// @author George David
@@ -182,6 +165,125 @@ class ShopView extends StackedView<ShopViewModel> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
                         children: [
+                          SizedBox(
+                            height: 60,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Autocomplete<Product>(
+                                    optionsBuilder: (TextEditingValue productTextEditingValue) {
+                                      if (productTextEditingValue.text == '') {
+                                        return const Iterable<Product>.empty();
+                                      }
+                                      return viewModel.filteredProductList.where((Product product) {
+                                        final query = productTextEditingValue.text.toLowerCase();
+                                        return (product.productName != null &&
+                                            product.productName!.toLowerCase().contains(query)) ||
+                                            (product.brandName != null &&
+                                                product.brandName!.toLowerCase().contains(query));
+                                      });
+                                    },
+                                    displayStringForOption: (Product product) => product.productName ?? '',
+                                    onSelected: (Product value) {
+                                      debugPrint('You just selected ${value.productName}');
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        isDismissible: true,
+                                        shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(25.0),
+                                              topRight: Radius.circular(25.0)),
+                                        ),
+                                        backgroundColor: Colors.black.withOpacity(0.7),
+                                        builder: (BuildContext context) {
+                                          return ProductCard(product: value);
+                                        },
+                                      );
+                                    },
+                                    fieldViewBuilder: (BuildContext context,
+                                        TextEditingController textEditingController,
+                                        FocusNode focusNode,
+                                        VoidCallback onFieldSubmitted) {
+                                      return Container(
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: TextField(
+                                          controller: textEditingController,
+                                          focusNode: focusNode,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Search product...',
+                                            prefixIcon: Icon(Icons.search),
+                                            border: InputBorder.none,
+                                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    optionsViewBuilder: (BuildContext context,
+                                        AutocompleteOnSelected<Product> onSelected,
+                                        Iterable<Product> options) {
+                                      return Material(
+                                        elevation: 4,
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Container(
+                                          constraints: BoxConstraints(maxHeight: 100),
+                                          child: ListView.builder(
+                                            padding: EdgeInsets.zero,
+                                            itemCount: options.length,
+                                            itemBuilder: (BuildContext context, int index) {
+                                              final Product product = options.elementAt(index);
+                                              return ListTile(
+                                                leading: product.images != null
+                                                    ? Image.network(
+                                                  product.images!.first,
+                                                  width: 40,
+                                                  height: 40,
+                                                  fit: BoxFit.cover,
+                                                )
+                                                    : Icon(Icons.image, size: 40),
+                                                title: Text(product.productName ?? ""),
+                                                onTap: () => onSelected(product),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                PopupMenuButton<String>(
+                                  icon: const Icon(Icons.filter_list),
+                                  onSelected: (String value) {
+                                    if (value == "All") {
+                                      viewModel.setSelectedBrand("");
+                                    } else {
+                                    viewModel.setSelectedBrand(value);}
+                                    viewModel.notifyListeners();
+
+                                  },
+                                  itemBuilder: (context) {
+                                    final brands = viewModel.productList
+                                        .map((product) => product.brandName ?? "")
+                                        .where((brand) => brand.isNotEmpty)
+                                        .toSet()
+                                        .toList();
+
+                                    return [
+                                      const PopupMenuItem(value: "All", child: Text("All Brands")),
+                                      ...brands.map((brand) => PopupMenuItem(
+                                        value: brand,
+                                        child: Text(brand),
+                                      )),
+                                    ];
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -464,8 +566,7 @@ class ShopView extends StackedView<ShopViewModel> {
 
   @override
   void onDispose(ShopViewModel viewModel) {
-    viewModel.dispose();
-    _pageController.dispose();
+    // _pageController.dispose();
   }
 
   @override

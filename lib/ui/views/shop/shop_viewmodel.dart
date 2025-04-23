@@ -37,6 +37,7 @@ class ShopViewModel extends BaseViewModel {
   static const int allCategoriesId = 0;
 
   int selectedId = allCategoriesId;
+  String selectedBrand = '';
 
   bool? onboarded;
 
@@ -62,6 +63,20 @@ class ShopViewModel extends BaseViewModel {
       print('id is: $id');
       filteredProductList = productList.where((product) {
         return product.categoryId == id;
+      }).toList();
+    }
+
+    notifyListeners();
+  }
+
+  void setSelectedBrand(String brand) {
+    selectedBrand = brand;
+
+    if (brand.isEmpty) {
+      filteredProductList = productList;
+    } else {
+      filteredProductList = productList.where((product) {
+        return product.brandName == brand;
       }).toList();
     }
 

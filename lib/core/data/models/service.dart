@@ -5,6 +5,7 @@ class Service {
   final String category;
   final double price;
   final String? image;
+  final String? phoneNumber;
 
   Service({
     required this.id,
@@ -13,6 +14,7 @@ class Service {
     required this.category,
     required this.price,
     this.image,
+    this.phoneNumber,
   });
 
   factory Service.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Service {
       category: json['category'],
       price: double.parse(json['price'].toString()),
       image: json['image'],
+      phoneNumber: json['phoneNumber'],
     );
   }
 
@@ -34,6 +37,7 @@ class Service {
       'category': category,
       'price': price,
       'image': image,
+      'phoneNumber': phoneNumber,
     };
   }
 }

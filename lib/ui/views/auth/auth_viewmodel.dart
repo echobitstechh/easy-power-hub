@@ -402,51 +402,52 @@ class AuthViewModel extends BaseViewModel {
 
     try {
       final authService = locator<AuthService>();
-      final Map<String, dynamic>? googleSignInResult =
-      await authService.signInWithGoogle();
+      final googleSignInResult = await authService.signInWithGoogle();
 
       if (googleSignInResult == null) {
         snackBar.showSnackbar(message: "Google Sign-In was cancelled", duration: Duration(seconds: 3));
+        return;
       }
 
-      // Validate required fields
-      if (googleSignInResult?['idToken'] == null ||
-          googleSignInResult?['email'] == null) {
-        snackBar.showSnackbar(
-            message: "Unable to retrieve Google account details", duration: Duration(seconds: 3)
-        );
+      final idToken = googleSignInResult['idToken'];
+      final email = googleSignInResult['email'];
+      String? phoneNumber = googleSignInResult['phoneNumber'];
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+
+      if (idToken == null || email == null) {
+        snackBar.showSnackbar(message: "Failed to retrieve account info");
+        return;
       }
 
-      // Get FCM token
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      // Retrieve phone number if available
-      String? phoneNumber = googleSignInResult?['phoneNumber'];
-      // If phone number is not provided, prompt the user to enter it
+      // 🧠 Determine if it's a new Firebase user
+      final firebaseUser = FirebaseAuth.instance.currentUser!;
+      final creationTime = firebaseUser.metadata.creationTime;
+      final lastSignInTime = firebaseUser.metadata.lastSignInTime;
+      print('creation time is: $creationTime');
+      print('last sign in time is: $lastSignInTime');
 
-      if (phoneNumber == null || phoneNumber.isEmpty) {
+      final isNewUser = creationTime == lastSignInTime;
+
+      if (isNewUser && (phoneNumber == null || phoneNumber.isEmpty)) {
         phoneNumber = await showPhoneNumberDialog(context);
         if (phoneNumber == null || phoneNumber.isEmpty) {
-          snackBar.showSnackbar(message: "Phone number is required", duration: Duration(seconds: 3));
+          snackBar.showSnackbar(message: "Phone number is required");
           return;
         }
       }
+
       // Prepare API request body
       final requestBody = {
         "fcmToken": fcmToken,
-        "idToken": googleSignInResult?['idToken'],
-        "phoneNumber": phoneNumber,
-
+        "idToken": googleSignInResult['idToken'],
+        if (phoneNumber != null) "phoneNumber": phoneNumber,
       };
-
-      // todo: add phone number
-
 
       // Make API call to your backend
       ApiResponse res = await repo.googleSignIn(requestBody);
 
       if (res.statusCode == 200) {
         final data = res.data;
-
           // Successful login
           userLoggedIn.value = true;
           profile.value =
@@ -458,7 +459,7 @@ class AuthViewModel extends BaseViewModel {
           locator<LocalStorage>()
               .save(LocalStorageDir.authUser, jsonEncode(data["user"]));
           locator<LocalStorage>().save(LocalStorageDir.remember, remember);
-
+          print("user is logged in and saved: ${data["user"]}");
           if (remember) {
             locator<LocalStorage>().save(LocalStorageDir.lastEmail, email.text);
           } else {
