@@ -240,7 +240,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                     children: [
                       Expanded(
                         child: Text(
-                          address.address,
+                          address.address ?? '',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -259,8 +259,8 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                       ),
                     ],
                   ),
-                  Text(address.city, style: TextStyle(fontSize: 16),),
-                  Text(address.state,style:  TextStyle(fontSize: 16),),
+                  Text(address.city ?? '', style: TextStyle(fontSize: 16),),
+                  Text(address.state ?? '',style:  TextStyle(fontSize: 16),),
                   const SizedBox(height: 2),
                 ],
               ),

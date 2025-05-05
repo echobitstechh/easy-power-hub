@@ -14,6 +14,7 @@ import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
+import '../../../core/data/models/category.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
@@ -264,49 +265,54 @@ class _CheckoutState extends State<Checkout> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     children: [
-                      isShippingLoading == true
-                          ? const CircularProgressIndicator()
-                          : shippingAddresses.isEmpty
-                              ? Column(
-                                  children: [
-                                    const Text("No Shipping address found"),
-                                    TextButton(
-                                      style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStateProperty.all(
-                                                kcPrimaryColor),
-                                      ),
-                                      child: const Text(
-                                        "Add new shipping address",
-                                        style: TextStyle(color: kcWhiteColor),
-                                      ),
-                                      onPressed: showAddAddressBottomSheet,
-                                    ),
-                                  ],
-                                )
-                              : ListView.builder(
-                                  shrinkWrap: true,
-                                  physics: NeverScrollableScrollPhysics(),
-                                  itemCount: shippingAddresses.length,
-                                  itemBuilder: (context, index) {
-                                    final address = shippingAddresses[index];
-                                    return ListTile(
-                                      title: Text(
-                                          "${address.address}, ${address.city}, ${address.state}"),
-                                      subtitle:
-                                          Text("Phone: ${address.phoneNumber}"),
-                                      trailing: Radio<String>(
-                                        value: address.id,
-                                        groupValue: shippingId,
-                                        onChanged: (String? value) {
-                                          setState(() {
-                                            shippingId = value!;
-                                          });
-                                        },
-                                      ),
-                                    );
-                                  },
-                                ),
+                      isShippingLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : Column(
+                        children: [
+                          // Existing addresses
+                          if (shippingAddresses.isNotEmpty)
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: shippingAddresses.length,
+                              itemBuilder: (context, index) {
+                                final address = shippingAddresses[index];
+                                return ListTile(
+                                  title: Text(
+                                      "${address.address}, ${address.city}, ${address.state}"),
+                                  subtitle: Text("Phone: ${address.phoneNumber}"),
+                                  trailing: Radio<String>(
+                                    value: address.id ?? '',
+                                    groupValue: shippingId,
+                                    onChanged: (String? value) {
+                                      setState(() {
+                                        shippingId = value!;
+                                      });
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+
+                          if (shippingAddresses.isEmpty)
+                            const Text("No Shipping address found"),
+
+                          verticalSpaceSmall,
+
+                          // Always show Add Shipping Address Button
+                          TextButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                              MaterialStateProperty.all(kcPrimaryColor),
+                            ),
+                            child: const Text(
+                              "Add new shipping address",
+                              style: TextStyle(color: kcWhiteColor),
+                            ),
+                            onPressed: showAddAddressBottomSheet,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -496,7 +502,38 @@ class _CheckoutState extends State<Checkout> {
                     });
 
                     try {
-                        await chargeCard(widget.viewModel.cartFinalTotal + getDeliveryFee(), paymentMethod);
+                      //check if any of the product is in electronics category and home delivery is selected
+                      if (pickUpOption == "Delivery") {
+                        bool isElectronics = cart.value.any((item) {
+                          final category = globalCategories.value.firstWhere(
+                                (cat) => cat.id == item.product?.categoryId,
+                            orElse: () => Category(id: 0, name: '', status: CategoryStatus.active),
+                          );
+                          return category.name.toLowerCase().contains('electronics');
+                        });
+
+                        //check if user address contains abuja
+                        Address? selectedAddress = shippingAddresses.firstWhere(
+                              (address) => address.id == shippingId,
+                          orElse: () => Address(address: '', city: '', state: '', phoneNumber: '', id: '', type: '', userId: ''),
+                        );
+
+                        // ✅ Check if the shipping state contains "abuja"
+                        bool? isInAbuja = selectedAddress.state?.toLowerCase().contains("abuja");
+
+                        if (isElectronics && !isInAbuja!) {
+                          locator<SnackbarService>().showSnackbar(
+                            message: "Home delivery for electronics is only available in Abuja.",
+                            duration: Duration(seconds: 3),
+                          );
+                          setState(() {
+                            loading = false;
+                          });
+                          return;
+                        }
+                      }
+
+                      await chargeCard(widget.viewModel.cartFinalTotal + getDeliveryFee(), paymentMethod);
                     } catch (e) {
                       print("Payment Error: $e");
                     }
@@ -711,8 +748,9 @@ class _CheckoutState extends State<Checkout> {
                               cityController.text.isNotEmpty &&
                               stateController.text.isNotEmpty &&
                               phoneNumberController.text.isNotEmpty) {
-                            createNewShipping().then((_) {
-                              Navigator.pop(context); // ✅ Only pop when successful
+                            createNewShipping().then((_) async {
+                              Navigator.pop(context);
+                              await getShippings();
                             });
                           }
                           houseAddressController.clear();
@@ -795,9 +833,9 @@ class _CheckoutState extends State<Checkout> {
 
         setState(() {
           shippingAddresses = fetchedAddresses;
-          shippingId = fetchedAddresses.isNotEmpty
+          shippingId = (fetchedAddresses.isNotEmpty
               ? fetchedAddresses[0].id
-              : "";
+              : "")!;
         });
       } else {
         locator<SnackbarService>().showSnackbar(

@@ -87,26 +87,26 @@ enum UserStatus { Active, Inactive }
 
 // Address model to represent address objects
 class Address {
-  final String id;
-  final String address;
-  final String city;
-  final String state;
-  final String phoneNumber;
-  final String type;
-  final String userId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? id;
+  final String? address;
+  final String? city;
+  final String? state;
+  final String? phoneNumber;
+  final String? type;
+  final String? userId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Address({
-    required this.id,
-    required this.address,
-    required this.city,
-    required this.state,
-    required this.phoneNumber,
-    required this.type,
-    required this.userId,
-    required this.createdAt,
-    required this.updatedAt,
+     this.id,
+     this.address,
+     this.city,
+     this.state,
+     this.phoneNumber,
+     this.type,
+     this.userId,
+     this.createdAt,
+     this.updatedAt,
   });
 
   factory Address.fromJson(Map<String, dynamic> json) {
@@ -131,8 +131,8 @@ class Address {
     'phoneNumber': phoneNumber,
     'type': type,
     'userId': userId,
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
   };
 }
 

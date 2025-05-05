@@ -396,7 +396,6 @@ class CartView extends StackedView<CartViewModel> {
                                 ],
                               ),
                       ),
-
                       verticalSpaceSmall,
                       if (cart.value.isNotEmpty)
                         _buildProceedToPaySection(context,

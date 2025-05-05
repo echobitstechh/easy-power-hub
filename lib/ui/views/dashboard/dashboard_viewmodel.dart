@@ -204,6 +204,8 @@ class DashboardViewModel extends BaseViewModel {
               .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
               .where((category) => category.status == CategoryStatus.active) // Filter out inactive
               .toList();
+
+          globalCategories.value = categories;
         }
       }
 
