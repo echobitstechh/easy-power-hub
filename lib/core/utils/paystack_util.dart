@@ -25,10 +25,12 @@ class PaystackUtil {
     required String ref,
     required List<CartItem> cartItems,
     required int deliveryFee,
+    String? accessCode,
   }) async {
     final charge = Charge()
       ..amount = (amountInNaira + deliveryFee) * 100 // Paystack expects kobo
       ..reference = ref
+      ..accessCode = accessCode
       ..email = email;
 
     final response = await _plugin.checkout(

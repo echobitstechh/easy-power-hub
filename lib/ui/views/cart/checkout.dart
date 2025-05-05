@@ -624,6 +624,7 @@ class _CheckoutState extends State<Checkout> {
           await PaystackUtil.processPayment(
             context: context,
             ref: response.data['data']['reference'],
+            accessCode: response.data['data']['accessCode'],
             amountInNaira: amount,
             email: profile.value.email!,
             cartItems: cart.value,
