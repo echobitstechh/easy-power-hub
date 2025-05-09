@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:easyph/app/app.locator.dart';
@@ -63,6 +64,23 @@ class _PaymentWebViewState extends State<PaymentWebView> {
             );
             widget.onFailure();
             Navigator.pop(context);
+          },
+          onNavigationRequest: (NavigationRequest request) {
+            final redirectedUrl = request.url;
+            debugPrint("Navigating to: $redirectedUrl");
+
+            // **Log the full redirect URL for analysis**
+            if (redirectedUrl.contains("checkout.paystack.com")) {
+              debugPrint("🔗 Paystack Redirect URL: $redirectedUrl");
+            }
+
+            // Prevent external links from opening in the WebView
+            if (!redirectedUrl.startsWith("https://checkout.paystack.com/")) {
+              launchUrl(Uri.parse(redirectedUrl), mode: LaunchMode.externalApplication);
+              return NavigationDecision.prevent;
+            }
+
+            return NavigationDecision.navigate;
           },
         ),
       )
