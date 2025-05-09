@@ -538,7 +538,7 @@ class _CheckoutState extends State<Checkout> {
                       print("Payment Error: $e");
                     }
 
-                     setState(() {
+                    setState(() {
                       loading = false;
                     });
                   },
@@ -622,13 +622,11 @@ class _CheckoutState extends State<Checkout> {
         if (response.statusCode == 200) {
           print('Payment initialized successfully');
 
-          print('Payment access code: ${response.data['data’][‘data’][‘access_code']}');
-          print(response.data['data']['access_code']);
-
           await PaystackUtil.processPayment(
             context: context,
             ref: response.data['data']['reference'],
             accessCode: response.data['data']['access_code'],
+            url: response.data['data']['authorization_url'],
             amountInNaira: amount,
             email: profile.value.email!,
             cartItems: cart.value,

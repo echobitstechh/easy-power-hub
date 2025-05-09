@@ -6,6 +6,7 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.router.dart';
 
+import '../../ui/dialogs/payment_modal.dart';
 import '../../ui/views/cart/raffle_reciept.dart';
 import '../data/models/cart_item.dart';
 
@@ -17,7 +18,6 @@ class PaystackUtil {
     _plugin.initialize(publicKey: publicKey);
   }
 
-
   static Future<bool> processPayment({
     required BuildContext context,
     required int amountInNaira,
@@ -26,47 +26,92 @@ class PaystackUtil {
     required List<CartItem> cartItems,
     required int deliveryFee,
     String? accessCode,
+    String? url,
   }) async {
-    final charge = Charge()
-      ..amount = (amountInNaira + deliveryFee) * 100 // Paystack expects kobo
-      ..reference = ref
-      ..accessCode = accessCode
-      ..email = email;
+    
+    print('processing url is $url');
+    // final charge = Charge()
+    //   ..amount = (amountInNaira + deliveryFee) * 100 // Paystack expects kobo
+    //   ..reference = ref
+    //   ..accessCode = accessCode
+    //   ..email = email;
+    //
+    // final response = await _plugin.checkout(
+    //   context,
+    //    method: CheckoutMethod.selectable,
+    //   charge: charge,
+    // );
 
-    final response = await _plugin.checkout(
-      context,
-       method: CheckoutMethod.selectable,
-      charge: charge,
-    );
+    // if (response.status == true) {
+    //
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (_) => RaffleReceiptPage(
+    //         carts: cartItems,
+    //         totalAmount: amountInNaira,
+    //       ),
+    //     ),
+    //   );
+    //   return true;
+    // } else {
+    //   locator<SnackbarService>().showSnackbar(
+    //     message: "Payment failed. Please try again.",
+    //     duration: const Duration(seconds: 2),
+    //   );
+    //
+    //   locator<NavigationService>().clearStackAndShow(Routes.homeView);
+    //
+    //   Future.delayed(const Duration(milliseconds: 200), () {
+    //     locator<NavigationService>().navigateTo(
+    //       Routes.orderView,
+    //       transition: (context, animation, secondaryAnimation, child) => child,
+    //     );
+    //   });
+    //
+    //   return false;
+    // }
 
-    if (response.status == true) {
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => RaffleReceiptPage(
-            carts: cartItems,
-            totalAmount: amountInNaira,
-          ),
-        ),
-      );
-      return true;
-    } else {
+    if (url == null || url.isEmpty) {
       locator<SnackbarService>().showSnackbar(
-        message: "Payment failed. Please try again.",
+        message: "Invalid payment URL.",
         duration: const Duration(seconds: 2),
       );
-
-      locator<NavigationService>().clearStackAndShow(Routes.homeView);
-
-      Future.delayed(const Duration(milliseconds: 200), () {
-        locator<NavigationService>().navigateTo(
-          Routes.orderView,
-          transition: (context, animation, secondaryAnimation, child) => child,
-        );
-      });
-
       return false;
     }
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PaymentWebView(
+          url: url,
+          onSuccess: () {
+            locator<SnackbarService>().showSnackbar(
+              message: "Payment successful!",
+              duration: const Duration(seconds: 2),
+            );
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => RaffleReceiptPage(
+                  carts: cartItems,
+                  totalAmount: amountInNaira,
+                ),
+              ),
+            );
+          },
+          onFailure: () {
+            locator<SnackbarService>().showSnackbar(
+              message: "Payment failed. Please try again.",
+              duration: const Duration(seconds: 2),
+            );
+            locator<NavigationService>().clearStackAndShow(Routes.homeView);
+            locator<NavigationService>().navigateTo(Routes.orderView);
+          },
+        ),
+      ),
+    );
+
+    return result ?? false;
   }
 }
