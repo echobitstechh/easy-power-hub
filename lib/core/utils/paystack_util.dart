@@ -35,7 +35,7 @@ class PaystackUtil {
 
     final response = await _plugin.checkout(
       context,
-      method: CheckoutMethod.card,
+       method: CheckoutMethod.selectable,
       charge: charge,
     );
 
