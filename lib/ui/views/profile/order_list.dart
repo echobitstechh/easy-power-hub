@@ -360,7 +360,7 @@ class _OrderListState extends State<OrderList> {
               const SizedBox(height: 10),
               Expanded(
                 child: ListView.builder(
-                  controller: scrollController, // Allows scrolling inside sheet
+                  controller: scrollController,
                   itemCount: timelineEntries.length,
                   itemBuilder: (context, index) {
                     final entry = timelineEntries[index];
@@ -410,7 +410,7 @@ class _OrderListState extends State<OrderList> {
     );
   }
 
-  /// Modified timeline card that changes its background based on active state
+
   Widget _buildTimelineCard(
       {required String title,
       required String description,
@@ -538,7 +538,6 @@ class _OrderListState extends State<OrderList> {
                   amountInNaira: order.totalPrice,
                   email: profile.value.email!,
                   cartItems: cart.value,
-                  deliveryFee: 0,
                 );
               }else{
                 locator<SnackbarService>().showSnackbar(message: "Payment processing failed",

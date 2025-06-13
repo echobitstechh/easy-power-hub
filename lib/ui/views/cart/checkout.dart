@@ -15,6 +15,7 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
+import '../../../core/data/models/delivery_zone.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
@@ -48,7 +49,9 @@ class _CheckoutState extends State<Checkout> {
   String publicKeyTest = MoneyUtils().payStackPublicKey;
   List<Address> shippingAddresses = [];
   int discountAmount = 0;
-  bool freeDelivery = false;
+
+  List<DeliveryZone> deliveryZones = [];
+  DeliveryZone? selectedDeliveryZone;
 
   final plugin = PaystackPlugin();
 
@@ -58,10 +61,18 @@ class _CheckoutState extends State<Checkout> {
   final TextEditingController stateController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
 
+  int calculatedDeliveryFee = 0;
+  int calculatedFinalTotal = 0;
+  bool isCalculating = false;
+
+
+
+
   @override
   void initState() {
     plugin.initialize(publicKey: publicKeyTest);
     getShippings();
+    getDeliveryZones();
     fetchOnlineCart();
     super.initState();
   }
@@ -159,107 +170,6 @@ class _CheckoutState extends State<Checkout> {
                 Card(
                   child: ExpansionTile(
                     initiallyExpanded: true,
-                    childrenPadding: const EdgeInsets.symmetric(horizontal: 20),
-                    title: const Text(
-                      "Billing summary",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    children: [
-                      verticalSpaceSmall,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Sub-total",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            MoneyUtils()
-                                .formatAmount(widget.viewModel.cartSubtotal),
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      verticalSpaceTiny,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Delivery-Fee",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            getDeliveryFee() == 0
-                                ? "-"
-                                : "N${getDeliveryFee()}",
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      verticalSpaceTiny,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Discount",
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            "- ${MoneyUtils().formatAmount(widget.viewModel.cartDiscount)}",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
-                          ),
-                        ],
-                      ),
-                      verticalSpaceTiny,
-                      if (freeDelivery)
-                        const Text(
-                          "Free Delivery Applied!",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      const Divider(
-                        thickness: 2,
-                      ),
-                      verticalSpaceSmall,
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            "Total",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            MoneyUtils()
-                                .formatAmount(widget.viewModel.cartFinalTotal),
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      verticalSpaceSmall
-                    ],
-                  ),
-                ),
-                verticalSpaceSmall,
-                Card(
-                  child: ExpansionTile(
-                    initiallyExpanded: true,
                     title: const Text(
                       "Shipping details",
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -287,6 +197,7 @@ class _CheckoutState extends State<Checkout> {
                                     onChanged: (String? value) {
                                       setState(() {
                                         shippingId = value!;
+                                        calculateOrder();
                                       });
                                     },
                                   ),
@@ -320,6 +231,87 @@ class _CheckoutState extends State<Checkout> {
                 Card(
                   child: ExpansionTile(
                     initiallyExpanded: true,
+                    childrenPadding: const EdgeInsets.symmetric(horizontal: 20),
+                    title: const Text(
+                      "Billing summary",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    children: [
+                      verticalSpaceSmall,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Sub-total",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            MoneyUtils()
+                                .formatAmount(widget.viewModel.cartSubtotal),
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceTiny,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Delivery-Fee", style: TextStyle(fontSize: 16)),
+                          isCalculating
+                              ? const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2))
+                              : Text(
+                            MoneyUtils().formatAmount(calculatedDeliveryFee),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceTiny,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Discount",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            "- ${MoneyUtils().formatAmount(widget.viewModel.cartDiscount)}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const Divider(
+                        thickness: 2,
+                      ),
+                      verticalSpaceSmall,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          isCalculating
+                              ? const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2))
+                              : Text(
+                            MoneyUtils().formatAmount(calculatedFinalTotal),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                      verticalSpaceSmall
+                    ],
+                  ),
+                ),
+                verticalSpaceSmall,
+                Card(
+                  child: ExpansionTile(
+                    initiallyExpanded: true,
                     childrenPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     title: const Text(
                       "Delivery method",
@@ -332,6 +324,7 @@ class _CheckoutState extends State<Checkout> {
                         onTap: () {
                           setState(() {
                             pickUpOption = "Pickup";
+                            calculateOrder();
                           });
                         },
                         child: Container(
@@ -364,6 +357,7 @@ class _CheckoutState extends State<Checkout> {
                         onTap: () {
                           setState(() {
                             pickUpOption = "Delivery";
+                            calculateOrder();
                           });
                         },
                         child: Container(
@@ -490,7 +484,7 @@ class _CheckoutState extends State<Checkout> {
                   isLoading: loading,
                   label: paymentMethod == "delivery"
                       ? "Confirm Order"
-                      : "Pay ${MoneyUtils().formatAmount(widget.viewModel.cartFinalTotal + getDeliveryFee())}",
+                      : "Pay ${MoneyUtils().formatAmount(calculatedFinalTotal)}",
                   submit: () async {
                     if (paymentMethod == null) {
                      // showSnackbar(context, "Please select a payment method");
@@ -533,7 +527,7 @@ class _CheckoutState extends State<Checkout> {
                         }
                       }
 
-                      await chargeCard(widget.viewModel.cartFinalTotal + getDeliveryFee(), paymentMethod);
+                      await chargeCard(widget.viewModel.cartFinalTotal, paymentMethod);
                     } catch (e) {
                       print("Payment Error: $e");
                     }
@@ -564,7 +558,6 @@ class _CheckoutState extends State<Checkout> {
     return quantity;
   }
 
-
   int getTotalPrice() {
     int total = 0;
 
@@ -573,16 +566,6 @@ class _CheckoutState extends State<Checkout> {
           (double.parse(element.product?.salePrice.toString() ?? '0').round() *
               element.quantity!);
     }
-
-    return total;
-  }
-
-  int getDeliveryFee() {
-    int total = 0;
-
-    // for (var element in raffleCart.value) {
-    //   total = total + (element.product!.shippingFee!);
-    // }
 
     return total;
   }
@@ -601,7 +584,6 @@ class _CheckoutState extends State<Checkout> {
       "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
       "deliveryOption": pickUpOption,
       "promoCode": "",
-      "shippingFee": getDeliveryFee(),
       "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
       "installmentPayment": hasInstallment,
       "deliveryAddressId": shippingId,
@@ -612,6 +594,7 @@ class _CheckoutState extends State<Checkout> {
     if (res.statusCode == 201) {
       // final orderData = res.data['order'];
       // final Order order = Order.fromJson(orderData);
+      print('Order placed successfully: ${res.data['order']}');
 
       if (paymentMethod == 'paystack') {
         ApiResponse response = await repo.initializePayment({
@@ -630,7 +613,6 @@ class _CheckoutState extends State<Checkout> {
             amountInNaira: amount,
             email: profile.value.email!,
             cartItems: cart.value,
-            deliveryFee: getDeliveryFee(),
           );
         }else{
           locator<SnackbarService>().showSnackbar(message: "Payment processing failed",
@@ -724,25 +706,29 @@ class _CheckoutState extends State<Checkout> {
                         controller: phoneNumberController,
                         onChanged: (value) => phoneNumber = value,
                       ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: isDefaultPayment,
-                            activeColor: Colors.black,
-                            checkColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)),
-                            onChanged: (value) {
-                              setModalState(() {
-                                isDefaultPayment = value ?? false;
-                              });
-                            },
-                          ),
-                          const Text("Set as default payment method"),
-                        ],
+                      verticalSpaceSmall,
+
+                      DropdownButtonFormField<DeliveryZone>(
+                        decoration: const InputDecoration(
+                          labelText: "Delivery Zone",
+                          border: OutlineInputBorder(),
+                        ),
+                        value: selectedDeliveryZone,
+                        items: deliveryZones.map((zone) {
+                          return DropdownMenuItem<DeliveryZone>(
+                            value: zone,
+                            child: Text('${zone.name} (${zone.baseFee?.toStringAsFixed(0) ?? ''} NGN)'),
+                          );
+                        }).toList(),
+                        onChanged: (zone) {
+                          setModalState(() {
+                            selectedDeliveryZone = zone;
+                          });
+                        },
                       ),
+
                       const SizedBox(height: 16),
+
                       SubmitButton(
                         isLoading: false,
                         label: 'Add Address',
@@ -750,7 +736,8 @@ class _CheckoutState extends State<Checkout> {
                           if (houseAddressController.text.isNotEmpty &&
                               cityController.text.isNotEmpty &&
                               stateController.text.isNotEmpty &&
-                              phoneNumberController.text.isNotEmpty) {
+                              phoneNumberController.text.isNotEmpty
+                              && selectedDeliveryZone != null) {
                             createNewShipping().then((_) async {
                               Navigator.pop(context);
                               await getShippings();
@@ -785,10 +772,11 @@ class _CheckoutState extends State<Checkout> {
         "city": cityController.text,
         "state": stateController.text,
         "phoneNumber": phoneNumberController.text,
-        "type": "Shipping"
+        "type": "Shipping",
+        "zoneId": selectedDeliveryZone?.id ?? '',
       });
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         locator<SnackbarService>().showSnackbar(
           message: "Created address successfully",
           duration: const Duration(seconds: 2),
@@ -863,6 +851,28 @@ class _CheckoutState extends State<Checkout> {
     }
   }
 
+  Future<void> getDeliveryZones() async {
+    try {
+      final response = await repo.getDeliveryZones();
+
+      if (response.statusCode == 200) {
+        final List<dynamic> list = response.data['zones'] ?? [];
+        deliveryZones = list.map((item) => DeliveryZone.fromJson(item)).toList();
+        setState(() {});
+      } else {
+        locator<SnackbarService>().showSnackbar(
+          message: response.data["message"],
+          duration: Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      locator<SnackbarService>().showSnackbar(
+        message: "Failed to fetch delivery zones: $e",
+        duration: Duration(seconds: 2),
+      );
+    }
+  }
+
   Future<void> fetchOnlineCart() async {
     try {
       ApiResponse res = await repo.cartList();
@@ -886,6 +896,44 @@ class _CheckoutState extends State<Checkout> {
       print('Couldn\'t get online cart: $e');
     }
   }
+
+  Future<void> calculateOrder() async {
+    if (shippingId.isEmpty || pickUpOption.isEmpty || pickUpOption == 'Pickup') return;
+
+    setState(() {
+      isCalculating = true;
+    });
+
+    try {
+      final response = await repo.calculateOrder({
+        "deliveryAddressId": shippingId,
+        "deliveryOption": pickUpOption,
+      });
+
+      if (response.statusCode == 200) {
+        print('order calculation response: ${response.data}');
+        setState(() {
+          calculatedDeliveryFee = response.data['data']['shippingFee'] ?? 0;
+          calculatedFinalTotal = response.data['data']['finalTotal'] ?? 0;
+        });
+      } else {
+        locator<SnackbarService>().showSnackbar(
+          message: response.data['message'] ?? "Failed to calculate total",
+        );
+      }
+    } catch (e) {
+      locator<SnackbarService>().showSnackbar(
+        message: "Error calculating order: $e",
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isCalculating = false;
+        });
+      }
+    }
+  }
+
 
   Widget _buildRadioIcon(String method) {
     return Container(

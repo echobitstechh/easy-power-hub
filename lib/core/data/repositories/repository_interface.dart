@@ -107,11 +107,15 @@ abstract class IRepository {
 
   Future<ApiResponse> getAddresses();
 
+  Future<ApiResponse> getDeliveryZones();
+
   Future<ApiResponse> getCategories();
 
   Future<ApiResponse> updateNotification(String eventId);
 
   Future<ApiResponse> saveShipping(Map<String, dynamic> req);
+
+  Future<ApiResponse> calculateOrder(Map<String, dynamic> req);
 
   Future<ApiResponse> setDefaultShipping(Map<String, dynamic> req, String id);
 

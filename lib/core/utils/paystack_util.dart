@@ -24,53 +24,11 @@ class PaystackUtil {
     required String email,
     required String ref,
     required List<CartItem> cartItems,
-    required int deliveryFee,
     String? accessCode,
     String? url,
   }) async {
     
     print('processing url is $url');
-    // final charge = Charge()
-    //   ..amount = (amountInNaira + deliveryFee) * 100 // Paystack expects kobo
-    //   ..reference = ref
-    //   ..accessCode = accessCode
-    //   ..email = email;
-    //
-    // final response = await _plugin.checkout(
-    //   context,
-    //    method: CheckoutMethod.selectable,
-    //   charge: charge,
-    // );
-
-    // if (response.status == true) {
-    //
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (_) => RaffleReceiptPage(
-    //         carts: cartItems,
-    //         totalAmount: amountInNaira,
-    //       ),
-    //     ),
-    //   );
-    //   return true;
-    // } else {
-    //   locator<SnackbarService>().showSnackbar(
-    //     message: "Payment failed. Please try again.",
-    //     duration: const Duration(seconds: 2),
-    //   );
-    //
-    //   locator<NavigationService>().clearStackAndShow(Routes.homeView);
-    //
-    //   Future.delayed(const Duration(milliseconds: 200), () {
-    //     locator<NavigationService>().navigateTo(
-    //       Routes.orderView,
-    //       transition: (context, animation, secondaryAnimation, child) => child,
-    //     );
-    //   });
-    //
-    //   return false;
-    // }
 
     if (url == null || url.isEmpty) {
       locator<SnackbarService>().showSnackbar(

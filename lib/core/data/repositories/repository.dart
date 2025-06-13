@@ -669,10 +669,33 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> calculateOrder(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "orders/calculate",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+
+
+  @override
   Future<ApiResponse> getAddresses() async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
       endpoint: "profile/addresses",
+    );
+
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getDeliveryZones() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "admin/delivery/zones",
     );
 
     return response;

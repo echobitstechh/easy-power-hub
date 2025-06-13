@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
+import '../../../core/data/models/delivery_zone.dart';
 import '../../../core/data/models/profile.dart';
 import '../../../core/network/interceptors.dart';
-import '../../../state.dart';
 import '../../common/app_colors.dart';
 import '../../components/submit_button.dart';
 import '../../components/text_field_widget.dart';
@@ -28,6 +28,8 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
   bool isShippingLoading = false;
 
   List<Address> shippingAddresses = [];
+  List<DeliveryZone> deliveryZones = [];
+  DeliveryZone? selectedDeliveryZone;
 
   void deleteAddress(int index) async {
     setState(() {
@@ -45,6 +47,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
     String city = '';
     String state = '';
     String phoneNumber = '';
+    String deliveryZoneId = '';
     bool isDefaultPayment = false;
 
     showModalBottomSheet(
@@ -99,25 +102,45 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                         controller: phoneNumberController,
                         onChanged: (value) => phoneNumber = value,
                       ),
+                      verticalSpaceSmall,
 
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Checkbox(
-                            value: isDefaultPayment,
-                            activeColor: Colors.black,
-                            checkColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(5)),
-                            onChanged: (value) {
-                              setModalState(() {
-                                isDefaultPayment = value ?? false;
-                              });
-                            },
-                          ),
-                          const Text("Set as default payment method"),
-                        ],
+                      DropdownButtonFormField<DeliveryZone>(
+                        decoration: const InputDecoration(
+                          labelText: "Delivery Zone",
+                          border: OutlineInputBorder(),
+                        ),
+                        value: selectedDeliveryZone,
+                        items: deliveryZones.map((zone) {
+                          return DropdownMenuItem<DeliveryZone>(
+                            value: zone,
+                            child: Text('${zone.name} (${zone.baseFee?.toStringAsFixed(0) ?? ''} NGN)'),
+                          );
+                        }).toList(),
+                        onChanged: (zone) {
+                          setModalState(() {
+                            selectedDeliveryZone = zone;
+                          });
+                        },
                       ),
+
+                      // const SizedBox(height: 16),
+                      // Row(
+                      //   children: [
+                      //     Checkbox(
+                      //       value: isDefaultPayment,
+                      //       activeColor: Colors.black,
+                      //       checkColor: Colors.white,
+                      //       shape: RoundedRectangleBorder(
+                      //           borderRadius: BorderRadius.circular(5)),
+                      //       onChanged: (value) {
+                      //         setModalState(() {
+                      //           isDefaultPayment = value ?? false;
+                      //         });
+                      //       },
+                      //     ),
+                      //     const Text("Set as default payment method"),
+                      //   ],
+                      // ),
                       const SizedBox(height: 16),
                       SubmitButton(
                           isLoading: false,
@@ -126,7 +149,8 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                             if (houseAddressController.text.isNotEmpty &&
                                 cityController.text.isNotEmpty &&
                                 stateController.text.isNotEmpty &&
-                                phoneNumberController.text.isNotEmpty) {
+                                phoneNumberController.text.isNotEmpty
+                                && selectedDeliveryZone != null) {
                               createNewShipping();
                             }
                             houseAddressController.clear();
@@ -154,10 +178,11 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
         "city": cityController.text,
         "state": stateController.text,
         "phoneNumber": phoneNumberController.text,
-        "type": "Shipping"
+        "type": "Shipping",
+        "zoneId": selectedDeliveryZone?.id ?? '',
       });
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         locator<SnackbarService>().showSnackbar(message: "Created address successfully", duration: Duration(seconds: 2));
         loading = false;
         getShippings();
@@ -205,11 +230,34 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
     }
   }
 
+  Future<void> getDeliveryZones() async {
+    try {
+      final response = await repo.getDeliveryZones();
+
+      if (response.statusCode == 200) {
+        final List<dynamic> list = response.data['zones'] ?? [];
+        deliveryZones = list.map((item) => DeliveryZone.fromJson(item)).toList();
+        setState(() {});
+      } else {
+        locator<SnackbarService>().showSnackbar(
+          message: response.data["message"],
+          duration: Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      locator<SnackbarService>().showSnackbar(
+        message: "Failed to fetch delivery zones: $e",
+        duration: Duration(seconds: 2),
+      );
+    }
+  }
+
 
   @override
   void initState() {
     super.initState();
     getShippings();
+    getDeliveryZones();
   }
 
   @override
