@@ -71,6 +71,7 @@ class _CheckoutState extends State<Checkout> {
   @override
   void initState() {
     plugin.initialize(publicKey: publicKeyTest);
+    calculatedFinalTotal = widget.viewModel.cartSubtotal;
     getShippings();
     getDeliveryZones();
     fetchOnlineCart();
