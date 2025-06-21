@@ -30,7 +30,6 @@ import 'package:rxdart/rxdart.dart';
 ///
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-final _messageStreamController = BehaviorSubject<RemoteMessage>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
@@ -48,7 +47,7 @@ void main() async{
 
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  FirebaseMessaging.instance.requestPermission();
+  // FirebaseMessaging.instance.requestPermission();
   runApp(const MyApp());
 }
 

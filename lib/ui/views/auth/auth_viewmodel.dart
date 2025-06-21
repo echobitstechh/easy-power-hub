@@ -213,11 +213,12 @@ class AuthViewModel extends BaseViewModel {
           locator<NavigationService>().clearStackAndShow(Routes.homeView);
         }
       } else {
-        snackBar.showSnackbar(message: res.data["message"]);
+        snackBar.showSnackbar(message: res.data["message"], duration: Duration(seconds: 3));
       }
     } catch (e) {
       log.i(e);
-      snackBar.showSnackbar(message: "Unable to login. Please try again.");
+      print('error is $e');
+      snackBar.showSnackbar(message: "Unable to login. Please try again.", duration: Duration(seconds: 3));
     } finally {
       appLoading.value = false;
       rebuildUi();
@@ -230,6 +231,7 @@ class AuthViewModel extends BaseViewModel {
 
     try {
       // Get FCM Token
+      print('trying to create fcm token');
       String? fcmToken = await FirebaseMessaging.instance.getToken();
       print("FCM Token: $fcmToken");
 
