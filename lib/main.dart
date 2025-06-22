@@ -1,3 +1,4 @@
+import 'package:app_links/app_links.dart';
 import 'package:easyph/core/utils/config.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
@@ -40,11 +41,7 @@ void main() async{
   setupDialogUi();
   setupBottomSheetUi();
   PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
-  // Initialize Paystack with your public key
-  // final  paystackPlugin = PaystackPlugin();
-  // await paystackPlugin.initialize(publicKey: AppConfig.paystackApiKeyTest);
-
-
+  final AppLinks _appLinks = AppLinks();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // FirebaseMessaging.instance.requestPermission();

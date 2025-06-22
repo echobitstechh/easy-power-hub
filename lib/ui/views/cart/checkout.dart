@@ -487,17 +487,13 @@ class _CheckoutState extends State<Checkout> {
                       ? "Confirm Order"
                       : "Pay ${MoneyUtils().formatAmount(calculatedFinalTotal)}",
                   submit: () async {
-                    if (paymentMethod == null) {
-                     // showSnackbar(context, "Please select a payment method");
-                      return;
-                    }
 
                     setState(() {
                       loading = true;
                     });
 
                     try {
-                      //check if any of the product is in electronics category and home delivery is selected
+
                       if (pickUpOption == "Delivery") {
                         bool isElectronics = cart.value.any((item) {
                           final category = globalCategories.value.firstWhere(
@@ -528,7 +524,7 @@ class _CheckoutState extends State<Checkout> {
                         }
                       }
 
-                      await chargeCard(widget.viewModel.cartFinalTotal, paymentMethod);
+                      await processPayment(widget.viewModel.cartFinalTotal, paymentMethod);
                     } catch (e) {
                       print("Payment Error: $e");
                     }
@@ -571,7 +567,7 @@ class _CheckoutState extends State<Checkout> {
     return total;
   }
 
-  Future<void> chargeCard(int amount, String paymentMethod) async {
+  Future<void> processPayment(int amount, String paymentMethod) async {
     setState(() {
       isPaying = true;
     });
@@ -579,8 +575,6 @@ class _CheckoutState extends State<Checkout> {
     final hasInstallment = cart.value.any((e) => e.isInstallment == true);
     final firstInstallmentItem = cart.value.firstWhere((e) => e.isInstallment == true, orElse: () => cart.value.first);
 
-
-    // Build the new request body
     Map<String, dynamic> requestBody = {
       "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
       "deliveryOption": pickUpOption,
@@ -593,9 +587,6 @@ class _CheckoutState extends State<Checkout> {
     ApiResponse res = await locator<Repository>().payForOrder(requestBody);
 
     if (res.statusCode == 201) {
-      // final orderData = res.data['order'];
-      // final Order order = Order.fromJson(orderData);
-      print('Order placed successfully: ${res.data['order']}');
 
       if (paymentMethod == 'paystack') {
         ApiResponse response = await repo.initializePayment({
