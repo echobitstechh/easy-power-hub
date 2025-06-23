@@ -33,6 +33,7 @@ import 'package:rxdart/rxdart.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
+final AppLinks _appLinks = AppLinks();
 
 void main() async{
 
@@ -41,7 +42,6 @@ void main() async{
   setupDialogUi();
   setupBottomSheetUi();
   PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
-  final AppLinks _appLinks = AppLinks();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // FirebaseMessaging.instance.requestPermission();
@@ -65,18 +65,41 @@ class _MyAppState extends State<MyApp> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       checkForUpdates();
-    });    // handleDeepLinks();
+    });
+    checkInitialLink();
+    handleDeepLinks();
   }
 
-  // void handleDeepLinks() async {
-  //   // Listen for deep links
-  //   uriLinkStream.listen((Uri? uri) {
-  //     if (uri != null) {
-  //       print("Deep Link Received: ${uri.toString()}");
-  //       // Handle navigation in the app
-  //     }
-  //   });
-  // }
+  void handleDeepLinks() async {
+    // Listen for deep links
+    _appLinks.uriLinkStream.listen((Uri? uri) {
+      if (uri == null) return;
+
+      final path = uri.path;
+
+      if (path.contains("payment-success")) {
+        print('payment successful, navigate back to success page');
+        // Navigator.pushNamed(context, '/paymentSuccess');
+      } else if (path.contains("payment-failed")) {
+        print('payment failed, navigate back to failed page');
+        // Navigator.pushNamed(context, '/paymentFailed');
+      }
+    });
+  }
+
+  void checkInitialLink() async {
+    final uri = await _appLinks.getInitialLink();
+    if (uri != null) {
+      final path = uri.path;
+
+      if (path.contains("payment-success")) {
+        Navigator.pushNamed(context, '/paymentSuccess');
+      } else if (path.contains("payment-failed")) {
+        Navigator.pushNamed(context, '/paymentFailed');
+      }
+    }
+  }
+
   void fetchUiState() async {
     String? savedMode =
         await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
