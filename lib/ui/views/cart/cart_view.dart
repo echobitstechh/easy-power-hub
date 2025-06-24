@@ -8,10 +8,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
 import '../../../utils/money_util.dart';
-import '../../../utils/paymentModal.dart';
-import '../../components/text_field_widget.dart';
 import 'cart_viewmodel.dart';
 import 'checkout.dart';
 
@@ -54,7 +53,7 @@ class CartView extends StackedView<CartViewModel> {
               ))
             : Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
+                  borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(25.0),
                     topRight: Radius.circular(25.0),
                   ),
@@ -69,40 +68,6 @@ class CartView extends StackedView<CartViewModel> {
                   ),
                   child: Column(
                     children: [
-                      // if (raffleCart.value.isNotEmpty)
-                      //   Padding(
-                      //     padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0),
-                      //     child: Row(
-                      //       mainAxisAlignment: MainAxisAlignment.start,
-                      //       children: [
-                      //         GestureDetector(
-                      //           onTap: () {
-                      //             viewModel.clearRaffleCart();
-                      //           },
-                      //           child: Row(
-                      //             children: [
-                      //               Text("Clear",
-                      //                   style: GoogleFonts.redHatDisplay(
-                      //                     textStyle: const TextStyle(
-                      //                       fontSize: 16,
-                      //                       fontWeight: FontWeight.w500,
-                      //                       color: Colors.red,
-                      //                     ),
-                      //                   )),
-                      //               SizedBox(width: 2),
-                      //               Icon(
-                      //                 size: 20,
-                      //                 Icons.delete_outline,
-                      //                 color:  uiMode.value == AppUiModes.dark
-                      //                     ? kcWhiteColor
-                      //                     : kcBlackColor,
-                      //               ),
-                      //             ],
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
                       Expanded(
                         child: cart.value.isEmpty
                             ? const EmptyState(
@@ -411,147 +376,225 @@ class CartView extends StackedView<CartViewModel> {
   Widget _buildProceedToPaySection(
       BuildContext context, CartViewModel viewModel) {
     return SafeArea(
-        child: Container(
-      decoration: BoxDecoration(
-        color: Colors.white, // Adjust the background color as needed
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.grey.shade300, // Adjust the border color as needed
-          width: 1.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: uiMode.value == AppUiModes.dark ? kcMediumGrey : kcWhiteColor,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 6,
+              offset: Offset(0, -4), // Shadow for the top edge
+            ),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 6,
-            offset: Offset(0, -4), // Shadow for the top edge
+        child: viewModel.isLoading
+            ?Shimmer.fromColors(
+          baseColor: uiMode.value == AppUiModes.dark
+              ? Colors.grey[800]!
+              : Colors.grey[300]!,
+          highlightColor: uiMode.value == AppUiModes.dark
+              ? Colors.grey[600]!
+              : Colors.grey[100]!,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+            Expanded(
+            child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Subtotal shimmer
+                Row(
+                  children: [
+                    Container(
+                      width: 70,
+                      height: 16,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                    SizedBox(width: 8),
+                    Container(
+                      width: 60,
+                      height: 16,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                // Discount shimmer
+                Row(
+                  children: [
+                    Container(
+                      width: 70,
+                      height: 16,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                    SizedBox(width: 8),
+                    Container(
+                      width: 60,
+                      height: 16,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                // Total shimmer
+                Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 20,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                    SizedBox(width: 8),
+                    Container(
+                      width: 80,
+                      height: 24,
+                      color: uiMode.value == AppUiModes.dark
+                          ? Colors.grey[700]!
+                          : Colors.white,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
-      child: viewModel.isLoading
-          ? const SizedBox(
-              // width: 50,
-              // height: 50,
-              child: CircularProgressIndicator(
-                color: kcPrimaryColor,
-                strokeWidth: 2.0,
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          // Checkout button shimmer
+                Container(
+                  width: 120,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: uiMode.value == AppUiModes.dark
+                        ? Colors.grey[700]!
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
+            : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            const Text(
-                              "Subtotal:",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500, fontSize: 14),
-                            ),
-                            horizontalSpaceTiny,
-                            Text(
-                              MoneyUtils().formatAmount(viewModel.cartSubtotal),
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.bold),
-                            ),
-
-                          ],
+                        const Text(
+                          "Subtotal:",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 14),
                         ),
-                        Row(
-                          children: [
-                            const Text(
-                              "Discount:",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500, fontSize: 14),
-                            ),
-                            horizontalSpaceTiny,
-                            Text(
-                              "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold),
-                            ),
-
-                          ],
-                        ),
-
-                        Row(
-                          children: [
-                            const Text(
-                              "Total",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
-                            ),
-                            horizontalSpaceTiny,
-                            Text(
-                              MoneyUtils().formatAmount(viewModel.cartFinalTotal),
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                            horizontalSpaceLarge,
-                    
-                          ],
+                        horizontalSpaceTiny,
+                        Text(
+                          MoneyUtils().formatAmount(viewModel.cartSubtotal),
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
-                  ),
-                  Column(
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          //_showPaymentModal(context, viewModel);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context ) => Checkout(viewModel: viewModel,
+                    Row(
+                      children: [
+                        const Text(
+                          "Discount:",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500, fontSize: 14),
+                        ),
+                        horizontalSpaceTiny,
+                        Text(
+                          "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
+                          style: const TextStyle(
+                              fontSize: 14,
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        const Text(
+                          "Total",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        horizontalSpaceTiny,
+                        Text(
+                          MoneyUtils().formatAmount(viewModel.cartFinalTotal),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        horizontalSpaceLarge,
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Checkout(viewModel: viewModel),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: kcPrimaryColor,
+                        borderRadius: BorderRadius.circular(5),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 4,
+                            offset: Offset(0, -2),
+                          ),
+                        ],
+                        border: Border.all(color: kcPrimaryColor),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            "Checkout",
+                            style: GoogleFonts.redHatDisplay(
+                              textStyle: const TextStyle(
+                                color: kcWhiteColor,
+                                fontSize: 20,
                               ),
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 8.0),
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: kcPrimaryColor,
-                            borderRadius: BorderRadius.circular(5),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4,
-                                offset: Offset(
-                                    0, -2), // Shadow for the top edge
-                              ),
-                            ],
-                            border: Border.all(color: kcPrimaryColor),
                           ),
-                          child: Row(
-                            children: [
-                              Text(
-                                "Checkout",
-                                style: GoogleFonts.redHatDisplay(
-                                  textStyle: const TextStyle(
-                                    color: kcWhiteColor,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
-                  )
+                    ),
+                  ),
                 ],
-              ),
-            ),
-    ));
+              )
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
 

@@ -4,10 +4,13 @@ import 'package:easyph/ui/views/cart/cart_viewmodel.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/config.dart';
 import '../../common/app_colors.dart';
+import '../../components/empty_state.dart';
+import '../../components/shimmer.dart';
 import '../../components/submit_button.dart';
 import '../cart/checkout.dart';
 import 'service_viewmodel.dart';
@@ -45,7 +48,9 @@ class ServicesView extends StackedView<ServicesviewModel> {
                         hintStyle: GoogleFonts.redHatDisplay(),
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: uiMode.value == AppUiModes.dark
+                            ? kcMediumGrey
+                            : kcWhiteColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20.0),
                           borderSide: BorderSide.none,
@@ -57,24 +62,43 @@ class ServicesView extends StackedView<ServicesviewModel> {
               ),
               verticalSpaceSmall,
               viewModel.isBusy
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Expanded(
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: ListView.builder(
+                    itemCount: 6,
+                    itemBuilder: (context, index) {
+                      return buildShimmerServiceItem(context);
+                    },
+                  ),
+                ),
+              )                  : viewModel.filteredServices.isEmpty
+                  ? const Expanded(
+                child: Center(
+                  child: EmptyState(
+                    animation: "empty_notifications.json",
+                    label: "No Services yet",
+                  ),
+                ),
+              )
                   : Expanded(
-                      child: ListView.builder(
-                        itemCount: viewModel.filteredServices.length,
-                        itemBuilder: (context, index) {
-                          final service = viewModel.filteredServices[index];
-                          return _buildServiceItem(
-                            context,
-                            service.image ?? 'assets/images/default.png',
-                            service.name,
-                            service.description,
-                            service.phoneNumber ?? 'N/A',
-                            '\$${service.price.toStringAsFixed(2)}',
-                            viewModel
-                          );
-                        },
-                      ),
-                    ),
+                child: ListView.builder(
+                  itemCount: viewModel.filteredServices.length,
+                  itemBuilder: (context, index) {
+                    final service = viewModel.filteredServices[index];
+                    return _buildServiceItem(
+                      context,
+                      service.image ?? 'assets/images/default.png',
+                      service.name,
+                      service.description,
+                      service.phoneNumber ?? 'N/A',
+                      '\$${service.price.toStringAsFixed(2)}',
+                      viewModel,
+                    );
+                  },
+                ),
+              )
             ],
           ),
         ),
