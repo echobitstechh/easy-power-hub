@@ -8,10 +8,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
 import '../../../utils/money_util.dart';
+import '../../components/empty_state.dart';
+import '../../components/shimmer.dart';
 import 'shop_viewmodel.dart';
 
 /// @author George David
@@ -208,7 +211,9 @@ class ShopView extends StackedView<ShopViewModel> {
                                       return Container(
                                         height: 40,
                                         decoration: BoxDecoration(
-                                          color: Colors.white,
+                                          color:  uiMode.value == AppUiModes.dark
+                                              ? kcMediumGrey
+                                              : kcWhiteColor,
                                           borderRadius: BorderRadius.circular(8),
                                         ),
                                         child: TextField(
@@ -293,6 +298,15 @@ class ShopView extends StackedView<ShopViewModel> {
                               }).toList(),
                             ),
                           ),
+                          if (categoryProducts.isEmpty)
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.5,
+                              child: const EmptyState(
+                                animation: "empty_order.json",
+                                label: "No products yet",
+                              ),
+                            )
+                          else
                           popularDrawsSlider(
                               context, categoryProducts, viewModel),
                         ],
@@ -378,12 +392,19 @@ class ShopView extends StackedView<ShopViewModel> {
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(12)),
                               child: CachedNetworkImage(
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.0,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        kcSecondaryColor),
-                                  ),
+                                placeholder: (context, url) =>  Center(
+                                  child: Expanded(
+                                    child: Shimmer.fromColors(
+                                      baseColor: Colors.grey[300]!,
+                                      highlightColor: Colors.grey[100]!,
+                                      child: ListView.builder(
+                                        itemCount: 6, // Number of shimmer items to show
+                                        itemBuilder: (context, index) {
+                                          return buildShimmerServiceItem(context);
+                                        },
+                                      ),
+                                    ),
+                                  )
                                 ),
                                 imageUrl: (item.images != null &&
                                     item.images!.isNotEmpty)

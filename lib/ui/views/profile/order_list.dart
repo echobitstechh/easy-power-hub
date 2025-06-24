@@ -10,6 +10,7 @@ import 'package:easyph/ui/components/empty_state.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import '../../../core/data/models/cart_item.dart';
@@ -125,16 +126,11 @@ class _OrderListState extends State<OrderList> {
   }
 
   List<Order> _pendingOrders() {
-    return orders
-        .where((order) =>
-            order.status == "Pending")
-        .toList();
+    return orders.where((order) => order.status == "Pending").toList();
   }
 
   List<Order> _processingOrders() {
-    return orders
-        .where((order) => order.status == "Processing")
-        .toList();
+    return orders.where((order) => order.status == "Processing").toList();
   }
 
   List<Order> _completedOrders() {
@@ -155,12 +151,56 @@ class _OrderListState extends State<OrderList> {
         centerTitle: true,
       ),
       body: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Shimmer.fromColors(
+              baseColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800]!
+                  : Colors.grey[300]!,
+              highlightColor: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[600]!
+                  : Colors.grey[100]!,
+              child: Column(
+                children: [
+                  // Shimmer for tab bar
+                  Container(
+                    height: 48,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.white,
+                  ),
+                  const SizedBox(height: 16),
+                  // Shimmer for order items
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 5, // Number of shimmer items to show
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: Container(
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey[800]
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            )
           : orders.isEmpty
               ? const EmptyState(
-                  animation: "empty_order.json", label: "No Orders Yet")
+                  animation: "empty_order.json",
+                  label: "No Orders Yet",
+                )
               : DefaultTabController(
-                  length: 2,
+                  length: 3, // Changed to 3 to match your TabBarView children
                   child: Column(
                     children: [
                       _buildTabBar(),
@@ -168,7 +208,8 @@ class _OrderListState extends State<OrderList> {
                         child: TabBarView(
                           children: [
                             _buildOrderList(_pendingOrders(), "Pending Orders"),
-                            _buildOrderList(_processingOrders(), "Processing Orders"),
+                            _buildOrderList(
+                                _processingOrders(), "Processing Orders"),
                             _buildOrderList(
                                 _completedOrders(), "Completed Orders"),
                           ],
@@ -410,7 +451,6 @@ class _OrderListState extends State<OrderList> {
     );
   }
 
-
   Widget _buildTimelineCard(
       {required String title,
       required String description,
@@ -519,31 +559,33 @@ class _OrderListState extends State<OrderList> {
           isLoading: false,
           label: "Make Payment",
           submit: () async {
-            final miniCartItems = order.products.map((item) => CartItem(
-              product: item,
-              quantity: order.quantity,
-              price: double.tryParse(item.salePrice ?? '0.0') ?? 0.0,
-            )).toList();
+            final miniCartItems = order.products
+                .map((item) => CartItem(
+                      product: item,
+                      quantity: order.quantity,
+                      price: double.tryParse(item.salePrice ?? '0.0') ?? 0.0,
+                    ))
+                .toList();
 
-              ApiResponse response = await repo.initializePayment({
-                'paymentMethod': 'CreditCard',
-                'paymentType': 'Paystack',
-                'orderId': order.id,
-              });
-              if (response.statusCode == 200) {
-                print('Payment initialized successfully');
-                await PaystackUtil.processPayment(
-                  context: context,
-                  ref: response.data['data']['reference'],
-                  amountInNaira: order.totalPrice,
-                  email: profile.value.email!,
-                  cartItems: cart.value,
-                );
-              }else{
-                locator<SnackbarService>().showSnackbar(message: "Payment processing failed",
-                    duration: const Duration(seconds: 3));
-              }
-
+            ApiResponse response = await repo.initializePayment({
+              'paymentMethod': 'CreditCard',
+              'paymentType': 'Paystack',
+              'orderId': order.id,
+            });
+            if (response.statusCode == 200) {
+              print('Payment initialized successfully');
+              await PaystackUtil.processPayment(
+                context: context,
+                ref: response.data['data']['reference'],
+                amountInNaira: order.totalPrice,
+                email: profile.value.email!,
+                cartItems: cart.value,
+              );
+            } else {
+              locator<SnackbarService>().showSnackbar(
+                  message: "Payment processing failed",
+                  duration: const Duration(seconds: 3));
+            }
           },
           boldText: true,
           color: kcPrimaryColor,
@@ -578,14 +620,14 @@ class _OrderListState extends State<OrderList> {
 
     return actions.isNotEmpty
         ? Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: actions.map((e) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: e,
-      )).toList(),
-    )
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: actions
+                .map((e) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: e,
+                    ))
+                .toList(),
+          )
         : const SizedBox();
   }
-
-
 }

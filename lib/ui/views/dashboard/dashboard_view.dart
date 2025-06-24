@@ -122,8 +122,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
         );
       }
     });
-
-    // Services card (always shown)
     tiles.add(
       GestureDetector(
         onTap: () {
@@ -149,15 +147,14 @@ class DashboardView extends StackedView<DashboardViewModel> {
   ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent, // Transparent status bar
-        statusBarIconBrightness: Brightness.dark, // For dark icons
-        statusBarBrightness: Brightness.light, // For light background
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-        extendBodyBehindAppBar: true, // Allow content to flow behind the AppBar
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          // backgroundColor: Colors.transparent,
-          elevation: 0, // Removes shadow
+          elevation: 0,
           title: Row(
             children: [
               CircleAvatar(
@@ -166,7 +163,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 radius: 20,
               ),
               const SizedBox(width: 8),
-              // Autocomplete search in the middle
               Expanded(
                 child: Autocomplete<Product>(
                   optionsBuilder: (TextEditingValue productTextEditingValue) {
@@ -206,7 +202,9 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     return Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color:  uiMode.value == AppUiModes.dark
+                            ? kcMediumGrey
+                            : kcWhiteColor,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TextField(
@@ -1311,8 +1309,8 @@ class RaffleRow extends StatelessWidget {
           ),
           if (containerColor != Colors.transparent)
             Positioned(
-              top: 0, // Adjust the positioning as you see fit
-              left: 22, // Adjust the positioning as you see fit
+              top: 0,
+              left: 22,
               child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -1393,11 +1391,9 @@ class RaffleRow extends StatelessWidget {
       NetworkImage(imageUrl),
     );
 
-    // Calculate the brightness of the dominant color
     final Color dominantColor = paletteGenerator.dominantColor!.color;
     final double luminance = dominantColor.computeLuminance();
 
-    // Decide text color based on luminance
     return luminance < 0.1 ? Colors.white : Colors.black;
   }
 }

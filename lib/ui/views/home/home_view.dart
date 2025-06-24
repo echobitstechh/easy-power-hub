@@ -85,7 +85,7 @@ class BottomNavBar extends StatelessWidget {
         return BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           backgroundColor: uiMode.value == AppUiModes.dark
-              ? kcDarkGreyColor // Dark mode logo
+              ? kcDarkGreyColor
               : kcWhiteColor,
           selectedLabelStyle: TextStyle(color: selectedColor),
           selectedItemColor: selectedColor,
