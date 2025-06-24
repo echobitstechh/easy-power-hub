@@ -272,7 +272,6 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
           Address address = shippingAddresses[index];
 
           return Card(
-            color: Colors.white,
             margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -297,18 +296,12 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      Row(
-                        children: [
-                          _buildIconButton(Icons.edit, 'Edit', Colors.red,),
-                          _buildIconButton(Icons.delete, 'Delete', Colors.red, () {
-                            deleteAddress(index);
-                          }),
-                        ],
-                      ),
+                      _buildIconButton(Icons.edit, 'Edit', ),
+                      _buildIconButton(Icons.delete, 'Delete'),
                     ],
                   ),
-                  Text(address.city ?? '', style: TextStyle(fontSize: 16),),
-                  Text(address.state ?? '',style:  TextStyle(fontSize: 16),),
+                  Text(address.city ?? '', style: const TextStyle(fontSize: 18),),
+                  Text(address.state ?? '',style:  const TextStyle(fontSize: 18),),
                   const SizedBox(height: 2),
                 ],
               ),
@@ -317,7 +310,7 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
         },
       ),
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 50), // Adjust this value to move the button up
+        padding: const EdgeInsets.only(bottom: 50),
         child: FloatingActionButton(
           onPressed: showAddAddressBottomSheet,
           backgroundColor: Colors.black,
@@ -328,15 +321,24 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
     );
   }
 
-  Widget _buildIconButton(IconData icon, String label, Color color, [VoidCallback? onPressed]) {
+  Widget _buildIconButton(IconData icon, String label, [VoidCallback? onPressed]) {
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
-        children: [
+      children: [
         IconButton(
-        icon: Icon(icon, color: color, size: 15,),
-    onPressed: onPressed,
-    ),
-    Text(label, style: TextStyle(color: color, fontSize: 12) ),
-    ],
+          icon: Icon(icon),
+          color: isDarkMode ? Colors.white : Colors.grey[600],
+          onPressed: onPressed,
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.grey[600],
+            fontSize: 12,
+          ),
+        ),
+      ],
     );
-    }
+  }
 }
