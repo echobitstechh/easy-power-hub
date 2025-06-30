@@ -575,7 +575,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
               // Second GestureDetector for Donate to Non-profits
               GestureDetector(
                 onTap: () {
-                  locator<NavigationService>().navigateToNotificationView();
+                  // locator<NavigationService>().navigateToNotificationView();
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(left: 0.0, right: 8.0),

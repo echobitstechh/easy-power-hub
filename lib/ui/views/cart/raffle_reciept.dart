@@ -387,7 +387,7 @@ class RaffleReceiptPage extends StatelessWidget {
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);
 
                     Future.delayed(const Duration(milliseconds: 100), () {
-                      locator<NavigationService>().navigateTo(Routes.ServicesView);
+                      locator<NavigationService>().navigateTo(Routes.servicesView);
                     });
                   },
                   style: ElevatedButton.styleFrom(

@@ -157,7 +157,7 @@ class AuthViewModel extends BaseViewModel {
             MaterialPageRoute(
               builder: (context) => AuthView(
                 initialPage: PresentPage.signup,
-                parameters: {
+                parametersArg: {
                   'isOtpRequested': true.toString(),
                   'userId': data['userId'] ?? '',
                   if (phone.text.isNotEmpty)
@@ -182,7 +182,7 @@ class AuthViewModel extends BaseViewModel {
             MaterialPageRoute(
               builder: (context) => AuthView(
                 initialPage: PresentPage.signup,
-                parameters: {
+                parametersArg: {
                   'isOtpRequested': false.toString(),
                   'userId': data['userId'] ?? '',
                   if (phone.text.isNotEmpty) 'phone': phone.text,

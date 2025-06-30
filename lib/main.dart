@@ -1,118 +1,114 @@
-import 'package:app_links/app_links.dart';
-import 'package:easyph/core/utils/config.dart';
-import 'package:easyph/core/utils/local_store_dir.dart';
-import 'package:easyph/core/utils/local_stotage.dart';
-import 'package:easyph/state.dart';
-import 'package:easyph/utils/money_util.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:easyph/app/app.bottomsheets.dart';
-import 'package:easyph/app/app.dialogs.dart';
-import 'package:easyph/app/app.locator.dart';
-import 'package:easyph/app/app.router.dart';
-import 'package:easyph/ui/common/app_colors.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:app_links/app_links.dart';
 import 'package:update_available/update_available.dart';
-import 'package:workmanager/workmanager.dart';
-// import 'app/flutter_paystack/lib/flutter_paystack.dart';
-import 'core/utils/paystack_util.dart';
+
 import 'firebase_options.dart';
-import 'package:rxdart/rxdart.dart';
+import 'core/utils/paystack_util.dart';
+import 'core/utils/config.dart';
+import 'core/utils/local_store_dir.dart';
+import 'core/utils/local_stotage.dart';
+import 'utils/money_util.dart';
+import 'state.dart';
 
-/// @author George David
-/// email: georgequin19@gmail.com
-/// Feb, 2024
-///
+import 'app/app.locator.dart';
+import 'app/app.dialogs.dart';
+import 'app/app.bottomsheets.dart';
+import 'app/app.router.dart';
+import 'ui/common/app_colors.dart';
 
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
 final AppLinks _appLinks = AppLinks();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-void main() async{
-
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
   setupDialogUi();
   setupBottomSheetUi();
   PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  // FirebaseMessaging.instance.requestPermission();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
-
-
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    fetchUiState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkForUpdates();
-    });
-    checkInitialLink();
-    handleDeepLinks();
+    _initializeUIState();
+    _setupUpdatePrompt();
+    _handleInitialDeepLink();
+    _listenToDeepLinks();
   }
 
-  void handleDeepLinks() async {
-    // Listen for deep links
-    _appLinks.uriLinkStream.listen((Uri? uri) {
-      if (uri == null) return;
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
 
-      final path = uri.path;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // App returned to foreground (e.g. after payment)
+      _listenToDeepLinks();
+    }
+  }
 
-      if (path.contains("payment-success")) {
-        print('payment successful, navigate back to success page');
-        // Navigator.pushNamed(context, '/paymentSuccess');
-      } else if (path.contains("payment-failed")) {
-        print('payment failed, navigate back to failed page');
-        // Navigator.pushNamed(context, '/paymentFailed');
-      }
+  void _initializeUIState() async {
+    final savedMode = await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
+    if (savedMode == "light") uiMode.value = AppUiModes.light;
+    if (savedMode == "dark") uiMode.value = AppUiModes.dark;
+  }
+
+  void _setupUpdatePrompt() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final availability = await getUpdateAvailability();
+      if (availability is UpdateAvailable) _showUpdateDialog();
     });
   }
 
-  void checkInitialLink() async {
+  void _handleInitialDeepLink() async {
     final uri = await _appLinks.getInitialLink();
-    if (uri != null) {
-      final path = uri.path;
+    if (uri != null) _navigateFromUri(uri);
+  }
 
-      if (path.contains("payment-success")) {
-        Navigator.pushNamed(context, '/paymentSuccess');
-      } else if (path.contains("payment-failed")) {
-        Navigator.pushNamed(context, '/paymentFailed');
-      }
+  void _listenToDeepLinks() {
+    _appLinks.uriLinkStream.listen((uri) {
+      if (uri != null) _navigateFromUri(uri);
+    });
+  }
+
+  void _navigateFromUri(Uri uri) {
+    debugPrint('Deep link received: ${uri.toString()}');
+    debugPrint('URI Scheme: ${uri.scheme}');
+    debugPrint('URI Host: ${uri.host}');
+    debugPrint('URI Path: ${uri.path}');
+    debugPrint('Query Params: ${uri.queryParameters}');
+
+    final host = uri.host.toLowerCase();
+
+    if (host.contains("payment-success")) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        locator<NavigationService>().clearStackAndShow(Routes.paymentSuccessPage);
+      });
+    } else if (host.contains("payment-failed")) {
+      locator<NavigationService>().clearStackAndShow(Routes.orderList);
     }
   }
 
-  void fetchUiState() async {
-    String? savedMode =
-        await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
-    if (savedMode != null) {
-      switch (savedMode) {
-        case "light":
-          uiMode.value = AppUiModes.light;
-          break;
-        case "dark":
-          uiMode.value = AppUiModes.dark;
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,125 +116,83 @@ class _MyAppState extends State<MyApp> {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const MaterialApp(home: Center(child: CircularProgressIndicator()));
         }
-
-        bool isAuthenticated = snapshot.hasData && snapshot.data != null;
 
         return ValueListenableBuilder<AppUiModes>(
           valueListenable: uiMode,
-          builder: (context, value, child) => MaterialApp(
+          builder: (context, mode, _) => MaterialApp(
             title: 'Easyph',
-            theme: ThemeData.light(useMaterial3: true),
-            darkTheme: ThemeData.dark(),
-            themeMode: value == AppUiModes.dark ? ThemeMode.dark : ThemeMode.light,
+            theme: _lightTheme(),
+            darkTheme: _darkTheme(),
+            themeMode: mode == AppUiModes.dark ? ThemeMode.dark : ThemeMode.light,
             initialRoute: Routes.startupView,
             onGenerateRoute: StackedRouter().onGenerateRoute,
             navigatorKey: StackedService.navigatorKey,
+            navigatorObservers: [StackedService.routeObserver],
             debugShowCheckedModeBanner: false,
-            navigatorObservers: [
-              StackedService.routeObserver,
-            ],
           ),
         );
       },
     );
   }
 
-
-  ThemeData darkTheme() {
-    return ThemeData.dark().copyWith(
-      appBarTheme: AppBarTheme(
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: kcWhiteColor,
-        ),
-        iconTheme: const IconThemeData(color: kcWhiteColor),
-        toolbarTextStyle: const TextStyle(color: kcWhiteColor),
-        elevation: 0,
-        // systemOverlayStyle: SystemUiOverlayStyle.light,
+  ThemeData _lightTheme() => ThemeData.light(useMaterial3: true).copyWith(
+    appBarTheme: AppBarTheme(
+      titleTextStyle: GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: kcBlackColor,
       ),
-      brightness: Brightness.dark,
-      primaryColor: kcBackgroundColor,
-      focusColor: kcPrimaryColor,
-      textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: kcWhiteColor),
-    );
-  }
+      iconTheme: const IconThemeData(color: kcBlackColor),
+      backgroundColor: kcWhiteColor,
+      elevation: 0,
+    ),
+    primaryColor: kcBackgroundColor,
+    focusColor: kcPrimaryColor,
+    textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: kcBlackColor),
+  );
 
-  ThemeData lightTheme() {
-    return ThemeData.light().copyWith(
-      appBarTheme: AppBarTheme(
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          color: kcBlackColor,
-        ),
-        iconTheme: const IconThemeData(color: kcBlackColor),
-        toolbarTextStyle: const TextStyle(color: kcBlackColor),
-        backgroundColor: kcWhiteColor,
-        elevation: 0,
-        // systemOverlayStyle: SystemUiOverlayStyle.light,
+  ThemeData _darkTheme() => ThemeData.dark().copyWith(
+    appBarTheme: AppBarTheme(
+      titleTextStyle: GoogleFonts.inter(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: kcWhiteColor,
       ),
-      primaryColor: kcBackgroundColor,
-      focusColor: kcPrimaryColor,
-      textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: kcBlackColor),
-    );
-  }
+      iconTheme: const IconThemeData(color: kcWhiteColor),
+      elevation: 0,
+    ),
+    brightness: Brightness.dark,
+    primaryColor: kcBackgroundColor,
+    focusColor: kcPrimaryColor,
+    textTheme: GoogleFonts.poppinsTextTheme().apply(bodyColor: kcWhiteColor),
+  );
 
-  void checkForUpdates() async {
-    final availability = await getUpdateAvailability();
-    if (availability is UpdateAvailable) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showUpdateCard();
-      });
-    }
-  }
-
-  void showUpdateCard() {
+  void _showUpdateDialog() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Card(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SvgPicture.asset(
-                  'assets/icons/update.svg',
-                  height: 10,
+      builder: (_) => AlertDialog(
+        content: Card(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SvgPicture.asset('assets/icons/update.svg', height: 40),
+              const ListTile(
+                title: Text('App Updates', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  'A new version of Easyph is now available.\nDownload now to enjoy our latest features.',
+                  style: TextStyle(fontSize: 12),
                 ),
-                const ListTile(
-                  title: Text('App Updates', style: TextStyle(fontSize: 12,
-                    fontFamily: "Panchang", fontWeight: FontWeight.bold,)),
-                  subtitle: Text('A new version of Easyph is now available.'
-                      ' download now to enjoy our lastest features.', style: TextStyle(fontSize: 8,
-                    fontFamily: "Panchang",)),
-                ),
-                ButtonBar(
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context); // Close the dialog
-                        // Add logic to navigate to the store or perform the update
-                      },
-                      child: const Text('Update Now'),
-                    ),
-                    // TextButton(
-                    //   onPressed: () {
-                    //     Navigator.pop(context); // Close the dialog
-                    //   },
-                    //   child: Text('Later'),
-                    // ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Update Now'),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

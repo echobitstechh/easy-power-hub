@@ -18,9 +18,9 @@ enum PresentPage {
 
 class AuthView extends StatefulWidget {
   final PresentPage? initialPage;
-  final Map<String, dynamic>? parameters;
+  final Map<String, dynamic>? parametersArg;
 
-  const AuthView({Key? key, this.initialPage, this.parameters})
+  const AuthView({Key? key, this.initialPage, this.parametersArg})
       : super(key: key);
 
   @override
@@ -99,11 +99,11 @@ class _AuthViewState extends State<AuthView> with TickerProviderStateMixin {
               presentPage = page;
             });
           },
-          isOtpRequested: widget.parameters?['isOtpRequested'] == 'true',
-          userId: widget.parameters?['userId'],
-          verificationCode: widget.parameters?['verificationCode'],
-          phone: widget.parameters?['phone'],
-          email: widget.parameters?['email'],
+          isOtpRequested: widget.parametersArg?['isOtpRequested'] == 'true',
+          userId: widget.parametersArg?['userId'],
+          verificationCode: widget.parametersArg?['verificationCode'],
+          phone: widget.parametersArg?['phone'],
+          email: widget.parametersArg?['email'],
         );
       case PresentPage.register:
         return Register(

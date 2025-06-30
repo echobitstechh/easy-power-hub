@@ -10,6 +10,7 @@ import 'package:easyph/ui/common/app_colors.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
+import '../../../core/data/models/cart_item.dart';
 import 'home_viewmodel.dart';
 import 'module_switch.dart';
 
@@ -72,8 +73,8 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AppModules>(
-      valueListenable: currentModuleNotifier,
+    return ValueListenableBuilder<List<CartItem>>(
+      valueListenable: cart,
       builder: (context, currentModule, _) {
         Color iconColor = Colors.grey;
         Color selectedColor = kcSecondaryColor;
@@ -90,7 +91,7 @@ class BottomNavBar extends StatelessWidget {
           selectedLabelStyle: TextStyle(color: selectedColor),
           selectedItemColor: selectedColor,
           unselectedItemColor: iconColor,
-          onTap: (index) => viewModel.changeSelected(index, currentModule),
+          onTap: (index) => viewModel.changeSelected(index),
           currentIndex: currentIndex,
           items: items,
         );

@@ -27,7 +27,6 @@ import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
-import '../draws/draws_view.dart';
 import '../service/service_view.dart';
 import '../shop/shop_view.dart';
 
@@ -72,7 +71,7 @@ class HomeViewModel extends BaseViewModel {
     rebuildUi();
   }
 
-  void changeSelected(int index, AppModules module) {
+  void changeSelected(int index) {
     selectedTab = index;
     notifyListeners();
   }
@@ -221,7 +220,7 @@ class HomeViewModel extends BaseViewModel {
           print('found order with false review');
           Order unratedOrder = unratedOrders.first;
           _dialogService.showCustomDialog(
-            variant: DialogType.ratingDialog,
+            variant: DialogType.rating,
             title: "Rate Your Order",
             description: "Please rate your recently delivered order.",
             data: unratedOrder,

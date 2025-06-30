@@ -64,7 +64,7 @@ class PaystackUtil {
               duration: const Duration(seconds: 2),
             );
             locator<NavigationService>().clearStackAndShow(Routes.homeView);
-            locator<NavigationService>().navigateTo(Routes.orderView);
+            locator<NavigationService>().navigateTo(Routes.orderList);
           },
         ),
       ),

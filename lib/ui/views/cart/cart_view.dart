@@ -12,7 +12,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
 import '../../../utils/money_util.dart';
 import 'cart_viewmodel.dart';
-import 'checkout.dart';
+import '../checkout/checkout.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -339,6 +339,11 @@ class CartView extends StackedView<CartViewModel> {
                                                                 label: Text("${i + 1}x"),
                                                                 backgroundColor: Colors.grey.shade200,
                                                                 selectedColor: kcPrimaryColor,
+                                                                labelStyle: TextStyle(
+                                                                  color: selectedFrequency == (i + 1)
+                                                                      ? Colors.white
+                                                                      : Colors.black,
+                                                                ),
                                                                 selected: selectedFrequency == (i + 1),
                                                                 onSelected: (_) {
                                                                   viewModel.selectInstallmentOption(item, i + 1);
@@ -552,7 +557,12 @@ class CartView extends StackedView<CartViewModel> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Checkout(viewModel: viewModel),
+                          builder: (context) => CheckoutView(
+                            cartSubtotal: viewModel.cartSubtotal,
+                            cartDiscount: viewModel.cartDiscount,
+                            cartItems: cart.value,
+                            calculatedFinalTotal: viewModel.cartFinalTotal,
+                          ),
                         ),
                       );
                     },

@@ -10,10 +10,14 @@ import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:easyph/ui/views/auth/auth_view.dart';
 import 'package:easyph/ui/views/dashboard/dashboard_view.dart';
-import 'package:easyph/ui/views/draws/draws_view.dart';
 import 'package:easyph/ui/views/cart/cart_view.dart';
 import 'package:easyph/ui/views/profile/profile_view.dart';
 
+import '../ui/views/auth/authService.dart';
+import '../ui/views/cart/payment_success_page.dart';
+import '../ui/dialogs/info_alert/rating_dialog.dart';
+import '../ui/views/onboarding/onboading_view3.dart';
+import '../ui/views/profile/order_list.dart';
 import '../ui/views/profile/wallet.dart';
 import 'package:easyph/ui/views/otp/otp_view.dart';
 import 'package:easyph/ui/views/change_password/change_password_view.dart';
@@ -35,7 +39,6 @@ import '../ui/views/service/service_view.dart';
     MaterialRoute(page: StartupView),
     MaterialRoute(page: AuthView),
     MaterialRoute(page: DashboardView),
-    MaterialRoute(page: DrawsView),
     MaterialRoute(page: CartView),
     // MaterialRoute(page: ShopCartView),
     MaterialRoute(page: ServicesView),
@@ -51,6 +54,10 @@ import '../ui/views/service/service_view.dart';
     MaterialRoute(page: EnterEmailView),
     MaterialRoute(page: DeleteAccountView),
     MaterialRoute(page: WithdrawView),
+    MaterialRoute(page: PaymentSuccessPage, path: '/paymentSuccess'),
+    MaterialRoute(page: OnboardingView3),
+    MaterialRoute(page: OrderList),
+
 // @stacked-route
   ],
   dependencies: [
@@ -61,6 +68,7 @@ import '../ui/views/service/service_view.dart';
     LazySingleton(classType: ApiService),
     LazySingleton(classType: LocalStorage),
     LazySingleton(classType: Repository),
+    LazySingleton(classType: AuthService),
     // @stacked-service
   ],
   bottomsheets: [
@@ -69,6 +77,7 @@ import '../ui/views/service/service_view.dart';
   ],
   dialogs: [
     StackedDialog(classType: InfoAlertDialog),
+    StackedDialog(classType: RatingDialog),
     // @stacked-dialog
   ],
 )

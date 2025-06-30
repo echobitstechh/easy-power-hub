@@ -25,7 +25,7 @@ class StartupViewModel extends BaseViewModel {
     bool? onboarded = await locator<LocalStorage>().fetch(LocalStorageDir.onboarded);
     //bool? onboarded = false;
     if (onboarded == null || onboarded == false) {
-      _navigationService.replaceWithOnboardingView2();
+      _navigationService.replaceWithOnboardingView3();
     } else {
       if (token != null && user != null) {
         userLoggedIn.value = true;

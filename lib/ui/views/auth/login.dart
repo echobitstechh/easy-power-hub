@@ -5,16 +5,11 @@ import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/components/submit_button.dart';
 import 'package:easyph/ui/components/text_field_widget.dart';
 import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../state.dart';
-import 'authService.dart';
 import 'auth_view.dart';
 
 
@@ -34,8 +29,6 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool terms = false;
   bool isPhoneNumber = false;
-
-  final AuthService _authService = AuthService(); // Ensure AuthService is imported and instantiated
 
   @override
   void dispose() {

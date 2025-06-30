@@ -12,7 +12,7 @@ import '../../common/app_colors.dart';
 import '../../components/empty_state.dart';
 import '../../components/shimmer.dart';
 import '../../components/submit_button.dart';
-import '../cart/checkout.dart';
+import '../checkout/checkout.dart';
 import 'service_viewmodel.dart';
 
 class ServicesView extends StackedView<ServicesviewModel> {
