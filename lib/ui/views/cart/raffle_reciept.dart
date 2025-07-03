@@ -237,7 +237,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                                 uiMode.value == AppUiModes.dark
                                                     ? Colors.white
                                                     : Colors.black,
-                                            fontFamily: "satoshi",
+                                            fontFamily: 'Roboto',
                                           )),
                                     )),
                                 const Divider(),
@@ -259,7 +259,7 @@ class RaffleReceiptPage extends StatelessWidget {
                                         color: uiMode.value == AppUiModes.dark
                                             ? Colors.white
                                             : Colors.black,
-                                        fontFamily: "satoshi",
+                                        fontFamily: 'Roboto',
                                       ),
                                     ),
                                   ],

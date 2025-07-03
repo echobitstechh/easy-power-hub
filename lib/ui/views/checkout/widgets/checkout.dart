@@ -85,7 +85,7 @@ class BillingSummary extends ViewModelWidget<CheckoutViewModel> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Sub-total", style: TextStyle(fontSize: 16)),
-              Text(MoneyUtils().formatAmount(subtotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(MoneyUtils().formatAmount(subtotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
             ],
           ),
           verticalSpaceTiny,
@@ -104,7 +104,7 @@ class BillingSummary extends ViewModelWidget<CheckoutViewModel> {
             children: [
               const Text("Discount", style: TextStyle(fontSize: 16)),
               Text("- ${MoneyUtils().formatAmount(model.discountAmount)}",
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green, fontFamily: 'Roboto',)),
             ],
           ),
           const Divider(thickness: 2),
@@ -115,7 +115,7 @@ class BillingSummary extends ViewModelWidget<CheckoutViewModel> {
               const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               model.isCalculating
                   ? const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(MoneyUtils().formatAmount(model.calculatedFinalTotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  : Text(MoneyUtils().formatAmount(model.calculatedFinalTotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold,fontFamily: 'Roboto',)),
             ],
           ),
           verticalSpaceSmall

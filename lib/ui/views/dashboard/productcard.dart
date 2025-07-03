@@ -294,6 +294,7 @@ class _ProductCardState extends State<ProductCard> {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 20,
+                        fontFamily: 'Roboto',
                       ),
                     ),
                   ],

@@ -504,7 +504,7 @@ class _OrderListState extends State<OrderList> {
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
             verticalSpaceSmall,
             Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
-                style: const TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
           ],
         ),
         Text(
@@ -540,7 +540,7 @@ class _OrderListState extends State<OrderList> {
               const SizedBox(height: 4),
               Text(
                   "Total: ${MoneyUtils().formatAmount((double.tryParse(product?.price ?? '0.0') ?? 0.0).toInt())}",
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
             ],
           ),
         ),

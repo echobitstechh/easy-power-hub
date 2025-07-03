@@ -688,6 +688,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                               Text(
                                 MoneyUtils().formatAmount((double.tryParse(item.salePrice ?? '0.0') ?? 0.0).toInt()),
                                 style: const TextStyle(
+                                  fontFamily: 'Roboto',
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),

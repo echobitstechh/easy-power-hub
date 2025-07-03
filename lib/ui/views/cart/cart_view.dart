@@ -200,6 +200,7 @@ class CartView extends StackedView<CartViewModel> {
                                                                           .ellipsis,
                                                                   style: TextStyle(
                                                                     fontSize: 16,
+                                                                    fontFamily: 'Roboto',
                                                                     color: uiMode
                                                                                 .value ==
                                                                             AppUiModes
@@ -208,8 +209,6 @@ class CartView extends StackedView<CartViewModel> {
                                                                             .white
                                                                         : Colors
                                                                             .black,
-                                                                    fontFamily:
-                                                                        "Satoshi",
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .w700,
@@ -510,6 +509,7 @@ class CartView extends StackedView<CartViewModel> {
                         Text(
                           MoneyUtils().formatAmount(viewModel.cartSubtotal),
                           style: const TextStyle(
+                              fontFamily: 'Roboto',
                               fontSize: 14, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -525,6 +525,7 @@ class CartView extends StackedView<CartViewModel> {
                         Text(
                           "- ${MoneyUtils().formatAmount(viewModel.cartDiscount)}",
                           style: const TextStyle(
+                              fontFamily: 'Roboto',
                               fontSize: 14,
                               color: Colors.green,
                               fontWeight: FontWeight.bold),
@@ -542,6 +543,7 @@ class CartView extends StackedView<CartViewModel> {
                         Text(
                           MoneyUtils().formatAmount(viewModel.cartFinalTotal),
                           style: const TextStyle(
+                              fontFamily: 'Roboto',
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         horizontalSpaceLarge,

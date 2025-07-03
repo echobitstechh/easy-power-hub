@@ -189,7 +189,8 @@ class RatingDialog extends StackedView<HomeViewModel> {
             style: const TextStyle(fontSize: 12, color: Colors.grey)),
         verticalSpaceSmall,
         Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+
+            style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
         const SizedBox(height: 8),
         Text(
           DateFormat("d MMM, yyyy").format(order.createdAt),

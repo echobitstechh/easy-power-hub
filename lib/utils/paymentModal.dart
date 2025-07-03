@@ -190,7 +190,7 @@ class PaymentModalWidget extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: const TextStyle(color: Colors.white, fontSize: 16, fontFamily: 'Roboto',),
           ),
           Text(
             amount,

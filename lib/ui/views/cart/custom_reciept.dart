@@ -181,7 +181,7 @@ class ReceiptPage extends StatelessWidget {
                                           MoneyUtils().formatAmount(getRaffleSubTotal(cart).toInt()),
                                           style: TextStyle(fontWeight: FontWeight.normal, fontSize: 12,
                                             color: uiMode.value == AppUiModes.dark ? Colors.white : Colors.black,
-                                            fontFamily: "satoshi",),
+                                              fontFamily: 'Roboto',),
                                         ),
                                       ],
                                     ),
@@ -196,7 +196,7 @@ class ReceiptPage extends StatelessWidget {
                                         ),
                                         Text(
                                           MoneyUtils().formatAmount(getRaffleSubTotal(cart).toInt()),
-                                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.3),
+                                          style: const TextStyle(fontFamily: 'Roboto',fontWeight: FontWeight.bold, fontSize: 14.3),
                                         ),
                                       ],
                                     ),

@@ -61,6 +61,7 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
             onMethodChanged: viewModel.updatePaymentMethod),
           verticalSpaceLarge,
           SubmitButton(
+            family: 'Roboto',
             isLoading: viewModel.loading,
             label: viewModel.paymentMethod == "delivery"
                 ? "Confirm Order"
