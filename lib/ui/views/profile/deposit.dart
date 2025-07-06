@@ -111,22 +111,22 @@ class _DepositState extends State<Deposit> {
 
     Navigator.pop(context);
 
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => PaymentSuccessPage(
-        title: "Wallet Funded Sucessfully!",
-                animation: 'payment_success.json',
-                callback: () {
-                  ProfileViewModel().getProfile();
-                  Navigator.popUntil(context, ModalRoute.withName(Routes.wallet));
-                  Navigator.pushReplacementNamed(context, Routes.wallet);
-
-                  // Navigator.popAndPushNamed(context, Routes.wallet);
-                  // locator<NavigationService>()
-                  //     .clearStackAndShow(Routes.wallet )?.whenComplete(() =>
-                  //     ProfileViewModel().getProfile());
-                  }
-      ),
-    ),);
+    //return Navigator.push(context, MaterialPageRoute(
+    //   builder: (context) => PaymentSuccessPage(
+    //     title: "Wallet Funded Sucessfully!",
+    //             animation: 'payment_success.json',
+    //             callback: () {
+    //               ProfileViewModel().getProfile();
+    //               Navigator.popUntil(context, ModalRoute.withName(Routes.wallet));
+    //               Navigator.pushReplacementNamed(context, Routes.wallet);
+    //
+    //               // Navigator.popAndPushNamed(context, Routes.wallet);
+    //               // locator<NavigationService>()
+    //               //     .clearStackAndShow(Routes.wallet )?.whenComplete(() =>
+    //               //     ProfileViewModel().getProfile());
+    //               }
+    //   ),
+    // ),);
     // return showModalBottomSheet(
     //   isScrollControlled: true,
     //   context: context,

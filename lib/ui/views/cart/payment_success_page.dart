@@ -65,7 +65,7 @@ class PaymentSuccessPage extends StatelessWidget {
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);
                   },
                   child: const Text(
-                    'CONTINUE SHOPPING',
+                    'CONTINUE SHOPPING ',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,

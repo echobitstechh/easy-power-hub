@@ -350,12 +350,10 @@ class AuthViewModel extends BaseViewModel {
     profile.value = Profile();
 
     try {
-      // Format phone number if required
       if (phone.text.isNotEmpty && !phone.text.startsWith('0')) {
         phone.text = '0${phone.text}';
       }
 
-      // Make API call
       ApiResponse res = await repo.requestOtp({
         if (email.text.isNotEmpty) "email": email.text,
         if (phone.text.isNotEmpty) "phoneNumber": phone.text,
@@ -365,7 +363,6 @@ class AuthViewModel extends BaseViewModel {
       log.i('Response status code: ${res.statusCode}');
 
       if (res.statusCode == 200) {
-        // OTP sent successfully
         profile.value.id = res.data['data']["userId"];
         profile.value.email = email.text;
         if (phone.text.isNotEmpty) {
@@ -374,7 +371,6 @@ class AuthViewModel extends BaseViewModel {
               res.data['data']["sendTokenResponse"]["data"]["reference"];
         }
 
-        // Return success response
         return res;
       } else if (res.statusCode == 400) {
         return res; // Return the error response for the caller to handle
@@ -421,7 +417,6 @@ class AuthViewModel extends BaseViewModel {
         return;
       }
 
-      // 🧠 Determine if it's a new Firebase user
       final firebaseUser = FirebaseAuth.instance.currentUser!;
       final creationTime = firebaseUser.metadata.creationTime;
       final lastSignInTime = firebaseUser.metadata.lastSignInTime;
@@ -438,7 +433,6 @@ class AuthViewModel extends BaseViewModel {
         }
       }
 
-      // Prepare API request body
       final requestBody = {
         "fcmToken": fcmToken,
         "idToken": googleSignInResult['idToken'],

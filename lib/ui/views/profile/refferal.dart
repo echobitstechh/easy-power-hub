@@ -2,7 +2,7 @@ import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 
 import '../../../core/data/models/discount.dart';
 import '../../../core/network/api_response.dart';
@@ -195,7 +195,7 @@ class _ReferralState extends State<Referral> {
         " #Easyph #FriendsWhoRaffleTogether. https://staging.easyph.com";
 
 
-    Share.share(shareText, subject: 'Easyph: where losing is (almost) impossible!');
+    //Share.share(shareText, subject: 'Easyph: where losing is (almost) impossible!');
   }
 
 }

@@ -95,7 +95,7 @@ class BillingSummary extends ViewModelWidget<CheckoutViewModel> {
               const Text("Delivery-Fee", style: TextStyle(fontSize: 16)),
               model.isCalculating
                   ? const SizedBox(height: 12, width: 12, child: CircularProgressIndicator(strokeWidth: 2))
-                  : Text(MoneyUtils().formatAmount(model.calculatedDeliveryFee), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  : Text(MoneyUtils().formatAmount(model.calculatedDeliveryFee), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto')),
             ],
           ),
           verticalSpaceTiny,
