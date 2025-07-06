@@ -10,7 +10,7 @@ import 'package:flutter_svg/svg.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
@@ -518,7 +518,7 @@ class RaffleReceiptPage extends StatelessWidget {
     await file.writeAsBytes(await pdf.save());
 
     // Share the PDF
-    Share.shareFiles([file.path], text: 'Your receipt');
+    //Share.shareFiles([file.path], text: 'Your receipt');
   }
 
   Future<pw.Widget> createCartItemWidget(CartItem cartItem) async {

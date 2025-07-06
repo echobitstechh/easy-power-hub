@@ -4,6 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
+import '../../../app/app.router.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/delivery_zone.dart';
 import '../../../core/data/models/profile.dart';
@@ -15,7 +16,10 @@ import '../../../core/utils/local_stotage.dart';
 import '../../../core/utils/paystack_util.dart';
 import '../../../state.dart';
 import '../../../utils/money_util.dart';
+import '../../components/payment_success_page.dart';
+import '../cart/payment_success_page.dart';
 import '../cart/raffle_reciept.dart';
+import '../profile/profile_viewmodel.dart';
 
 class CheckoutViewModel extends BaseViewModel {
   // state
@@ -264,12 +268,8 @@ class CheckoutViewModel extends BaseViewModel {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => RaffleReceiptPage(
-              carts: cart.value,
-              totalAmount: amount,
-            ),
-          ),
-        );
+            builder: (context) => PaymentSuccessPage(),
+        ));
       }
     } else {
       locator<SnackbarService>().showSnackbar(

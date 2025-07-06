@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:share_plus/share_plus.dart';
+//import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -359,7 +359,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
         "Help us raise funds for ${widget.project.project?.projectReel}. "
         "Join the effort and make an impact by donating to this great cause! Check it out here: https://yourprojectlink.com";
 
-    Share.share(shareText, subject: 'Donate to a Great Cause!');
+    //Share.share(shareText, subject: 'Donate to a Great Cause!');
   }
 
   Future<void> _launchProjectReel(String url) async {
