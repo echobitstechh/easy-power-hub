@@ -169,14 +169,13 @@ class AuthViewModel extends BaseViewModel {
               ),
             ),
           );
-        } else if (data['incompleteBiodata'] == true) {
-          // User verified but profile not completed
-          print(
-              'user is verified, but profile not completed. redirecting to verification');
+        }
+        else if (data['incompleteBiodata'] == true) {
           profile.value.id = data['userId'];
-          if (phone.text.isNotEmpty)
+          if (phone.text.isNotEmpty) {
             profile.value.reference =
                 data['sendTokenResponse']?['data']?['token'] ?? '';
+          }
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -212,7 +211,23 @@ class AuthViewModel extends BaseViewModel {
 
           locator<NavigationService>().clearStackAndShow(Routes.homeView);
         }
-      } else {
+      }
+      else if( res.statusCode == 403 && res.data['incompleteBiodata'] == true){
+        final data = res.data;
+        profile.value.id = data['userId'];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AuthView(
+              initialPage: PresentPage.signup,
+              parametersArg: {
+                'isOtpRequested': false.toString(),
+                'userId': data['userId'] ?? '',
+              },
+            ),
+          ),
+        );
+      }else {
         snackBar.showSnackbar(message: res.data["message"], duration: Duration(seconds: 3));
       }
     } catch (e) {
