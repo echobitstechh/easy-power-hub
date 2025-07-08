@@ -23,13 +23,15 @@ class CartItem {
     this.product,
   });
 
-  // Factory method to create a CartItem from JSON
+
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
       id: json['id']?.toString(),
       quantity: json['quantity'] as int?,
       price: (json['price'] as num?)?.toDouble(),
-      installmentTotalPrice: (json['installmentTotalPrice'] as num?)?.toDouble(),
+      installmentTotalPrice: json['installmentTotalPrice'] != null
+          ? double.tryParse(json['installmentTotalPrice'].toString())
+          : null,
       isInstallment: json['isInstallment'] as bool?,
       installmentFrequency: json['installmentFrequency'] as int?,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
@@ -38,7 +40,7 @@ class CartItem {
     );
   }
 
-  // Method to convert CartItem to JSON
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
