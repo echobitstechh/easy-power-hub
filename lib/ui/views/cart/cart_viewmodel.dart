@@ -182,6 +182,10 @@ class CartViewModel extends BaseViewModel {
         List<dynamic> items = res.data["cartItems"] ?? [];
         Map<String, dynamic> summary = res.data["summary"] ?? {};
 
+        // cartSubtotal = summary["totalPrice"] ?? 0;
+        // cartDiscount = summary["discountAmount"] ?? 0;
+        // cartFinalTotal = summary["finalPrice"] ?? 0;
+
         cartSubtotal = summary["totalPrice"] ?? 0;
         cartDiscount = summary["discountAmount"] ?? 0;
         cartFinalTotal = summary["finalPrice"] ?? 0;
