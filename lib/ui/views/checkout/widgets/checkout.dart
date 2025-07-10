@@ -24,7 +24,7 @@ class CheckoutOrderSummary extends StatelessWidget {
           return ListTile(
             leading: CircleAvatar(backgroundImage: NetworkImage(item.product?.images?.first ?? '')),
             title: Text(item.product?.productName ?? ''),
-            trailing: Text("₦${item.price}"),
+            trailing: Text("₦${item.price}", style: const TextStyle(fontFamily: 'Roboto')),
           );
         }).toList(),
       ),

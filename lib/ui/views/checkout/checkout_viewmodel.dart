@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -42,7 +41,6 @@ class CheckoutViewModel extends BaseViewModel {
   List<DeliveryZone> deliveryZones = [];
   DeliveryZone? selectedDeliveryZone;
 
-  final plugin = PaystackPlugin();
 
   // Controllers
   final houseAddressController = TextEditingController();
@@ -182,8 +180,10 @@ class CheckoutViewModel extends BaseViewModel {
   }
 
   Future<void> calculateOrder() async {
-    if (shippingId.isEmpty || pickUpOption.isEmpty || pickUpOption == 'Pickup')
-      return;
+    // if (shippingId.isEmpty || pickUpOption.isEmpty || pickUpOption == 'Pickup')
+    //   return;
+    if (shippingId.isEmpty || pickUpOption.isEmpty) return;
+
 
     isCalculating = true;
     notifyListeners();
@@ -193,10 +193,10 @@ class CheckoutViewModel extends BaseViewModel {
         "deliveryAddressId": shippingId,
         "deliveryOption": pickUpOption,
       });
-
       if (response.statusCode == 200) {
         calculatedDeliveryFee = response.data['data']['shippingFee'] ?? 0;
         calculatedFinalTotal = response.data['data']['finalTotal'] ?? 0;
+        discountAmount = response.data['data']['discount'] ?? 0;
         notifyListeners();
       } else {
         locator<SnackbarService>().showSnackbar(
@@ -296,9 +296,7 @@ class CheckoutViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  Future<void> init() async {
-    plugin.initialize(publicKey: publicKeyTest);
-    await fetchOnlineCart();
+  Future<void> init() async {await fetchOnlineCart();
     await getDeliveryZones();
     await getShippings();
     if (shippingId.isNotEmpty && pickUpOption.isNotEmpty) {

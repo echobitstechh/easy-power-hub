@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_paystack/flutter_paystack.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:easyph/core/data/models/profile.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -11,11 +10,11 @@ import '../../ui/views/cart/raffle_reciept.dart';
 import '../data/models/cart_item.dart';
 
 class PaystackUtil {
-  static final _plugin = PaystackPlugin();
+  //static final _plugin = PaystackPlugin();
 
 
   static void initialize(String publicKey) {
-    _plugin.initialize(publicKey: publicKey);
+   // _plugin.initialize(publicKey: publicKey);
   }
 
   static Future<bool> processPayment({

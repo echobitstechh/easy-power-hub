@@ -162,13 +162,13 @@ class ServicesView extends StackedView<ServicesviewModel> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.chat, color: Colors.green), // WhatsApp chat icon
+                  icon: Icon(Icons.chat, color: Colors.green),
                   onPressed: () => _openWhatsAppChat(title, "Service Image URL"),
                 ),
                 SizedBox(height: 0.0),
                 IconButton(
-                  icon: Icon(Icons.phone, color: Colors.green), // Phone icon
-                  onPressed:()=> _openDialer(phoneNumber), // Opens the dialer without a number
+                  icon: Icon(Icons.phone, color: Colors.green),
+                  onPressed:()=> _openDialer(phoneNumber),
                 ),
 
               ],
