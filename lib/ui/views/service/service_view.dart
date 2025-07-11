@@ -163,7 +163,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
               children: [
                 IconButton(
                   icon: Icon(Icons.chat, color: Colors.green),
-                  onPressed: () => _openWhatsAppChat(title, "Service Image URL"),
+                  onPressed: () => _openWhatsAppChat(title, "Service Image URL", phoneNumber),
                 ),
                 SizedBox(height: 0.0),
                 IconButton(
@@ -370,12 +370,13 @@ void _openDialer(String phoneNumber) async {
   }
 }
 
-void _openWhatsAppChat(String serviceName, String serviceImage) async {
-  String phoneNumber = AppConfig.companyPhone; // Remove +
+void _openWhatsAppChat(String serviceName, String serviceImage, String phoneNumber) async {
+  String cleanedPhoneNumber = phoneNumber.startsWith('+') ? phoneNumber :'+234$phoneNumber';
+
   String message = Uri.encodeFull(
       "Hello, I want more info on the service *$serviceName*");
 
-  String whatsappUrl = "https://wa.me/$phoneNumber?text=$message";
+  String whatsappUrl = "https://wa.me/$cleanedPhoneNumber?text=$message";
 
   if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
     await launchUrl(Uri.parse(whatsappUrl));
