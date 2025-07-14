@@ -30,6 +30,7 @@ class CheckoutViewModel extends BaseViewModel {
   int calculatedDeliveryFee = 0;
   int calculatedFinalTotal = 0;
   int discountAmount = 0;
+  int cartSubtotal = 0;
 
   bool isPaying = false;
   bool isCalculating = false;
@@ -160,6 +161,15 @@ class CheckoutViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         List<dynamic> items = res.data["cartItems"] ?? [];
 
+        Map<String, dynamic> summary = res.data["summary"] ?? {};
+
+
+
+        cartSubtotal = summary["totalPrice"] ?? 0;
+        discountAmount = summary["discountAmount"] ?? 0;
+        calculatedFinalTotal = summary["finalPrice"] ?? 0;
+
+
         if (items.isNotEmpty) {
           List<CartItem> onlineItems = items
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
@@ -197,6 +207,7 @@ class CheckoutViewModel extends BaseViewModel {
         calculatedDeliveryFee = response.data['data']['shippingFee'] ?? 0;
         calculatedFinalTotal = response.data['data']['finalTotal'] ?? 0;
         discountAmount = response.data['data']['discount'] ?? 0;
+        cartSubtotal = response.data['data']["totalPrice"] ?? 0;
         notifyListeners();
       } else {
         locator<SnackbarService>().showSnackbar(

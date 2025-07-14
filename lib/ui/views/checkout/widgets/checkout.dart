@@ -85,7 +85,7 @@ class BillingSummary extends ViewModelWidget<CheckoutViewModel> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Sub-total", style: TextStyle(fontSize: 16)),
-              Text(MoneyUtils().formatAmount(subtotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
+              Text(MoneyUtils().formatAmount(model.cartSubtotal), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
             ],
           ),
           verticalSpaceTiny,
