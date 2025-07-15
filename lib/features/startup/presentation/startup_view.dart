@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stacked/stacked.dart';
-import 'package:wahala_hq/ui/common/ui_helpers.dart';
 
 import 'startup_viewmodel.dart';
 

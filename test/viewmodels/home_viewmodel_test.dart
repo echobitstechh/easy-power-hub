@@ -1,40 +1,51 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:wahala_hq/app/app.bottomsheets.dart';
-import 'package:wahala_hq/app/app.locator.dart';
-import 'package:wahala_hq/ui/common/app_strings.dart';
+import 'package:wahala_hq/features/dashboard/presentation/dashboad_view.dart';
 import 'package:wahala_hq/features/home/presentation/home_viewmodel.dart';
 
-import '../helpers/test_helpers.dart';
-
 void main() {
-  HomeViewModel getModel() => HomeViewModel();
+  group('HomeViewModel Tests -', () {
+    late HomeViewModel model;
 
-  group('HomeViewmodelTest -', () {
-    setUp(() => registerServices());
-    tearDown(() => locator.reset());
-
-    group('incrementCounter -', () {
-      test('When called once should return  Counter is: 1', () {
-        final model = getModel();
-        model.incrementCounter();
-        expect(model.counterLabel, 'Counter is: 1');
-      });
+    setUp(() {
+      model = HomeViewModel();
     });
 
-    group('showBottomSheet -', () {
-      test('When called, should show custom bottom sheet using notice variant',
-          () {
-        final bottomSheetService = getAndRegisterBottomSheetService();
+    test('Initial selectedTab should be 0', () {
+      expect(model.selectedTab, 0);
+    });
 
-        final model = getModel();
-        model.showBottomSheet();
-        verify(bottomSheetService.showCustomSheet(
-          variant: BottomSheetType.notice,
-          title: ksHomeBottomSheetTitle,
-          description: ksHomeBottomSheetDescription,
-        ));
-      });
+    test('changeSelected should update selectedTab and notify listeners', () {
+      int notifyCount = 0;
+      model.addListener(() => notifyCount++);
+
+      model.changeSelected(2);
+      expect(model.selectedTab, 2);
+      expect(notifyCount, 1);
+    });
+
+    test('clearSelectedTab should set selectedTab to -1 and notify', () {
+      int notifyCount = 0;
+      model.addListener(() => notifyCount++);
+
+      model.clearSelectedTab();
+      expect(model.selectedTab, -1);
+      expect(notifyCount, 1);
+    });
+
+    test('currentPage should return the correct widget based on selectedTab', () {
+      expect(model.currentPage.runtimeType, DashboardView);
+
+      model.changeSelected(3);
+      expect(model.currentPage.runtimeType, DashboardView);
+    });
+
+    test('checkForUpdates should complete without throwing', () async {
+      // Just ensure it runs without error
+      await model.checkForUpdates(FakeBuildContext());
     });
   });
 }
+
+/// A fake BuildContext just to satisfy method signature
+class FakeBuildContext extends Fake implements BuildContext {}

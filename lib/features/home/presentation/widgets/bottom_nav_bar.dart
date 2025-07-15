@@ -1,132 +1,115 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../home_viewmodel.dart';
 
 class BottomNavBar extends StatelessWidget {
   final HomeViewModel viewModel;
-  final ValueListenable<List<dynamic>>? counterListenable;
 
-  const BottomNavBar({
-    Key? key,
-    required this.viewModel,
-    this.counterListenable,
-  }) : super(key: key);
+  const BottomNavBar({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color iconColor = kcMediumGrey;
-    Color selectedColor = kcSecondaryColor;
+    final selectedTab = viewModel.selectedTab;
 
-    List<BottomNavigationBarItem> items = _navItems(iconColor, selectedColor);
-
-    int currentIndex = viewModel.selectedTab;
-
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      backgroundColor:
-      uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
-      selectedLabelStyle: TextStyle(color: selectedColor),
-      selectedItemColor: selectedColor,
-      unselectedItemColor: iconColor,
-      onTap: (index) => viewModel.changeSelected(index),
-      currentIndex: currentIndex,
-      items: items,
-    );
-  }
-
-  List<BottomNavigationBarItem> _navItems(
-      Color iconColor, Color selectedColor) {
-    return [
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon(
-          'home.svg',
-          'home_outline.svg',
-          viewModel.selectedTab == 0,
-          iconColor,
-        ),
-        label: "Home",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemWithCounter(
-          'buy.svg',
-          'buy.svg',
-          viewModel.selectedTab == 1,
-          counterListenable,
-          iconColor,
-        ),
-        label: "Cart",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon(
-          'profile.svg',
-          'profile_outline.svg',
-          viewModel.selectedTab == 2,
-          iconColor,
-        ),
-        label: "Profile",
-      ),
-    ];
-  }
-
-  Widget _navBarItemIcon(String filledIcon, String outlinedIcon,
-      bool isSelected, Color iconColor) {
     return Container(
-      width: 30,
-      height: 30,
+      height: 86,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color:
-        isSelected ? kcSecondaryColor.withOpacity(0.2) : Colors.transparent,
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
-      child: SvgPicture.asset(
-        'assets/icons/${isSelected ? filledIcon : outlinedIcon}',
-        height: 16,
-        color: isSelected ? kcSecondaryColor : iconColor,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(
+            icon: 'home',
+            height: 45,
+            selected: selectedTab == 0,
+            onTap: () => viewModel.changeSelected(0),
+          ),
+          _buildNavItem(
+            icon: 'search',
+            selected: selectedTab == 1,
+            onTap: () => viewModel.changeSelected(1),
+          ),
+          _buildAddButton(),
+          _buildNavItem(
+            icon: 'notification',
+            height: 51,
+            selected: selectedTab == 2,
+            onTap: () => viewModel.changeSelected(2),
+          ),
+          _buildProfileItem(
+            selected: selectedTab == 3,
+            onTap: () => viewModel.changeSelected(3),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _navBarItemWithCounter(
-      String icon,
-      String filledIcon,
-      bool isSelected,
-      ValueListenable<List<dynamic>>? counterListenable,
-      Color color,
-      ) {
-    if (counterListenable == null) {
-      return _navBarItemIcon(filledIcon, icon, isSelected, color);
-    }
+  Widget _buildNavItem({
+    required String icon,
+    required bool selected,
+    double? height,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: selected
+            ? BoxDecoration(
+          color: kcSecondaryColor.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(12),
+        )
+            : null,
+        child: SvgPicture.asset(
+          'assets/icons/${icon}_${selected ? "filled" : "outline"}.svg',
+          height: selected ? (height ?? 29) + 20 : (height ?? 29),
+          // color: selected ? kcSecondaryColor.withOpacity(0.1) : kcMediumGrey,
+        ),
+      ),
+    );
+  }
 
-    return ValueListenableBuilder<List<dynamic>>(
-      valueListenable: counterListenable,
-      builder: (context, value, child) {
-        return Stack(
-          clipBehavior: Clip.none,
-          children: [
-            _navBarItemIcon(filledIcon, icon, isSelected, color),
-            if (value.isNotEmpty)
-              Positioned(
-                right: -6,
-                top: -6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '${value.length}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ),
-          ],
-        );
-      },
+  Widget _buildAddButton() {
+    return GestureDetector(
+      onTap: viewModel.clearSelectedTab,
+      child: Container(
+        height: 44,
+        width: 44,
+        decoration: const BoxDecoration(
+          color: Colors.black,
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+    );
+  }
+
+
+  Widget _buildProfileItem({
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: const CircleAvatar(
+        radius: 16,
+        backgroundImage: NetworkImage(
+          'https://placehold.co/64x64.png', // Replace with profile.value.profilePicture
+        ),
+      ),
     );
   }
 }
+
