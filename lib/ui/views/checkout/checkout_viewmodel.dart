@@ -207,7 +207,7 @@ class CheckoutViewModel extends BaseViewModel {
         calculatedDeliveryFee = response.data['data']['shippingFee'] ?? 0;
         calculatedFinalTotal = response.data['data']['finalTotal'] ?? 0;
         discountAmount = response.data['data']['discount'] ?? 0;
-        cartSubtotal = response.data['data']["totalPrice"] ?? 0;
+        cartSubtotal = response.data['data']["subtotal"] ?? 0;
         notifyListeners();
       } else {
         locator<SnackbarService>().showSnackbar(

@@ -8,7 +8,7 @@ import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-
+import 'dart:io' show Platform;
 import '../../../state.dart';
 import 'auth_view.dart';
 
@@ -196,80 +196,132 @@ class _LoginState extends State<Login> {
                 ),
               ),
               verticalSpaceMedium,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const <Widget>[
-                  Expanded(
-                    child: Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      "OR",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      color: Colors.grey,
-                      thickness: 1,
-                    ),
-                  ),
-                ],
-              ),
-              verticalSpaceMedium,
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.black,
-                  backgroundColor: Colors.white, // Text color
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 2, // Subtle shadow
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  minimumSize: const Size(double.infinity, 54), // Full-width button
-                ),
-                onPressed: () {
-                  model.signInWithGoogle(context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/crypto%2Fsearch%20(2).png?alt=media&token=24a918f7-3564-4290-b7e4-08ff54b3c94c",
-                      width: 20,
-                    ),
-                    const SizedBox(width: 20),
-                    const Text(
-                      'Sign in with Google',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // SubmitButton(
-              //   isLoading: model.isBusy,
-              //   boldText: true,
-              //   iconIsPrefix: true,
-              //   icon: FontAwesomeIcons.google,
-              //   label: "Sign in with Google",
-              //   textColor: Colors.black,
-              //   submit:() {
-              //     model.signInWithGoogle(context);
-              //   },
-              //   color: Colors.grey,
+              // Row(
+              //   mainAxisAlignment: MainAxisAlignment.center,
+              //   children: const <Widget>[
+              //     Expanded(
+              //       child: Divider(
+              //         color: Colors.grey,
+              //         thickness: 1,
+              //       ),
+              //     ),
+              //     Padding(
+              //       padding: EdgeInsets.symmetric(horizontal: 8),
+              //       child: Text(
+              //         "OR",
+              //         style: TextStyle(
+              //           fontSize: 14,
+              //           color: Colors.grey,
+              //         ),
+              //       ),
+              //     ),
+              //     Expanded(
+              //       child: Divider(
+              //         color: Colors.grey,
+              //         thickness: 1,
+              //       ),
+              //     ),
+              //   ],
               // ),
+              // verticalSpaceMedium,
+              // // ElevatedButton(
+              // //   style: ElevatedButton.styleFrom(
+              // //     foregroundColor: Colors.black,
+              // //     backgroundColor: Colors.white, // Text color
+              // //     shape: RoundedRectangleBorder(
+              // //       borderRadius: BorderRadius.circular(15),
+              // //     ),
+              // //     elevation: 2, // Subtle shadow
+              // //     padding: const EdgeInsets.symmetric(horizontal: 16),
+              // //     minimumSize: const Size(double.infinity, 54), // Full-width button
+              // //   ),
+              // //   onPressed: () {
+              // //     model.signInWithGoogle(context);
+              // //   },
+              // //   child: Row(
+              // //     mainAxisAlignment: MainAxisAlignment.center,
+              // //     children: [
+              // //       Image.network(
+              // //         "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/crypto%2Fsearch%20(2).png?alt=media&token=24a918f7-3564-4290-b7e4-08ff54b3c94c",
+              // //         width: 20,
+              // //       ),
+              // //       const SizedBox(width: 20),
+              // //       const Text(
+              // //         'Sign in with Google',
+              // //         style: TextStyle(
+              // //           color: Colors.black,
+              // //           fontSize: 16,
+              // //           fontWeight: FontWeight.w500,
+              // //         ),
+              // //       ),
+              // //     ],
+              // //   ),
+              // // ),
+              // verticalSpaceMedium,
+              // if (Platform.isAndroid) // Only show this on Android
+          if (Platform.isAndroid) ...[
+      verticalSpaceMedium,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const <Widget>[
+          Expanded(
+            child: Divider(
+              color: Colors.grey,
+              thickness: 1,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              "OR",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Divider(
+              color: Colors.grey,
+              thickness: 1,
+            ),
+          ),
+        ],
+      ), ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    elevation: 2,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    minimumSize: const Size(double.infinity, 54),
+                  ),
+                  onPressed: () {
+                    model.signInWithGoogle(context);
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.network(
+                        "https://firebasestorage.googleapis.com/v0/b/flutterbricks-public.appspot.com/o/crypto%2Fsearch%20(2).png?alt=media&token=24a918f7-3564-4290-b7e4-08ff54b3c94c",
+                        width: 20,
+                      ),
+                      const SizedBox(width: 20),
+                      const Text(
+                        'Sign in with Google',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               verticalSpaceMedium,
+            ],
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 const Text(
                   "Don't have an account? ",

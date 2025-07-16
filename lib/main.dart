@@ -27,12 +27,12 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupLocator();
   setupDialogUi();
   setupBottomSheetUi();
   PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 

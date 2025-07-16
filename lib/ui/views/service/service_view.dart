@@ -3,10 +3,14 @@ import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/views/cart/cart_viewmodel.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../app/app.locator.dart';
 import '../../../core/utils/config.dart';
 import '../../common/app_colors.dart';
 import '../../components/empty_state.dart';
@@ -168,7 +172,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 SizedBox(height: 0.0),
                 IconButton(
                   icon: Icon(Icons.phone, color: Colors.green),
-                  onPressed:()=> _openDialer(phoneNumber),
+                  onPressed:()=> _callNumber(phoneNumber),
                 ),
 
               ],
@@ -359,14 +363,42 @@ class ServicesView extends StackedView<ServicesviewModel> {
     super.onViewModelReady(viewModel);
   }
 }
+final SnackbarService _snackBar = locator<SnackbarService>();
 
-void _openDialer(String phoneNumber) async {
-  final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+// void _openDialer(String phoneNumber) async {
+//   final Uri phoneUri = Uri.parse('tel:$phoneNumber');
+//
+//   try {
+//     bool canLaunchIt = await canLaunchUrl(phoneUri);
+//     if (!canLaunchIt) {
+//       _snackBar.showSnackbar(
+//         message: "No app found to open dialer. Please check your phone settings.",
+//         duration: Duration(seconds: 4),
+//       );
+//       print('No app found to handle tel intent');
+//       return;
+//     }
+//
+//     await launchUrl(phoneUri, mode: LaunchMode.externalApplication); // Explicit mode
+//   } on PlatformException catch (e) {
+//     _snackBar.showSnackbar(
+//       message: "Platform error: ${e.message}",
+//       duration: Duration(seconds: 3),
+//     );
+//     print('PlatformException: $e');
+//   } catch (e) {
+//     _snackBar.showSnackbar(
+//       message: "An error occurred: ${e.toString()}",
+//       duration: Duration(seconds: 3),
+//     );
+//     print('Unexpected error: $e');
+//   }
+// }
 
-  if (await canLaunchUrl(phoneUri)) {
-    await launchUrl(phoneUri);
-  } else {
-    throw 'Could not open dialer';
+void _callNumber(String phoneNumber) async {
+  bool? res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
+  if (res != true) {
+    _snackBar.showSnackbar(message: "Could not launch dialer.");
   }
 }
 

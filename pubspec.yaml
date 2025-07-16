@@ -98,6 +98,7 @@ dependencies:
   app_links: ^6.4.0
   shimmer_animation: ^2.1.0
   connectivity_plus: ^6.1.4
+  flutter_phone_direct_caller: ^2.2.1
 
 
 
