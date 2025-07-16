@@ -23,6 +23,8 @@ import '../../../state.dart';
 import '../../components/text_field_widget.dart';
 import 'authService.dart';
 import 'auth_view.dart';
+import 'dart:io';
+
 
 
 /// @author George David
@@ -130,7 +132,13 @@ class AuthViewModel extends BaseViewModel {
 
       // Get FCM token
       String? fcmToken = await FirebaseMessaging.instance.getToken();
-      print("FCM Token: $fcmToken");
+
+      // Print FCM token with platform info
+      if (Platform.isAndroid) {
+        print(" Android FCM Token: $fcmToken");
+      } else if (Platform.isIOS) {
+        print(" iOS FCM Token: $fcmToken");
+      }
 
       // Make API request with FCM token included
       ApiResponse res = await repo.login({
@@ -142,12 +150,8 @@ class AuthViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         final data = res.data;
-        print('value of data is: $data');
-        print("FCM Token: $fcmToken");
 
         if (data['verificationRequired'] == true) {
-          // User not verified, redirect to verification
-          print('user not verified, redirecting to verification');
           profile.value.id = data['userId'];
           if (phone.text.isNotEmpty)
             profile.value.reference =
@@ -162,15 +166,14 @@ class AuthViewModel extends BaseViewModel {
                   'userId': data['userId'] ?? '',
                   if (phone.text.isNotEmpty)
                     'verificationCode':
-                        data['sendTokenResponse']?['data']?['token'] ?? '',
+                    data['sendTokenResponse']?['data']?['token'] ?? '',
                   if (phone.text.isNotEmpty) 'phone': phone.text,
                   if (email.text.isNotEmpty) 'email': email.text,
                 },
               ),
             ),
           );
-        }
-        else if (data['incompleteBiodata'] == true) {
+        } else if (data['incompleteBiodata'] == true) {
           profile.value.id = data['userId'];
           if (phone.text.isNotEmpty) {
             profile.value.reference =
@@ -191,12 +194,10 @@ class AuthViewModel extends BaseViewModel {
             ),
           );
         } else {
-          // Successful login
           userLoggedIn.value = true;
           profile.value =
               Profile.fromJson(Map<String, dynamic>.from(data["User"]));
-          locator<LocalStorage>()
-              .save(LocalStorageDir.authToken, data["token"]);
+          locator<LocalStorage>().save(LocalStorageDir.authToken, data["token"]);
           locator<LocalStorage>()
               .save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
           locator<LocalStorage>()
@@ -211,8 +212,7 @@ class AuthViewModel extends BaseViewModel {
 
           locator<NavigationService>().clearStackAndShow(Routes.homeView);
         }
-      }
-      else if( res.statusCode == 403 && res.data['incompleteBiodata'] == true){
+      } else if (res.statusCode == 403 && res.data['incompleteBiodata'] == true) {
         final data = res.data;
         profile.value.id = data['userId'];
         Navigator.push(
@@ -227,13 +227,19 @@ class AuthViewModel extends BaseViewModel {
             ),
           ),
         );
-      }else {
-        snackBar.showSnackbar(message: res.data["message"], duration: Duration(seconds: 3));
+      } else {
+        snackBar.showSnackbar(
+          message: res.data["message"],
+          duration: Duration(seconds: 3),
+        );
       }
     } catch (e) {
       log.i(e);
       print('error is $e');
-      snackBar.showSnackbar(message: "Unable to login. Please try again.", duration: Duration(seconds: 3));
+      snackBar.showSnackbar(
+        message: "Unable to login. Please try again.",
+        duration: Duration(seconds: 3),
+      );
     } finally {
       appLoading.value = false;
       rebuildUi();
