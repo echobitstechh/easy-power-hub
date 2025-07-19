@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,10 +10,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:update_available/update_available.dart';
-
 import 'firebase_options.dart';
 import 'core/utils/paystack_util.dart';
-import 'core/utils/config.dart';
 import 'core/utils/local_store_dir.dart';
 import 'core/utils/local_stotage.dart';
 import 'utils/money_util.dart';
@@ -25,18 +26,30 @@ import 'ui/common/app_colors.dart';
 final AppLinks _appLinks = AppLinks();
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  setupLocator();
-  setupDialogUi();
-  setupBottomSheetUi();
-  PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
+void main() {
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized(); // ✅ Now inside the zone
 
-  runApp(const MyApp());
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    FlutterError.onError =
+        FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    setupLocator();
+    setupDialogUi();
+    setupBottomSheetUi();
+    PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
+
+    runApp(const MyApp());
+  }, (error, stackTrace) {
+    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
+  });
 }
 
-class MyApp extends StatefulWidget {
+
+      class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override

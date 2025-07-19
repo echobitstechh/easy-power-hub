@@ -31,7 +31,7 @@ class HomeView extends StackedView<HomeViewModel> {
     viewModel.checkForUpdates(context);
 
     return ValueListenableBuilder<AppModules>(
-      valueListenable: currentModuleNotifier, // Your ValueNotifier
+      valueListenable: currentModuleNotifier,
       builder: (context, currentModule, child) {
         return Scaffold(
           backgroundColor: currentModuleNotifier.value == AppModules.shop
@@ -39,9 +39,8 @@ class HomeView extends StackedView<HomeViewModel> {
               : null,
           body: Stack(
             children: [
-              viewModel.currentPage, // Assuming you have separate getters for pages in your viewModel
+              viewModel.currentPage,
 
-              // Floating Cart Button
             ],
           ),
           bottomNavigationBar: BottomNavBar(viewModel: viewModel),

@@ -11,6 +11,7 @@ import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:easyph/utils/string_entension.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -592,13 +593,18 @@ class DashboardView extends StackedView<DashboardViewModel> {
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(12)),
                               child: CachedNetworkImage(
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.0,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        kcSecondaryColor),
+                                placeholder: (context, url) => const Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.0,
+                                      valueColor: AlwaysStoppedAnimation<Color>(kcSecondaryColor),
+                                    ),
                                   ),
                                 ),
+
                                 imageUrl: (item.images != null &&
                                         item.images!.isNotEmpty)
                                     ? item.images!.first
@@ -763,26 +769,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
       return Column(
         children: [
           verticalSpaceSmall,
-          // Column(
-          //   children: [
-          //     Padding(
-          //       padding: const EdgeInsets.only(right: 8.0),
-          //       child: Container(
-          //         decoration: BoxDecoration(
-          //           border: Border.all(color: Colors.transparent, width: 2.0), // Border color and width
-          //           borderRadius: BorderRadius.circular(16.0), // Same radius as ClipRRect
-          //         ),
-          //         child: ClipRRect(
-          //           borderRadius: BorderRadius.circular(16.0),
-          //           child: Image.asset(
-          //             'assets/animations/easy_power_hub.gif',
-          //             fit: BoxFit.cover,
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
           _buildAdsSlideshow(),
           // quickActions(context),
           verticalSpaceSmall,
@@ -1169,7 +1155,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         )
       ];
     } else {
-      // Normal display when data is loaded
+
       return [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
