@@ -206,9 +206,9 @@ class ShippingDetailsWidget extends ViewModelWidget<CheckoutViewModel> {
                       style: ButtonStyle(
                           backgroundColor:
                               MaterialStateProperty.all(kcPrimaryColor)),
+                      onPressed: onAddAddress,
                       child: const Text("Add new shipping address",
                           style: TextStyle(color: kcWhiteColor)),
-                      onPressed: onAddAddress,
                     ),
                   ],
                 ),

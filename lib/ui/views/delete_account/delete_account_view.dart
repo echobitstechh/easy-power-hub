@@ -31,7 +31,7 @@ class DeleteAccountView extends StackedView<DeleteAccountViewModel> {
               ),
             ),
             expandedHeight: 200,
-            flexibleSpace: Background(
+            flexibleSpace: const Background(
               children: [
                 Positioned(
                   top: 30,
@@ -39,7 +39,7 @@ class DeleteAccountView extends StackedView<DeleteAccountViewModel> {
                   right: 0,
                   bottom: 0,
                   child: Padding(
-                    padding: const EdgeInsets.all(80.0),
+                    padding: EdgeInsets.all(80.0),
                     // child: Image.asset(""),
                   ),
                 )

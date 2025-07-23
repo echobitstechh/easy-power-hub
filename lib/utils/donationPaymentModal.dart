@@ -6,11 +6,6 @@ import '../state.dart';
 import '../ui/common/app_colors.dart';
 import '../ui/common/ui_helpers.dart';
 import '../ui/components/submit_button.dart';
-import '../ui/components/text_field_widget.dart';
-import 'money_util.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:pay/pay.dart';
-import 'inAppPayConfig.dart' as payment_configurations;
 
 
 
@@ -56,7 +51,7 @@ class DonationsPaymentModalWidget extends StatelessWidget {
           // padding: const EdgeInsets.all(16.0),
           decoration:  BoxDecoration(
             color: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : Colors.white,
-            borderRadius: BorderRadius.only(
+            borderRadius: const BorderRadius.only(
               topRight: Radius.circular(25.0),
               topLeft: Radius.circular(25.0),
             ),
@@ -69,9 +64,9 @@ class DonationsPaymentModalWidget extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: kcSecondaryColor, // Yellowish background
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topRight: Radius.circular(25.0),
                     topLeft: Radius.circular(25.0),
                   ), // Adjusted border-radius only for the top

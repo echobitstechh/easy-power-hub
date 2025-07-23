@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
-import 'dart:ffi';
 import 'package:easyph/app/app.router.dart';
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
@@ -11,11 +9,8 @@ import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:easyph/utils/string_entension.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
 import 'package:flutter_countdown_timer/current_remaining_time.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
@@ -85,7 +80,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
       child: GestureDetector(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (c) => ServicesView(),
+            builder: (c) => const ServicesView(),
           ));
         },
         child: actionContainer('assets/images/2148087576.jpg', "Services", context),
@@ -127,7 +122,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
       GestureDetector(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
-            builder: (c) => ServicesView(),
+            builder: (c) => const ServicesView(),
           ));
         },
         child: actionContainer('assets/images/2148087576.jpg', "Services", context),
@@ -147,7 +142,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
     Widget? child,
   ) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
         statusBarBrightness: Brightness.light,
@@ -158,9 +153,9 @@ class DashboardView extends StackedView<DashboardViewModel> {
           elevation: 0,
           title: Row(
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 backgroundImage:
-                    const AssetImage("assets/images/easy_ph_logo.png"),
+                    AssetImage("assets/images/easy_ph_logo.png"),
                 radius: 20,
               ),
               const SizedBox(width: 8),
@@ -307,8 +302,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
               // width: 110, // Adjust width according to your design
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                boxShadow: [
-                  const BoxShadow(
+                boxShadow: const [
+                  BoxShadow(
                     color: Colors.black12,
                     blurRadius: 5.0,
                     spreadRadius: 1.0,
@@ -335,7 +330,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
               right: 8,
               child: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
@@ -379,7 +374,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16.0),
-                boxShadow: [
+                boxShadow: const [
                   BoxShadow(
                     color: Colors.black26,
                     blurRadius: 10.0,
@@ -395,7 +390,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   Text(
                     title,
                     style: GoogleFonts.bricolageGrotesque(
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -407,10 +402,10 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     itemCount: products.length,
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
-                        leading: Icon(Icons.lightbulb),
+                        leading: const Icon(Icons.lightbulb),
                         title: Text(
                           products[index],
-                          style: TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16),
                         ),
                         onTap: () {
                           Navigator.pop(context);
@@ -511,15 +506,15 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     Text(
                       "Explore",
                       style: GoogleFonts.redHatDisplay(
-                        textStyle: TextStyle(
+                        textStyle: const TextStyle(
                           fontSize: 12,
                           color: kcBlackColor,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(
+                    const SizedBox(width: 8),
+                    const Icon(
                       Icons.arrow_forward,
                       size: 16,
                       color: kcSecondaryColor,
@@ -532,8 +527,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
         ),
         GridView.builder(
           shrinkWrap: true,
-          padding: EdgeInsets.only(top: 20),
-          physics: NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(top: 20),
+          physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 10.0,
@@ -713,7 +708,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                           double ratingValue = item.rating ?? 0.0;
                                           return LinearGradient(
                                             stops: [ratingValue / 5, ratingValue / 5],
-                                            colors: [Colors.amber, Colors.grey], // Fill and empty colors
+                                            colors: const [Colors.amber, Colors.grey], // Fill and empty colors
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(
@@ -941,15 +936,15 @@ class DashboardView extends StackedView<DashboardViewModel> {
             right: 10,
             top: 10,
             child: Container(
-              padding: EdgeInsets.all(5),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 color: Colors.red,
                 borderRadius: BorderRadius.circular(12),
               ),
-              constraints: BoxConstraints(minWidth: 10, minHeight: 10),
+              constraints: const BoxConstraints(minWidth: 10, minHeight: 10),
               child: Text(
                 unreadCount.toString(),
-                style: TextStyle(color: Colors.white, fontSize: 6),
+                style: const TextStyle(color: Colors.white, fontSize: 6),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -973,7 +968,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
           height: MediaQuery.of(context).size.height * 0.5,
           child: Column(
             children: [
-              Text("Notifications",
+              const Text("Notifications",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               Expanded(
                 child: ListView.builder(
@@ -1009,7 +1004,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                         ),
                       ),
                       trailing: notification.unread
-                          ? Icon(Icons.circle, color: Colors.red, size: 10)
+                          ? const Icon(Icons.circle, color: Colors.red, size: 10)
                           : null,
                     );
                   },
@@ -1169,16 +1164,21 @@ class DashboardView extends StackedView<DashboardViewModel> {
                   onTap: () {
                     locator<NavigationService>().navigateTo(Routes.profileView);
                   },
-                  child: CircleAvatar(
-                    // backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
-                    backgroundImage: CachedNetworkImageProvider(
-                      (profile.value.profilePicture != null && profile.value.profilePicture!.isNotEmpty)
-                          ? profile.value.profilePicture!
-                          : 'assets/images/display_pic.png',
-                    ),
-
-                    radius: 20, // Adjust size as needed
-                  ),
+                    child: CircleAvatar(
+                      radius: 20,
+                      backgroundImage: (profile.value.profilePicture != null &&
+                          profile.value.profilePicture!.isNotEmpty)
+                          ? (profile.value.profilePicture!.startsWith('http')
+                          ? CachedNetworkImageProvider(profile.value.profilePicture!)
+                      as ImageProvider<Object>
+                          : AssetImage(profile.value.profilePicture!)
+                      as ImageProvider<Object>)
+                          : const AssetImage('assets/images/display_pic.png')
+                      as ImageProvider<Object>,
+                      onBackgroundImageError: (exception, stackTrace) {
+                        debugPrint('Failed to load profile picture: $exception');
+                      },
+                    )
                 )
               ] else ...[
                 InkWell(
@@ -1186,18 +1186,17 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     locator<NavigationService>().navigateTo(Routes.authView);
                   },
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
-                      color: kcSecondaryColor
-                          .withOpacity(0.2), // Capsule background color
-                      borderRadius:
-                          BorderRadius.circular(10), // Rounded capsule shape
+                      color: kcSecondaryColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Login",
                       style: TextStyle(
-                        color: kcBlackColor,
+                        color: uiMode.value == AppUiModes.dark
+                            ? kcWhiteColor
+                            : kcBlackColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -1389,7 +1388,7 @@ class BackGroundTile extends StatelessWidget {
   final Color backgroundColor;
   final IconData icondata;
 
-  BackGroundTile({required this.backgroundColor, required this.icondata});
+  const BackGroundTile({super.key, required this.backgroundColor, required this.icondata});
 
   @override
   Widget build(BuildContext context) {

@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-//import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,14 +19,13 @@ import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
 import '../../../utils/donationPaymentModal.dart';
 import '../../../utils/money_util.dart';
-import '../../../utils/paymentModal.dart';
 import '../../common/app_colors.dart';
 
 
 class ProjectDetailsPage extends StatefulWidget {
   final ProjectResource project;
 
-  ProjectDetailsPage({Key? key, required this.project}) : super(key: key);
+  const ProjectDetailsPage({Key? key, required this.project}) : super(key: key);
 
   @override
   State<ProjectDetailsPage> createState() => _ProjectdetalsState();
@@ -123,11 +120,12 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // Project Image
-                      Image.network(
-                        widget.project.project?.media?.first.url ??
-                            'https://via.placeholder.com/150',
-                        fit: BoxFit.cover,
+                      Positioned.fill(
+                        child: Image.network(
+                          widget.project.project?.media?.first.url ??
+                              'https://via.placeholder.com/150',
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       // Gradient Overlay
                       const DecoratedBox(
@@ -157,7 +155,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
                     },
                   ),
                 ),
-                actions: [
+                actions: const [
                   // Container(
                   //   margin: const EdgeInsets.only(right: 16.0), // Align the share icon properly
                   //   decoration: BoxDecoration(
@@ -579,7 +577,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
 
   // Comment input field pinned at the bottom
   Widget _buildCommentInputField(BuildContext context) {
-    final TextEditingController _commentController = TextEditingController();
+    final TextEditingController commentController = TextEditingController();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -587,7 +585,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
         color:  uiMode.value == AppUiModes.dark
             ? kcDarkGreyColor
             : Colors.grey[200], // Light grey background for the container
-        borderRadius: BorderRadius.only(
+        borderRadius: const BorderRadius.only(
             topRight: Radius.circular(20),
             topLeft: Radius.circular(20)), // Rounded edges
       ),
@@ -614,7 +612,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
             children: [
               Expanded(
                 child: TextField(
-                  controller: _commentController,
+                  controller: commentController,
                   decoration: InputDecoration(
                     hintText: 'Donate to join this Project, and make comments',
                     hintStyle: GoogleFonts.redHatDisplay(
@@ -624,9 +622,9 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    border: InputBorder.none, // Remove the border
-                    fillColor: Colors.transparent, // Grey fill color for the input
-                    filled: true, // Ensures fill color is applied
+                    border: InputBorder.none,
+                    fillColor: Colors.transparent,
+                    filled: true,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12.0,
                       vertical: 8.0,
@@ -644,7 +642,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
               // Send button
               InkWell(
                 onTap: () {
-                  final commentText = _commentController.text;
+                  final commentText = commentController.text;
                   if (commentText.isNotEmpty) {
                     if (replyingToComment != null) {
                       makeReplyComment(commentText, replyingToComment!); // Replying
@@ -652,7 +650,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
                       makeComment(commentText); // New comment
                     }
                     replyingToComment = null;
-                    _commentController.clear();
+                    commentController.clear();
                   }
                 },
                 child: SvgPicture.asset(
@@ -688,7 +686,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
                 color: goal.completed! ? Colors.green : Colors.grey,
                 size: 20,
               ),
-              const SizedBox(width: 8), // Adjust space between icon and text
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   goal.name ?? '',
@@ -725,9 +723,9 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 0.0),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: kcSecondaryColor, // Yellowish background
-                  borderRadius: const BorderRadius.only(
+                  borderRadius: BorderRadius.only(
                     topRight: Radius.circular(25.0),
                     topLeft: Radius.circular(25.0),
                   ), // Adjusted border-radius only for the top
@@ -777,14 +775,14 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(25.0),
                       topRight: Radius.circular(25.0),
                     ),
                     color: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor, // Set your desired background color
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(25.0),
                       topRight: Radius.circular(25.0),
                     ),
@@ -845,7 +843,7 @@ class _ProjectdetalsState extends State<ProjectDetailsPage> {
           valueListenable: selectedPaymentMethod,
           builder: (context, value, child) {
             return Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25.0),

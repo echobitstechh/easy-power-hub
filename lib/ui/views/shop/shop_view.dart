@@ -3,9 +3,7 @@ import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/views/dashboard/productcard.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
@@ -13,7 +11,6 @@ import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
 import '../../../utils/money_util.dart';
 import '../../components/empty_state.dart';
-import '../../components/shimmer.dart';
 import 'shop_viewmodel.dart';
 
 /// @author George David
@@ -130,7 +127,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Spacer(),
+                                  const Spacer(),
                                   Text(
                                     slide['title']!,
                                     style: const TextStyle(
@@ -255,7 +252,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                         borderRadius: BorderRadius.circular(8),
                                         child: Container(
                                           constraints:
-                                              BoxConstraints(maxHeight: 100),
+                                              const BoxConstraints(maxHeight: 100),
                                           child: ListView.builder(
                                             padding: EdgeInsets.zero,
                                             itemCount: options.length,
@@ -271,7 +268,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                                         height: 40,
                                                         fit: BoxFit.cover,
                                                       )
-                                                    : Icon(Icons.image,
+                                                    : const Icon(Icons.image,
                                                         size: 40),
                                                 title: Text(
                                                     product.productName ?? ""),
@@ -540,7 +537,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                               ratingValue / 5,
                                               ratingValue / 5
                                             ],
-                                            colors: [
+                                            colors: const [
                                               Colors.amber,
                                               Colors.grey
                                             ], // Fill and empty colors
@@ -573,7 +570,6 @@ class ShopView extends StackedView<ShopViewModel> {
                 ),
               ),
             );
-            ;
           },
         )
       ],

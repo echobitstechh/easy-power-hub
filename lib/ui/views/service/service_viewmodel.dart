@@ -5,13 +5,7 @@ import 'package:easyph/core/network/api_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 
-import '../../../core/data/models/app_notification.dart';
-import '../../../core/data/models/category.dart';
-import '../../../core/data/models/project.dart';
 import '../../../core/data/models/service.dart';
-import '../../../core/utils/local_store_dir.dart';
-import '../../../core/utils/local_stotage.dart';
-import '../../../state.dart';
 
 class ServicesviewModel extends BaseViewModel {
   final repo = locator<Repository>();

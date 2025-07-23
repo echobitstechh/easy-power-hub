@@ -1,9 +1,7 @@
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
-import 'package:easyph/ui/views/cart/cart_viewmodel.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
@@ -11,12 +9,10 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../app/app.locator.dart';
-import '../../../core/utils/config.dart';
 import '../../common/app_colors.dart';
 import '../../components/empty_state.dart';
 import '../../components/shimmer.dart';
 import '../../components/submit_button.dart';
-import '../checkout/checkout.dart';
 import 'service_viewmodel.dart';
 
 class ServicesView extends StackedView<ServicesviewModel> {
@@ -31,7 +27,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
           'Services',
           style: GoogleFonts.redHatDisplay(
             textStyle:
-                const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
         ),
       ),
@@ -77,13 +73,12 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     },
                   ),
                 ),
-              )                  : viewModel.filteredServices.isEmpty
+              )
+                  : viewModel.filteredServices.isEmpty
                   ? const Expanded(
-                child: Center(
-                  child: EmptyState(
-                    animation: "empty_notifications.json",
-                    label: "No Services yet",
-                  ),
+                child: EmptyState(
+                  animation: "empty_notifications.json",
+                  label: "No Services yet",
                 ),
               )
                   : Expanded(
@@ -134,7 +129,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 },
               ),
             ),
-            SizedBox(width: 16.0),
+            const SizedBox(width: 16.0),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +144,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 8.0),
+                  const SizedBox(height: 8.0),
                   Text(
                     description,
                     style: GoogleFonts.redHatDisplay(
@@ -161,17 +156,17 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 ],
               ),
             ),
-            SizedBox(width: 16.0),
+            const SizedBox(width: 16.0),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: Icon(Icons.chat, color: Colors.green),
+                  icon: const Icon(Icons.chat, color: Colors.green),
                   onPressed: () => _openWhatsAppChat(title, "Service Image URL", phoneNumber),
                 ),
-                SizedBox(height: 0.0),
+                const SizedBox(height: 0.0),
                 IconButton(
-                  icon: Icon(Icons.phone, color: Colors.green),
+                  icon: const Icon(Icons.phone, color: Colors.green),
                   onPressed:()=> _callNumber(phoneNumber),
                 ),
 
@@ -187,8 +182,8 @@ class ServicesView extends StackedView<ServicesviewModel> {
     showModalBottomSheet(
       context: context,
       isScrollControlled:
-          true, // Allows the bottom sheet to adjust for the keyboard
-      shape: RoundedRectangleBorder(
+      true, // Allows the bottom sheet to adjust for the keyboard
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(16),
         ),
@@ -205,7 +200,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
             // Wrap with SingleChildScrollView
             child: Column(
               mainAxisSize:
-                  MainAxisSize.min, // Minimize the size of the bottom sheet
+              MainAxisSize.min, // Minimize the size of the bottom sheet
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Center(
@@ -218,43 +213,43 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   "Service Address",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 16),
-                TextField(
+                const SizedBox(height: 16),
+                const TextField(
                   decoration: InputDecoration(
                     labelText: "House Address",
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
-                TextField(
+                const SizedBox(height: 16),
+                const TextField(
                   decoration: InputDecoration(
                     labelText: "City",
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
-                TextField(
+                const SizedBox(height: 16),
+                const TextField(
                   decoration: InputDecoration(
                     labelText: "State / Nationality",
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Row(
                   children: [
                     Expanded(
                       child: TextField(
                         controller: viewModel.dateController,
                         readOnly: true,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: "Date of Service",
                           border: OutlineInputBorder(),
                         ),
@@ -278,12 +273,12 @@ class ServicesView extends StackedView<ServicesviewModel> {
                         },
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: viewModel.timeController,
                         readOnly: true,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: "Time of Service",
                           border: OutlineInputBorder(),
                         ),
@@ -307,8 +302,8 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     ),
                   ],
                 ),
-                SizedBox(height: 16),
-                TextField(
+                const SizedBox(height: 16),
+                const TextField(
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: "Phone Number",
@@ -316,7 +311,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 // Row(
                 //   children: [
                 //     Checkbox(
@@ -328,7 +323,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                 //     Text("Set as default payment method"),
                 //   ],
                 // ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 SubmitButton(
                   isLoading: false,
                   label: "place Order",
@@ -363,37 +358,8 @@ class ServicesView extends StackedView<ServicesviewModel> {
     super.onViewModelReady(viewModel);
   }
 }
-final SnackbarService _snackBar = locator<SnackbarService>();
 
-// void _openDialer(String phoneNumber) async {
-//   final Uri phoneUri = Uri.parse('tel:$phoneNumber');
-//
-//   try {
-//     bool canLaunchIt = await canLaunchUrl(phoneUri);
-//     if (!canLaunchIt) {
-//       _snackBar.showSnackbar(
-//         message: "No app found to open dialer. Please check your phone settings.",
-//         duration: Duration(seconds: 4),
-//       );
-//       print('No app found to handle tel intent');
-//       return;
-//     }
-//
-//     await launchUrl(phoneUri, mode: LaunchMode.externalApplication); // Explicit mode
-//   } on PlatformException catch (e) {
-//     _snackBar.showSnackbar(
-//       message: "Platform error: ${e.message}",
-//       duration: Duration(seconds: 3),
-//     );
-//     print('PlatformException: $e');
-//   } catch (e) {
-//     _snackBar.showSnackbar(
-//       message: "An error occurred: ${e.toString()}",
-//       duration: Duration(seconds: 3),
-//     );
-//     print('Unexpected error: $e');
-//   }
-// }
+final SnackbarService _snackBar = locator<SnackbarService>();
 
 void _callNumber(String phoneNumber) async {
   bool? res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
@@ -416,5 +382,3 @@ void _openWhatsAppChat(String serviceName, String serviceImage, String phoneNumb
     throw 'Could not launch WhatsApp chat';
   }
 }
-
-

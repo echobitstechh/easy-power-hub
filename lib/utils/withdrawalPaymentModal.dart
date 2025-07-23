@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../core/data/models/profile.dart';
@@ -8,11 +6,6 @@ import '../state.dart';
 import '../ui/common/app_colors.dart';
 import '../ui/common/ui_helpers.dart';
 import '../ui/components/submit_button.dart';
-import '../ui/components/text_field_widget.dart';
-import 'money_util.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:pay/pay.dart';
-import 'inAppPayConfig.dart' as payment_configurations;
 
 class WithdrawalPaymentModalWidget extends StatelessWidget {
   final VoidCallback onProceedWithPayment;
@@ -82,7 +75,7 @@ class WithdrawalPaymentModalWidget extends StatelessWidget {
                       color: uiMode.value == AppUiModes.dark
                           ? kcDarkGreyColor
                           : Colors.white,
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topRight: Radius.circular(25.0),
                         topLeft: Radius.circular(25.0),
                       ),
@@ -95,9 +88,9 @@ class WithdrawalPaymentModalWidget extends StatelessWidget {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             color: kcPrimaryColor, // Yellowish background
-                            borderRadius: const BorderRadius.only(
+                            borderRadius: BorderRadius.only(
                               topRight: Radius.circular(25.0),
                               topLeft: Radius.circular(25.0),
                             ), // Adjusted border-radius only for the top
@@ -362,10 +355,10 @@ class WithdrawalPaymentModalWidget extends StatelessWidget {
                                 ),
                               ),
                               verticalSpaceSmall,
-                              Align(
+                              const Align(
                                 alignment: Alignment.centerRight,
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: EdgeInsets.symmetric(
                                       horizontal: 16.0),
                                   child: Text(
                                     "Send code",

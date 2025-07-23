@@ -1,5 +1,4 @@
 import 'package:easyph/core/data/models/cart_item.dart';
-import 'package:easyph/core/data/models/raffle_cart_item.dart';
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/utils/date_time_utils.dart';
@@ -378,7 +377,7 @@ class ReceiptPage extends StatelessWidget {
 
   Future<pw.Widget> createCartItemWidget(CartItem cartItem) async {
     // Attempt to load the image from the network
-    final response = await http.get(Uri.parse(cartItem.product!.images!.first!));
+    final response = await http.get(Uri.parse(cartItem.product!.images!.first));
 
     pw.Widget imageWidget;
     if (response.statusCode == 200) {

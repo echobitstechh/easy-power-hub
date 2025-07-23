@@ -3,11 +3,9 @@ import 'dart:io';
 import 'package:easyph/app/app.bottomsheets.dart';
 import 'package:easyph/app/app.dialogs.dart';
 import 'package:easyph/app/app.locator.dart';
-import 'package:easyph/app/app.router.dart';
 import 'package:easyph/core/utils/config.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/app_strings.dart';
-import 'package:easyph/ui/components/submit_button.dart';
 import 'package:easyph/ui/views/cart/cart_view.dart';
 import 'package:easyph/ui/views/dashboard/dashboard_view.dart';
 import 'package:easyph/ui/views/profile/profile_view.dart';
@@ -20,7 +18,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/order_item.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/interceptors.dart';
@@ -42,7 +39,7 @@ class HomeViewModel extends BaseViewModel {
     DashboardView(),
     ShopView(),
     const CartView(),
-    ServicesView(),
+    const ServicesView(),
     const ProfileView()
   ];
 
@@ -231,7 +228,7 @@ class HomeViewModel extends BaseViewModel {
       }
     } catch (e) {
       locator<SnackbarService>()
-          .showSnackbar(message: "Failed to load orders", duration: Duration(seconds: 2));
+          .showSnackbar(message: "Failed to load orders", duration: const Duration(seconds: 2));
       print("Failed to load orders: $e");
     } finally {
       setBusy(false);

@@ -2,7 +2,6 @@ import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.logger.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -75,14 +74,14 @@ class EnterEmailViewModel extends BaseViewModel {
         if (currentContext != null) {
           ScaffoldMessenger.of(currentContext).showSnackBar(
             SnackBar(
-              content: Text("Password changed successfully."),
+              content: const Text("Password changed successfully."),
               behavior: SnackBarBehavior.floating,
               margin: EdgeInsets.only(
                 bottom: MediaQuery.of(currentContext).size.height - 150,
                 left: 20,
                 right: 20,
               ),
-              duration: Duration(seconds: 2),
+              duration: const Duration(seconds: 2),
             ),
           );
         }

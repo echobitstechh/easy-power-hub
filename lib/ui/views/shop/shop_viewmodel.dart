@@ -12,11 +12,8 @@ import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/state.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:video_player/video_player.dart';
 
-import '../../../core/data/models/app_notification.dart';
 import '../../../core/data/models/category.dart';
-import '../../../core/data/models/profile.dart';
 import '../../../core/data/models/project.dart';
 
 class ShopViewModel extends BaseViewModel {
@@ -307,15 +304,15 @@ class ShopViewModel extends BaseViewModel {
 
       if (response.statusCode == 200) {
         locator<SnackbarService>().showSnackbar(
-            message: "Product added to cart", duration: Duration(seconds: 2));
+            message: "Product added to cart", duration: const Duration(seconds: 2));
       } else {
         locator<SnackbarService>().showSnackbar(
-            message: response.data["message"], duration: Duration(seconds: 2));
+            message: response.data["message"], duration: const Duration(seconds: 2));
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to add raffle to cart: $e",
-          duration: Duration(seconds: 2));
+          duration: const Duration(seconds: 2));
     } finally {
       notifyListeners();
     }
@@ -354,7 +351,7 @@ class ShopViewModel extends BaseViewModel {
       List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
       log.e(e);
     } finally {
       setBusy(false);
@@ -382,7 +379,7 @@ class ShopViewModel extends BaseViewModel {
         await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
       log.e(e);
     } finally {
       setBusy(false);

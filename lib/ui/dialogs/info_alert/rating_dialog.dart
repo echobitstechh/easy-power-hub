@@ -1,4 +1,3 @@
-import 'package:easyph/ui/views/dashboard/dashboard_viewmodel.dart';
 import 'package:easyph/ui/views/home/home_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -188,7 +187,7 @@ class RatingDialog extends StackedView<HomeViewModel> {
         Text("Tracking: ${order.trackingNumber}",
             style: const TextStyle(fontSize: 12, color: Colors.grey)),
         verticalSpaceSmall,
-        Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
+        Text("Total: ${MoneyUtils().formatAmount(order.totalPrice)}",
 
             style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
         const SizedBox(height: 8),

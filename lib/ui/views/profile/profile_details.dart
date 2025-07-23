@@ -1,7 +1,6 @@
 import 'package:easyph/ui/views/profile/profile_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:path/path.dart' as path;
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/profile.dart';
 import '../../../core/data/repositories/repository.dart';
@@ -264,7 +263,7 @@ class _ProfileScreen extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween, // Aligns items properly
                             children: [
                               // Text(
@@ -297,8 +296,8 @@ class _ProfileScreen extends State<ProfileScreen> {
                     ),
                   ),
                   horizontalSpaceMedium,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 3.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 3.0),
                     child: Column(
                       children: [],
                     ),

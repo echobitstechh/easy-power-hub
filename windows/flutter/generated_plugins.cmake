@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   firebase_core
   permission_handler_windows
   printing
+  sentry_flutter
   url_launcher_windows
 )
 

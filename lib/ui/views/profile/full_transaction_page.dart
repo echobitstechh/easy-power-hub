@@ -10,6 +10,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class FullTransactionsPage extends StatefulWidget {
+  const FullTransactionsPage({super.key});
+
   @override
   _FullTransactionsPageState createState() => _FullTransactionsPageState();
 }
@@ -94,7 +96,7 @@ class _FullTransactionsPageState extends State<FullTransactionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('All Transactions'),
+        title: const Text('All Transactions'),
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -105,7 +107,7 @@ class _FullTransactionsPageState extends State<FullTransactionsPage> {
           await fetchTransactions();
         },
         child: loading
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : transactions.isEmpty
             ? const EmptyState(
           animation: "no_transactions.json",
@@ -117,8 +119,8 @@ class _FullTransactionsPageState extends State<FullTransactionsPage> {
           itemBuilder: (context, index) {
             if (index == transactions.length) {
               // Display loader at the bottom when loading more
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
+              return const Padding(
+                padding: EdgeInsets.all(8.0),
                 child: Center(child: CircularProgressIndicator()),
               );
             }

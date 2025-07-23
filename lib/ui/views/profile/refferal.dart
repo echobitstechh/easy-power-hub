@@ -5,9 +5,6 @@ import 'package:flutter/services.dart';
 //import 'package:share_plus/share_plus.dart';
 
 import '../../../core/data/models/discount.dart';
-import '../../../core/network/api_response.dart';
-import '../../../core/network/interceptors.dart';
-import '../../../state.dart';
 import '../../common/app_colors.dart';
 
 

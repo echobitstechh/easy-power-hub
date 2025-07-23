@@ -37,7 +37,7 @@ class _SuccessPageState extends State<SuccessPage> {
               ),
             ),
           ),
-          Spacer(), // Pushes the text and button to the bottom
+          const Spacer(), // Pushes the text and button to the bottom
           // Text and button at the bottom
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),

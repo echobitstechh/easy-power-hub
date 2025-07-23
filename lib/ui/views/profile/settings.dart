@@ -1,5 +1,3 @@
-import 'package:easyph/ui/components/background.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/app_colors.dart';
@@ -8,6 +6,8 @@ import '../../components/submit_button.dart';
 import '../../components/text_field_widget.dart';
 
 class Settings extends StatefulWidget {
+  const Settings({super.key});
+
   @override
   _Settings createState() => _Settings();
 }
@@ -24,10 +24,10 @@ class _Settings extends State<Settings> {
       child: Scaffold(
         backgroundColor: Colors.grey[200],
         appBar: AppBar(
-          title: Text(''),
+          title: const Text(''),
           actions: [
             IconButton(
-              icon: Icon(Icons.search_outlined),
+              icon: const Icon(Icons.search_outlined),
               onPressed: () {
                 // Handle notification settings here
               },
@@ -38,12 +38,12 @@ class _Settings extends State<Settings> {
           padding: const EdgeInsets.all(6.0),
           child: ListView(
             children: [
-              Text(
+              const Text(
                 "Settings",
                 style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold),
               ),
               verticalSpaceMedium,
-              Text(
+              const Text(
                 "Personal Information",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
               ),
@@ -62,7 +62,7 @@ class _Settings extends State<Settings> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Dark Theme', style: TextStyle(fontSize: 18)),
+                    const Text('Dark Theme', style: TextStyle(fontSize: 18)),
                     Switch(
                       value: _isDarkTheme,
                       onChanged: (value) {
@@ -78,7 +78,7 @@ class _Settings extends State<Settings> {
               Container(
                 padding: const EdgeInsets.all(16.0),
                 margin: const EdgeInsets.only(bottom: 6.0),
-                child: Row(
+                child: const Row(
                   children: [
                     Text('Notifications', style: TextStyle(fontSize: 18)),
                   ],
@@ -92,7 +92,7 @@ class _Settings extends State<Settings> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SwitchListTile(
-                      title: Text('New arrivals'),
+                      title: const Text('New arrivals'),
                       value: isNewArrivalsNotificationEnabled,
                       activeColor: Colors.green,
                       onChanged: (val) {
@@ -104,7 +104,7 @@ class _Settings extends State<Settings> {
                     Container(
 
                       child: SwitchListTile(
-                        title: Text('Delivery status changes'),
+                        title: const Text('Delivery status changes'),
                         value: isDeliveryStatusNotificationEnabled,
                         activeColor: Colors.green,
                         onChanged: (val) {
@@ -138,12 +138,12 @@ class _Settings extends State<Settings> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: TextStyle(fontSize: 16)),
+              Text(label, style: const TextStyle(fontSize: 16)),
               if (hasIcon)
 
                 GestureDetector(
                   onTap: () => _showBottomSheet(context),
-                  child: Text(
+                  child: const Text(
                       'Change',
                       style: TextStyle(color: kcPrimaryColor),
                   ),
@@ -151,8 +151,8 @@ class _Settings extends State<Settings> {
 
             ],
           ),
-          SizedBox(height: 8),
-          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -171,8 +171,8 @@ class _Settings extends State<Settings> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Change Password', style: TextStyle(fontSize: 18)),
-              SizedBox(height: 16),
+              const Text('Change Password', style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 16),
               TextFieldWidget(
                 hint: "Enter Old Password",
                 controller: oldPassword,
