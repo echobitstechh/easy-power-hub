@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/core/data/models/product.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
@@ -66,11 +64,11 @@ List<Map<String, dynamic>> getTimelineSteps(OrderStatus currentStatus) {
 
   // Filter out "Returns"
   final filteredSteps =
-      allSteps.where((step) => step['status'] != OrderStatus.Returns).toList();
+  allSteps.where((step) => step['status'] != OrderStatus.Returns).toList();
 
   // Determine the index of the current status
   final currentIndex =
-      filteredSteps.indexWhere((step) => step['status'] == currentStatus);
+  filteredSteps.indexWhere((step) => step['status'] == currentStatus);
 
   // Mark each step with flags for first, last, completed and active
   for (int i = 0; i < filteredSteps.length; i++) {
@@ -136,7 +134,7 @@ class _OrderListState extends State<OrderList> {
   List<Order> _completedOrders() {
     return orders
         .where((order) =>
-            order.status == "Cancelled" || order.status == "Delivered")
+    order.status == "Cancelled" || order.status == "Delivered")
         .toList();
   }
 
@@ -151,73 +149,71 @@ class _OrderListState extends State<OrderList> {
         centerTitle: true,
       ),
       body: loading
-          ? Shimmer.fromColors(
-              baseColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[800]!
-                  : Colors.grey[300]!,
-              highlightColor: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[600]!
-                  : Colors.grey[100]!,
-              child: Column(
+          ? _buildShimmerLoading()
+          : orders.isEmpty
+          ? const EmptyState(
+        animation: "empty_order.json",
+        label: "No Orders Yet",
+      )
+          : DefaultTabController(
+        length: 3,
+        child: Column(
+          children: [
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
                 children: [
-                  // Shimmer for tab bar
-                  Container(
-                    height: 48,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? Colors.grey[800]
-                        : Colors.white,
-                  ),
-                  const SizedBox(height: 16),
-                  // Shimmer for order items
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: 5, // Number of shimmer items to show
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: Container(
-                            height: 120,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.grey[800]
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  _buildOrderList(_pendingOrders(), "Pending Orders"),
+                  _buildOrderList(
+                      _processingOrders(), "Processing Orders"),
+                  _buildOrderList(
+                      _completedOrders(), "Completed Orders"),
                 ],
               ),
-            )
-          : orders.isEmpty
-              ? const EmptyState(
-                  animation: "empty_order.json",
-                  label: "No Orders Yet",
-                )
-              : DefaultTabController(
-                  length: 3, // Changed to 3 to match your TabBarView children
-                  child: Column(
-                    children: [
-                      _buildTabBar(),
-                      Expanded(
-                        child: TabBarView(
-                          children: [
-                            _buildOrderList(_pendingOrders(), "Pending Orders"),
-                            _buildOrderList(
-                                _processingOrders(), "Processing Orders"),
-                            _buildOrderList(
-                                _completedOrders(), "Completed Orders"),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerLoading() {
+    return Shimmer.fromColors(
+      baseColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[800]!
+          : Colors.grey[300]!,
+      highlightColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.grey[600]!
+          : Colors.grey[100]!,
+      child: Column(
+        children: [
+          // Shimmer for tab bar
+          Container(
+            height: 48,
+            margin: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey[800]
+                  : Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Shimmer for order items - Fixed: Removed Expanded from here
+          ...List.generate(5, (index) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[800]
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -225,17 +221,18 @@ class _OrderListState extends State<OrderList> {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        color: Colors.white,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: TabBar(
           labelColor: Colors.white,
           unselectedLabelColor: Colors.black,
           indicator: const BoxDecoration(
             color: kcPrimaryColor,
-            borderRadius: BorderRadius.all(
-                Radius.circular(8)), // Optional for rounded edges
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
-          indicatorSize: TabBarIndicatorSize
-              .tab, // Makes the indicator cover full tab width
+          indicatorSize: TabBarIndicatorSize.tab,
           tabs: [
             Tab(text: "Pending (${_pendingOrders().length})"),
             Tab(text: "Processing (${_processingOrders().length})"),
@@ -268,7 +265,6 @@ class _OrderListState extends State<OrderList> {
         : "https://via.placeholder.com/120";
 
     return InkWell(
-      // Pass the specific order to the timeline bottom sheet
       onTap: () => showTimelineBottomSheet(context, order),
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -302,7 +298,7 @@ class _OrderListState extends State<OrderList> {
                   ),
                   Text(" ${order.status}",
                       style:
-                          const TextStyle(fontSize: 14, color: kcOrangeColor)),
+                      const TextStyle(fontSize: 14, color: kcOrangeColor)),
                 ],
               ),
               const SizedBox(height: 10),
@@ -337,13 +333,13 @@ class _OrderListState extends State<OrderList> {
               ),
               const Divider(),
               ...order.products.map((product) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 5),
-                    child: _buildOrderDetails(
-                        product,
-                        product.images != null && product.images!.isNotEmpty
-                            ? product.images!.first
-                            : "https://placehold.co/400"),
-                  )),
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: _buildOrderDetails(
+                    product,
+                    product.images != null && product.images!.isNotEmpty
+                        ? product.images!.first
+                        : "https://placehold.co/400"),
+              )),
               const SizedBox(height: 20),
             ],
           ),
@@ -352,33 +348,31 @@ class _OrderListState extends State<OrderList> {
     );
   }
 
-  /// Modified to accept the tapped order so we can build the timeline dynamically
   void showTimelineBottomSheet(BuildContext context, Order order) {
     print("Order Status: ${order.status}");
     final orderStatusEnum = getOrderStatusEnum(order.status);
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Makes the bottom sheet taller
-      backgroundColor: Colors.transparent, // Transparent background
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) => _buildBottomSheetContent(orderStatusEnum),
     );
   }
 
-  /// Modified bottom sheet content that builds the timeline dynamically
   Widget _buildBottomSheetContent(OrderStatus currentStatus) {
     print("Current Status: $currentStatus");
     final timelineEntries = getTimelineSteps(currentStatus);
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.5, // Adjust height
-      maxChildSize: 0.8, // Maximum height
-      minChildSize: 0.3, // Minimum height
+      initialChildSize: 0.5,
+      maxChildSize: 0.8,
+      minChildSize: 0.3,
       builder: (context, scrollController) {
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
             children: [
@@ -420,13 +414,13 @@ class _OrderListState extends State<OrderList> {
                         color: isActive
                             ? kcPrimaryColor
                             : isCompleted
-                                ? kcVeryLightGrey
-                                : kcVeryLightGrey,
+                            ? kcVeryLightGrey
+                            : kcVeryLightGrey,
                         iconStyle: isCompleted
                             ? IconStyle(
-                                iconData: Icons.check,
-                                color: kcPrimaryColor,
-                              )
+                          iconData: Icons.check,
+                          color: kcPrimaryColor,
+                        )
                             : null,
                       ),
                       beforeLineStyle: LineStyle(
@@ -434,7 +428,7 @@ class _OrderListState extends State<OrderList> {
                         thickness: 3,
                       ),
                       afterLineStyle:
-                          const LineStyle(color: kcPrimaryColor, thickness: 3),
+                      const LineStyle(color: kcPrimaryColor, thickness: 3),
                       endChild: _buildTimelineCard(
                         title: entry['title'] as String,
                         description: entry['description'] as String,
@@ -453,35 +447,32 @@ class _OrderListState extends State<OrderList> {
 
   Widget _buildTimelineCard(
       {required String title,
-      required String description,
-      bool isActive = false}) {
+        required String description,
+        bool isActive = false}) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Container(
-        // constraints: const BoxConstraints(minHeight: 10),
         decoration: BoxDecoration(
           color: isActive ? kcPrimaryColor : Colors.grey.withOpacity(0.9),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: Colors.white, width: 1),
         ),
-        child: Stack(children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontSize: 18)),
-                const SizedBox(height: 8),
-                Text(description,
-                    style: const TextStyle(color: Colors.white, fontSize: 14)),
-              ],
-            ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18)),
+              const SizedBox(height: 8),
+              Text(description,
+                  style: const TextStyle(color: Colors.white, fontSize: 14)),
+            ],
           ),
-        ]),
+        ),
       ),
     );
   }
@@ -503,7 +494,7 @@ class _OrderListState extends State<OrderList> {
             Text("Tracking: ${order.trackingNumber}",
                 style: const TextStyle(fontSize: 12, color: Colors.grey)),
             verticalSpaceSmall,
-            Text("Total: ${MoneyUtils().formatAmount(order.totalPrice as int)}",
+            Text("Total: ${MoneyUtils().formatAmount(order.totalPrice)}",
                 style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Roboto',)),
           ],
         ),
@@ -525,6 +516,14 @@ class _OrderListState extends State<OrderList> {
             height: 70,
             width: 70,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                height: 70,
+                width: 70,
+                color: Colors.grey[300],
+                child: const Icon(Icons.image_not_supported, color: Colors.grey),
+              );
+            },
           ),
         ),
         const SizedBox(width: 12),
@@ -535,7 +534,7 @@ class _OrderListState extends State<OrderList> {
               Text(
                 product?.productName ?? "Unknown Product",
                 style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 4),
               Text(
@@ -561,10 +560,10 @@ class _OrderListState extends State<OrderList> {
           submit: () async {
             final miniCartItems = order.products
                 .map((item) => CartItem(
-                      product: item,
-                      quantity: order.quantity,
-                      price: double.tryParse(item.salePrice ?? '0.0') ?? 0.0,
-                    ))
+              product: item,
+              quantity: order.quantity,
+              price: double.tryParse(item.salePrice ?? '0.0') ?? 0.0,
+            ))
                 .toList();
 
             ApiResponse response = await repo.initializePayment({
@@ -620,14 +619,14 @@ class _OrderListState extends State<OrderList> {
 
     return actions.isNotEmpty
         ? Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: actions
-                .map((e) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: e,
-                    ))
-                .toList(),
-          )
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: actions
+          .map((e) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: e,
+      ))
+          .toList(),
+    )
         : const SizedBox();
   }
 }

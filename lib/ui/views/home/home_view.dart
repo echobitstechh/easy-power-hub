@@ -1,18 +1,13 @@
-import 'dart:ui';
 
-import 'package:easyph/app/app.router.dart';
 import 'package:easyph/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stacked/stacked.dart';
 import 'package:easyph/ui/common/app_colors.dart';
-import 'package:stacked_services/stacked_services.dart';
 
-import '../../../app/app.locator.dart';
 import '../../../core/data/models/cart_item.dart';
 import 'home_viewmodel.dart';
-import 'module_switch.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -31,7 +26,7 @@ class HomeView extends StackedView<HomeViewModel> {
     viewModel.checkForUpdates(context);
 
     return ValueListenableBuilder<AppModules>(
-      valueListenable: currentModuleNotifier, // Your ValueNotifier
+      valueListenable: currentModuleNotifier,
       builder: (context, currentModule, child) {
         return Scaffold(
           backgroundColor: currentModuleNotifier.value == AppModules.shop
@@ -39,9 +34,8 @@ class HomeView extends StackedView<HomeViewModel> {
               : null,
           body: Stack(
             children: [
-              viewModel.currentPage, // Assuming you have separate getters for pages in your viewModel
+              viewModel.currentPage,
 
-              // Floating Cart Button
             ],
           ),
           bottomNavigationBar: BottomNavBar(viewModel: viewModel),
@@ -66,7 +60,7 @@ class HomeView extends StackedView<HomeViewModel> {
 class BottomNavBar extends StatelessWidget {
   final HomeViewModel viewModel;
 
-  BottomNavBar({
+  const BottomNavBar({
     Key? key,
     required this.viewModel,
   }) : super(key: key);
@@ -153,14 +147,14 @@ class BottomNavBar extends StatelessWidget {
                 right: -6,
                 top: -6,
                 child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
                     color: Colors.red,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
                     '${value.length}',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
               ),

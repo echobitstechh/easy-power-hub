@@ -1,41 +1,20 @@
-import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
-import '../../../app/app.router.dart';
 import '../../../core/network/api_response.dart';
 import '../../../state.dart';
 import '../../../utils/code_input.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/submit_button.dart';
-import '../../components/text_field_widget.dart';
 import 'auth_view.dart';
 import 'auth_viewmodel.dart';
 
 
-/// @author George David
-/// email: georgequin19@gmail.com
-/// Feb, 2024
-///
 
-
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:stacked/stacked.dart';
-
-import '../../../app/app.locator.dart';
-import '../../../state.dart';
-import '../../../utils/code_input.dart';
-import '../../common/app_colors.dart';
-import '../../common/ui_helpers.dart';
-import '../../components/submit_button.dart';
-import '../../components/text_field_widget.dart';
-import 'auth_viewmodel.dart';
 
 /// @author
 /// George David
@@ -185,8 +164,8 @@ class _SignUpState extends State<SignUp> {
                               // OTP successfully sent
                               model.isOtpRequested = true;
                               isOtpRequestedByEmail.value = model.email.text.isNotEmpty;
-                              print('${model.email.text}');
-                              if((model.email.text.isEmpty || model.email.text == null) && model.phone.text.isNotEmpty) {
+                              print(model.email.text);
+                              if((model.email.text.isEmpty) && model.phone.text.isNotEmpty) {
                                 isOtpRequestedByEmail.value = false;
                               } else{
                                 isOtpRequestedByEmail.value = true;

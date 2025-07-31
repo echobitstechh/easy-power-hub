@@ -8,7 +8,6 @@ import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/state.dart';
 import 'package:stacked/stacked.dart';
-import 'package:path/path.dart' as path;
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../core/utils/local_store_dir.dart';
@@ -49,7 +48,7 @@ class ProfileViewModel extends BaseViewModel {
 
       // Send Base64 string to API
       ApiResponse res = await repo.updateProfilePicture({
-        "profilePicture": base64Image = "data:image/png;base64," + base64Encode(imageBytes)// Send as Base64 string
+        "profilePicture": base64Image = "data:image/png;base64,${base64Encode(imageBytes)}"// Send as Base64 string
       });
 
       if (res.statusCode == 200) {
@@ -88,12 +87,12 @@ class ProfileViewModel extends BaseViewModel {
 
       locator<SnackbarService>().showSnackbar(
         message: "Profile updated successfully",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
     } else {
       locator<SnackbarService>().showSnackbar(
         message: response.data["message"] ?? "Failed to update profile",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
     }
   }

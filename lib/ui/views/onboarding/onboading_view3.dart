@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
@@ -10,11 +8,10 @@ import '../../../core/utils/local_stotage.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
 import '../../components/submit_button.dart';
-import '../auth/auth_view.dart';
-import '../auth/login.dart';
-import 'onboarding_viewmodel.dart';
 
 class OnboardingView3 extends StatefulWidget {
+  const OnboardingView3({super.key});
+
   @override
   State<OnboardingView3> createState() => _OnboardingViewState();
 }
@@ -53,13 +50,13 @@ class _OnboardingViewState extends State<OnboardingView3> {
                     ),
                   ),
                   verticalSpaceLarge,
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: const [
+                        children: [
                           Text(
                             "Anywhere, Anytime",
                             textAlign: TextAlign.center,
@@ -99,17 +96,17 @@ class _OnboardingViewState extends State<OnboardingView3> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(26.0),
+            const Padding(
+              padding: EdgeInsets.all(26.0),
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IndicatorDot(isActive: false),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IndicatorDot(isActive: false),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IndicatorDot(isActive: true),
                   ],
                 ),

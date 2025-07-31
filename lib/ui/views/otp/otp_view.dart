@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
 
-import '../../components/background.dart';
 import 'otp_viewmodel.dart';
 
 class OtpView extends StackedView<OtpViewModel> {

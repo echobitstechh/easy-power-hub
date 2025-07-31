@@ -268,7 +268,7 @@ class StackedRouter extends _i1.RouterBase {
     },
     _i17.OnboardingView3: (data) {
       return _i19.MaterialPageRoute<dynamic>(
-        builder: (context) => _i17.OnboardingView3(),
+        builder: (context) => const _i17.OnboardingView3(),
         settings: data,
       );
     },

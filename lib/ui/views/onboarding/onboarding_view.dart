@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
@@ -8,12 +6,11 @@ import '../../../app/app.router.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../common/app_colors.dart';
-import '../../common/ui_helpers.dart';
 import '../../components/submit_button.dart';
-import '../auth/login.dart';
-import 'onboading_view2.dart';
 
 class OnboardingView extends StatefulWidget {
+  const OnboardingView({super.key});
+
   @override
   State<OnboardingView> createState() => _OnboardingViewState();
 }
@@ -68,10 +65,10 @@ class _OnboardingViewState extends State<OnboardingView> {
                       'assets/images/welcome.svg',
                       height: 300,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
-                        children: const [
+                        children: [
                           Text(
                             "Welcome to Easy Power Hub!",
                             textAlign: TextAlign.center,
@@ -140,18 +137,3 @@ class CurvedClipper extends CustomClipper<Path> {
   }
 }
 
-class IndicatorDot extends StatelessWidget {
-  final bool isActive;
-  const IndicatorDot({super.key, required this.isActive});
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 12,
-      height: 12,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.orange : Colors.grey.shade400,
-        borderRadius: BorderRadius.circular(6),
-      ),
-    );
-  }
-}

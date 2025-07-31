@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:easyph/app/app.locator.dart';
-import 'package:easyph/app/app.router.dart';
 import 'package:easyph/core/data/models/profile.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
@@ -11,7 +10,6 @@ import 'package:animated_segmented_tab_control/animated_segmented_tab_control.da
 import 'package:flutter/material.dart';
 import 'package:easyph/core/data/models/profile.dart' as pro;
 import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/transaction.dart';
 import '../../../state.dart';
@@ -20,8 +18,6 @@ import '../../../utils/withdrawalPaymentModal.dart';
 import '../../components/empty_state.dart';
 import 'package:intl/intl.dart';
 
-import '../../components/submit_button.dart';
-import '../../components/text_field_widget.dart';
 
 
 class Wallet extends StatefulWidget {
@@ -145,25 +141,27 @@ class _WalletState extends State<Wallet> {
                       children: [
                         Center(
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 18),
-                            child: Stack(
+                            padding: const EdgeInsets.symmetric(horizontal: 18),
+                            child: const Stack(
                               alignment: Alignment.center,
                               children: [
                                 Align(
                                   alignment: Alignment.center,
                                   child: SizedBox(
                                     width: 500,
-                                    child: const Image(
+                                    child: Image(
                                       image: AssetImage('assets/images/Frame.png'),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: EdgeInsets.all(16.0),
                                   child: Column(
                                     children: [
                                       Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                         children: [
                                           Expanded(
                                             child: Text(
@@ -172,8 +170,6 @@ class _WalletState extends State<Wallet> {
                                             ),
                                           ),
                                         ],
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                       ),
                                       Row(
                                         children: [
@@ -291,8 +287,8 @@ class _WalletState extends State<Wallet> {
                     child: Column(
                       children: [
                         verticalSpaceTiny,
-                        Padding(
-                          padding: const EdgeInsets.all(6.0),
+                        const Padding(
+                          padding: EdgeInsets.all(6.0),
                           child: SegmentedTabControl(
                             splashColor: Colors.transparent,
                             indicatorDecoration: BoxDecoration(
@@ -333,9 +329,9 @@ class _WalletState extends State<Wallet> {
                                   // await viewModel.refreshData();
                                 },
                                 child: loading
-                                    ? Padding(
-                                  padding: const EdgeInsets.all(26.0),
-                                  child: const Center(
+                                    ? const Padding(
+                                  padding: EdgeInsets.all(26.0),
+                                  child: Center(
                                     child: CircularProgressIndicator(),
                                   ),
                                 )
@@ -367,7 +363,7 @@ class _WalletState extends State<Wallet> {
             ),
           ),
 
-          Container(
+          SizedBox(
             width: double.infinity,
             height: double.infinity,
             child: ClipRRect(
@@ -410,7 +406,7 @@ class _WalletState extends State<Wallet> {
                                 color: kcPrimaryColor.withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: Icon(
+                              child: const Icon(
                                 Icons.construction,
                                 size: 50,
                                 color: kcPrimaryColor,
@@ -419,7 +415,7 @@ class _WalletState extends State<Wallet> {
                             const SizedBox(height: 20),
 
                             // Coming Soon Text
-                            Text(
+                            const Text(
                               'Coming Soon',
                               style: TextStyle(
                                 fontSize: 28,
@@ -443,7 +439,7 @@ class _WalletState extends State<Wallet> {
                             const SizedBox(height: 20),
 
                             // Loading indicator
-                            SizedBox(
+                            const SizedBox(
                               width: 30,
                               height: 30,
                               child: CircularProgressIndicator(
@@ -485,7 +481,7 @@ class _WalletState extends State<Wallet> {
           valueListenable: selectedPaymentMethod,
           builder: (context, value, child) {
             return Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25.0),
@@ -519,7 +515,7 @@ class _WalletState extends State<Wallet> {
           valueListenable: selectedPaymentMethod,
           builder: (context, value, child) {
             return Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(25.0),

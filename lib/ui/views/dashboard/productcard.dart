@@ -1,17 +1,13 @@
 import 'dart:convert';
 
 import 'package:easyph/app/app.router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 //import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/cart_item.dart';
-import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
 import '../../../core/network/interceptors.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
@@ -19,9 +15,7 @@ import '../../../state.dart';
 import '../../../utils/money_util.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../shop/shop_view.dart';
-import 'dashboard_viewmodel.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
@@ -77,12 +71,12 @@ class _ProductCardState extends State<ProductCard> {
       });
 
       if (response.statusCode == 200) {
-        locator<SnackbarService>().showSnackbar(message: "Raffle added to cart", duration: Duration(seconds: 2));
+        locator<SnackbarService>().showSnackbar(message: "Raffle added to cart", duration: const Duration(seconds: 2));
       } else {
-        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: Duration(seconds: 2));
+        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: const Duration(seconds: 2));
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to add raffle to cart: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to add raffle to cart: $e", duration: const Duration(seconds: 2));
     }
   }
 
@@ -140,7 +134,7 @@ class _ProductCardState extends State<ProductCard> {
       List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
     print(e);
     }
   }
@@ -165,7 +159,7 @@ class _ProductCardState extends State<ProductCard> {
         await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
 
     } finally {
 
@@ -206,11 +200,11 @@ class _ProductCardState extends State<ProductCard> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text("Product Details"),
+        title: const Text("Product Details"),
         toolbarHeight: 100,
         actions: [
           IconButton(
-            icon: Icon(Icons.share, size: 25),
+            icon: const Icon(Icons.share, size: 25),
             onPressed: ()  {
 
             },
@@ -230,13 +224,13 @@ class _ProductCardState extends State<ProductCard> {
                 ))
                     .toList(),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Flexible(
                 fit: FlexFit.loose, // Allows the container to shrink if needed
                 child: Container(
                   height: 345,
                   decoration: BoxDecoration(
-                    color: Color(0xFFDADADA).withOpacity(0.5),
+                    color: const Color(0xFFDADADA).withOpacity(0.5),
                     border: Border.all(color: Colors.grey, width: 1),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
@@ -244,7 +238,7 @@ class _ProductCardState extends State<ProductCard> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 5,
-                        offset: Offset(0, 3),
+                        offset: const Offset(0, 3),
                       ),
                     ],
                   ),
@@ -252,7 +246,7 @@ class _ProductCardState extends State<ProductCard> {
                     selectedImage,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
-                      return Icon(
+                      return const Icon(
                         Icons.broken_image,
                         size: 100,
                         color: Colors.grey,
@@ -263,14 +257,14 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ],
           ),
-          Divider(),
+          const Divider(),
           Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
                   widget.product.productName ?? '',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
@@ -281,7 +275,7 @@ class _ProductCardState extends State<ProductCard> {
                 padding: const EdgeInsets.all(20.0),
                 child: Text(
                   widget.product.productDescription ?? '',
-                  style: TextStyle(fontSize: 12),
+                  style: const TextStyle(fontSize: 12),
                   softWrap: true,
                 ),
               ),
@@ -291,7 +285,7 @@ class _ProductCardState extends State<ProductCard> {
                   children: [
                     Text(
                       MoneyUtils().formatAmount((double.tryParse(widget.product.salePrice ?? '0.0') ?? 0.0).toInt()),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 20,
                         fontFamily: 'Roboto',
@@ -442,8 +436,8 @@ class _ProductCardState extends State<ProductCard> {
                                   color: kcSecondaryColor,
                                   borderRadius: BorderRadius.circular(9),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
+                                child: const Padding(
+                                  padding: EdgeInsets.all(16.0),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -488,10 +482,10 @@ class _ProductCardState extends State<ProductCard> {
 
             ],
           ),
-          Divider(),
+          const Divider(),
           verticalSpaceTiny,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -559,10 +553,10 @@ class _ProductCardState extends State<ProductCard> {
                                 fit: BoxFit.cover,
                                 loadingBuilder: (context, child, progress) {
                                   if (progress == null) return child;
-                                  return Center(child: CircularProgressIndicator());
+                                  return const Center(child: CircularProgressIndicator());
                                 },
                                 errorBuilder: (context, error, stackTrace) {
-                                  return Icon(Icons.broken_image, size: 100, color: Colors.white);
+                                  return const Icon(Icons.broken_image, size: 100, color: Colors.white);
                                 },
                               ),
                             ),
@@ -606,19 +600,19 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
           verticalSpaceSmall,
-          Divider(),
+          const Divider(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   'Product Rating & Reviews',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 Text(
                   "${productReviews.length} reviews",
-                  style: TextStyle(color: Colors.grey),
+                  style: const TextStyle(color: Colors.grey),
                 )
               ],
             ),
@@ -627,13 +621,13 @@ class _ProductCardState extends State<ProductCard> {
           Column(
             children: productReviews.map((review) {
               return Container(
-                margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                padding: EdgeInsets.all(12.0),
+                margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: const EdgeInsets.all(12.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: [
-                    BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: Offset(0, 2)),
+                    BoxShadow(color: Colors.grey.shade300, blurRadius: 4, offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Column(
@@ -643,17 +637,17 @@ class _ProductCardState extends State<ProductCard> {
                     Row(
                       children: List.generate(
                         review.rating.toInt(),
-                            (index) => Icon(Icons.star, color: Colors.orange, size: 16),
+                            (index) => const Icon(Icons.star, color: Colors.orange, size: 16),
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
 
                     // 📝 Review Title / Summary
                     Text(
                       review.content,
-                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
 
                     // 👤 By reviewer
                     Row(
@@ -683,7 +677,7 @@ class _ProductCardState extends State<ProductCard> {
     return Container(
       width: width,
       height: height,
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey, width: 1),
         borderRadius: BorderRadius.circular(8),

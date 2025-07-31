@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
 
-/**
- * @author George David
- * email: georgequin19@gmail.com
- * Feb, 2024
- **/
+/// @author George David
+/// email: georgequin19@gmail.com
+/// Feb, 2024
+///
 
 
 const Color kcPrimaryColor = Color(0xFFF7A917);

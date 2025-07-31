@@ -210,7 +210,7 @@ class SupportOption extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Icon(icon, color: Colors.orange), // Replace with your color
+            Icon(icon, color: Colors.orange),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

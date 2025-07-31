@@ -1,11 +1,8 @@
 import 'dart:convert';
 
-import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl_phone_field/phone_number.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:stacked/stacked.dart';
@@ -153,9 +150,10 @@ class AuthViewModel extends BaseViewModel {
 
         if (data['verificationRequired'] == true) {
           profile.value.id = data['userId'];
-          if (phone.text.isNotEmpty)
+          if (phone.text.isNotEmpty) {
             profile.value.reference =
                 data['sendTokenResponse']?['data']?['token'] ?? '';
+          }
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -230,7 +228,7 @@ class AuthViewModel extends BaseViewModel {
       } else {
         snackBar.showSnackbar(
           message: res.data["message"],
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
@@ -238,7 +236,7 @@ class AuthViewModel extends BaseViewModel {
       print('error is $e');
       snackBar.showSnackbar(
         message: "Unable to login. Please try again.",
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       );
     } finally {
       appLoading.value = false;
@@ -323,7 +321,7 @@ class AuthViewModel extends BaseViewModel {
         print("OTP Verified Successfully. Navigating to registerView...");
         snackBar.showSnackbar(
             message: 'OTP verified successfully',
-            duration: Duration(seconds: 5));
+            duration: const Duration(seconds: 5));
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -336,12 +334,12 @@ class AuthViewModel extends BaseViewModel {
       } else if (res.statusCode == 400) {
         snackBar.showSnackbar(
             message: 'Invalid verification code',
-            duration: Duration(seconds: 5));
+            duration: const Duration(seconds: 5));
       } else {
         final responseMessage = res.data["message"] ?? 'Verification failed';
         isLoading = false;
         snackBar.showSnackbar(
-            message: responseMessage, duration: Duration(seconds: 5));
+            message: responseMessage, duration: const Duration(seconds: 5));
         appLoading.value = false;
       }
     } catch (e, stacktrace) {
@@ -356,7 +354,7 @@ class AuthViewModel extends BaseViewModel {
 
       snackBar.showSnackbar(
         message: 'An error occurred. Please try again later.',
-        duration: Duration(seconds: 5),
+        duration: const Duration(seconds: 5),
       );
     } finally {
       appLoading.value = false;
@@ -424,7 +422,7 @@ class AuthViewModel extends BaseViewModel {
       final googleSignInResult = await authService.signInWithGoogle();
 
       if (googleSignInResult == null) {
-        snackBar.showSnackbar(message: "Google Sign-In was cancelled", duration: Duration(seconds: 3));
+        snackBar.showSnackbar(message: "Google Sign-In was cancelled", duration: const Duration(seconds: 3));
         return;
       }
 
@@ -491,7 +489,7 @@ class AuthViewModel extends BaseViewModel {
     } catch (e) {
       log.e("Google Sign-In Error: $e");
       snackBar.showSnackbar(
-          message: "An error occurred during Google Sign-In: $e", duration: Duration(seconds: 3)
+          message: "An error occurred during Google Sign-In: $e", duration: const Duration(seconds: 3)
       );
     } finally {
       appLoading.value = false;
@@ -507,7 +505,7 @@ Future<String?> showPhoneNumberDialog(BuildContext context) async {
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text("Enter Your Phone Number", style: TextStyle(fontSize: 16),),
+        title: const Text("Enter Your Phone Number", style: TextStyle(fontSize: 16),),
         content: TextFieldWidget(
           hint: "Phone number",
         controller: phoneController,
@@ -516,13 +514,13 @@ Future<String?> showPhoneNumberDialog(BuildContext context) async {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, null),
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context, phoneController.text.trim());
             },
-            child: Text("Submit"),
+            child: const Text("Submit"),
           ),
         ],
       );

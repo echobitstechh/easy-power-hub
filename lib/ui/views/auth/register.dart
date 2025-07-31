@@ -4,11 +4,9 @@ import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/components/submit_button.dart';
 import 'package:easyph/ui/components/text_field_widget.dart';
 import 'package:easyph/ui/views/auth/auth_viewmodel.dart';
-import 'package:easyph/utils/country_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:stacked/stacked.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../utils/country_picker_utils.dart';
 import '../../common/ui_helpers.dart';
 
@@ -20,7 +18,6 @@ import '../../common/ui_helpers.dart';
 
 
 class Register extends StatefulWidget {
-  // final TabController controller;
   final Function(bool) updateIsLogin;
   const Register({Key? key, required this.updateIsLogin}) : super(key: key);
 
@@ -42,8 +39,8 @@ class _RegisterState extends State<Register> {
     super.initState();
     countries = [
       Country(
-        code: 'NG', // ISO code for Nigeria
-        isoCode: 'NG', // ISO code for Nigeria
+        code: 'NG',
+        isoCode: 'NG',
         name: 'Nigeria',
         capital: 'Abuja',
         id2: 'NGA',
@@ -107,7 +104,7 @@ class _RegisterState extends State<Register> {
                           if (value.isEmpty) {
                             return 'required';
                           }
-                          return null; // Return null to indicate no validation error
+                          return null;
                         },
                       ),
                     ),

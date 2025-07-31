@@ -1,20 +1,17 @@
-
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/views/dashboard/productcard.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stacked/stacked.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
+import '../../../core/data/models/tags.dart';
 import '../../../utils/money_util.dart';
 import '../../components/empty_state.dart';
-import '../../components/shimmer.dart';
 import 'shop_viewmodel.dart';
 
 /// @author George David
@@ -26,7 +23,6 @@ class ShopView extends StackedView<ShopViewModel> {
   final Category? filter;
 
   ShopView({Key? key, this.filter}) : super(key: key);
-  final PageController _pageController = PageController();
 
   @override
   Widget builder(
@@ -34,7 +30,6 @@ class ShopView extends StackedView<ShopViewModel> {
     ShopViewModel viewModel,
     Widget? child,
   ) {
-    // Filter products based on the passed category
     List<Product> categoryProducts = viewModel.filteredProductList;
     if (filter != null) {
       categoryProducts = viewModel.filteredProductList.where((product) {
@@ -42,7 +37,6 @@ class ShopView extends StackedView<ShopViewModel> {
       }).toList();
     }
 
-    // Prepare slides dynamically based on the filtered category
     List<Map<String, String>> slides = [];
 
     if (filter != null && filter?.image != null) {
@@ -54,7 +48,6 @@ class ShopView extends StackedView<ShopViewModel> {
         }
       ];
     } else {
-      // Fallback to default slides if no category or no images
       slides = [
         {
           'image': 'assets/images/shop_solar.jpeg',
@@ -84,7 +77,7 @@ class ShopView extends StackedView<ShopViewModel> {
                 handle:
                     NestedScrollView.sliverOverlapAbsorberHandleFor(context),
                 sliver: SliverAppBar(
-                  expandedHeight: 300.0,
+                  expandedHeight: 250.0,
                   pinned: true,
                   floating: true,
                   collapsedHeight: 80.0,
@@ -93,7 +86,7 @@ class ShopView extends StackedView<ShopViewModel> {
                   flexibleSpace: FlexibleSpaceBar(
                     background: CarouselSlider.builder(
                       options: CarouselOptions(
-                        height: 300,
+                        height: 200,
                         viewportFraction: 1.0,
                         autoPlay: true,
                       ),
@@ -104,20 +97,24 @@ class ShopView extends StackedView<ShopViewModel> {
                         return Stack(
                           fit: StackFit.expand,
                           children: [
-                            slide['image']!.startsWith('http') || slide['image']!.startsWith('https')
+                            slide['image']!.startsWith('http') ||
+                                    slide['image']!.startsWith('https')
                                 ? CachedNetworkImage(
-                              imageUrl: slide['image']!,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
-                            )
+                                    imageUrl: slide['image']!,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  )
                                 : Image.asset(
-                              slide['image']!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-                            ),
-
-
+                                    slide['image']!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(Icons.error),
+                                  ),
                             Container(
                               color: Colors.black.withOpacity(0.3),
                             ),
@@ -127,7 +124,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Spacer(),
+                                  const Spacer(),
                                   Text(
                                     slide['title']!,
                                     style: const TextStyle(
@@ -169,26 +166,36 @@ class ShopView extends StackedView<ShopViewModel> {
                       child: Column(
                         children: [
                           SizedBox(
-                            height: 60,
+                            height: 30,
                             child: Row(
                               children: [
                                 Expanded(
                                   child: Autocomplete<Product>(
-                                    optionsBuilder: (TextEditingValue productTextEditingValue) {
+                                    optionsBuilder: (TextEditingValue
+                                        productTextEditingValue) {
                                       if (productTextEditingValue.text == '') {
                                         return const Iterable<Product>.empty();
                                       }
-                                      return viewModel.filteredProductList.where((Product product) {
-                                        final query = productTextEditingValue.text.toLowerCase();
+                                      return viewModel.filteredProductList
+                                          .where((Product product) {
+                                        final query = productTextEditingValue
+                                            .text
+                                            .toLowerCase();
                                         return (product.productName != null &&
-                                            product.productName!.toLowerCase().contains(query)) ||
+                                                product.productName!
+                                                    .toLowerCase()
+                                                    .contains(query)) ||
                                             (product.brandName != null &&
-                                                product.brandName!.toLowerCase().contains(query));
+                                                product.brandName!
+                                                    .toLowerCase()
+                                                    .contains(query));
                                       });
                                     },
-                                    displayStringForOption: (Product product) => product.productName ?? '',
+                                    displayStringForOption: (Product product) =>
+                                        product.productName ?? '',
                                     onSelected: (Product value) {
-                                      debugPrint('You just selected ${value.productName}');
+                                      debugPrint(
+                                          'You just selected ${value.productName}');
                                       showModalBottomSheet(
                                         context: context,
                                         isScrollControlled: true,
@@ -198,23 +205,26 @@ class ShopView extends StackedView<ShopViewModel> {
                                               topLeft: Radius.circular(25.0),
                                               topRight: Radius.circular(25.0)),
                                         ),
-                                        backgroundColor: Colors.black.withOpacity(0.7),
+                                        backgroundColor:
+                                            Colors.black.withOpacity(0.7),
                                         builder: (BuildContext context) {
                                           return ProductCard(product: value);
                                         },
                                       );
                                     },
                                     fieldViewBuilder: (BuildContext context,
-                                        TextEditingController textEditingController,
+                                        TextEditingController
+                                            textEditingController,
                                         FocusNode focusNode,
                                         VoidCallback onFieldSubmitted) {
                                       return Container(
                                         height: 40,
                                         decoration: BoxDecoration(
-                                          color:  uiMode.value == AppUiModes.dark
+                                          color: uiMode.value == AppUiModes.dark
                                               ? kcMediumGrey
                                               : kcWhiteColor,
-                                          borderRadius: BorderRadius.circular(8),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
                                         ),
                                         child: TextField(
                                           controller: textEditingController,
@@ -223,35 +233,44 @@ class ShopView extends StackedView<ShopViewModel> {
                                             hintText: 'Search product...',
                                             prefixIcon: Icon(Icons.search),
                                             border: InputBorder.none,
-                                            contentPadding: EdgeInsets.symmetric(vertical: 10),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 10),
                                           ),
                                         ),
                                       );
                                     },
                                     optionsViewBuilder: (BuildContext context,
-                                        AutocompleteOnSelected<Product> onSelected,
+                                        AutocompleteOnSelected<Product>
+                                            onSelected,
                                         Iterable<Product> options) {
                                       return Material(
                                         elevation: 4,
                                         borderRadius: BorderRadius.circular(8),
                                         child: Container(
-                                          constraints: BoxConstraints(maxHeight: 100),
+                                          constraints:
+                                              const BoxConstraints(maxHeight: 100),
                                           child: ListView.builder(
                                             padding: EdgeInsets.zero,
                                             itemCount: options.length,
-                                            itemBuilder: (BuildContext context, int index) {
-                                              final Product product = options.elementAt(index);
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              final Product product =
+                                                  options.elementAt(index);
                                               return ListTile(
                                                 leading: product.images != null
                                                     ? Image.network(
-                                                  product.images!.first,
-                                                  width: 40,
-                                                  height: 40,
-                                                  fit: BoxFit.cover,
-                                                )
-                                                    : Icon(Icons.image, size: 40),
-                                                title: Text(product.productName ?? ""),
-                                                onTap: () => onSelected(product),
+                                                        product.images!.first,
+                                                        width: 40,
+                                                        height: 40,
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : const Icon(Icons.image,
+                                                        size: 40),
+                                                title: Text(
+                                                    product.productName ?? ""),
+                                                onTap: () =>
+                                                    onSelected(product),
                                               );
                                             },
                                           ),
@@ -266,19 +285,21 @@ class ShopView extends StackedView<ShopViewModel> {
                                     if (value == "All") {
                                       viewModel.setSelectedBrand("");
                                     } else {
-                                    viewModel.setSelectedBrand(value);}
-                                    viewModel.notifyListeners();
-
+                                      viewModel.setSelectedBrand(value);
+                                    }
                                   },
                                   itemBuilder: (context) {
                                     final brands = viewModel.productList
-                                        .map((product) => product.brandName ?? "")
+                                        .map((product) =>
+                                    product.brandName ?? "")
                                         .where((brand) => brand.isNotEmpty)
                                         .toSet()
                                         .toList();
 
                                     return [
-                                      const PopupMenuItem(value: "All", child: Text("All Brands")),
+                                      const PopupMenuItem(
+                                          value: "All",
+                                          child: Text("All Brands")),
                                       ...brands.map((brand) => PopupMenuItem(
                                         value: brand,
                                         child: Text(brand),
@@ -289,6 +310,7 @@ class ShopView extends StackedView<ShopViewModel> {
                               ],
                             ),
                           ),
+                          _buildProductTagsSection(context, viewModel),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -307,8 +329,8 @@ class ShopView extends StackedView<ShopViewModel> {
                               ),
                             )
                           else
-                          popularDrawsSlider(
-                              context, categoryProducts, viewModel),
+                            popularDrawsSlider(
+                                context, categoryProducts, viewModel),
                         ],
                       ),
                     ),
@@ -318,6 +340,172 @@ class ShopView extends StackedView<ShopViewModel> {
             },
           ),
         ),
+      ),
+    );
+  }
+  Widget _buildProductTagsSection( context, ShopViewModel viewModel) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (viewModel.isLoadingTags) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: 8),
+                Text('Loading tags...'), //come naback and make it a pregress icon
+              ],
+            ),
+          ),
+        ],
+        if (viewModel.hasTagsError) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.red, size: 16),
+                const SizedBox(width: 8),
+                Text(
+                  viewModel.tagsError ?? 'Error loading tags',
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => viewModel.refreshTags(),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (viewModel.tags.isNotEmpty) ...[
+          if (viewModel.tags.isNotEmpty) ...[
+            Container(
+              height: 160,
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // 2 rows (since we're scrolling horizontally)
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: viewModel.tags.length,
+                  itemBuilder: (context, index) {
+                    final tag = viewModel.tags[index];
+                    return _buildTagChip(context, tag, viewModel);
+                  },
+                )
+
+            ),
+          ],
+        ],
+        if (viewModel.tags.isEmpty && !viewModel.isLoadingTags && !viewModel.hasTagsError) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'No product tags available',
+              style: TextStyle(color: Colors.grey, fontSize: 12),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+  Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
+    final isSelected = viewModel.selectedTag?.id == tag.id;
+    return InkWell(
+      onTap: () {
+        viewModel.setSelectedTag(isSelected ? null : tag);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
+            child: Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? kcDarkGreyColor
+                    : Colors.white,
+                borderRadius: const BorderRadius.all(Radius.circular(12)),
+              ),
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12)),
+                child: tag.image != null && tag.image!.isNotEmpty
+                    ? CachedNetworkImage(
+                  imageUrl: tag.image!,
+                  height: MediaQuery.of(context).size.height * 0.15,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.image_not_supported),
+                  ),
+                )
+                    : Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(Icons.category, size: 40),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Tag details
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(
+                        Icons.check_circle,
+                        color: kcSecondaryColor,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 1),
+                    ],
+                    Expanded(
+                      child: Text(
+                        tag.name,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? kcSecondaryColor : null,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -337,7 +525,7 @@ class ShopView extends StackedView<ShopViewModel> {
             crossAxisCount: 2,
             crossAxisSpacing: 10.0,
             mainAxisSpacing: 10.0,
-            childAspectRatio: 0.75, // Adjusted aspect ratio
+            childAspectRatio: 0.75,
           ),
           itemCount: productList.length,
           itemBuilder: (context, index) {
@@ -363,8 +551,8 @@ class ShopView extends StackedView<ShopViewModel> {
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color:Theme.of(context).brightness == Brightness.dark
-                      ? kcDarkGreyColor// Slightly lighter black for contrast
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? kcDarkGreyColor
                       : Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade200),
@@ -378,36 +566,36 @@ class ShopView extends StackedView<ShopViewModel> {
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
                             decoration: BoxDecoration(
-                              color:Theme.of(context).brightness == Brightness.dark
-                                  ? kcDarkGreyColor// Slightly lighter black for contrast
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? kcDarkGreyColor
                                   : Colors.white,
                               border: Border.all(
-                                color: Colors.grey.shade300, // Border color
-                                width: 1.0, // Border width
+                                color: Colors.grey.shade300,
+                                width: 1.0,
                               ),
                               borderRadius:
-                              const BorderRadius.all(Radius.circular(12)),
+                                  const BorderRadius.all(Radius.circular(12)),
                             ),
                             child: ClipRRect(
                               borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(12)),
                               child: CachedNetworkImage(
-                                placeholder: (context, url) =>  Center(
-                                  child: Expanded(
-                                    child: Shimmer.fromColors(
-                                      baseColor: Colors.grey[300]!,
-                                      highlightColor: Colors.grey[100]!,
-                                      child: ListView.builder(
-                                        itemCount: 6, // Number of shimmer items to show
-                                        itemBuilder: (context, index) {
-                                          return buildShimmerServiceItem(context);
-                                        },
-                                      ),
+                                placeholder: (context, url) => Center(
+                                  child: Shimmer.fromColors(
+                                    baseColor: Colors.grey[300]!,
+                                    highlightColor: Colors.grey[100]!,
+                                    child: Container(
+                                      height: MediaQuery.of(context).size.height * 0.15,
+                                      width: double.infinity,
+                                      color: Colors.white,
                                     ),
-                                  )
+                                  ),
+
                                 ),
+
                                 imageUrl: (item.images != null &&
-                                    item.images!.isNotEmpty)
+                                        item.images!.isNotEmpty)
                                     ? item.images!.first
                                     : 'https://via.placeholder.com/120',
                                 height: MediaQuery.of(context).size.height *
@@ -416,37 +604,37 @@ class ShopView extends StackedView<ShopViewModel> {
                                 fit: BoxFit
                                     .fitHeight, // Ensures it fits properly
                                 errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
+                                    const Icon(Icons.error),
                                 fadeInDuration:
-                                const Duration(milliseconds: 500),
+                                    const Duration(milliseconds: 500),
                                 fadeOutDuration:
-                                const Duration(milliseconds: 300),
+                                    const Duration(milliseconds: 300),
                               ),
                             ),
                           ),
                         ),
-
-                        viewModel.isNewProduct(item.createdAt ?? '') ?
-                        Positioned(
-                          left: 16,
-                          top: 16,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: const Text(
-                              'New',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 8,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ): const SizedBox.shrink(),
+                        viewModel.isNewProduct(item.createdAt ?? '')
+                            ? Positioned(
+                                left: 16,
+                                top: 16,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black87,
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  child: const Text(
+                                    'New',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                     Padding(
@@ -484,7 +672,10 @@ class ShopView extends StackedView<ShopViewModel> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                MoneyUtils().formatAmount((double.tryParse(item.salePrice ?? '0.0') ?? 0.0).toInt()),
+                                MoneyUtils().formatAmount(
+                                    (double.tryParse(item.salePrice ?? '0.0') ??
+                                            0.0)
+                                        .toInt()),
                                 style: const TextStyle(
                                   fontFamily: 'Roboto',
                                   fontSize: 16,
@@ -502,10 +693,17 @@ class ShopView extends StackedView<ShopViewModel> {
                                       ),
                                       ShaderMask(
                                         shaderCallback: (Rect bounds) {
-                                          double ratingValue = item.rating ?? 0.0;
+                                          double ratingValue =
+                                              item.rating ?? 0.0;
                                           return LinearGradient(
-                                            stops: [ratingValue / 5, ratingValue / 5],
-                                            colors: [Colors.amber, Colors.grey], // Fill and empty colors
+                                            stops: [
+                                              ratingValue / 5,
+                                              ratingValue / 5
+                                            ],
+                                            colors: const [
+                                              Colors.amber,
+                                              Colors.grey
+                                            ], // Fill and empty colors
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(
@@ -534,7 +732,7 @@ class ShopView extends StackedView<ShopViewModel> {
                   ],
                 ),
               ),
-            );;
+            );
           },
         )
       ],
@@ -552,11 +750,10 @@ class ShopView extends StackedView<ShopViewModel> {
           ),
         ),
         selected: category.id ==
-            viewModel.selectedId, // Check if this category is selected
+            viewModel.selectedId,
         onSelected: (bool selected) {
           viewModel.setSelectedCategory(
-              selected ? category.id : 0); // Update viewModel properly
-          viewModel.notifyListeners(); // Notify the listeners to rebuild the UI
+              selected ? category.id : 0);
         },
         selectedColor: kcSecondaryColor,
         backgroundColor: uiMode.value == AppUiModes.dark
@@ -570,11 +767,11 @@ class ShopView extends StackedView<ShopViewModel> {
           side: BorderSide(
             color: uiMode.value == AppUiModes.dark
                 ? Colors.grey[500]!
-                : Colors.grey[100]!, // Set the border color to light grey
-            width: 1.0, // Set the border width
+                : Colors.grey[100]!,
+            width: 1.0,
           ),
           borderRadius: BorderRadius.circular(
-              30.0), // Reduce the border radius (adjust this value)
+              30.0),
         ),
       ),
     );

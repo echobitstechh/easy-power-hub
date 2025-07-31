@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.logger.dart';
 import 'package:easyph/core/data/models/product.dart';
-import 'package:easyph/core/data/models/raffle_cart_item.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
@@ -13,7 +11,6 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
-import '../../../core/data/models/project.dart';
 import '../../../core/network/interceptors.dart';
 
 class DashboardViewModel extends BaseViewModel {
@@ -279,10 +276,10 @@ class DashboardViewModel extends BaseViewModel {
 
       if (response.statusCode == 200) {
         locator<SnackbarService>().showSnackbar(
-            message: "Product added to cart", duration: Duration(seconds: 2));
+            message: "Product added to cart", duration: const Duration(seconds: 2));
       } else {
         locator<SnackbarService>().showSnackbar(
-            message: response.data["message"], duration: Duration(seconds: 2));
+            message: response.data["message"], duration: const Duration(seconds: 2));
       }
 
       // **Calculate Discount & Free Delivery**
@@ -305,7 +302,7 @@ class DashboardViewModel extends BaseViewModel {
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to add raffle to cart: $e",
-          duration: Duration(seconds: 2));
+          duration: const Duration(seconds: 2));
     } finally {
       loadingItems.remove(product.id);
       notifyListeners();
@@ -383,7 +380,7 @@ class DashboardViewModel extends BaseViewModel {
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to decrease raffle quantity: $e",
-          duration: Duration(seconds: 2));
+          duration: const Duration(seconds: 2));
       print(e);
     }
   }
@@ -412,7 +409,7 @@ class DashboardViewModel extends BaseViewModel {
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to increase raffle quantity: $e",
-          duration: Duration(seconds: 2));
+          duration: const Duration(seconds: 2));
     } finally {
       cart.notifyListeners();
     }
