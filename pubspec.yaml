@@ -100,9 +100,6 @@ dependencies:
   connectivity_plus: ^6.1.4
   flutter_phone_direct_caller: ^2.2.1
   firebase_crashlytics: ^3.5.1
-  stack_trace: ^1.11.0
-  sentry_flutter: ^7.17.0
-
 
 
 

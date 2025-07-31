@@ -5,7 +5,6 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter/foundation.dart';
 
 class ComprehensiveErrorHandler {
@@ -20,14 +19,12 @@ class ComprehensiveErrorHandler {
       FlutterError.onError = (FlutterErrorDetails details) {
         _logError('FLUTTER_FRAMEWORK_ERROR', details.exception, details.stack, details.toString());
         FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-        Sentry.captureException(details.exception, stackTrace: details.stack);
       };
 
       // 2. Capture platform dispatcher errors (newer Flutter versions)
       PlatformDispatcher.instance.onError = (error, stack) {
         _logError('PLATFORM_DISPATCHER_ERROR', error, stack, 'Platform dispatcher error');
         FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-        Sentry.captureException(error, stackTrace: stack);
         return true;
       };
 
@@ -40,7 +37,6 @@ class ComprehensiveErrorHandler {
 
           _logError('ISOLATE_ERROR', error, stack, 'Unhandled isolate error');
           await FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-          await Sentry.captureException(error, stackTrace: stack);
         }).sendPort,
       );
 
@@ -120,21 +116,6 @@ class ComprehensiveErrorHandler {
         reason: context,
         fatal: fatal,
         printDetails: true,
-      );
-
-      await Sentry.captureException(
-        error,
-        stackTrace: stackTrace,
-        withScope: (scope) {
-          scope.setTag('context', context);
-          scope.setTag('manual_report', 'true');
-          scope.setTag('fatal', fatal.toString());
-          if (customData != null) {
-            for (final entry in customData.entries) {
-              scope.setExtra(entry.key, entry.value);
-            }
-          }
-        },
       );
 
       developer.log('✅ Error reported successfully', name: 'ErrorHandler');

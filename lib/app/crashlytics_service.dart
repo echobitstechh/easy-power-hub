@@ -1,6 +1,5 @@
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:developer' as developer;
 
@@ -31,10 +30,6 @@ class CrashlyticsService {
 
         // Report to crash services
         _crashlytics.recordFlutterFatalError(details);
-        Sentry.captureException(
-          details.exception,
-          stackTrace: details.stack,
-        );
       };
 
       _isInitialized = true;
@@ -57,7 +52,6 @@ class CrashlyticsService {
 
     try {
       _crashlytics.log(message);
-      Sentry.captureMessage(message);
     } catch (e) {
       if (kDebugMode) {
         developer.log('Failed to log message: $e', name: 'CrashlyticsService');
@@ -116,32 +110,12 @@ class CrashlyticsService {
 
       _crashlytics.log(logMessage);
 
-      // Record to Firebase Crashlytics
       await _crashlytics.recordError(
         exception,
         stack,
         reason: reason,
         printDetails: kDebugMode,
         fatal: fatal,
-      );
-
-      // Record to Sentry with additional context
-      await Sentry.captureException(
-        exception,
-        stackTrace: stack,
-        withScope: (scope) {
-          // Set tags and extras
-          if (reason != null) scope.setTag('reason', reason);
-          scope.setTag('is_fatal', fatal.toString());
-          if (frame != null) {
-            scope.setTag('file', frame.uri.pathSegments.last);
-            scope.setTag('line', frame.line?.toString() ?? 'unknown');
-            scope.setTag('function', frame.member ?? 'unknown');
-          }
-          for (final entry in customKeys.entries) {
-            scope.setExtra(entry.key, entry.value);
-          }
-        },
       );
 
     } catch (e, s) {
@@ -212,9 +186,7 @@ class CrashlyticsService {
   static Future<void> setUserIdentifier(String userId) async {
     try {
       await _crashlytics.setUserIdentifier(userId);
-      await Sentry.configureScope((scope) {
-        scope.setUser(SentryUser(id: userId));
-      });
+
 
       log('User ID set: $userId');
     } catch (e) {
@@ -231,9 +203,7 @@ class CrashlyticsService {
           : value.toString();
 
       await _crashlytics.setCustomKey(key, val);
-      await Sentry.configureScope((scope) {
-        scope.setTag(key, val.toString());
-      });
+
 
       if (kDebugMode) {
         developer.log('Custom key set: $key = $val', name: 'CrashlyticsService');

@@ -1,4 +1,6 @@
 
+import 'package:easyph/core/data/models/tags.dart';
+
 class Product {
   String? id;
   String? productName;
@@ -22,6 +24,7 @@ class Product {
   String? status;
   List<String>? reviews;
   List<String>? images;
+  List<Tag>? tags;
 
   Product({
     this.id,
@@ -46,12 +49,13 @@ class Product {
     this.installment,
     this.status,
     this.installmentFrequency,
+    this.tags,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    productName = json['name']; // Corrected key
-    productDescription = json['description']; // Corrected key
+    productName = json['name'];
+    productDescription = json['description'];
     price = json['price']?.toString() ?? '0';
     salePrice = json['salePrice']?.toString() ?? '0';
     rating = double.tryParse(json['rating']?.toString() ?? '0.0');
@@ -71,6 +75,11 @@ class Product {
     installment = json['installment'];
     installmentFrequency = json['installmentFrequency'];
     status = json['status'];
+
+    tags = json['tags'] != null
+        ? (json['tags'] as List).map((tagJson) => Tag.fromJson(tagJson)).toList()
+        : null;
+
   }
 
   Map<String, dynamic> toJson() {
@@ -101,6 +110,11 @@ class Product {
     if (images != null) {
       data['images'] = images;
     }
+
+    if (tags != null) {
+      data['tags'] = tags!.map((tag) => tag.toJson()).toList();
+    }
+
     return data;
   }
 }
@@ -396,105 +410,6 @@ class Review {
 
 
 
-// class Review {
-//   String? id;
-//   String? comment;
-//   int? rating;
-//   String? created;
-//   String? updated;
-//   Product? product;
-//   User? user;
-//
-//   Review(
-//       {this.id,
-//         this.comment,
-//         this.rating,
-//         this.created,
-//         this.updated,
-//         this.product,
-//         this.user,
-//       });
-//
-//   Review.fromJson(Map<String, dynamic> json) {
-//     id = json['id'];
-//     rating = json['rating'];
-//     comment = json['comment'];
-//     created = json['created'];
-//     updated = json['updated'];
-//     product = json['product'] != null ? Product.fromJson(json['product']) : null;
-//     user = json['user'] != null ? User.fromJson(json['user']) : null;
-//   }
-//
-//   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = <String, dynamic>{};
-//     data['id'] = id;
-//     data['rating'] = rating;
-//     data['comment'] = comment;
-//     data['created'] = created;
-//     data['updated'] = updated;
-//     if (product != null) {
-//       data['product'] = product!.toJson();
-//     }
-//     if (user != null) {
-//       data['user'] = user!.toJson();
-//     }
-//     return data;
-//   }
-// }
-//
-// class Winner {
-//   String? id;
-//   User? user;
-//   Raffle? raffle;
-//   String? status;
-//   String? ticketNumber;
-//   bool? isWinner;
-//   String? createdAt;
-//   String? updatedAt;
-//   String? order;
-//
-//   Winner({
-//     this.id,
-//     this.user,
-//     this.raffle,
-//     this.status,
-//     this.ticketNumber,
-//     this.isWinner,
-//     this.createdAt,
-//     this.updatedAt,
-//     this.order,
-//   });
-//
-//   Winner.fromJson(Map<String, dynamic> json) {
-//     id = json['_id'];
-//     user = json['user'] != null ? User.fromJson(json['user']) : null;
-//     raffle = json['raffle'] != null ? Raffle.fromJson(Map<String, dynamic>.from(json['raffle'])) : null;
-//     status = json['status'];
-//     ticketNumber = json['ticket_number'];
-//     isWinner = json['is_winner'];
-//     createdAt = json['createdAt'];
-//     updatedAt = json['updatedAt'];
-//     order = json['order'];
-//   }
-//
-//   Map<String, dynamic> toJson() {
-//     final Map<String, dynamic> data = <String, dynamic>{};
-//     data['_id'] = id;
-//     if (user != null) {
-//       data['user'] = user!.toJson();
-//     }
-//     if (raffle != null) {
-//       data['raffle'] = raffle!.toJson();
-//     }
-//     data['status'] = status;
-//     data['ticket_number'] = ticketNumber;
-//     data['is_winner'] = isWinner;
-//     data['createdAt'] = createdAt;
-//     data['updatedAt'] = updatedAt;
-//     data['order'] = order;
-//     return data;
-//   }
-// }
 
 class DrawEvent {
   final String id;

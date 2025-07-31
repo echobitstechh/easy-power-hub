@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:update_available/update_available.dart';
@@ -34,36 +33,11 @@ void main() async {
   // CRITICAL: Initialize widgets binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize comprehensive error handling BEFORE anything else
   await ComprehensiveErrorHandler.initialize();
 
-  developer.log('🚀 Starting app with comprehensive error handling...', name: 'Main');
+  developer.log(' Starting app with comprehensive error handling...', name: 'Main');
 
-  // Initialize Sentry with enhanced configuration
-  await SentryFlutter.init(
-        (options) {
-      options.dsn = 'https://899e0bb72fd08cc9f091d49ed545d7ac@o4509706538123264.ingest.de.sentry.io/4509706539827280';
-      options.environment = kDebugMode ? 'debug' : 'production';
-      options.tracesSampleRate = kDebugMode ? 1.0 : 0.1;
-      options.debug = kDebugMode;
-      options.attachStacktrace = true;
-      options.sendDefaultPii = false;
-
-      // Capture everything
-      options.captureFailedRequests = true;
-      options.autoAppStart = true;
-      options.enableAutoSessionTracking = true;
-      // Removed sessionTrackingIntervalMillis as it's not available in SentryFlutterOptions
-
-      options.beforeSend = (SentryEvent event, {dynamic hint}) {
-        if (kDebugMode) {
-          developer.log('📤 Sentry event: ${event.throwable}', name: 'Sentry');
-        }
-        return event;
-      };
-    },
-    appRunner: () => runZonedGuarded(_runApp, _onZonedError),
-  );
+  runZonedGuarded(_runApp, _onZonedError);
 }
 
 Future<void> _runApp() async {
