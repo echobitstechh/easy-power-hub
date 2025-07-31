@@ -11,7 +11,6 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:app_links/app_links.dart';
 import 'package:update_available/update_available.dart';
 import 'package:flutter/foundation.dart';
-
 import 'app/errorHandler.dart';
 import 'firebase_options.dart';
 import 'core/utils/paystack_util.dart';
@@ -30,7 +29,6 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 FlutterLocalNotificationsPlugin();
 
 void main() async {
-  // CRITICAL: Initialize widgets binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
 
   await ComprehensiveErrorHandler.initialize();
@@ -44,31 +42,29 @@ Future<void> _runApp() async {
   await ComprehensiveErrorHandler.wrapWithErrorHandling(
     operationName: 'App Initialization',
     operation: () async {
-      developer.log('🔧 Initializing Firebase...', name: 'Init');
+      developer.log('Initializing Firebase...', name: 'Init');
 
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
       );
 
-      developer.log('🔧 Setting up Firebase Crashlytics...', name: 'Init');
+      developer.log('Setting up Firebase Crashlytics...', name: 'Init');
       await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
 
-      developer.log('🔧 Setting up services...', name: 'Init');
+      developer.log('Setting up services...', name: 'Init');
       setupLocator();
       setupDialogUi();
       setupBottomSheetUi();
 
-      developer.log('🔧 Initializing PayStack...', name: 'Init');
+      developer.log('Initializing PayStack...', name: 'Init');
       PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
 
-      developer.log('✅ All initialization complete, starting app...', name: 'Init');
+      developer.log('All initialization complete, starting app...', name: 'Init');
       runApp(const MyApp());
 
-      // Test error reporting in debug mode (remove in production)
       if (kDebugMode) {
-        // Wait a bit then test all error types
         Timer(const Duration(seconds: 10), () {
-          developer.log('🧪 Starting error reporting tests...', name: 'Test');
+          developer.log(' Starting error reporting tests...', name: 'Test');
           ComprehensiveErrorHandler.testAllErrorTypes();
         });
       }
@@ -116,7 +112,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    developer.log('📱 App lifecycle changed: $state', name: 'Lifecycle');
+    developer.log('App lifecycle changed: $state', name: 'Lifecycle');
     FirebaseCrashlytics.instance.setCustomKey('app_lifecycle_state', state.toString());
 
     if (state == AppLifecycleState.resumed) {
@@ -162,7 +158,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         operation: () async {
           final availability = await getUpdateAvailability();
           if (availability is UpdateAvailable) {
-            developer.log('📱 Update available', name: 'Update');
+            developer.log('Update available', name: 'Update');
             _showUpdateDialog();
           }
         },
@@ -175,7 +171,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       final uri = await _appLinks.getInitialLink();
       if (uri != null) {
-        developer.log('🔗 Initial deep link: ${uri.toString()}', name: 'DeepLink');
+        developer.log('Initial deep link: ${uri.toString()}', name: 'DeepLink');
         _navigateFromUri(uri);
       }
     } catch (error, stackTrace) {
@@ -192,13 +188,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     try {
       _appLinks.uriLinkStream.listen(
             (uri) {
-          developer.log('🔗 Deep link received: ${uri.toString()}', name: 'DeepLink');
+          developer.log('Deep link received: ${uri.toString()}', name: 'DeepLink');
           _navigateFromUri(uri);
         },
         onError: (error, stackTrace) {
           ComprehensiveErrorHandler.reportError(
             error: error,
-            stackTrace: stackTrace ?? StackTrace.current, // Fixed: provide fallback StackTrace
+            stackTrace: stackTrace ?? StackTrace.current,
             context: 'Deep link stream error',
             customData: {'operation': 'deep_link_stream'},
           );
@@ -264,7 +260,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             );
           }
 
-          // Set user identifier for crash reporting
           if (snapshot.hasData && snapshot.data != null) {
             FirebaseCrashlytics.instance.setUserIdentifier(snapshot.data!.uid);
             developer.log('👤 User authenticated: ${snapshot.data!.uid}', name: 'Auth');
@@ -287,11 +282,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 navigatorObservers: [StackedService.routeObserver],
                 debugShowCheckedModeBanner: false,
                 builder: (context, widget) {
-                  // Global error widget builder
                   ErrorWidget.builder = (FlutterErrorDetails details) {
                     ComprehensiveErrorHandler.reportError(
                       error: details.exception,
-                      stackTrace: details.stack ?? StackTrace.current, // Fixed: provide fallback StackTrace
+                      stackTrace: details.stack ?? StackTrace.current,
                       context: 'Widget build error',
                       customData: {
                         'widget_details': details.toString(),
@@ -327,7 +321,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               ),
                               ElevatedButton(
                                 onPressed: () {
-                                  // Show error log for debugging
                                   final errors = ComprehensiveErrorHandler.getErrorLog();
                                   showDialog(
                                     context: context,
