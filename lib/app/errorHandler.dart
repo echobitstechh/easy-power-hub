@@ -139,6 +139,107 @@ class ComprehensiveErrorHandler {
     }
   }
 
+  /// Handle zoned errors from runZonedGuarded
+  static void handleZonedError(Object error, StackTrace stackTrace) async {
+    developer.log('💥 ZONED ERROR CAUGHT: $error',
+        name: 'ZonedError',
+        error: error,
+        stackTrace: stackTrace
+    );
+
+    await reportError(
+      error: error,
+      stackTrace: stackTrace,
+      context: 'Uncaught error in runZonedGuarded',
+      customData: {'error_type': 'zoned_error'},
+      fatal: true,
+    );
+  }
+
+  /// Setup custom error widget builder for MaterialApp
+  static Widget Function(FlutterErrorDetails) getErrorWidgetBuilder() {
+    return (FlutterErrorDetails details) {
+      reportError(
+        error: details.exception,
+        stackTrace: details.stack ?? StackTrace.current,
+        context: 'Widget build error',
+        customData: {
+          'widget_details': details.toString(),
+          'operation': 'widget_build',
+        },
+      );
+
+      if (kDebugMode) {
+        return Container(
+          color: Colors.red.withOpacity(0.8),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.error, color: Colors.white, size: 48),
+                const SizedBox(height: 16),
+                const Text(
+                  'Widget Error Detected',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    details.exception.toString(),
+                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () {
+                      final errors = getErrorLog();
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text('Error Log'),
+                          content: SizedBox(
+                            width: double.maxFinite,
+                            height: 300,
+                            child: ListView.builder(
+                              itemCount: errors.length,
+                              itemBuilder: (_, index) => Text(
+                                errors[index],
+                                style: const TextStyle(fontSize: 10),
+                              ),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Close'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    child: const Text('View Error Log'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return const Material(
+        child: Center(
+          child: Text('Something went wrong'),
+        ),
+      );
+    };
+  }
+
   /// Test all error reporting mechanisms
   static Future<void> testAllErrorTypes() async {
     if (!kDebugMode) return;
