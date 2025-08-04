@@ -236,6 +236,7 @@ class HomeViewModel extends BaseViewModel {
   }
 
   Future<void> fetchOnlineCart() async {
+    print('getting online cart');
     setBusy(true);
     try {
       ApiResponse res = await repo.cartList();
@@ -247,12 +248,12 @@ class HomeViewModel extends BaseViewModel {
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
           cart.value = onlineItems;
-          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
+          // await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
           cart.notifyListeners();
           notifyListeners();
         } else {
           cart.value.clear();
-          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
+          // await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
           notifyListeners();
         }
       }

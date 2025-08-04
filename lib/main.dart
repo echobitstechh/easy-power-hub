@@ -28,7 +28,7 @@ FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ComprehensiveErrorHandler.initialize();
-  await DeepLinkHandler.initialize();
+  // await DeepLinkHandler.initialize();
   runZonedGuarded(_runApp, ComprehensiveErrorHandler.handleZonedError);
 }
 

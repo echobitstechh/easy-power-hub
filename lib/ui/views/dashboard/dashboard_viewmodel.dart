@@ -45,7 +45,6 @@ class DashboardViewModel extends BaseViewModel {
       filteredProductList = productList;
       brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
     } else {
-      print('id is: $id');
       filteredProductList = productList.where((product) {
         return product.categoryId == id;
       }).toList();
@@ -82,15 +81,16 @@ class DashboardViewModel extends BaseViewModel {
 
 
   void initialise() {
-    print('called initialize');
     init();
   }
 
   Future<void> init() async {
     setBusy(true);
     notifyListeners();
-    await loadProduct();
-    await loadCategories();
+    // await loadProduct();
+    await getProducts();
+    await getCategories();
+    // await loadCategories();
     rebuildUi();
 
     if (userLoggedIn.value == true) {
@@ -109,25 +109,19 @@ class DashboardViewModel extends BaseViewModel {
 
 
   Future<void> loadProduct() async {
-    print('loading products....');
     try {
 
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-      log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
 
       if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        print('Decoded JSON: $storedProducts');
         // Populate productList and filteredProductList
         productList = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
         filteredProductList = productList;
         brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
-
-        print('loaded products from local storage list ${productList.length}');
-        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
         rebuildUi();
       }else{
         print('no value to load');
@@ -158,7 +152,6 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> getProducts() async {
-    print('getting online products');
     try {
       ApiResponse res = await repo.getProducts();
 
@@ -175,9 +168,9 @@ class DashboardViewModel extends BaseViewModel {
         brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
 
         // Save updated data to local storage
-        List<Map<String, dynamic>> storedProducts =
-        productList.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
+        // List<Map<String, dynamic>> storedProducts =
+        // productList.map((e) => e.toJson()).toList();
+        // await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
         rebuildUi();
       } else {
         log.e("API Error: ${res.data["message"]}");
@@ -231,8 +224,8 @@ class DashboardViewModel extends BaseViewModel {
         // Save the active categories locally
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.donationsCategories, storedCategories);
+        // await locator<LocalStorage>()
+        //     .save(LocalStorageDir.donationsCategories, storedCategories);
 
         // Update filtered list
         filteredCategories = [
@@ -267,7 +260,7 @@ class DashboardViewModel extends BaseViewModel {
 
       List<Map<String, dynamic>> storedList =
       cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      // await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
 
       final response = await repo.addToCart({
         "productId": product.id,
@@ -318,15 +311,9 @@ class DashboardViewModel extends BaseViewModel {
     totalPrice -= discountAmount; // Apply 2% discount correctly
 
     notifyListeners();
-
-    print("Updated Cart Summary:");
-    print("Total Price: \$${totalPrice.toStringAsFixed(2)}");
-    print("Discount Applied: \$${discountAmount.toStringAsFixed(2)}");
-    print("Free Delivery: $freeDelivery");
   }
 
   void onEnd() {
-    print('onEnd');
     //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
     notifyListeners();
   }
@@ -373,10 +360,10 @@ class DashboardViewModel extends BaseViewModel {
       }
 
       // Save to local storage
-      List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>()
-          .save(LocalStorageDir.raffleCart, storedList);
+      // List<Map<String, dynamic>> storedList =
+      //     cart.value.map((e) => e.toJson()).toList();
+      // await locator<LocalStorage>()
+      //     .save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to decrease raffle quantity: $e",
@@ -401,10 +388,10 @@ class DashboardViewModel extends BaseViewModel {
         });
 
         // Save to local storage
-        List<Map<String, dynamic>> storedList =
-            cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.raffleCart, storedList);
+        // List<Map<String, dynamic>> storedList =
+        //     cart.value.map((e) => e.toJson()).toList();
+        // await locator<LocalStorage>()
+        //     .save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
