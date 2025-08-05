@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:easyph/app/app.bottomsheets.dart';
 import 'package:easyph/app/app.dialogs.dart';
 import 'package:easyph/app/app.locator.dart';
@@ -21,8 +20,6 @@ import '../../../core/data/models/order_item.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/interceptors.dart';
-import '../../../core/utils/local_store_dir.dart';
-import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
 import '../service/service_view.dart';
 import '../shop/shop_view.dart';
@@ -58,15 +55,6 @@ class HomeViewModel extends BaseViewModel {
     currentModuleNotifier.addListener(notifyListeners);
   }
 
-  String get counterLabel => 'Counter is: $_counter';
-
-  int _counter = 0;
-
-  //for test
-  void incrementCounter() {
-    _counter++;
-    rebuildUi();
-  }
 
   void changeSelected(int index) {
     selectedTab = index;
