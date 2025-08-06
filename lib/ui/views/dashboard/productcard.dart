@@ -242,19 +242,9 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ],
                   ),
-                  child: CachedNetworkImage(
-                    imageUrl: selectedImage,
+                  child: Image.network(
+                    selectedImage,
                     fit: BoxFit.cover,
-                    width: MediaQuery.of(context).size.width,
-                    height: 345,
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => Icon(
-                      Icons.broken_image,
-                      size: 100,
-                      color: Colors.grey,
-                    ),
                     errorBuilder: (context, error, stackTrace) {
                       return const Icon(
                         Icons.broken_image,
@@ -554,22 +544,13 @@ class _ProductCardState extends State<ProductCard> {
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.all(Radius.circular(12)),
-                              child: CachedNetworkImage(
-                                imageUrl: (product.images != null && product.images!.isNotEmpty)
+                              child: Image.network(
+                                product.images != null && product.images!.isNotEmpty
                                     ? product.images!.first
                                     : 'https://via.placeholder.com/150',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
-                                placeholder: (context, url) {
-                                  return Center(child: CircularProgressIndicator());
-                                },
-                                errorWidget: (context, url, error) {
-                                  return Icon(
-                                    Icons.broken_image,
-                                    size: 100,
-                                    color: Colors.white,
-                                  );
                                 loadingBuilder: (context, child, progress) {
                                   if (progress == null) return child;
                                   return const Center(child: CircularProgressIndicator());
@@ -701,20 +682,7 @@ class _ProductCardState extends State<ProductCard> {
         border: Border.all(color: Colors.grey, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: CachedNetworkImage(
-        imageUrl: imagePath,
-        fit: BoxFit.cover,
-        placeholder: (context, url) {
-          return Center(child: CircularProgressIndicator());
-        },
-        errorWidget: (context, url, error) {
-          return const Icon(
-            Icons.broken_image,
-            size: 50,
-            color: Colors.grey,
-          );
-        },
-      ),
+      child: Image.network(imagePath, fit: BoxFit.cover),
     );
   }
 }

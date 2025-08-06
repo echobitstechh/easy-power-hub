@@ -215,154 +215,54 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ),
                     );
                   },
-                  // optionsViewBuilder: (BuildContext context,
-                  //     AutocompleteOnSelected<Product> onSelected,
-                  //     Iterable<Product> options) {
-                  //   return Align(
-                  //     alignment: Alignment.topLeft,
-                  //     child: Material(
-                  //       elevation: 4,
-                  //       borderRadius: BorderRadius.circular(8),
-                  //       child: Container(
-                  //         constraints: const BoxConstraints(
-                  //           maxHeight: 250, // scrollable max height
-                  //           maxWidth: 350,  // limits width of dropdown
-                  //         ),
-                  //         decoration: BoxDecoration(
-                  //           color: Colors.white,
-                  //           borderRadius: BorderRadius.circular(8),
-                  //         ),
-                  //         child:
-                  //         // ListView.builder(
-                  //         //   padding: EdgeInsets.zero,
-                  //         //   shrinkWrap: true,
-                  //         //   itemCount: options.length,
-                  //         //   itemBuilder: (BuildContext context, int index) {
-                  //         //     final Product product = options.elementAt(index);
-                  //         //     return ListTile(
-                  //         //       leading: (product.images != null && product.images!.isNotEmpty)
-                  //         //           ? Image.network(
-                  //         //         product.images!.first,
-                  //         //         width: 35,
-                  //         //         height: 35,
-                  //         //         fit: BoxFit.cover,
-                  //         //       )
-                  //         //           : const Icon(Icons.image, size: 30),
-                  //         //       title: Text(
-                  //         //         product.productName ?? "",
-                  //         //         style: const TextStyle(
-                  //         //           fontSize: 13,
-                  //         //           fontWeight: FontWeight.w500,
-                  //         //           overflow: TextOverflow.ellipsis,
-                  //         //         ),
-                  //         //         maxLines: 2,
-                  //         //       ),
-                  //         //       onTap: () => onSelected(product),
-                  //         //     );
-                  //         //   },
-                  //         // ),
-                  //           NotificationListener<ScrollNotification>(
-                  //             onNotification: (scrollNotification) {
-                  //               if (scrollNotification is ScrollEndNotification &&
-                  //                   scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent) {
-                  //                 viewModel.getProducts(); // This will load the next page
-                  //               }
-                  //               return false;
-                  //             },
-                  //             child: ListView.builder(
-                  //               padding: EdgeInsets.zero,
-                  //               shrinkWrap: true,
-                  //               itemCount: viewModel.productList.length + (viewModel.isLoadingMore ? 1 : 0),
-                  //               itemBuilder: (BuildContext context, int index) {
-                  //                 // Show loading spinner at the end while fetching more
-                  //                 if (index == viewModel.productList.length) {
-                  //                   return const Center(
-                  //                     child: Padding(
-                  //                       padding: EdgeInsets.symmetric(vertical: 20),
-                  //                       child: CircularProgressIndicator(strokeWidth: 2),
-                  //                     ),
-                  //                   );
-                  //                 }
-                  //
-                  //                 final Product product = viewModel.productList[index];
-                  //
-                  //                 return ListTile(
-                  //                   leading: (product.images != null && product.images!.isNotEmpty)
-                  //                       ? Image.network(
-                  //                     product.images!.first,
-                  //                     width: 35,
-                  //                     height: 35,
-                  //                     fit: BoxFit.cover,
-                  //                   )
-                  //                       : const Icon(Icons.image, size: 30),
-                  //                   title: Text(
-                  //                     product.productName ?? "",
-                  //                     style: const TextStyle(
-                  //                       fontSize: 13,
-                  //                       fontWeight: FontWeight.w500,
-                  //                       overflow: TextOverflow.ellipsis,
-                  //                     ),
-                  //                     maxLines: 2,
-                  //                   ),
-                  //                   onTap: () => onSelected(product),
-                  //                 );
-                  //               },
-                  //             ),
-                  //           )
-                  //
-                  //       ),
-                  //     ),
-                  //   );
-                    // In your DashboardView class, replace the optionsViewBuilder section with this:
-
-                    optionsViewBuilder: (BuildContext context,
-                        AutocompleteOnSelected<Product> onSelected,
-                        Iterable<Product> options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            constraints: const BoxConstraints(
-                              maxHeight: 250,
-                              maxWidth: 350,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final Product product = options.elementAt(index);
-                                return ListTile(
-                                  leading: (product.images != null && product.images!.isNotEmpty)
-                                      ? Image.network(
-                                    product.images!.first,
-                                    width: 35,
-                                    height: 35,
-                                    fit: BoxFit.cover,
-                                  )
-                                      : const Icon(Icons.image, size: 30),
-                                  title: Text(
-                                    product.productName ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    maxLines: 2,
+                  optionsViewBuilder: (BuildContext context,
+                      AutocompleteOnSelected<Product> onSelected,
+                      Iterable<Product> options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxHeight: 250, // scrollable max height
+                            maxWidth: 350,  // limits width of dropdown
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final Product product = options.elementAt(index);
+                              return ListTile(
+                                leading: (product.images != null && product.images!.isNotEmpty)
+                                    ? Image.network(
+                                  product.images!.first,
+                                  width: 35,
+                                  height: 35,
+                                  fit: BoxFit.cover,
+                                )
+                                    : const Icon(Icons.image, size: 30),
+                                title: Text(
+                                  product.productName ?? "",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  onTap: () => onSelected(product),
-                                );
-                              },
-                            ),
+                                  maxLines: 2,
+                                ),
+                                onTap: () => onSelected(product),
+                              );
+                            },
                           ),
                         ),
-                      );
+                      ),
+                    );
                   },
                 ),
               )
@@ -374,32 +274,17 @@ class DashboardView extends StackedView<DashboardViewModel> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-    await viewModel.getProducts(isRefresh: true);
-    },
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo is ScrollEndNotification &&
-              scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-            viewModel.getProducts(); // This will load the next page
-          }
-          return false;
-        },
-        child: ListView(
-          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-          children: [
-            const SizedBox(height: 100),
-            _buildShimmerOrContent(context, viewModel),
-            if (viewModel.isLoadingMore)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-          ],
+            await viewModel.refreshData();
+          },
+          child: ListView(
+            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+            children: [
+              // Add some space above the content
+              const SizedBox(height: 100), // Space above content
+              _buildShimmerOrContent(context, viewModel),
+            ],
+          ),
         ),
-      ),
-    ),
       ),
     );
   }
@@ -414,6 +299,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
             Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
+              // width: 110, // Adjust width according to your design
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 boxShadow: const [
@@ -434,7 +320,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
             Positioned.fill(
               child: Container(
                 color:
-                    Colors.black.withOpacity(0.5),
+                    Colors.black.withOpacity(0.5), // Semi-transparent overlay
               ),
             ),
             // Title Text
@@ -815,17 +701,14 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                       const Icon(
                                         Icons.star,
                                         size: 16,
-                                        color: Colors.grey,
+                                        color: Colors.grey, // Base star color
                                       ),
                                       ShaderMask(
                                         shaderCallback: (Rect bounds) {
                                           double ratingValue = item.rating ?? 0.0;
                                           return LinearGradient(
                                             stops: [ratingValue / 5, ratingValue / 5],
-
-                                            colors: [Colors.amber, Colors.grey],
-
-                                            colors: const [Colors.amber, Colors.grey],
+                                            colors: const [Colors.amber, Colors.grey], // Fill and empty colors
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(
@@ -866,15 +749,15 @@ class DashboardView extends StackedView<DashboardViewModel> {
     if (viewModel.filteredProductList.isEmpty && viewModel.isBusy) {
       return Column(
         children: [
-          _buildShimmerContainer(),
+          _buildShimmerContainer(), // shimmer for video player placeholder
           verticalSpaceSmall,
-          _buildShimmerQuickActions(),
+          _buildShimmerQuickActions(), // shimmer for quick actions
           verticalSpaceMedium,
-          _buildShimmerQuickActions(),
+          _buildShimmerQuickActions(), // shimmer for quick actions
           verticalSpaceMedium,
-          _buildShimmerSlider(),
+          _buildShimmerSlider(), // shimmer for raffle list
           verticalSpaceMedium,
-          _buildShimmerSlider(),
+          _buildShimmerSlider(), // shimmer for donations
         ],
       );
     } else {
@@ -886,11 +769,17 @@ class DashboardView extends StackedView<DashboardViewModel> {
           verticalSpaceSmall,
           Container(
             padding: const EdgeInsets.all(0),
+            // child: StaggeredGrid.count(
+            //   crossAxisCount: 2,
+            //   mainAxisSpacing: 6.0,
+            //   crossAxisSpacing: 6.0,
+            //   children: buildCardTiles(context, viewModel),
+            // ),
             child: GridView.count(
               crossAxisCount: 2,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
-              childAspectRatio: 2,
+              childAspectRatio: 2, // 👈 makes them wider (more rectangle-like)
               padding: const EdgeInsets.all(0),
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -899,6 +788,14 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
           ),
           verticalSpaceMedium,
+          // SingleChildScrollView(
+          //   scrollDirection: Axis.horizontal,
+          //   child: Row(
+          //     children: viewModel.filteredCategories.map((category) {
+          //       return _buildCategoryChip(category, viewModel);
+          //     }).toList(),
+          //   ),
+          // ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -929,6 +826,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
       itemBuilder: (context, index, realIndex) {
         final gifPath = gifList[index];
         return Container(
+          // margin: const EdgeInsets.symmetric(horizontal: 3.0), // Add spacing between carousel items
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(15),
             color: Colors.white,
@@ -950,11 +848,11 @@ class DashboardView extends StackedView<DashboardViewModel> {
         );
       },
       options: CarouselOptions(
-        height: 200,
-        autoPlay: true,
+        height: 200, // Adjust height of the carousel
+        autoPlay: true, // Enable autoplay
         autoPlayInterval: const Duration(seconds: 5),
         enlargeCenterPage: true,
-        viewportFraction: 1.0,
+        viewportFraction: 1.0, // Adjust size of the carousel items
       ),
     );
   }
@@ -1007,7 +905,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
           ? Colors.grey[300]!
           : Colors.grey[100]!,
       child: Container(
-        height: 300,
+        height: 300, // Adjust the height as per your design
         width: double.infinity,
         decoration: BoxDecoration(
           color: Colors.grey[300],
@@ -1025,7 +923,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         IconButton(
             icon: SvgPicture.asset(
               uiMode.value == AppUiModes.dark
-                  ? "assets/images/dashboard_otification_white.svg"
+                  ? "assets/images/dashboard_otification_white.svg" // Dark mode logo
                   : "assets/images/dashboard_otification.svg",
               width: 25,
               height: 25,
@@ -1057,6 +955,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
   void _showNotificationSheet(
       BuildContext context, DashboardViewModel viewModel) {
+    // viewModel.markAllNotificationsAsRead();
+
     TopModalSheet.show(
         context: context,
         isShowCloseButton: true,
@@ -1148,7 +1048,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
             width: 1.0, // Set the border width
           ),
           borderRadius: BorderRadius.circular(
-              30.0),
+              30.0), // Reduce the border radius (adjust this value)
         ),
       ),
     );
@@ -1165,7 +1065,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
           ),
         ),
         selected: brand ==
-            viewModel.selectedBrand,
+            viewModel.selectedBrand, // Check if this category is selected
         onSelected: (bool selected) {
           viewModel.setSelectedBrand(
               selected ? brand : '');
@@ -1183,11 +1083,11 @@ class DashboardView extends StackedView<DashboardViewModel> {
           side: BorderSide(
             color: uiMode.value == AppUiModes.dark
                 ? Colors.grey[500]!
-                : Colors.grey[100]!,
-            width: 1.0,
+                : Colors.grey[100]!, // Set the border color to light grey
+            width: 1.0, // Set the border width
           ),
           borderRadius: BorderRadius.circular(
-              30.0),
+              30.0), // Reduce the border radius (adjust this value)
         ),
       ),
     );
