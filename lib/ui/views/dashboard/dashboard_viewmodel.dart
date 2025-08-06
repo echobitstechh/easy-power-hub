@@ -38,19 +38,27 @@ class DashboardViewModel extends BaseViewModel {
   bool appBarLoading = false;
   final snackBar = locator<SnackbarService>();
 
+  int currentPage = 1;
+  bool isLastPage = false;
+  bool isLoadingMore = false;
+  final int pageLimit = 10;
+
   void setSelectedCategory(int id) {
     selectedId = id;
+    selectedBrand = '';
+
 
     if (id == allCategoriesId) {
       filteredProductList = productList;
-      brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
     } else {
       print('id is: $id');
       filteredProductList = productList.where((product) {
         return product.categoryId == id;
       }).toList();
-      brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
     }
+
+    brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+    brands.removeWhere((brand) => brand.isEmpty);
 
     notifyListeners();
   }
@@ -58,10 +66,19 @@ class DashboardViewModel extends BaseViewModel {
   void setSelectedBrand(String brand) {
     selectedBrand = brand;
 
-    if (brand.isEmpty) {
-      filteredProductList = productList;
+    List<Product> categoryFiltered;
+    if (selectedId == allCategoriesId) {
+      categoryFiltered = productList;
     } else {
-      filteredProductList = productList.where((product) {
+      categoryFiltered = productList.where((product) {
+        return product.categoryId == selectedId;
+      }).toList();
+    }
+
+    if (brand.isEmpty) {
+      filteredProductList = categoryFiltered;
+    } else {
+      filteredProductList = categoryFiltered.where((product) {
         return product.brandName == brand;
       }).toList();
     }
@@ -104,7 +121,7 @@ class DashboardViewModel extends BaseViewModel {
     final productDate = DateTime.parse(createdAt);
     final currentDate = DateTime.now();
     final difference = currentDate.difference(productDate).inDays;
-    return difference <= 14;  // 14 days = 2 weeks
+    return difference <= 14;
   }
 
 
@@ -119,7 +136,6 @@ class DashboardViewModel extends BaseViewModel {
       if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
         print('Decoded JSON: $storedProducts');
-        // Populate productList and filteredProductList
         productList = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
@@ -133,7 +149,6 @@ class DashboardViewModel extends BaseViewModel {
         print('no value to load');
       }
 
-      // Make API call in the background
       getProducts();
     } catch (e) {
       log.e("Error loading products: $e");
@@ -157,42 +172,85 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> getProducts() async {
-    print('getting online products');
+
+
+  Future<void> getProducts({bool isRefresh = false}) async {
+    if (isLoadingMore && !isRefresh) return;
+    if (isLastPage && !isRefresh) return;
+
+    print('Getting products - Page $currentPage');
     try {
-      ApiResponse res = await repo.getProducts();
+      if (isRefresh) {
+        productList.clear();
+        filteredProductList.clear();
+        currentPage = 1;
+        isLastPage = false;
+      }
+
+      isLoadingMore = true;
+      notifyListeners();
+
+      ApiResponse res = await repo.getProducts(
+        page: currentPage,
+        limit: pageLimit,
+      );
 
       if (res.statusCode == 200) {
-        // Fetch updated products from API
-        List<Product> updatedProductList = (res.data["products"] as List)
+        List<Product> newProducts = (res.data["products"] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active') // Filter out inactive
+            .where((product) => product.status?.toLowerCase() == 'active')
             .toList();
 
-        // Update the product list
-        productList = updatedProductList;
-        filteredProductList = productList;
-        brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+        final totalPages = res.data["pagination"]["totalPages"];
 
-        // Save updated data to local storage
+        productList.addAll(newProducts);
+
+        // Apply current filters to new products
+        _applyCurrentFilters();
+
+        brands = productList.map((product) => product.brandName ?? '').toSet().toList();
+        brands.removeWhere((brand) => brand.isEmpty);
+
+        if (currentPage >= totalPages) {
+          isLastPage = true;
+        } else {
+          currentPage++;
+        }
+
+        // Save current loaded pages to local storage
         List<Map<String, dynamic>> storedProducts =
         productList.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
+
         rebuildUi();
       } else {
         log.e("API Error: ${res.data["message"]}");
       }
     } catch (e) {
       log.e("Error fetching products: $e");
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
     }
+  }
+  void _applyCurrentFilters() {
+    List<Product> filtered = productList;
+
+    if (selectedId != allCategoriesId) {
+      filtered = filtered.where((product) => product.categoryId == selectedId).toList();
+    }
+
+    if (selectedBrand.isNotEmpty) {
+      filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+    }
+
+    filteredProductList = filtered;
   }
 
   Future<void> loadCategories() async {
     try {
-      // First try to load from API
       await getCategories();
 
-      // If API fails, fall back to local storage
       if (categories.isEmpty) {
         dynamic storedDonations = await locator<LocalStorage>()
             .fetch(LocalStorageDir.donationsCategories);
@@ -206,7 +264,6 @@ class DashboardViewModel extends BaseViewModel {
         }
       }
 
-      // Always include "All" option and update filtered list
       filteredCategories = [
         Category(id: 0, name: 'All', status: CategoryStatus.active),
         ...categories,
@@ -228,7 +285,6 @@ class DashboardViewModel extends BaseViewModel {
             .where((category) => category.status == CategoryStatus.active) // Filter out inactive
             .toList();
 
-        // Save the active categories locally
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
         await locator<LocalStorage>()

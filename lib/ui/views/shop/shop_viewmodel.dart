@@ -62,6 +62,10 @@ class ShopViewModel extends BaseViewModel {
 
 
   final snackBar = locator<SnackbarService>();
+  int currentPage = 1;
+  bool isLastPage = false;
+  bool isLoadingMore = false;
+  final int pageLimit = 10;
 
   @override
   void initialise() {
@@ -76,7 +80,10 @@ class ShopViewModel extends BaseViewModel {
       print('After category filter: ${filtered.length}');
     }
 
-    // Apply brand filter
+  void setSelectedCategory(int id) {
+    selectedId = id;
+    selectedBrand = '';
+  
     if (selectedBrand.isNotEmpty) {
       filtered = filtered.where((p) => p.brandName == selectedBrand).toList();
       print('After brand filter: ${filtered.length}');
@@ -105,12 +112,27 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+    List<Product> categoryFiltered;
+    if (selectedId == allCategoriesId) {
+      categoryFiltered = productList;
+    } else {
+      categoryFiltered = productList.where((product) {
+        return product.categoryId == selectedId;
+      }).toList();
+    }
+
+    if (brand.isEmpty) {
+      filteredProductList = categoryFiltered;
+    } else {
+      filteredProductList = categoryFiltered.where((product) {
+        return product.brandName == brand;
+      }).toList();
+    }
   void setSelectedCategory(int id) {
     _selectedTag = null;
     selectedId = id;
     _applyFilters();
   }
-
   void setSelectedBrand(String brand) {
     _selectedTag = null;
     selectedBrand = brand;
@@ -219,12 +241,45 @@ class ShopViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> getProducts() async {
-    print('getting online products');
+  Future<void> getProducts({bool isRefresh = false}) async {
+    if (isLoadingMore && !isRefresh) return;
+    if (isLastPage && !isRefresh) return;
+
+    print('Getting products - Page $currentPage');
     try {
-      ApiResponse res = await repo.getProducts();
+      if (isRefresh) {
+        productList.clear();
+        filteredProductList.clear();
+        currentPage = 1;
+        isLastPage = false;
+      }
+
+      isLoadingMore = true;
+      notifyListeners();
+
+      ApiResponse res = await repo.getProducts(
+        page: currentPage,
+        limit: pageLimit,
+      );
 
       if (res.statusCode == 200) {
+        List<Product> newProducts = (res.data["products"] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active')
+            .toList();
+
+        final totalPages = res.data["pagination"]["totalPages"];
+
+        productList.addAll(newProducts);
+
+        // Apply current filters to new products
+        _applyCurrentFilters();
+
+        if (currentPage >= totalPages) {
+          isLastPage = true;
+        } else {
+          currentPage++;
+        }
         List<Product> updatedProductList = (res.data["products"] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .where((product) => product.status?.toLowerCase() == 'active')
@@ -244,9 +299,24 @@ class ShopViewModel extends BaseViewModel {
       }
     } catch (e) {
       log.e("Error fetching products: $e");
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
     }
   }
+  void _applyCurrentFilters() {
+    List<Product> filtered = productList;
 
+    if (selectedId != allCategoriesId) {
+      filtered = filtered.where((product) => product.categoryId == selectedId).toList();
+    }
+
+    if (selectedBrand.isNotEmpty) {
+      filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+    }
+
+    filteredProductList = filtered;
+  }
   Future<void> loadCategories() async {
     try {
       await getCategories();
@@ -460,7 +530,6 @@ class ShopViewModel extends BaseViewModel {
 
   void onEnd() {
     print('onEnd');
-    //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
     notifyListeners();
   }
 
