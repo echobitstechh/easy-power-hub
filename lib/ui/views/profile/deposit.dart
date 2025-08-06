@@ -1,13 +1,10 @@
-import 'package:easyph/app/app.router.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/components/submit_button.dart';
-import 'package:easyph/ui/views/profile/profile_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 // import 'package:flutter_paystack/flutter_paystack.dart';
 import '../../../utils/money_util.dart';
-import '../../components/payment_success_page.dart';
 
 class Deposit extends StatefulWidget {
   const Deposit({Key? key}) : super(key: key);

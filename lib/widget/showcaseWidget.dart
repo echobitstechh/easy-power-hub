@@ -42,7 +42,7 @@ class AppShowcase extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                     color: Colors.black, // You can customize color as needed
@@ -51,7 +51,7 @@ class AppShowcase extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   description,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black87, // Customize as needed
                   ),

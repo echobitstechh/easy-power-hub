@@ -1,23 +1,16 @@
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.router.dart';
 import 'package:easyph/core/data/models/product.dart';
-import 'package:easyph/core/data/models/raffle_cart_item.dart';
-import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:palette_generator/palette_generator.dart';
-import 'package:slidable_button/slidable_button.dart';
 import 'package:slide_countdown/slide_countdown.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/cart_item.dart';
-import '../../../core/network/interceptors.dart';
 import 'dashboard_viewmodel.dart';
 
 class RaffleDetail extends StatefulWidget {
@@ -94,8 +87,8 @@ class _RaffleDetailState extends State<RaffleDetail> {
                             height: 370,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                const BoxShadow(
+                              boxShadow: const [
+                                BoxShadow(
                                   color: Colors.black12,
                                   blurRadius: 6.0,
                                   offset: Offset(0, 2),
@@ -237,7 +230,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
                                   GoogleFonts.redHatDisplay(
                                     textStyle:  TextStyle(
                                       color: uiMode.value == AppUiModes.dark
-                                          ? kcWhiteColor // Dark mode logo
+                                          ? kcWhiteColor
                                           : kcBlackColor,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w400,
@@ -254,14 +247,14 @@ class _RaffleDetailState extends State<RaffleDetail> {
                             Row(
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.only(right: 0.0, left: 10.0, top: 10.0),
+                                  padding: const EdgeInsets.only(right: 0.0, left: 10.0, top: 10.0),
                                   child: SvgPicture.asset(
                                     "assets/images/benfits.svg",
                                     height: 20,
                                   ),
                                 ),
                                  Padding(
-                                  padding: EdgeInsets.only(right: 10.0, left: 10.0, top: 10.0),
+                                  padding: const EdgeInsets.only(right: 10.0, left: 10.0, top: 10.0),
                                   child: Text(
                                     'Extra Benefits',
                                     style: TextStyle(
@@ -276,7 +269,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
                               ],
                             ),
                             Padding(
-                              padding: EdgeInsets.only(right: 10.0, left: 10.0, top: 10.0),
+                              padding: const EdgeInsets.only(right: 10.0, left: 10.0, top: 10.0),
                               child: SvgPicture.asset(
                                 "assets/images/InfoSquare.svg",
                                 height: 20,
@@ -491,7 +484,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
 
-        Container(
+        SizedBox(
           height: 80, // You can adjust the height as necessary
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -505,8 +498,8 @@ class _RaffleDetailState extends State<RaffleDetail> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: uiMode.value == AppUiModes.dark
-                          ? Color(0xFF2E2E2E)
-                          : Color(0xFFFAFAFA),
+                          ? const Color(0xFF2E2E2E)
+                          : const Color(0xFFFAFAFA),
                       borderRadius: BorderRadius.circular(10.0),
                       boxShadow: [
                         BoxShadow(
@@ -515,7 +508,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
                               : kcLightGrey,
                           blurRadius: 5.0,
                           spreadRadius: 1.0,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -582,8 +575,8 @@ class _RaffleDetailState extends State<RaffleDetail> {
                   child: Container(
                     decoration: BoxDecoration(
                       color: uiMode.value == AppUiModes.dark
-                          ? Color(0xFF2E2E2E)
-                          : Color(0xFFFAFAFA),
+                          ? const Color(0xFF2E2E2E)
+                          : const Color(0xFFFAFAFA),
                       borderRadius: BorderRadius.circular(10.0),
                       boxShadow: [
                         BoxShadow(
@@ -592,7 +585,7 @@ class _RaffleDetailState extends State<RaffleDetail> {
                               : kcLightGrey,
                           blurRadius: 5.0,
                           spreadRadius: 1.0,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),

@@ -23,6 +23,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getProducts({required int page, required int limit});
 
+  Future<ApiResponse> getProductTags();
+
   Future<ApiResponse> getReviews( String productId);
 
   Future<ApiResponse> getRaffle();

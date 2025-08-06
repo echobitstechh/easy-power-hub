@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
@@ -44,7 +43,7 @@ class InfoAlertDialog extends StackedView<InfoAlertDialogModel> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Align(
+              child: const Align(
                 alignment: Alignment.centerRight,
                   child: Icon(Icons.cancel, color: Colors.white)),
             ),

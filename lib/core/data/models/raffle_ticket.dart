@@ -1,7 +1,6 @@
 import 'package:easyph/core/data/models/product.dart';
 import 'package:easyph/core/data/models/profile.dart';
 
-import 'order_item.dart';
 
 class RaffleTicket {
   String? id;

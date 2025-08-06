@@ -146,6 +146,16 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> getProductTags() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "tags",
+    );
+    return response;
+  }
+
+
+  @override
     Future<ApiResponse> getReviews( String productId) async {
       ApiResponse response = await api.call(
         method: HttpMethod.get,

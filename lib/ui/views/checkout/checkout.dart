@@ -55,7 +55,7 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
           verticalSpaceSmall,
           BillingSummary(subtotal: cartSubtotal),
           verticalSpaceSmall,
-          DeliveryMethodWidget(),
+          const DeliveryMethodWidget(),
           verticalSpaceSmall,
           CheckoutPaymentOptions(selectedMethod: viewModel.paymentMethod,
             onMethodChanged: viewModel.updatePaymentMethod),

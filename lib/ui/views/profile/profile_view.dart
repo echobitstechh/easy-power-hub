@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.router.dart';
@@ -10,18 +9,11 @@ import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/components/profile_picture.dart';
 import 'package:easyph/ui/views/profile/order_list.dart';
 import 'package:easyph/ui/views/profile/profile_details.dart';
-import 'package:easyph/ui/views/profile/refferal.dart';
-import 'package:easyph/ui/views/profile/settings.dart';
 import 'package:easyph/ui/views/profile/support.dart';
 import 'package:easyph/ui/views/profile/shipping_addresses_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import '../../../core/network/api_response.dart';
-import '../../../core/network/interceptors.dart';
-import '../enter_email/enter_email_view.dart';
 import 'profile_viewmodel.dart';
 
 class ProfileView extends StatelessWidget {

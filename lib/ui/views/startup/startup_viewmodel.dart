@@ -8,9 +8,6 @@ import 'package:easyph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../core/data/models/profile.dart';
-import '../../../core/data/models/raffle_cart_item.dart';
-import '../../../core/network/api_response.dart';
-import '../../../core/network/interceptors.dart';
 import '../../../state.dart';
 
 class StartupViewModel extends BaseViewModel {

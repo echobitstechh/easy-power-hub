@@ -4,7 +4,6 @@ import '../state.dart';
 import '../ui/common/app_colors.dart';
 import '../ui/common/ui_helpers.dart';
 import 'money_util.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pay/pay.dart';
 import 'inAppPayConfig.dart' as payment_configurations;
 
@@ -29,7 +28,7 @@ class PaymentModalWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Define your modal UI here
-    final List<PaymentItem> _paymentItems = [
+    final List<PaymentItem> paymentItems = [
       PaymentItem(
         label: 'Total',
         amount: totalAmount.toString(),
@@ -78,7 +77,7 @@ class PaymentModalWidget extends StatelessWidget {
                   selectedMethod: selectedPaymentMethod,
                   onTap: () => onPaymentMethodSelected(PaymentMethod.flutterwave),
                 ),
-                _buildApplePayOption(context, _paymentItems),
+                _buildApplePayOption(context, paymentItems),
               ],
             ),
             verticalSpaceMedium,
@@ -151,12 +150,12 @@ class PaymentModalWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildApplePayOption(BuildContext context, List<PaymentItem> _paymentItems) {
+  Widget _buildApplePayOption(BuildContext context, List<PaymentItem> paymentItems) {
     return ApplePayButton(
       paymentConfiguration: PaymentConfiguration.fromJsonString(
         payment_configurations.defaultApplePay,
       ),
-      paymentItems: _paymentItems,
+      paymentItems: paymentItems,
       style: ApplePayButtonStyle.black,
       type: ApplePayButtonType.buy,
       margin: const EdgeInsets.only(top: 15.0),

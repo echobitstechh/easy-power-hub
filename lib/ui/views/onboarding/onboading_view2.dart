@@ -1,9 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
@@ -12,9 +9,10 @@ import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
-import '../auth/login.dart';
 import 'onboading_view3.dart';
 class OnboardingView2 extends StatefulWidget {
+  const OnboardingView2({super.key});
+
   @override
   State<OnboardingView2> createState() => _OnboardingViewState();
 }
@@ -71,13 +69,13 @@ class _OnboardingViewState extends State<OnboardingView2> {
                     ),
                   ),
               
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
                     child: Align(
                       alignment: Alignment.bottomCenter,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: const [
+                        children: [
                           Text(
                             "Explore Our Extensive Catalog",
                             textAlign: TextAlign.center,
@@ -110,11 +108,11 @@ class _OnboardingViewState extends State<OnboardingView2> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => OnboardingView3()),
+                                  builder: (context) => const OnboardingView3()),
                             );
                           },
-                          child: Row(
-                            children: const [
+                          child: const Row(
+                            children: [
                               Text(
                                 "Next",
                                 style: TextStyle(
@@ -135,17 +133,17 @@ class _OnboardingViewState extends State<OnboardingView2> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(36.0),
+            const Padding(
+              padding: EdgeInsets.all(36.0),
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     IndicatorDot(isActive: false),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IndicatorDot(isActive: true),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8),
                     IndicatorDot(isActive: false),
                   ],
                 ),

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -8,48 +7,48 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:app_links/app_links.dart';
 import 'package:update_available/update_available.dart';
+import 'app/dev_utils.dart';
+import 'app/errorHandler.dart';
 import 'firebase_options.dart';
 import 'core/utils/paystack_util.dart';
 import 'core/utils/local_store_dir.dart';
 import 'core/utils/local_stotage.dart';
 import 'utils/money_util.dart';
 import 'state.dart';
-
 import 'app/app.locator.dart';
 import 'app/app.dialogs.dart';
 import 'app/app.bottomsheets.dart';
 import 'app/app.router.dart';
 import 'ui/common/app_colors.dart';
 
-final AppLinks _appLinks = AppLinks();
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
-void main() {
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized(); // ✅ Now inside the zone
-
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-
-    FlutterError.onError =
-        FirebaseCrashlytics.instance.recordFlutterFatalError;
-
-    setupLocator();
-    setupDialogUi();
-    setupBottomSheetUi();
-    PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
-
-    runApp(const MyApp());
-  }, (error, stackTrace) {
-    FirebaseCrashlytics.instance.recordError(error, stackTrace, fatal: true);
-  });
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await ComprehensiveErrorHandler.initialize();
+  await DeepLinkHandler.initialize();
+  runZonedGuarded(_runApp, ComprehensiveErrorHandler.handleZonedError);
 }
 
+Future<void> _runApp() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-      class MyApp extends StatefulWidget {
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
+
+  setupLocator();
+  setupDialogUi();
+  setupBottomSheetUi();
+
+  PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
@@ -60,10 +59,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _initializeUIState();
-    _setupUpdatePrompt();
-    _handleInitialDeepLink();
-    _listenToDeepLinks();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeApp();
   }
 
   @override
@@ -74,54 +71,43 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    FirebaseCrashlytics.instance.setCustomKey('app_lifecycle_state', state.toString());
+
+    // Resume deep link listening when app comes to foreground
     if (state == AppLifecycleState.resumed) {
-      // App returned to foreground (e.g. after payment)
-      _listenToDeepLinks();
+      DeepLinkHandler.resumeListening();
     }
   }
 
-  void _initializeUIState() async {
-    final savedMode = await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
-    if (savedMode == "light") uiMode.value = AppUiModes.light;
-    if (savedMode == "dark") uiMode.value = AppUiModes.dark;
+  void _initializeApp() {
+    _initializeUIState();
+    _setupUpdatePrompt();
+  }
+
+  Future<void> _initializeUIState() async {
+    try {
+      final savedMode = await locator<LocalStorage>().fetch(LocalStorageDir.uiMode);
+      if (savedMode == "light") uiMode.value = AppUiModes.light;
+      if (savedMode == "dark") uiMode.value = AppUiModes.dark;
+
+      await FirebaseCrashlytics.instance.setCustomKey('ui_mode', savedMode ?? 'default');
+    } catch (error) {
+      // Silent error handling
+    }
   }
 
   void _setupUpdatePrompt() {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final availability = await getUpdateAvailability();
-      if (availability is UpdateAvailable) _showUpdateDialog();
+      try {
+        final availability = await getUpdateAvailability();
+        if (availability is UpdateAvailable) {
+          _showUpdateDialog();
+        }
+      } catch (error) {
+        // Silent error handling
+      }
     });
   }
-
-  void _handleInitialDeepLink() async {
-    final uri = await _appLinks.getInitialLink();
-    if (uri != null) _navigateFromUri(uri);
-  }
-
-  void _listenToDeepLinks() {
-    _appLinks.uriLinkStream.listen((uri) {
-      if (uri != null) _navigateFromUri(uri);
-    });
-  }
-
-  void _navigateFromUri(Uri uri) {
-    debugPrint('Deep link received: ${uri.toString()}');
-    debugPrint('URI Scheme: ${uri.scheme}');
-    debugPrint('URI Host: ${uri.host}');
-    debugPrint('URI Path: ${uri.path}');
-    debugPrint('Query Params: ${uri.queryParameters}');
-
-    final host = uri.host.toLowerCase();
-
-    if (host.contains("payment-success")) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        locator<NavigationService>().clearStackAndShow(Routes.paymentSuccessPage);
-      });
-    } else if (host.contains("payment-failed")) {
-      locator<NavigationService>().clearStackAndShow(Routes.orderList);
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +115,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(home: Center(child: CircularProgressIndicator()));
+          return const MaterialApp(
+            home: Center(child: CircularProgressIndicator()),
+            debugShowCheckedModeBanner: false,
+          );
+        }
+
+        if (snapshot.hasData && snapshot.data != null) {
+          FirebaseCrashlytics.instance.setUserIdentifier(snapshot.data!.uid);
         }
 
         return ValueListenableBuilder<AppUiModes>(
@@ -144,6 +137,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             navigatorKey: StackedService.navigatorKey,
             navigatorObservers: [StackedService.routeObserver],
             debugShowCheckedModeBanner: false,
+            builder: (context, widget) {
+              ErrorWidget.builder = ComprehensiveErrorHandler.getErrorWidgetBuilder();
+              return widget ?? const SizedBox.shrink();
+            },
           ),
         );
       },
@@ -192,7 +189,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             children: [
               SvgPicture.asset('assets/icons/update.svg', height: 40),
               const ListTile(
-                title: Text('App Updates', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                title: Text(
+                  'App Updates',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
                 subtitle: Text(
                   'A new version of Easyph is now available.\nDownload now to enjoy our latest features.',
                   style: TextStyle(fontSize: 12),

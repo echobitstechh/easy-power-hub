@@ -183,16 +183,16 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
       });
 
       if (response.statusCode == 201) {
-        locator<SnackbarService>().showSnackbar(message: "Created address successfully", duration: Duration(seconds: 2));
+        locator<SnackbarService>().showSnackbar(message: "Created address successfully", duration: const Duration(seconds: 2));
         loading = false;
         getShippings();
         Navigator.pop(context);
       } else {
         Navigator.pop(context);
-        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: Duration(seconds: 2));
+        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: const Duration(seconds: 2));
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to create address: $e", duration: Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to create address: $e", duration: const Duration(seconds: 2));
     }finally{
       loading = false;
     }
@@ -216,13 +216,13 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
       } else {
         locator<SnackbarService>().showSnackbar(
           message: response.data["message"],
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         );
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
         message: "Failed to fetch addresses: $e",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
     } finally {
       isShippingLoading = false;
@@ -241,13 +241,13 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
       } else {
         locator<SnackbarService>().showSnackbar(
           message: response.data["message"],
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         );
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
         message: "Failed to fetch delivery zones: $e",
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       );
     }
   }
@@ -285,19 +285,25 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
+                      Flexible(
+                        flex: 3,
                         child: Text(
                           address.address ?? '',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
-                          maxLines: 1, // Ensure it doesn't wrap
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      _buildIconButton(Icons.edit, 'Edit', ),
-                      _buildIconButton(Icons.delete, 'Delete'),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildIconButton(Icons.edit, 'Edit'),
+                          _buildIconButton(Icons.delete, 'Delete'),
+                        ],
+                      ),
                     ],
                   ),
                   Text(address.city ?? '', style: const TextStyle(fontSize: 18),),
@@ -324,21 +330,30 @@ class _ShippingAddressesPageState extends State<ShippingAddressesPage> {
   Widget _buildIconButton(IconData icon, String label, [VoidCallback? onPressed]) {
     final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
-      children: [
-        IconButton(
-          icon: Icon(icon),
-          color: isDarkMode ? Colors.white : Colors.grey[600],
-          onPressed: onPressed,
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isDarkMode ? Colors.white : Colors.grey[600],
+              size: 20,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.grey[600],
+                fontSize: 10,
+              ),
+            ),
+          ],
         ),
-        Text(
-          label,
-          style: TextStyle(
-            color: isDarkMode ? Colors.white : Colors.grey[600],
-            fontSize: 12,
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

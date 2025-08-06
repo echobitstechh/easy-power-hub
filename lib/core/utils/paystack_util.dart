@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easyph/utils/money_util.dart';
-import 'package:easyph/core/data/models/profile.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.router.dart';
