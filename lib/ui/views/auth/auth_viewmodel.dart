@@ -130,9 +130,7 @@ class AuthViewModel extends BaseViewModel {
         phone.text = '0${phone.text}';
       }
 
-      // Get FCM token
       String? fcmToken = await FirebaseMessaging.instance.getToken();
-
       // Print FCM token with platform info
       if (Platform.isAndroid) {
         print(" Android FCM Token: $fcmToken");

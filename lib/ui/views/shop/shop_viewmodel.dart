@@ -47,6 +47,10 @@ class ShopViewModel extends BaseViewModel {
   bool shouldShowShowcase = true;  // Controls when to show showcase
 
   final snackBar = locator<SnackbarService>();
+  int currentPage = 1;
+  bool isLastPage = false;
+  bool isLoadingMore = false;
+  final int pageLimit = 10;
 
   @override
   void initialise() {
@@ -56,6 +60,7 @@ class ShopViewModel extends BaseViewModel {
 
   void setSelectedCategory(int id) {
     selectedId = id;
+    selectedBrand = '';
 
     if (id == allCategoriesId) {
       filteredProductList = productList;
@@ -72,10 +77,19 @@ class ShopViewModel extends BaseViewModel {
   void setSelectedBrand(String brand) {
     selectedBrand = brand;
 
-    if (brand.isEmpty) {
-      filteredProductList = productList;
+    List<Product> categoryFiltered;
+    if (selectedId == allCategoriesId) {
+      categoryFiltered = productList;
     } else {
-      filteredProductList = productList.where((product) {
+      categoryFiltered = productList.where((product) {
+        return product.categoryId == selectedId;
+      }).toList();
+    }
+
+    if (brand.isEmpty) {
+      filteredProductList = categoryFiltered;
+    } else {
+      filteredProductList = categoryFiltered.where((product) {
         return product.brandName == brand;
       }).toList();
     }
@@ -83,7 +97,7 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  bool showcaseShown = false; // Track whether the showcase has been shown
+  bool showcaseShown = false;
   void setShowcaseShown(bool value) {
     showcaseShown = value;
     notifyListeners();
@@ -104,7 +118,6 @@ class ShopViewModel extends BaseViewModel {
 
   @override
   void dispose() {
-    // controller.dispose();
     super.dispose();
   }
 
@@ -117,8 +130,6 @@ class ShopViewModel extends BaseViewModel {
     await loadCategories();
     if (userLoggedIn.value == true) {
       initCart();
-      // await getNotifications();
-      // await getProfile();
     }
     setBusy(false);
     notifyListeners();
@@ -177,45 +188,80 @@ class ShopViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> getProducts() async {
-    print('getting online products');
+  Future<void> getProducts({bool isRefresh = false}) async {
+    if (isLoadingMore && !isRefresh) return;
+    if (isLastPage && !isRefresh) return;
+
+    print('Getting products - Page $currentPage');
     try {
-      ApiResponse res = await repo.getProducts();
+      if (isRefresh) {
+        productList.clear();
+        filteredProductList.clear();
+        currentPage = 1;
+        isLastPage = false;
+      }
+
+      isLoadingMore = true;
+      notifyListeners();
+
+      ApiResponse res = await repo.getProducts(
+        page: currentPage,
+        limit: pageLimit,
+      );
 
       if (res.statusCode == 200) {
-        // Fetch updated products from API
-        List<Product> updatedProductList = (res.data["products"] as List)
+        List<Product> newProducts = (res.data["products"] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active') // Filter out inactive
+            .where((product) => product.status?.toLowerCase() == 'active')
             .toList();
 
-        // Update the product list
-        productList = updatedProductList;
-        filteredProductList = productList;
+        final totalPages = res.data["pagination"]["totalPages"];
 
-        // Save updated data to local storage
+        productList.addAll(newProducts);
+
+        // Apply current filters to new products
+        _applyCurrentFilters();
+
+        if (currentPage >= totalPages) {
+          isLastPage = true;
+        } else {
+          currentPage++;
+        }
+        // Save current loaded pages to local storage
         List<Map<String, dynamic>> storedProducts =
         productList.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
         log.i("Updated Products from API saved to storage.");
 
-        // Notify UI about updated data
         notifyListeners();
       } else {
         log.e("API Error: ${res.data["message"]}");
       }
     } catch (e) {
       log.e("Error fetching products: $e");
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
     }
   }
+  void _applyCurrentFilters() {
+    List<Product> filtered = productList;
 
+    if (selectedId != allCategoriesId) {
+      filtered = filtered.where((product) => product.categoryId == selectedId).toList();
+    }
+
+    if (selectedBrand.isNotEmpty) {
+      filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+    }
+
+    filteredProductList = filtered;
+  }
   Future<void> loadCategories() async {
     try {
-      // First try to load from API
       await getCategories();
 
-      // If API fails, fall back to local storage
       if (categories.isEmpty) {
         dynamic storedDonations = await locator<LocalStorage>()
             .fetch(LocalStorageDir.donationsCategories);
@@ -227,7 +273,6 @@ class ShopViewModel extends BaseViewModel {
         }
       }
 
-      // Always include "All" option and update filtered list
       filteredCategories = [
         Category(id: 0, name: 'All', status: CategoryStatus.active),
         ...categories,

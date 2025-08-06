@@ -248,16 +248,19 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ],
                   ),
-                  child: Image.network(
-                    selectedImage,
+                  child: CachedNetworkImage(
+                    imageUrl: selectedImage,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.broken_image,
-                        size: 100,
-                        color: Colors.grey,
-                      );
-                    },
+                    width: MediaQuery.of(context).size.width,
+                    height: 345,
+                    placeholder: (context, url) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorWidget: (context, url, error) => Icon(
+                      Icons.broken_image,
+                      size: 100,
+                      color: Colors.grey,
+                    ),
                   ),
                 ),
               ),
@@ -550,19 +553,22 @@ class _ProductCardState extends State<ProductCard> {
                           children: [
                             ClipRRect(
                               borderRadius: const BorderRadius.all(Radius.circular(12)),
-                              child: Image.network(
-                                product.images != null && product.images!.isNotEmpty
+                              child: CachedNetworkImage(
+                                imageUrl: (product.images != null && product.images!.isNotEmpty)
                                     ? product.images!.first
                                     : 'https://via.placeholder.com/150',
                                 width: 100,
                                 height: 100,
                                 fit: BoxFit.cover,
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
+                                placeholder: (context, url) {
                                   return Center(child: CircularProgressIndicator());
                                 },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Icon(Icons.broken_image, size: 100, color: Colors.white);
+                                errorWidget: (context, url, error) {
+                                  return Icon(
+                                    Icons.broken_image,
+                                    size: 100,
+                                    color: Colors.white,
+                                  );
                                 },
                               ),
                             ),
@@ -688,7 +694,20 @@ class _ProductCardState extends State<ProductCard> {
         border: Border.all(color: Colors.grey, width: 1),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Image.network(imagePath, fit: BoxFit.cover),
+      child: CachedNetworkImage(
+        imageUrl: imagePath,
+        fit: BoxFit.cover,
+        placeholder: (context, url) {
+          return Center(child: CircularProgressIndicator());
+        },
+        errorWidget: (context, url, error) {
+          return const Icon(
+            Icons.broken_image,
+            size: 50,
+            color: Colors.grey,
+          );
+        },
+      ),
     );
   }
 }
