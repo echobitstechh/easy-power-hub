@@ -10,16 +10,18 @@ import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:video_player/video_player.dart';
 
+import '../../../core/data/models/app_notification.dart';
 import '../../../core/data/models/category.dart';
+import '../../../core/data/models/profile.dart';
 import '../../../core/data/models/project.dart';
-import '../../../core/data/models/tags.dart';
 
 class ShopViewModel extends BaseViewModel {
   final repo = locator<Repository>();
+  final bool _isDataLoaded = false;
   int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
   List<Raffle> raffleList = [];
@@ -39,27 +41,10 @@ class ShopViewModel extends BaseViewModel {
 
   bool? onboarded;
 
-  bool showDialog = true;
-  bool modalShown = false;
+  bool showDialog = true;  // Controls when to show the modal
+  bool modalShown = false; // Flag to track if the modal was shown
   bool appBarLoading = false;
-  bool shouldShowShowcase = true;
-
-  List<Tag> _tags = [];
-  Tag? _selectedTag;
-  bool _isLoadingTags = false;
-  bool _hasTagsError = false;
-  String? _tagsError;
-
-
-  List<Tag> get tags => _tags;
-  List<String> get productTags => _tags.map((tag) => tag.name).toList();
-  Tag? get selectedTag => _selectedTag;
-  String? get selectedTagName => _selectedTag?.name;
-  bool get isLoadingTags => _isLoadingTags;
-  bool get hasTagsError => _hasTagsError;
-  String? get tagsError => _tagsError;
-
-
+  bool shouldShowShowcase = true;  // Controls when to show showcase
 
   final snackBar = locator<SnackbarService>();
   int currentPage = 1;
@@ -71,46 +56,26 @@ class ShopViewModel extends BaseViewModel {
   void initialise() {
     init();
   }
-  void _applyFilters() {
-    List<Product> filtered = List.from(productList);
 
-    // Apply category filter
-    if (selectedId != allCategoriesId) {
-      filtered = filtered.where((p) => p.categoryId == selectedId).toList();
-      print('After category filter: ${filtered.length}');
-    }
 
   void setSelectedCategory(int id) {
     selectedId = id;
     selectedBrand = '';
-  
-    if (selectedBrand.isNotEmpty) {
-      filtered = filtered.where((p) => p.brandName == selectedBrand).toList();
-      print('After brand filter: ${filtered.length}');
-    }
-    if (_selectedTag != null) {
-      filtered = filtered.where((product) {
-        if (product.tags != null && product.tags!.isNotEmpty) {
-          return product.tags!.any((tag) => tag.id == _selectedTag!.id);
-        }
 
-        return false;
+    if (id == allCategoriesId) {
+      filteredProductList = productList;
+    } else {
+      print('id is: $id');
+      filteredProductList = productList.where((product) {
+        return product.categoryId == id;
       }).toList();
-      print('After tag filter: ${filtered.length}');
     }
 
-    filteredProductList = filtered;
-    print('Final filtered count: ${filteredProductList.length}');
     notifyListeners();
   }
 
-  void resetFilters() {
-    selectedId = allCategoriesId;
-    selectedBrand = '';
-    _selectedTag = null;
-    filteredProductList = List.from(productList);
-    notifyListeners();
-  }
+  void setSelectedBrand(String brand) {
+    selectedBrand = brand;
 
     List<Product> categoryFiltered;
     if (selectedId == allCategoriesId) {
@@ -128,33 +93,8 @@ class ShopViewModel extends BaseViewModel {
         return product.brandName == brand;
       }).toList();
     }
-  void setSelectedCategory(int id) {
-    _selectedTag = null;
-    selectedId = id;
-    _applyFilters();
-  }
-  void setSelectedBrand(String brand) {
-    _selectedTag = null;
-    selectedBrand = brand;
-    _applyFilters();
-  }
-  void setSelectedTag(Tag? tag) {
-    _selectedTag = tag;
-    _applyFilters();
-  }
-  void clearAllFilters() {
-    selectedId = allCategoriesId;
-    selectedBrand = '';
-    _selectedTag = null;
-    _applyFilters();
-  }
-  Map<String, dynamic> getCurrentFilters() {
-    return {
-      'category': selectedId != allCategoriesId ? selectedId : null,
-      'brand': selectedBrand.isNotEmpty ? selectedBrand : null,
-      'tag': _selectedTag?.name,
-      'hasFilters': selectedId != allCategoriesId || selectedBrand.isNotEmpty || _selectedTag != null,
-    };
+
+    notifyListeners();
   }
 
   bool showcaseShown = false;
@@ -167,7 +107,7 @@ class ShopViewModel extends BaseViewModel {
     final productDate = DateTime.parse(createdAt);
     final currentDate = DateTime.now();
     final difference = currentDate.difference(productDate).inDays;
-    return difference <= 14;
+    return difference <= 14;  // 14 days = 2 weeks
   }
 
   void changeSelected(int i) {
@@ -188,7 +128,6 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
     await loadProduct();
     await loadCategories();
-    await fetchProductTags();
     if (userLoggedIn.value == true) {
       initCart();
     }
@@ -200,8 +139,14 @@ class ShopViewModel extends BaseViewModel {
   Future<void> loadProduct() async {
     print('loading products....');
     try {
+
+
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
+
+
+
+
       if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         log.i("Loaded decoded jsonProducts from storage: ${jsonDecode(storedJsonProduct)}");
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
@@ -211,11 +156,14 @@ class ShopViewModel extends BaseViewModel {
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
         filteredProductList = productList;
-        print(' filtered product: ${filteredProductList.first.tags}');
+
+        // Immediately notify UI to display data
         notifyListeners();
       }else{
         print('no value to load');
       }
+
+      // Make API call in the background
       getProducts();
     } catch (e) {
       log.e("Error loading products: $e");
@@ -223,7 +171,7 @@ class ShopViewModel extends BaseViewModel {
   }
 
 
- Future<void> refreshData() async {
+  Future<void> refreshData() async {
     setBusy(true);
     notifyListeners();
     getResourceList();
@@ -234,7 +182,6 @@ class ShopViewModel extends BaseViewModel {
   void getResourceList(){
     getProducts();
     getCategories();
-    fetchProductTags();
 
     if (userLoggedIn.value == true) {
       initCart();
@@ -280,19 +227,13 @@ class ShopViewModel extends BaseViewModel {
         } else {
           currentPage++;
         }
-        List<Product> updatedProductList = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
-        productList = updatedProductList;
-        print(' filtered product: ${productList.first.tags}');
-        print(' filtered product: ${productList.first}');
-        _applyFilters();
+        // Save current loaded pages to local storage
         List<Map<String, dynamic>> storedProducts =
         productList.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
         log.i("Updated Products from API saved to storage.");
+
         notifyListeners();
       } else {
         log.e("API Error: ${res.data["message"]}");
@@ -320,6 +261,7 @@ class ShopViewModel extends BaseViewModel {
   Future<void> loadCategories() async {
     try {
       await getCategories();
+
       if (categories.isEmpty) {
         dynamic storedDonations = await locator<LocalStorage>()
             .fetch(LocalStorageDir.donationsCategories);
@@ -330,6 +272,7 @@ class ShopViewModel extends BaseViewModel {
               .toList();
         }
       }
+
       filteredCategories = [
         Category(id: 0, name: 'All', status: CategoryStatus.active),
         ...categories,
@@ -345,14 +288,19 @@ class ShopViewModel extends BaseViewModel {
     try {
       ApiResponse res = await repo.getCategories();
       if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
+        // Update categories list with only active ones
         categories = (res.data["categories"] as List)
             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
             .where((category) => category.status == CategoryStatus.active) // Filter out inactive
             .toList();
+
+        // Save the active categories locally
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
         await locator<LocalStorage>()
             .save(LocalStorageDir.donationsCategories, storedCategories);
+
+        // Update filtered list
         filteredCategories = [
           Category(id: 0, name: 'All', status: CategoryStatus.active),
           ...categories,
@@ -367,42 +315,7 @@ class ShopViewModel extends BaseViewModel {
   }
 
 
-  Future<void> fetchProductTags() async {
-    _isLoadingTags = true;
-    _hasTagsError = false;
-    _tagsError = null;
-    notifyListeners();
-    try {
-      ApiResponse res = await repo.getProductTags();
-      if (res.statusCode == 200) {
-        List<dynamic> tagsData = res.data['tags'] ?? [];
-        _tags = tagsData
-            .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
-            .toList();
-        _tags.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _hasTagsError = false;
-        _tagsError = null;
-        print("Loaded ${_tags.length} tags: ${_tags.map((t) => '${t.name} (${t.id})').toList()}");
-      } else {
-        throw Exception('Failed to fetch tags with status: ${res.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error fetching product tags: $e');
-      _hasTagsError = true;
-      _tagsError = 'Failed to load tags. Please try again.';
-      _tags = [];
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to load product tags",
-          duration: const Duration(seconds: 2)
-      );
-    } finally {
-      _isLoadingTags = false;
-      notifyListeners();
-    }
-  }
-  Future<void> refreshTags() async {
-    await fetchProductTags();
-  }
+
 
 
   void addToRaffleCart(Product product) async {
@@ -413,20 +326,25 @@ class ShopViewModel extends BaseViewModel {
       );
 
       if (existingIndex != -1) {
+        // Product already exists, create a new instance to avoid modifying the original reference
         final updatedItem = CartItem(
           product: cart.value[existingIndex].product,
           quantity: cart.value[existingIndex].quantity! + 1,
         );
 
+        // Replace the existing item in the cart list
         cart.value[existingIndex] = updatedItem;
       } else {
+        // Product does not exist, add a new one
         cart.value.add(CartItem(product: product, quantity: 1));
       }
 
+      // Save to local storage
       List<Map<String, dynamic>> storedList =
       cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
 
+      // Save to online cart using API
       final response = await repo.addToCart({
         "productId": product.id,
         "quantity": cart.value.firstWhere((item) => item.product?.id == product.id).quantity,
@@ -434,15 +352,15 @@ class ShopViewModel extends BaseViewModel {
 
       if (response.statusCode == 200) {
         locator<SnackbarService>().showSnackbar(
-            message: "Product added to cart", duration: const Duration(seconds: 2));
+            message: "Product added to cart", duration: Duration(seconds: 2));
       } else {
         locator<SnackbarService>().showSnackbar(
-            message: response.data["message"], duration: const Duration(seconds: 2));
+            message: response.data["message"], duration: Duration(seconds: 2));
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
           message: "Failed to add raffle to cart: $e",
-          duration: const Duration(seconds: 2));
+          duration: Duration(seconds: 2));
     } finally {
       notifyListeners();
     }
@@ -457,34 +375,38 @@ class ShopViewModel extends BaseViewModel {
     cart.value = localRaffleCart;
     cart.notifyListeners();
   }
-  
+
   Future<void> decreaseRaffleQuantity(RaffleCartItem item) async {
     setBusy(true);
     try {
       if (item.quantity! > 1) {
         item.quantity = item.quantity! - 1;
 
+        // Update online cart
         await repo.addToCart({
           "raffle": item.raffle?.id,
           "quantity": item.quantity,
         });
       } else if (item.quantity! == 1) {
+        // Remove from local cart
         cart.value.removeWhere((cartItem) => cartItem.product?.id == item.raffle?.id);
 
+        // Remove from online cart
         await repo.deleteFromCart(item.raffle!.id!);
       }
 
+      // Save to local storage
       List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
       await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: Duration(seconds: 2));
       log.e(e);
     } finally {
       setBusy(false);
       cart.notifyListeners();
     }
   }
-  
+
   Future<void> increaseRaffleQuantity(CartItem item) async {
     setBusy(true);
     try {
@@ -505,7 +427,7 @@ class ShopViewModel extends BaseViewModel {
         await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: Duration(seconds: 2));
       log.e(e);
     } finally {
       setBusy(false);
@@ -530,6 +452,7 @@ class ShopViewModel extends BaseViewModel {
 
   void onEnd() {
     print('onEnd');
+    //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
     notifyListeners();
   }
 
