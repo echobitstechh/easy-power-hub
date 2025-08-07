@@ -15,6 +15,7 @@ import '../../../utils/money_util.dart';
 import '../../components/empty_state.dart';
 import '../../components/shimmer.dart';
 import 'shop_viewmodel.dart';
+import '../../../core/data/models/tags.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
