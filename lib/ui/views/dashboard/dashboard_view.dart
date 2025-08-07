@@ -822,7 +822,10 @@ class DashboardView extends StackedView<DashboardViewModel> {
                                           double ratingValue = item.rating ?? 0.0;
                                           return LinearGradient(
                                             stops: [ratingValue / 5, ratingValue / 5],
+
                                             colors: [Colors.amber, Colors.grey],
+
+                                            
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(
