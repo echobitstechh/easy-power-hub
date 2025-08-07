@@ -71,7 +71,8 @@ class ShopViewModel extends BaseViewModel {
   void initialise() {
     init();
   }
-  void _applyFilters() {
+
+void _applyFilters() {
     List<Product> filtered = List.from(productList);
 
     // Apply category filter
@@ -80,10 +81,7 @@ class ShopViewModel extends BaseViewModel {
       print('After category filter: ${filtered.length}');
     }
 
-  void setSelectedCategory(int id) {
-    selectedId = id;
-    selectedBrand = '';
-  
+    // Apply brand filter
     if (selectedBrand.isNotEmpty) {
       filtered = filtered.where((p) => p.brandName == selectedBrand).toList();
       print('After brand filter: ${filtered.length}');
@@ -112,22 +110,24 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-    List<Product> categoryFiltered;
-    if (selectedId == allCategoriesId) {
-      categoryFiltered = productList;
-    } else {
-      categoryFiltered = productList.where((product) {
-        return product.categoryId == selectedId;
-      }).toList();
-    }
+    // List<Product> categoryFiltered;
+    // if (selectedId == allCategoriesId) {
+    //   categoryFiltered = productList;
+    // } else {
+    //   categoryFiltered = productList.where((product) {
+    //     return product.categoryId == selectedId;
+    //   }).toList();
+    // }
 
-    if (brand.isEmpty) {
-      filteredProductList = categoryFiltered;
-    } else {
-      filteredProductList = categoryFiltered.where((product) {
-        return product.brandName == brand;
-      }).toList();
-    }
+    // if (brand.isEmpty) {
+    //   filteredProductList = categoryFiltered;
+    // } else {
+    //   filteredProductList = categoryFiltered.where((product) {
+    //     return product.brandName == brand;
+    //   }).toList();
+    // } 
+
+
   void setSelectedCategory(int id) {
     _selectedTag = null;
     selectedId = id;

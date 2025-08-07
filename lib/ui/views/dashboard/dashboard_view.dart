@@ -825,7 +825,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
                                             colors: [Colors.amber, Colors.grey],
 
-                                            colors: const [Colors.amber, Colors.grey],
+                                            
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(

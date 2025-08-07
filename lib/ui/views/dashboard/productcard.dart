@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:easyph/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
@@ -255,13 +256,6 @@ class _ProductCardState extends State<ProductCard> {
                       size: 100,
                       color: Colors.grey,
                     ),
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.broken_image,
-                        size: 100,
-                        color: Colors.grey,
-                      );
-                    },
                   ),
                 ),
               ),
@@ -570,12 +564,6 @@ class _ProductCardState extends State<ProductCard> {
                                     size: 100,
                                     color: Colors.white,
                                   );
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const Center(child: CircularProgressIndicator());
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.broken_image, size: 100, color: Colors.white);
                                 },
                               ),
                             ),
