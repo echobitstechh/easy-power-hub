@@ -31,7 +31,8 @@ class ShopViewModel extends BaseViewModel {
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
   List<Category> categories = [];
-
+  List<String> _brandsForSelectedTag = [];
+  
   static const int allCategoriesId = 0;
 
   int selectedId = allCategoriesId;
@@ -43,6 +44,7 @@ class ShopViewModel extends BaseViewModel {
   bool modalShown = false;
   bool appBarLoading = false;
   bool shouldShowShowcase = true;
+  bool _showingTagBrands = false;
 
   List<Tag> _tags = [];
   Tag? _selectedTag;
@@ -63,6 +65,8 @@ class ShopViewModel extends BaseViewModel {
   bool get isLoadingTags => _isLoadingTags;
   bool get hasTagsError => _hasTagsError;
   String? get tagsError => _tagsError;
+  List<String> get brandsForSelectedTag => _brandsForSelectedTag;
+  bool get showingTagBrands => _showingTagBrands;
 
   final snackBar = locator<SnackbarService>();
 
@@ -121,8 +125,28 @@ class ShopViewModel extends BaseViewModel {
   }
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
+
+     if (tag != null) {
+    // When a tag is selected, switch to showing brands for that tag
+    _brandsForSelectedTag = _getBrandsForTag(tag);
+    _showingTagBrands = true;
+    // Reset category and brand selections when tag is selected
+    selectedId = allCategoriesId;
+    selectedBrand = '';
+  } else {
+    // When tag is unselected, go back to normal categories
+    _brandsForSelectedTag = [];
+    _showingTagBrands = false;
+  }
+
     _applyFilters();
   }
+
+  void setSelectedTagBrand(String brand) {
+    selectedBrand = brand;
+    _applyFilters();
+  }
+
   void clearAllFilters() {
     selectedId = allCategoriesId;
     selectedBrand = '';
@@ -377,6 +401,26 @@ class ShopViewModel extends BaseViewModel {
   }
   Future<void> refreshTags() async {
     await fetchProductTags();
+  }
+
+  List<String> _getBrandsForTag(Tag tag) {
+    // Get products that have this tag
+    final productsWithTag = productList.where((product) {
+      if (product.tags != null && product.tags!.isNotEmpty) {
+        return product.tags!.any((productTag) => productTag.id == tag.id);
+      }
+      return false;
+    }).toList();
+    
+    // Extract unique brand names
+    final brands = productsWithTag
+        .map((product) => product.brandName ?? "")
+        .where((brand) => brand.isNotEmpty)
+        .toSet()
+        .toList();
+    
+    brands.sort(); // Sort alphabetically
+    return brands;
   }
 
   void addToRaffleCart(Product product) async {
