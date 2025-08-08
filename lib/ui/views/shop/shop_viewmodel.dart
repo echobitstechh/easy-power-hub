@@ -50,6 +50,11 @@ class ShopViewModel extends BaseViewModel {
   bool _hasTagsError = false;
   String? _tagsError;
 
+  // Pagination variables
+  int currentPage = 1;
+  bool isLastPage = false;
+  bool isLoadingMore = false;
+  final int pageLimit = 10;
 
   List<Tag> get tags => _tags;
   List<String> get productTags => _tags.map((tag) => tag.name).toList();
@@ -59,20 +64,14 @@ class ShopViewModel extends BaseViewModel {
   bool get hasTagsError => _hasTagsError;
   String? get tagsError => _tagsError;
 
-
-
   final snackBar = locator<SnackbarService>();
-  int currentPage = 1;
-  bool isLastPage = false;
-  bool isLoadingMore = false;
-  final int pageLimit = 10;
 
   @override
   void initialise() {
     init();
   }
 
-void _applyFilters() {
+  void _applyFilters() {
     List<Product> filtered = List.from(productList);
 
     // Apply category filter
@@ -109,24 +108,6 @@ void _applyFilters() {
     filteredProductList = List.from(productList);
     notifyListeners();
   }
-
-    // List<Product> categoryFiltered;
-    // if (selectedId == allCategoriesId) {
-    //   categoryFiltered = productList;
-    // } else {
-    //   categoryFiltered = productList.where((product) {
-    //     return product.categoryId == selectedId;
-    //   }).toList();
-    // }
-
-    // if (brand.isEmpty) {
-    //   filteredProductList = categoryFiltered;
-    // } else {
-    //   filteredProductList = categoryFiltered.where((product) {
-    //     return product.brandName == brand;
-    //   }).toList();
-    // } 
-
 
   void setSelectedCategory(int id) {
     _selectedTag = null;
@@ -175,12 +156,10 @@ void _applyFilters() {
     rebuildUi();
   }
 
-
   @override
   void dispose() {
     super.dispose();
   }
-
 
   Future<void> init() async {
     setBusy(true);
@@ -196,34 +175,31 @@ void _applyFilters() {
     notifyListeners();
   }
 
-
   Future<void> loadProduct() async {
     print('loading products....');
     try {
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
+
       if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
-        log.i("Loaded decoded jsonProducts from storage: ${jsonDecode(storedJsonProduct)}");
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        log.i("Loaded Products from storage: $storedProducts");
-        // Populate productList and filteredProductList
         productList = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
         filteredProductList = productList;
-        print(' filtered product: ${filteredProductList.first.tags}');
-        notifyListeners();
+        print('loaded products from local storage list ${productList.length}');
+        rebuildUi();
       }else{
         print('no value to load');
       }
+
       getProducts();
     } catch (e) {
       log.e("Error loading products: $e");
     }
   }
 
-
- Future<void> refreshData() async {
+  Future<void> refreshData() async {
     setBusy(true);
     notifyListeners();
     getResourceList();
@@ -232,7 +208,7 @@ void _applyFilters() {
   }
 
   void getResourceList(){
-    getProducts();
+    getProducts(isRefresh: true);
     getCategories();
     fetchProductTags();
 
@@ -280,20 +256,11 @@ void _applyFilters() {
         } else {
           currentPage++;
         }
-        List<Product> updatedProductList = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
-        productList = updatedProductList;
-        print(' filtered product: ${productList.first.tags}');
-        print(' filtered product: ${productList.first}');
-        _applyFilters();
         List<Map<String, dynamic>> storedProducts =
         productList.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
-        log.i("Updated Products from API saved to storage.");
-        notifyListeners();
+        rebuildUi();
       } else {
         log.e("API Error: ${res.data["message"]}");
       }
@@ -313,6 +280,15 @@ void _applyFilters() {
 
     if (selectedBrand.isNotEmpty) {
       filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+    }
+
+    if (_selectedTag != null) {
+      filtered = filtered.where((product) {
+        if (product.tags != null && product.tags!.isNotEmpty) {
+          return product.tags!.any((tag) => tag.id == _selectedTag!.id);
+        }
+        return false;
+      }).toList();
     }
 
     filteredProductList = filtered;
@@ -366,7 +342,6 @@ void _applyFilters() {
     }
   }
 
-
   Future<void> fetchProductTags() async {
     _isLoadingTags = true;
     _hasTagsError = false;
@@ -403,7 +378,6 @@ void _applyFilters() {
   Future<void> refreshTags() async {
     await fetchProductTags();
   }
-
 
   void addToRaffleCart(Product product) async {
     print('adding to cart');
@@ -449,15 +423,20 @@ void _applyFilters() {
   }
 
   void initCart() async {
-    dynamic raffle = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
-    dynamic store = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
-    List<CartItem> localRaffleCart = List<Map<String, dynamic>>.from(raffle)
-        .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-    cart.value = localRaffleCart;
-    cart.notifyListeners();
+    try {
+      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
+
+      if (storedData != null) {
+        List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
+            .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
+            .toList();
+        cart.value = localCart;
+      }
+    } catch (e) {
+      print('Failed to load cart from local storage: $e');
+    }
   }
-  
+
   Future<void> decreaseRaffleQuantity(RaffleCartItem item) async {
     setBusy(true);
     try {
@@ -484,7 +463,7 @@ void _applyFilters() {
       cart.notifyListeners();
     }
   }
-  
+
   Future<void> increaseRaffleQuantity(CartItem item) async {
     setBusy(true);
     try {
@@ -513,24 +492,17 @@ void _applyFilters() {
     }
   }
 
-
-
-
   String formatRemainingTime(DateTime drawDate) {
     final now = DateTime.now();
     final difference = drawDate.difference(now);
-    // Format the Duration to your needs
     final hours = difference.inHours;
     final minutes = difference.inMinutes.remainder(60);
     final seconds = difference.inSeconds.remainder(60);
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
 
-
-
   void onEnd() {
     print('onEnd');
     notifyListeners();
   }
-
 }
