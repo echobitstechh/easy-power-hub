@@ -50,6 +50,6 @@ app.*.map.json
 .fvm/
 .fvmrc
 .vscode/settings.json
-pubspec.lock
+.pubspec.lock
 
 sentry.properties
