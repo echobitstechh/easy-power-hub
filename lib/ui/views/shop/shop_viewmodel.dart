@@ -28,6 +28,7 @@ class ShopViewModel extends BaseViewModel {
   List<ProjectResource> projectResources = [];
   List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
+  List<String> brands = [];
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
   List<Category> categories = [];
@@ -43,6 +44,7 @@ class ShopViewModel extends BaseViewModel {
   bool modalShown = false;
   bool appBarLoading = false;
   bool shouldShowShowcase = true;
+  bool get isTagFilterActive => _selectedTag != null;
 
   List<Tag> _tags = [];
   Tag? _selectedTag;
@@ -50,7 +52,6 @@ class ShopViewModel extends BaseViewModel {
   bool _hasTagsError = false;
   String? _tagsError;
 
-  // Pagination variables
   int currentPage = 1;
   bool isLastPage = false;
   bool isLoadingMore = false;
@@ -72,32 +73,48 @@ class ShopViewModel extends BaseViewModel {
   }
 
   void _applyFilters() {
-    List<Product> filtered = List.from(productList);
+    Set<String> seenProductIds = {};
+    List<Product> filtered = [];
 
-    // Apply category filter
-    if (selectedId != allCategoriesId) {
-      filtered = filtered.where((p) => p.categoryId == selectedId).toList();
-      print('After category filter: ${filtered.length}');
-    }
+    for (Product product in productList) {
+      if (seenProductIds.contains(product.id)) {
+        continue;
+      }
 
-    // Apply brand filter
-    if (selectedBrand.isNotEmpty) {
-      filtered = filtered.where((p) => p.brandName == selectedBrand).toList();
-      print('After brand filter: ${filtered.length}');
-    }
-    if (_selectedTag != null) {
-      filtered = filtered.where((product) {
+      bool matchesFilters = true;
+
+      if (selectedId != allCategoriesId) {
+        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+      }
+
+      if (selectedBrand.isNotEmpty) {
+        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+      }
+
+      if (_selectedTag != null) {
+        bool hasMatchingTag = false;
         if (product.tags != null && product.tags!.isNotEmpty) {
-          return product.tags!.any((tag) => tag.id == _selectedTag!.id);
+          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
         }
-
-        return false;
-      }).toList();
-      print('After tag filter: ${filtered.length}');
+        matchesFilters = matchesFilters && hasMatchingTag;
+      }
+      if (matchesFilters) {
+        filtered.add(product);
+        seenProductIds.add(product.id!);
+      }
     }
 
     filteredProductList = filtered;
-    print('Final filtered count: ${filteredProductList.length}');
+    print('After applying filters: ${filteredProductList.length} unique products');
+
+    Set<String> uniqueBrands = {};
+    for (Product product in filteredProductList) {
+      if (product.brandName != null && product.brandName!.isNotEmpty) {
+        uniqueBrands.add(product.brandName!);
+      }
+    }
+    brands = uniqueBrands.toList();
+
     notifyListeners();
   }
 
@@ -105,7 +122,24 @@ class ShopViewModel extends BaseViewModel {
     selectedId = allCategoriesId;
     selectedBrand = '';
     _selectedTag = null;
-    filteredProductList = List.from(productList);
+
+    Set<String> seenIds = {};
+    List<Product> uniqueProducts = [];
+    for (Product product in productList) {
+      if (!seenIds.contains(product.id)) {
+        uniqueProducts.add(product);
+        seenIds.add(product.id!);
+      }
+    }
+
+    filteredProductList = uniqueProducts;
+    Set<String> uniqueBrands = {};
+    for (Product product in filteredProductList) {
+      if (product.brandName != null && product.brandName!.isNotEmpty) {
+        uniqueBrands.add(product.brandName!);
+      }
+    }
+    brands = uniqueBrands.toList();
     notifyListeners();
   }
 
@@ -114,21 +148,25 @@ class ShopViewModel extends BaseViewModel {
     selectedId = id;
     _applyFilters();
   }
+
   void setSelectedBrand(String brand) {
     _selectedTag = null;
     selectedBrand = brand;
     _applyFilters();
   }
+
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
     _applyFilters();
   }
+
   void clearAllFilters() {
     selectedId = allCategoriesId;
     selectedBrand = '';
     _selectedTag = null;
     _applyFilters();
   }
+
   Map<String, dynamic> getCurrentFilters() {
     return {
       'category': selectedId != allCategoriesId ? selectedId : null,
@@ -163,7 +201,7 @@ class ShopViewModel extends BaseViewModel {
 
   Future<void> init() async {
     setBusy(true);
-    print("loading the initials" );
+    print("loading the initials");
     notifyListeners();
     await loadProduct();
     await loadCategories();
@@ -181,15 +219,33 @@ class ShopViewModel extends BaseViewModel {
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
-      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
+      if (storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        productList = storedProducts
+        List<Product> loadedProducts = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-        filteredProductList = productList;
-        print('loaded products from local storage list ${productList.length}');
+
+        Set<String> seenIds = {};
+        productList = [];
+        for (Product product in loadedProducts) {
+          if (!seenIds.contains(product.id)) {
+            productList.add(product);
+            seenIds.add(product.id!);
+          }
+        }
+
+        filteredProductList = List.from(productList);
+        print('loaded ${productList.length} unique products from local storage');
+
+        Set<String> uniqueBrands = {};
+        for (Product product in filteredProductList) {
+          if (product.brandName != null && product.brandName!.isNotEmpty) {
+            uniqueBrands.add(product.brandName!);
+          }
+        }
+        brands = uniqueBrands.toList();
         rebuildUi();
-      }else{
+      } else {
         print('no value to load');
       }
 
@@ -207,7 +263,7 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void getResourceList(){
+  void getResourceList() {
     getProducts(isRefresh: true);
     getCategories();
     fetchProductTags();
@@ -218,6 +274,12 @@ class ShopViewModel extends BaseViewModel {
   }
 
   Future<void> getProducts({bool isRefresh = false}) async {
+    // If a tag is selected, don't load more products via pagination
+    if (_selectedTag != null && !isRefresh) {
+      print('Tag is selected, skipping pagination load');
+      return;
+    }
+
     if (isLoadingMore && !isRefresh) return;
     if (isLastPage && !isRefresh) return;
 
@@ -228,6 +290,7 @@ class ShopViewModel extends BaseViewModel {
         filteredProductList.clear();
         currentPage = 1;
         isLastPage = false;
+        _selectedTag = null;
       }
 
       isLoadingMore = true;
@@ -246,18 +309,40 @@ class ShopViewModel extends BaseViewModel {
 
         final totalPages = res.data["pagination"]["totalPages"];
 
-        productList.addAll(newProducts);
+        Set<String> existingIds = productList.map((p) => p.id!).toSet();
+        for (Product newProduct in newProducts) {
+          if (!existingIds.contains(newProduct.id)) {
+            productList.add(newProduct);
+          }
+        }
 
-        // Apply current filters to new products
         _applyCurrentFilters();
+
+        Set<String> uniqueBrands = {};
+        for (Product product in productList) {
+          if (product.brandName != null && product.brandName!.isNotEmpty) {
+            uniqueBrands.add(product.brandName!);
+          }
+        }
+        brands = uniqueBrands.toList();
 
         if (currentPage >= totalPages) {
           isLastPage = true;
         } else {
           currentPage++;
         }
-        List<Map<String, dynamic>> storedProducts =
-        productList.map((e) => e.toJson()).toList();
+
+        // Save unique products to storage
+        Set<String> seenIds = {};
+        List<Product> uniqueProducts = [];
+        for (Product product in productList) {
+          if (!seenIds.contains(product.id)) {
+            uniqueProducts.add(product);
+            seenIds.add(product.id!);
+          }
+        }
+
+        List<Map<String, dynamic>> storedProducts = uniqueProducts.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
         rebuildUi();
@@ -271,28 +356,43 @@ class ShopViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
   void _applyCurrentFilters() {
-    List<Product> filtered = productList;
+    Set<String> seenProductIds = {};
+    List<Product> filtered = [];
 
-    if (selectedId != allCategoriesId) {
-      filtered = filtered.where((product) => product.categoryId == selectedId).toList();
-    }
+    for (Product product in productList) {
+      if (seenProductIds.contains(product.id)) {
+        continue;
+      }
 
-    if (selectedBrand.isNotEmpty) {
-      filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
-    }
+      bool matchesFilters = true;
 
-    if (_selectedTag != null) {
-      filtered = filtered.where((product) {
+      if (selectedId != allCategoriesId) {
+        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+      }
+
+      if (selectedBrand.isNotEmpty) {
+        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+      }
+
+      if (_selectedTag != null) {
+        bool hasMatchingTag = false;
         if (product.tags != null && product.tags!.isNotEmpty) {
-          return product.tags!.any((tag) => tag.id == _selectedTag!.id);
+          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
         }
-        return false;
-      }).toList();
+        matchesFilters = matchesFilters && hasMatchingTag;
+      }
+
+      if (matchesFilters) {
+        filtered.add(product);
+        seenProductIds.add(product.id!);
+      }
     }
 
     filteredProductList = filtered;
   }
+
   Future<void> loadCategories() async {
     try {
       await getCategories();
@@ -302,7 +402,7 @@ class ShopViewModel extends BaseViewModel {
         if (storedDonations != null) {
           categories = List<Map<String, dynamic>>.from(storedDonations)
               .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+              .where((category) => category.status == CategoryStatus.active)
               .toList();
         }
       }
@@ -323,7 +423,7 @@ class ShopViewModel extends BaseViewModel {
       if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
         categories = (res.data["categories"] as List)
             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-            .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+            .where((category) => category.status == CategoryStatus.active)
             .toList();
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
@@ -375,6 +475,7 @@ class ShopViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
   Future<void> refreshTags() async {
     await fetchProductTags();
   }
@@ -473,13 +574,11 @@ class ShopViewModel extends BaseViewModel {
         cart.value[index] = item;
         cart.value = List.from(cart.value);
 
-        // Update online cart
         await repo.addToCart({
           "raffle": item.product?.id,
           "quantity": item.quantity,
         });
 
-        // Save to local storage
         List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
       }

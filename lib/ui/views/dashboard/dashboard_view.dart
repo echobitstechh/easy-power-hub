@@ -26,8 +26,10 @@ import 'package:top_bottom_sheet_flutter/top_bottom_sheet_flutter.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
+import '../../components/shimmer.dart';
 import '../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
+import '../../../core/data/models/tags.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -109,8 +111,14 @@ class DashboardView extends StackedView<DashboardViewModel> {
         tiles.add(
           GestureDetector(
             onTap: () {
+              final isSpecial = ['solar', 'electronics', 'light'].contains(key);
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (c) => ShopView(filter: category)),
+                MaterialPageRoute(
+                  builder: (c) => ShopView(
+                    filter: category,
+                    isSpecialCategory: isSpecial,
+                  ),
+                ),
               );
             },
             child: actionContainer(imagePath, key.capitalize(), context),
@@ -215,106 +223,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ),
                     );
                   },
-                  // optionsViewBuilder: (BuildContext context,
-                  //     AutocompleteOnSelected<Product> onSelected,
-                  //     Iterable<Product> options) {
-                  //   return Align(
-                  //     alignment: Alignment.topLeft,
-                  //     child: Material(
-                  //       elevation: 4,
-                  //       borderRadius: BorderRadius.circular(8),
-                  //       child: Container(
-                  //         constraints: const BoxConstraints(
-                  //           maxHeight: 250, // scrollable max height
-                  //           maxWidth: 350,  // limits width of dropdown
-                  //         ),
-                  //         decoration: BoxDecoration(
-                  //           color: Colors.white,
-                  //           borderRadius: BorderRadius.circular(8),
-                  //         ),
-                  //         child:
-                  //         // ListView.builder(
-                  //         //   padding: EdgeInsets.zero,
-                  //         //   shrinkWrap: true,
-                  //         //   itemCount: options.length,
-                  //         //   itemBuilder: (BuildContext context, int index) {
-                  //         //     final Product product = options.elementAt(index);
-                  //         //     return ListTile(
-                  //         //       leading: (product.images != null && product.images!.isNotEmpty)
-                  //         //           ? Image.network(
-                  //         //         product.images!.first,
-                  //         //         width: 35,
-                  //         //         height: 35,
-                  //         //         fit: BoxFit.cover,
-                  //         //       )
-                  //         //           : const Icon(Icons.image, size: 30),
-                  //         //       title: Text(
-                  //         //         product.productName ?? "",
-                  //         //         style: const TextStyle(
-                  //         //           fontSize: 13,
-                  //         //           fontWeight: FontWeight.w500,
-                  //         //           overflow: TextOverflow.ellipsis,
-                  //         //         ),
-                  //         //         maxLines: 2,
-                  //         //       ),
-                  //         //       onTap: () => onSelected(product),
-                  //         //     );
-                  //         //   },
-                  //         // ),
-                  //           NotificationListener<ScrollNotification>(
-                  //             onNotification: (scrollNotification) {
-                  //               if (scrollNotification is ScrollEndNotification &&
-                  //                   scrollNotification.metrics.pixels == scrollNotification.metrics.maxScrollExtent) {
-                  //                 viewModel.getProducts(); // This will load the next page
-                  //               }
-                  //               return false;
-                  //             },
-                  //             child: ListView.builder(
-                  //               padding: EdgeInsets.zero,
-                  //               shrinkWrap: true,
-                  //               itemCount: viewModel.productList.length + (viewModel.isLoadingMore ? 1 : 0),
-                  //               itemBuilder: (BuildContext context, int index) {
-                  //                 // Show loading spinner at the end while fetching more
-                  //                 if (index == viewModel.productList.length) {
-                  //                   return const Center(
-                  //                     child: Padding(
-                  //                       padding: EdgeInsets.symmetric(vertical: 20),
-                  //                       child: CircularProgressIndicator(strokeWidth: 2),
-                  //                     ),
-                  //                   );
-                  //                 }
-                  //
-                  //                 final Product product = viewModel.productList[index];
-                  //
-                  //                 return ListTile(
-                  //                   leading: (product.images != null && product.images!.isNotEmpty)
-                  //                       ? Image.network(
-                  //                     product.images!.first,
-                  //                     width: 35,
-                  //                     height: 35,
-                  //                     fit: BoxFit.cover,
-                  //                   )
-                  //                       : const Icon(Icons.image, size: 30),
-                  //                   title: Text(
-                  //                     product.productName ?? "",
-                  //                     style: const TextStyle(
-                  //                       fontSize: 13,
-                  //                       fontWeight: FontWeight.w500,
-                  //                       overflow: TextOverflow.ellipsis,
-                  //                     ),
-                  //                     maxLines: 2,
-                  //                   ),
-                  //                   onTap: () => onSelected(product),
-                  //                 );
-                  //               },
-                  //             ),
-                  //           )
-                  //
-                  //       ),
-                  //     ),
-                  //   );
-                    // In your DashboardView class, replace the optionsViewBuilder section with this:
-
                     optionsViewBuilder: (BuildContext context,
                         AutocompleteOnSelected<Product> onSelected,
                         Iterable<Product> options) {
@@ -380,7 +288,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         onNotification: (ScrollNotification scrollInfo) {
           if (scrollInfo is ScrollEndNotification &&
               scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-            viewModel.getProducts(); // This will load the next page
+            viewModel.getProducts();
           }
           return false;
         },
@@ -882,23 +790,23 @@ class DashboardView extends StackedView<DashboardViewModel> {
         children: [
           verticalSpaceSmall,
           _buildAdsSlideshow(),
-          // quickActions(context),
           verticalSpaceSmall,
           Container(
-            padding: const EdgeInsets.all(0),
-            child: GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 2,
               padding: const EdgeInsets.all(0),
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              children: buildGridItems(context, viewModel),
-            )
-
+              child: GridView.count(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 2,
+                padding: const EdgeInsets.all(0),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: buildGridItems(context, viewModel),
+              )
           ),
           verticalSpaceMedium,
+          _buildProductTagsSection(context, viewModel),
+          verticalSpaceSmall,
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -916,7 +824,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
   }
 
   Widget _buildAdsSlideshow() {
-    // List of static GIF asset paths
     final List<String> gifList = [
       "assets/gif/quality_power_supply.gif",
       "assets/gif/easy_power_hub.gif",
@@ -1310,6 +1217,101 @@ class DashboardView extends StackedView<DashboardViewModel> {
     }
   }
 
+  Widget _buildProductTagsSection(BuildContext context, DashboardViewModel viewModel) {
+    if (viewModel.isLoadingTags) {
+      return buildTagsShimmerLoading(false);
+    }
+
+    if (viewModel.hasTagsError) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              viewModel.tagsError ?? 'Error loading tags',
+              style: const TextStyle(color: Colors.red, fontSize: 12),
+            ),
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => viewModel.refreshTags(),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (viewModel.tags.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      height: 160,
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: GridView.builder(
+        scrollDirection: Axis.horizontal,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+          childAspectRatio: 1.0,
+        ),
+        itemCount: viewModel.tags.length,
+        itemBuilder: (context, index) {
+          final tag = viewModel.tags[index];
+          return _buildTagChip(context, tag, viewModel);
+        },
+      ),
+    );
+  }
+  Widget _buildTagChip(BuildContext context, Tag tag, DashboardViewModel viewModel) {
+    final isSelected = viewModel.selectedTag?.id == tag.id;
+    return InkWell(
+      onTap: () {
+        viewModel.setSelectedTag(isSelected ? null : tag);
+      },
+      child: Container(
+        margin: const EdgeInsets.all(4),
+        child: Column(
+          children: [
+            Container(
+              height: 50,
+              width: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: tag.image != null && tag.image!.isNotEmpty
+                    ? DecorationImage(
+                  image: CachedNetworkImageProvider(tag.image!),
+                  fit: BoxFit.cover,
+                )
+                    : null,
+                color: tag.image == null || tag.image!.isEmpty
+                    ? Colors.grey[200]
+                    : null,
+              ),
+              child: tag.image == null || tag.image!.isEmpty
+                  ? const Center(child: Icon(Icons.category, size: 30))
+                  : null,
+            ),
+            // const SizedBox(height: 4),
+            Text(
+              tag.name,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? kcSecondaryColor : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
@@ -1470,7 +1472,6 @@ class RaffleRow extends StatelessWidget {
       ),
     );
   }
-
   Future<Color?> _updateTextColor(String imageUrl) async {
     final PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImageProvider(

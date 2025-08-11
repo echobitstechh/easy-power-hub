@@ -1,32 +1,37 @@
 import 'dart:convert';
+
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.logger.dart';
+import 'package:easyph/core/data/models/cart_item.dart';
 import 'package:easyph/core/data/models/product.dart';
+import 'package:easyph/core/data/models/raffle_cart_item.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
 import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/state.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import '../../../core/data/models/cart_item.dart';
+
 import '../../../core/data/models/category.dart';
-import '../../../core/network/interceptors.dart';
+import '../../../core/data/models/project.dart';
+import '../../../core/data/models/tags.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
   int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
+  List<Raffle> raffleList = [];
+  List<Project> projects = [];
   List<Ads> adsList = [];
+  List<ProjectResource> projectResources = [];
+  List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
+  List<String> brands = [];
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
-  List<String> brands = [];
-  List<Category> filteredCategoriesList = [];
   List<Category> categories = [];
-  double discountAmount = 0.0;
-  bool freeDelivery = false;
-  Set<String> loadingItems = {};
 
   static const int allCategoriesId = 0;
 
@@ -35,85 +40,161 @@ class DashboardViewModel extends BaseViewModel {
 
   bool? onboarded;
 
+  bool showDialog = true;
+  bool modalShown = false;
   bool appBarLoading = false;
-  final snackBar = locator<SnackbarService>();
+  bool shouldShowShowcase = true;
+  bool get isTagFilterActive => _selectedTag != null;
+
+  List<Tag> _tags = [];
+  Tag? _selectedTag;
+  bool _isLoadingTags = false;
+  bool _hasTagsError = false;
+  String? _tagsError;
 
   int currentPage = 1;
   bool isLastPage = false;
   bool isLoadingMore = false;
   final int pageLimit = 10;
 
-  void setSelectedCategory(int id) {
-    selectedId = id;
-    selectedBrand = '';
+  List<Tag> get tags => _tags;
+  List<String> get productTags => _tags.map((tag) => tag.name).toList();
+  Tag? get selectedTag => _selectedTag;
+  String? get selectedTagName => _selectedTag?.name;
+  bool get isLoadingTags => _isLoadingTags;
+  bool get hasTagsError => _hasTagsError;
+  String? get tagsError => _tagsError;
 
+  final snackBar = locator<SnackbarService>();
 
-    if (id == allCategoriesId) {
-      filteredProductList = productList;
-    } else {
-      print('id is: $id');
-      filteredProductList = productList.where((product) {
-        return product.categoryId == id;
-      }).toList();
-    }
+  // Add loading items set for cart operations
+  Set<String> loadingItems = {};
 
-    brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
-    brands.removeWhere((brand) => brand.isEmpty);
-
-    notifyListeners();
-  }
-
-  void setSelectedBrand(String brand) {
-    selectedBrand = brand;
-
-    List<Product> categoryFiltered;
-    if (selectedId == allCategoriesId) {
-      categoryFiltered = productList;
-    } else {
-      categoryFiltered = productList.where((product) {
-        return product.categoryId == selectedId;
-      }).toList();
-    }
-
-    if (brand.isEmpty) {
-      filteredProductList = categoryFiltered;
-    } else {
-      filteredProductList = categoryFiltered.where((product) {
-        return product.brandName == brand;
-      }).toList();
-    }
-
-    notifyListeners();
-  }
-
-  void changeSelected(int i) {
-    selectedIndex = i;
-    rebuildUi();
-  }
-
-  // @override
-  // void dispose() {
-  //   // controller.dispose();
-  //   super.dispose();
-  // }
-
-
+  @override
   void initialise() {
-    print('called initialize');
     init();
   }
 
-  Future<void> init() async {
-    setBusy(true);
-    notifyListeners();
-    await loadProduct();
-    await loadCategories();
-    rebuildUi();
+  void _applyFilters() {
+    // Create a Set to track unique product IDs and prevent duplicates
+    Set<String> seenProductIds = {};
+    List<Product> filtered = [];
 
-    if (userLoggedIn.value == true) {
-      initCart();
+    // Start with all products
+    for (Product product in productList) {
+      // Skip if we've already seen this product ID
+      if (seenProductIds.contains(product.id)) {
+        continue;
+      }
+
+      bool matchesFilters = true;
+
+      // Apply category filter
+      if (selectedId != allCategoriesId) {
+        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+      }
+
+      // Apply brand filter
+      if (selectedBrand.isNotEmpty) {
+        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+      }
+
+      // Apply tag filter
+      if (_selectedTag != null) {
+        bool hasMatchingTag = false;
+        if (product.tags != null && product.tags!.isNotEmpty) {
+          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
+        }
+        matchesFilters = matchesFilters && hasMatchingTag;
+      }
+
+      // Add to filtered list if it matches all filters and hasn't been seen
+      if (matchesFilters) {
+        filtered.add(product);
+        seenProductIds.add(product.id!);
+      }
     }
-    setBusy(false);
+
+    filteredProductList = filtered;
+    print('After applying filters: ${filteredProductList.length} unique products');
+
+    // Update brands based on filtered products
+    Set<String> uniqueBrands = {};
+    for (Product product in filteredProductList) {
+      if (product.brandName != null && product.brandName!.isNotEmpty) {
+        uniqueBrands.add(product.brandName!);
+      }
+    }
+    brands = uniqueBrands.toList();
+
+    notifyListeners();
+  }
+
+  void resetFilters() {
+    selectedId = allCategoriesId;
+    selectedBrand = '';
+    _selectedTag = null;
+
+    // Remove duplicates from productList before applying to filtered list
+    Set<String> seenIds = {};
+    List<Product> uniqueProducts = [];
+    for (Product product in productList) {
+      if (!seenIds.contains(product.id)) {
+        uniqueProducts.add(product);
+        seenIds.add(product.id!);
+      }
+    }
+
+    filteredProductList = uniqueProducts;
+    Set<String> uniqueBrands = {};
+    for (Product product in filteredProductList) {
+      if (product.brandName != null && product.brandName!.isNotEmpty) {
+        uniqueBrands.add(product.brandName!);
+      }
+    }
+    brands = uniqueBrands.toList();
+    notifyListeners();
+  }
+
+  void setSelectedCategory(int id) {
+    _selectedTag = null;
+    selectedId = id;
+    _applyFilters();
+    brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+    brands.removeWhere((brand) => brand.isEmpty);
+  }
+
+  void setSelectedBrand(String brand) {
+    _selectedTag = null;
+    selectedBrand = brand;
+    _applyFilters();
+  }
+
+  void setSelectedTag(Tag? tag) {
+    _selectedTag = tag;
+    // When a tag is selected, apply filters immediately
+    _applyFilters();
+  }
+
+  void clearAllFilters() {
+    selectedId = allCategoriesId;
+    selectedBrand = '';
+    _selectedTag = null;
+    _applyFilters();
+  }
+
+  Map<String, dynamic> getCurrentFilters() {
+    return {
+      'category': selectedId != allCategoriesId ? selectedId : null,
+      'brand': selectedBrand.isNotEmpty ? selectedBrand : null,
+      'tag': _selectedTag?.name,
+      'hasFilters': selectedId != allCategoriesId || selectedBrand.isNotEmpty || _selectedTag != null,
+    };
+  }
+
+  bool showcaseShown = false;
+  void setShowcaseShown(bool value) {
+    showcaseShown = value;
     notifyListeners();
   }
 
@@ -124,28 +205,64 @@ class DashboardViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
+  void changeSelected(int i) {
+    selectedIndex = i;
+    rebuildUi();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> init() async {
+    setBusy(true);
+    print("loading the initials");
+    notifyListeners();
+    await loadProduct();
+    await loadCategories();
+    await fetchProductTags();
+    if (userLoggedIn.value == true) {
+      initCart();
+    }
+    setBusy(false);
+    notifyListeners();
+  }
 
   Future<void> loadProduct() async {
     print('loading products....');
     try {
-
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
-
-      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
+      if (storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        print('Decoded JSON: $storedProducts');
-        productList = storedProducts
+        List<Product> loadedProducts = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
-        filteredProductList = productList;
-        brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
 
-        print('loaded products from local storage list ${productList.length}');
-        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
+        // Remove duplicates from loaded products
+        Set<String> seenIds = {};
+        productList = [];
+        for (Product product in loadedProducts) {
+          if (!seenIds.contains(product.id)) {
+            productList.add(product);
+            seenIds.add(product.id!);
+          }
+        }
+
+        filteredProductList = List.from(productList);
+        print('loaded ${productList.length} unique products from local storage');
+
+        Set<String> uniqueBrands = {};
+        for (Product product in filteredProductList) {
+          if (product.brandName != null && product.brandName!.isNotEmpty) {
+            uniqueBrands.add(product.brandName!);
+          }
+        }
+        brands = uniqueBrands.toList();
         rebuildUi();
-      }else{
+      } else {
         print('no value to load');
       }
 
@@ -164,27 +281,35 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void getResourceList() {
-    getProducts();
+    getProducts(isRefresh: true);
     getCategories();
+    fetchProductTags();
 
     if (userLoggedIn.value == true) {
       initCart();
     }
   }
 
-
-
   Future<void> getProducts({bool isRefresh = false}) async {
+    // If a tag is selected, don't load more products via pagination
+    if (_selectedTag != null && !isRefresh) {
+      print('Tag is selected, skipping pagination load');
+      return;
+    }
+
     if (isLoadingMore && !isRefresh) return;
     if (isLastPage && !isRefresh) return;
 
     print('Getting products - Page $currentPage');
     try {
       if (isRefresh) {
+        // Clear everything and reset pagination
         productList.clear();
         filteredProductList.clear();
         currentPage = 1;
         isLastPage = false;
+        // Clear tag selection on refresh
+        _selectedTag = null;
       }
 
       isLoadingMore = true;
@@ -203,13 +328,24 @@ class DashboardViewModel extends BaseViewModel {
 
         final totalPages = res.data["pagination"]["totalPages"];
 
-        productList.addAll(newProducts);
+        // Add new products, avoiding duplicates
+        Set<String> existingIds = productList.map((p) => p.id!).toSet();
+        for (Product newProduct in newProducts) {
+          if (!existingIds.contains(newProduct.id)) {
+            productList.add(newProduct);
+          }
+        }
 
-        // Apply current filters to new products
+        // Apply current filters to all products
         _applyCurrentFilters();
 
-        brands = productList.map((product) => product.brandName ?? '').toSet().toList();
-        brands.removeWhere((brand) => brand.isEmpty);
+        Set<String> uniqueBrands = {};
+        for (Product product in productList) {
+          if (product.brandName != null && product.brandName!.isNotEmpty) {
+            uniqueBrands.add(product.brandName!);
+          }
+        }
+        brands = uniqueBrands.toList();
 
         if (currentPage >= totalPages) {
           isLastPage = true;
@@ -217,9 +353,17 @@ class DashboardViewModel extends BaseViewModel {
           currentPage++;
         }
 
-        // Save current loaded pages to local storage
-        List<Map<String, dynamic>> storedProducts =
-        productList.map((e) => e.toJson()).toList();
+        // Save unique products to storage
+        Set<String> seenIds = {};
+        List<Product> uniqueProducts = [];
+        for (Product product in productList) {
+          if (!seenIds.contains(product.id)) {
+            uniqueProducts.add(product);
+            seenIds.add(product.id!);
+          }
+        }
+
+        List<Map<String, dynamic>> storedProducts = uniqueProducts.map((e) => e.toJson()).toList();
         await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
         rebuildUi();
@@ -233,15 +377,44 @@ class DashboardViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
+
   void _applyCurrentFilters() {
-    List<Product> filtered = productList;
+    // Create a Set to track unique product IDs and prevent duplicates
+    Set<String> seenProductIds = {};
+    List<Product> filtered = [];
 
-    if (selectedId != allCategoriesId) {
-      filtered = filtered.where((product) => product.categoryId == selectedId).toList();
-    }
+    for (Product product in productList) {
+      // Skip if we've already seen this product ID
+      if (seenProductIds.contains(product.id)) {
+        continue;
+      }
 
-    if (selectedBrand.isNotEmpty) {
-      filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+      bool matchesFilters = true;
+
+      // Apply category filter
+      if (selectedId != allCategoriesId) {
+        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+      }
+
+      // Apply brand filter
+      if (selectedBrand.isNotEmpty) {
+        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+      }
+
+      // Apply tag filter
+      if (_selectedTag != null) {
+        bool hasMatchingTag = false;
+        if (product.tags != null && product.tags!.isNotEmpty) {
+          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
+        }
+        matchesFilters = matchesFilters && hasMatchingTag;
+      }
+
+      // Add to filtered list if it matches all filters and hasn't been seen
+      if (matchesFilters) {
+        filtered.add(product);
+        seenProductIds.add(product.id!);
+      }
     }
 
     filteredProductList = filtered;
@@ -250,20 +423,16 @@ class DashboardViewModel extends BaseViewModel {
   Future<void> loadCategories() async {
     try {
       await getCategories();
-
       if (categories.isEmpty) {
         dynamic storedDonations = await locator<LocalStorage>()
             .fetch(LocalStorageDir.donationsCategories);
         if (storedDonations != null) {
           categories = List<Map<String, dynamic>>.from(storedDonations)
               .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+              .where((category) => category.status == CategoryStatus.active)
               .toList();
-
-          globalCategories.value = categories;
         }
       }
-
       filteredCategories = [
         Category(id: 0, name: 'All', status: CategoryStatus.active),
         ...categories,
@@ -279,18 +448,14 @@ class DashboardViewModel extends BaseViewModel {
     try {
       ApiResponse res = await repo.getCategories();
       if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
-        // Update categories list with only active ones
         categories = (res.data["categories"] as List)
             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-            .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+            .where((category) => category.status == CategoryStatus.active)
             .toList();
-
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
         await locator<LocalStorage>()
             .save(LocalStorageDir.donationsCategories, storedCategories);
-
-        // Update filtered list
         filteredCategories = [
           Category(id: 0, name: 'All', status: CategoryStatus.active),
           ...categories,
@@ -304,19 +469,63 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> fetchProductTags() async {
+    _isLoadingTags = true;
+    _hasTagsError = false;
+    _tagsError = null;
+    notifyListeners();
+    try {
+      ApiResponse res = await repo.getProductTags();
+      if (res.statusCode == 200) {
+        List<dynamic> tagsData = res.data['tags'] ?? [];
+        _tags = tagsData
+            .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
+            .toList();
+        _tags.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _hasTagsError = false;
+        _tagsError = null;
+        print("Loaded ${_tags.length} tags: ${_tags.map((t) => '${t.name} (${t.id})').toList()}");
+      } else {
+        throw Exception('Failed to fetch tags with status: ${res.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching product tags: $e');
+      _hasTagsError = true;
+      _tagsError = 'Failed to load tags. Please try again.';
+      _tags = [];
+      locator<SnackbarService>().showSnackbar(
+          message: "Failed to load product tags",
+          duration: const Duration(seconds: 2)
+      );
+    } finally {
+      _isLoadingTags = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> refreshTags() async {
+    await fetchProductTags();
+  }
+
   void addToRaffleCart(Product product) async {
+    print('adding to cart');
+
+    // Add product ID to loading set
     loadingItems.add(product.id!);
     notifyListeners();
+
     try {
       final existingIndex = cart.value.indexWhere(
             (raffleItem) => raffleItem.product?.id == product.id,
       );
 
       if (existingIndex != -1) {
-        cart.value[existingIndex] = CartItem(
+        final updatedItem = CartItem(
           product: cart.value[existingIndex].product,
           quantity: cart.value[existingIndex].quantity! + 1,
         );
+
+        cart.value[existingIndex] = updatedItem;
       } else {
         cart.value.add(CartItem(product: product, quantity: 1));
       }
@@ -337,136 +546,81 @@ class DashboardViewModel extends BaseViewModel {
         locator<SnackbarService>().showSnackbar(
             message: response.data["message"], duration: const Duration(seconds: 2));
       }
-
-      // **Calculate Discount & Free Delivery**
-      final brandCount = <String, int>{};
-      double eligibleProductTotal = 0.0;
-
-      for (var item in cart.value) {
-        if (["Hisense", "LG", "Maxi"].contains(item.product?.brandName)) {
-          brandCount[item.product!.brandName!] = (brandCount[item.product!.brandName!] ?? 0) + item.quantity!;
-          eligibleProductTotal += (double.tryParse(item.product?.salePrice ?? '0.0') ?? 0.0) * item.quantity!;
-        }
-      }
-
-      freeDelivery = brandCount.values.any((count) => count >= 5);
-      bool applyDiscount = brandCount.values.any((count) => count >= 3);
-
-      discountAmount = applyDiscount ? eligibleProductTotal * 0.02 : 0.0;
-
-      updateCartSummary();
     } catch (e) {
       locator<SnackbarService>().showSnackbar(
-          message: "Failed to add raffle to cart: $e",
+          message: "Failed to add product to cart: $e",
           duration: const Duration(seconds: 2));
     } finally {
-      loadingItems.remove(product.id);
+      // Remove product ID from loading set
+      loadingItems.remove(product.id!);
       notifyListeners();
-      cart.notifyListeners();
     }
   }
 
-  void updateCartSummary() {
-    double totalPrice = cart.value
-        .map((item) => (double.tryParse(item.product?.salePrice ?? '0.0') ?? 0.0) * item.quantity!)
-        .reduce((a, b) => a + b);
-
-    totalPrice -= discountAmount; // Apply 2% discount correctly
-
-    notifyListeners();
-
-    print("Updated Cart Summary:");
-    print("Total Price: \$${totalPrice.toStringAsFixed(2)}");
-    print("Discount Applied: \$${discountAmount.toStringAsFixed(2)}");
-    print("Free Delivery: $freeDelivery");
-  }
-
-  void onEnd() {
-    print('onEnd');
-    //TODO SEND USER NOTIFICATION OF AVAILABILITY OF PRODUCT
-    notifyListeners();
-  }
-}
-
   void initCart() async {
     try {
-      // Fetch stored data from local storage
       dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
 
       if (storedData != null) {
-        // Parse the stored JSON data into a list of CartItem
         List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
             .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
             .toList();
-
-        // Update the cart with the retrieved items
         cart.value = localCart;
       }
     } catch (e) {
-      // Handle any errors that might occur during fetching or parsing
       print('Failed to load cart from local storage: $e');
     }
   }
 
-
-  Future<void> decreaseRaffleQuantity(CartItem item) async {
+  Future<void> decreaseRaffleQuantity(RaffleCartItem item) async {
+    setBusy(true);
     try {
       if (item.quantity! > 1) {
         item.quantity = item.quantity! - 1;
 
-        // Update online cart
         await repo.addToCart({
-          "productId": item.product?.id,
+          "raffle": item.raffle?.id,
           "quantity": item.quantity,
         });
       } else if (item.quantity! == 1) {
-        // Remove from local cart
-        cart.value
-            .removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
+        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.raffle?.id);
 
-        // Remove from online cart
-        await repo.deleteFromCart(item.product!.id!);
+        await repo.deleteFromCart(item.raffle!.id!);
       }
 
-      // Save to local storage
-      List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>()
-          .save(LocalStorageDir.raffleCart, storedList);
+      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
+      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to decrease raffle quantity: $e",
-          duration: const Duration(seconds: 2));
-      print(e);
+      locator<SnackbarService>().showSnackbar(message: "Failed to decrease product quantity: $e", duration: const Duration(seconds: 2));
+      log.e(e);
+    } finally {
+      setBusy(false);
+      cart.notifyListeners();
     }
   }
 
   Future<void> increaseRaffleQuantity(CartItem item) async {
+    setBusy(true);
     try {
       item.quantity = item.quantity! + 1;
-      int index = cart.value
-          .indexWhere((raffleItem) => raffleItem.product?.id == item.product?.id);
+      int index = cart.value.indexWhere((raffleItem) => raffleItem.product?.id == item.product?.id);
       if (index != -1) {
         cart.value[index] = item;
         cart.value = List.from(cart.value);
 
-        // Update online cart
         await repo.addToCart({
           "productId": item.product?.id,
           "quantity": item.quantity,
         });
 
-        // Save to local storage
-        List<Map<String, dynamic>> storedList =
-            cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.raffleCart, storedList);
+        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
+        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to increase raffle quantity: $e",
-          duration: const Duration(seconds: 2));
+      locator<SnackbarService>().showSnackbar(message: "Failed to increase product quantity: $e", duration: const Duration(seconds: 2));
+      log.e(e);
     } finally {
+      setBusy(false);
       cart.notifyListeners();
     }
   }
@@ -474,9 +628,14 @@ class DashboardViewModel extends BaseViewModel {
   String formatRemainingTime(DateTime drawDate) {
     final now = DateTime.now();
     final difference = drawDate.difference(now);
-    // Format the Duration to your needs
     final hours = difference.inHours;
     final minutes = difference.inMinutes.remainder(60);
     final seconds = difference.inSeconds.remainder(60);
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+
+  void onEnd() {
+    print('onEnd');
+    notifyListeners();
+  }
+}
