@@ -13,6 +13,7 @@ import '../../../core/data/models/tags.dart';
 import '../../../utils/money_util.dart';
 import '../../components/empty_state.dart';
 import 'shop_viewmodel.dart';
+import '../../components/shimmer.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -326,7 +327,7 @@ class ShopView extends StackedView<ShopViewModel> {
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  children: viewModel.showingTagBrands
+                                  children: viewModel.showingTagBrands  // new by yehhmii check if tag is selected
                                   ? _buildTagBrandChips(viewModel)
                                   : viewModel.filteredCategories.map((category) {
                                     return _buildCategoryChip(category, viewModel);
@@ -370,17 +371,19 @@ class ShopView extends StackedView<ShopViewModel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (viewModel.isLoadingTags) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
               children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 8),
-                Text('Loading tags...'), //come naback and make it a pregress icon
+                Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    color: Colors.white,
+                  ),
+                ), //come naback and make it a pregress icon
               ],
             ),
           ),
@@ -407,36 +410,121 @@ class ShopView extends StackedView<ShopViewModel> {
         ],
         if (viewModel.tags.isNotEmpty) ...[
           if (viewModel.tags.isNotEmpty) ...[
-            Container(
-                height: 100,
+            // Container(
+            //     height: 90,
+            //     margin: const EdgeInsets.symmetric(vertical: 8.0),
+            //     child: ListView.builder(
+            //       scrollDirection: Axis.horizontal,
+            //       itemCount: viewModel.tags.length,
+            //       itemBuilder: (context, index) {
+            //         final tag = viewModel.tags[index];
+            //         return Container(
+            //           width: 80,
+            //           margin: const EdgeInsets.only(right: 8.0),
+            //           child: _buildTagChip(context, tag, viewModel),
+            //         );
+            //       },
+            //     )
+            // ),
+              Container(
+                height: 160,
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
+                child: GridView.builder(
+                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2, // 2 rows (since we're scrolling horizontally)
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 8.0,
+                    childAspectRatio: 1.0,
+                  ),
                   itemCount: viewModel.tags.length,
                   itemBuilder: (context, index) {
                     final tag = viewModel.tags[index];
-                    return Container(
-                      width: 120,
-                      margin: const EdgeInsets.only(right: 8.0),
-                      child: _buildTagChip(context, tag, viewModel),
-                    );
+                    return _buildTagChip(context, tag, viewModel);
                   },
                 )
+
             ),
+          
           ],
         ],
-        if (viewModel.tags.isEmpty && !viewModel.isLoadingTags && !viewModel.hasTagsError) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'No product tags available',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ),
-        ],
+        
       ],
     );
   }
+  // Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
+  //   final isSelected = viewModel.selectedTag?.id == tag.id;
+  //   return InkWell(
+  //     onTap: () {
+  //       viewModel.setSelectedTag(isSelected ? null : tag);
+  //     },
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.center,
+  //       children: [
+  //         Expanded(
+  //           child: Container(
+  //             width: double.infinity,
+  //             decoration: BoxDecoration(
+  //               color: Theme.of(context).brightness == Brightness.dark
+  //                   ? kcDarkGreyColor
+  //                   : Colors.white,
+  //               borderRadius: const BorderRadius.all(Radius.circular(12)),
+  //               border: isSelected ? Border.all(color: kcSecondaryColor, width: 2) : null,
+  //             ),
+  //             child: ClipRRect(
+  //               borderRadius: const BorderRadius.all(Radius.circular(12)),
+  //               child: tag.image != null && tag.image!.isNotEmpty
+  //                   ? CachedNetworkImage(
+  //                       imageUrl: tag.image!,
+  //                       fit: BoxFit.cover,
+  //                       placeholder: (context, url) => Center(
+  //                         child: Shimmer.fromColors(
+  //                           baseColor: Colors.grey[300]!,
+  //                           highlightColor: Colors.grey[100]!,
+  //                           child: Container(color: Colors.white),
+  //                         ),
+  //                       ),
+  //                       errorWidget: (context, url, error) => Container(
+  //                         color: Colors.grey[200],
+  //                         child: const Icon(Icons.image_not_supported),
+  //                       ),
+  //                     )
+  //                   : Container(
+  //                       color: Colors.grey[200],
+  //                       child: const Center(child: Icon(Icons.category, size: 40)),
+  //                     ),
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(height: 4),
+  //         // Tag name
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.center,
+  //           children: [
+  //             if (isSelected) ...[
+  //               const Icon(Icons.check_circle, color: kcSecondaryColor, size: 12),
+  //               const SizedBox(width: 2),
+  //             ],
+  //             Expanded(
+  //               child: Text(
+  //                 tag.name,
+  //                 style: TextStyle(
+  //                   fontSize: 10,
+  //                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+  //                   color: isSelected ? kcSecondaryColor : null,
+  //                 ),
+  //                 maxLines: 2,
+  //                 overflow: TextOverflow.ellipsis,
+  //                 textAlign: TextAlign.center,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+  
   Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
     final isSelected = viewModel.selectedTag?.id == tag.id;
     return InkWell(
@@ -444,71 +532,91 @@ class ShopView extends StackedView<ShopViewModel> {
         viewModel.setSelectedTag(isSelected ? null : tag);
       },
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
             child: Container(
-              width: double.infinity,
+              height: 50,
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? kcDarkGreyColor
                     : Colors.white,
                 borderRadius: const BorderRadius.all(Radius.circular(12)),
-                border: isSelected ? Border.all(color: kcSecondaryColor, width: 2) : null,
               ),
               child: ClipRRect(
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(12)),
                 child: tag.image != null && tag.image!.isNotEmpty
                     ? CachedNetworkImage(
-                        imageUrl: tag.image!,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(
-                          child: Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Container(color: Colors.white),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          color: Colors.grey[200],
-                          child: const Icon(Icons.image_not_supported),
-                        ),
-                      )
-                    : Container(
-                        color: Colors.grey[200],
-                        child: const Center(child: Icon(Icons.category, size: 40)),
+                  imageUrl: tag.image!,
+                  height: MediaQuery.of(context).size.height * 0.15,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(
+                    child: Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: Container(
+                        color: Colors.white,
                       ),
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.image_not_supported),
+                  ),
+                )
+                    : Container(
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: Icon(Icons.category, size: 40),
+                  ),
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 4),
-          // Tag name
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (isSelected) ...[
-                const Icon(Icons.check_circle, color: kcSecondaryColor, size: 12),
-                const SizedBox(width: 2),
-              ],
-              Expanded(
-                child: Text(
-                  tag.name,
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? kcSecondaryColor : null,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+
+          // Tag details
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isSelected) ...[
+                      const Icon(
+                        Icons.check_circle,
+                        color: kcSecondaryColor,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 1),
+                    ],
+                    Expanded(
+                      child: Text(
+                        tag.name,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                          color: isSelected ? kcSecondaryColor : null,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+  // new for the tagbrands
   List<Widget> _buildTagBrandChips(ShopViewModel viewModel) {
     final brands = ['All', ...viewModel.brandsForSelectedTag];
     

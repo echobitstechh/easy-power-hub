@@ -31,7 +31,7 @@ class ShopViewModel extends BaseViewModel {
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
   List<Category> categories = [];
-  List<String> _brandsForSelectedTag = [];
+  List<String> _brandsForSelectedTag = [];  // new by yehhmii
   
   static const int allCategoriesId = 0;
 
@@ -44,7 +44,7 @@ class ShopViewModel extends BaseViewModel {
   bool modalShown = false;
   bool appBarLoading = false;
   bool shouldShowShowcase = true;
-  bool _showingTagBrands = false;
+  bool _showingTagBrands = false;   // new by yehhmii
 
   List<Tag> _tags = [];
   Tag? _selectedTag;
@@ -65,8 +65,8 @@ class ShopViewModel extends BaseViewModel {
   bool get isLoadingTags => _isLoadingTags;
   bool get hasTagsError => _hasTagsError;
   String? get tagsError => _tagsError;
-  List<String> get brandsForSelectedTag => _brandsForSelectedTag;
-  bool get showingTagBrands => _showingTagBrands;
+  List<String> get brandsForSelectedTag => _brandsForSelectedTag; // new by yehhmii
+  bool get showingTagBrands => _showingTagBrands; // new by yehhmii
 
   final snackBar = locator<SnackbarService>();
 
@@ -126,15 +126,12 @@ class ShopViewModel extends BaseViewModel {
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
 
-     if (tag != null) {
-    // When a tag is selected, switch to showing brands for that tag
+  if (tag != null) {   // this if by yehhmii
     _brandsForSelectedTag = _getBrandsForTag(tag);
     _showingTagBrands = true;
-    // Reset category and brand selections when tag is selected
     selectedId = allCategoriesId;
     selectedBrand = '';
   } else {
-    // When tag is unselected, go back to normal categories
     _brandsForSelectedTag = [];
     _showingTagBrands = false;
   }
@@ -142,7 +139,7 @@ class ShopViewModel extends BaseViewModel {
     _applyFilters();
   }
 
-  void setSelectedTagBrand(String brand) {
+  void setSelectedTagBrand(String brand) {  // new by yehhmii
     selectedBrand = brand;
     _applyFilters();
   }
@@ -403,6 +400,7 @@ class ShopViewModel extends BaseViewModel {
     await fetchProductTags();
   }
 
+  // new by yehhmii
   List<String> _getBrandsForTag(Tag tag) {
     // Get products that have this tag
     final productsWithTag = productList.where((product) {
