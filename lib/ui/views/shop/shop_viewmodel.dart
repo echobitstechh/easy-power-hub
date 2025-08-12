@@ -76,7 +76,11 @@ class ShopViewModel extends BaseViewModel {
   }
 
   void _applyFilters() {
+    print('=== _applyFilters called ===');
+    print('productList.length: ${productList.length}');
+
     List<Product> filtered = List.from(productList);
+    print('Initial filtered.length: ${filtered.length}');
 
     // Apply category filter
     if (selectedId != allCategoriesId) {
@@ -100,6 +104,7 @@ class ShopViewModel extends BaseViewModel {
       print('After tag filter: ${filtered.length}');
     }
 
+    print('Setting filteredProductList.length to: ${filtered.length}');
     filteredProductList = filtered;
     print('Final filtered count: ${filteredProductList.length}');
     notifyListeners();
@@ -237,61 +242,91 @@ class ShopViewModel extends BaseViewModel {
       initCart();
     }
   }
+  
+Future<void> getProducts({bool isRefresh = false}) async {
+  if (isLoadingMore && !isRefresh) return;
+  if (isLastPage && !isRefresh) return;
 
-  Future<void> getProducts({bool isRefresh = false}) async {
-    if (isLoadingMore && !isRefresh) return;
-    if (isLastPage && !isRefresh) return;
-
-    print('Getting products - Page $currentPage');
-    try {
-      if (isRefresh) {
-        productList.clear();
-        filteredProductList.clear();
-        currentPage = 1;
-        isLastPage = false;
-      }
-
-      isLoadingMore = true;
-      notifyListeners();
-
-      ApiResponse res = await repo.getProducts(
-        page: currentPage,
-        limit: pageLimit,
-      );
-
-      if (res.statusCode == 200) {
-        List<Product> newProducts = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
-
-        final totalPages = res.data["pagination"]["totalPages"];
-
-        productList.addAll(newProducts);
-
-        // Apply current filters to new products
-        _applyCurrentFilters();
-
-        if (currentPage >= totalPages) {
-          isLastPage = true;
-        } else {
-          currentPage++;
-        }
-        List<Map<String, dynamic>> storedProducts =
-        productList.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
-
-        rebuildUi();
-      } else {
-        log.e("API Error: ${res.data["message"]}");
-      }
-    } catch (e) {
-      log.e("Error fetching products: $e");
-    } finally {
-      isLoadingMore = false;
-      notifyListeners();
+  print('Getting products - Page $currentPage');
+  try {
+    if (isRefresh) {
+      productList.clear();
+      filteredProductList.clear();
+      currentPage = 1;
+      isLastPage = false;
     }
+
+    isLoadingMore = true;
+    notifyListeners();
+
+    ApiResponse res = await repo.getProducts(
+      page: currentPage,
+      limit: pageLimit,
+    );
+
+    if (res.statusCode == 200) {
+      List<Product> newProducts = (res.data["products"] as List)
+          .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+          .where((product) => product.status?.toLowerCase() == 'active')
+          .toList();
+
+      final totalPages = res.data["pagination"]["totalPages"];
+
+      // PREVENT DUPLICATES: Check if products already exist before adding
+      for (var newProduct in newProducts) {
+        bool alreadyExists = productList.any((existing) => existing.id == newProduct.id);
+        if (!alreadyExists) {
+          productList.add(newProduct);
+        }
+      }
+
+      // Apply current filters to new products
+      _applyCurrentFilters();
+
+      if (currentPage >= totalPages) {
+        isLastPage = true;
+      } else {
+        currentPage++;
+      }
+      
+      List<Map<String, dynamic>> storedProducts =
+      productList.map((e) => e.toJson()).toList();
+      await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
+
+      rebuildUi();
+    } else {
+      log.e("API Error: ${res.data["message"]}");
+    }
+  } catch (e) {
+    log.e("Error fetching products: $e");
+  } finally {
+    isLoadingMore = false;
+    notifyListeners();
   }
+}
+
+ // new by yehhmii
+  List<String> _getBrandsForTag(Tag tag) {
+    // Get products that have this tag
+    final productsWithTag = productList.where((product) {
+      if (product.tags != null && product.tags!.isNotEmpty) {
+        return product.tags!.any((productTag) => productTag.id == tag.id);
+      }
+      return false;
+    }).toList();
+    
+    // Extract unique brand names
+    final brands = productsWithTag
+        .map((product) => product.brandName ?? "")
+        .where((brand) => brand.isNotEmpty)
+        .toSet()
+        .toList();
+    
+    brands.sort(); // Sort alphabetically
+    return brands;
+  }
+
+
   void _applyCurrentFilters() {
     List<Product> filtered = productList;
 
@@ -400,27 +435,8 @@ class ShopViewModel extends BaseViewModel {
     await fetchProductTags();
   }
 
-  // new by yehhmii
-  List<String> _getBrandsForTag(Tag tag) {
-    // Get products that have this tag
-    final productsWithTag = productList.where((product) {
-      if (product.tags != null && product.tags!.isNotEmpty) {
-        return product.tags!.any((productTag) => productTag.id == tag.id);
-      }
-      return false;
-    }).toList();
-    
-    // Extract unique brand names
-    final brands = productsWithTag
-        .map((product) => product.brandName ?? "")
-        .where((brand) => brand.isNotEmpty)
-        .toSet()
-        .toList();
-    
-    brands.sort(); // Sort alphabetically
-    return brands;
-  }
-
+ 
+  
   void addToRaffleCart(Product product) async {
     print('adding to cart');
     try {

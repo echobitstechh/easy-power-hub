@@ -162,9 +162,11 @@ class ShopView extends StackedView<ShopViewModel> {
                 return NotificationListener<ScrollNotification>(
                   onNotification: (ScrollNotification scrollInfo) {
                     if (scrollInfo is ScrollEndNotification &&
-                        scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-                      viewModel.getProducts();
-                    }
+                        scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+                        !viewModel.isLoadingMore && // Prevent multiple calls
+                        !viewModel.isLastPage) {
+                          viewModel.getProducts();
+                        }
                     return false;
                   },
                   child: CustomScrollView(
@@ -410,22 +412,6 @@ class ShopView extends StackedView<ShopViewModel> {
         ],
         if (viewModel.tags.isNotEmpty) ...[
           if (viewModel.tags.isNotEmpty) ...[
-            // Container(
-            //     height: 90,
-            //     margin: const EdgeInsets.symmetric(vertical: 8.0),
-            //     child: ListView.builder(
-            //       scrollDirection: Axis.horizontal,
-            //       itemCount: viewModel.tags.length,
-            //       itemBuilder: (context, index) {
-            //         final tag = viewModel.tags[index];
-            //         return Container(
-            //           width: 80,
-            //           margin: const EdgeInsets.only(right: 8.0),
-            //           child: _buildTagChip(context, tag, viewModel),
-            //         );
-            //       },
-            //     )
-            // ),
               Container(
                 height: 160,
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -452,78 +438,6 @@ class ShopView extends StackedView<ShopViewModel> {
       ],
     );
   }
-  // Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
-  //   final isSelected = viewModel.selectedTag?.id == tag.id;
-  //   return InkWell(
-  //     onTap: () {
-  //       viewModel.setSelectedTag(isSelected ? null : tag);
-  //     },
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.center,
-  //       children: [
-  //         Expanded(
-  //           child: Container(
-  //             width: double.infinity,
-  //             decoration: BoxDecoration(
-  //               color: Theme.of(context).brightness == Brightness.dark
-  //                   ? kcDarkGreyColor
-  //                   : Colors.white,
-  //               borderRadius: const BorderRadius.all(Radius.circular(12)),
-  //               border: isSelected ? Border.all(color: kcSecondaryColor, width: 2) : null,
-  //             ),
-  //             child: ClipRRect(
-  //               borderRadius: const BorderRadius.all(Radius.circular(12)),
-  //               child: tag.image != null && tag.image!.isNotEmpty
-  //                   ? CachedNetworkImage(
-  //                       imageUrl: tag.image!,
-  //                       fit: BoxFit.cover,
-  //                       placeholder: (context, url) => Center(
-  //                         child: Shimmer.fromColors(
-  //                           baseColor: Colors.grey[300]!,
-  //                           highlightColor: Colors.grey[100]!,
-  //                           child: Container(color: Colors.white),
-  //                         ),
-  //                       ),
-  //                       errorWidget: (context, url, error) => Container(
-  //                         color: Colors.grey[200],
-  //                         child: const Icon(Icons.image_not_supported),
-  //                       ),
-  //                     )
-  //                   : Container(
-  //                       color: Colors.grey[200],
-  //                       child: const Center(child: Icon(Icons.category, size: 40)),
-  //                     ),
-  //             ),
-  //           ),
-  //         ),
-  //         const SizedBox(height: 4),
-  //         // Tag name
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.center,
-  //           children: [
-  //             if (isSelected) ...[
-  //               const Icon(Icons.check_circle, color: kcSecondaryColor, size: 12),
-  //               const SizedBox(width: 2),
-  //             ],
-  //             Expanded(
-  //               child: Text(
-  //                 tag.name,
-  //                 style: TextStyle(
-  //                   fontSize: 10,
-  //                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-  //                   color: isSelected ? kcSecondaryColor : null,
-  //                 ),
-  //                 maxLines: 2,
-  //                 overflow: TextOverflow.ellipsis,
-  //                 textAlign: TextAlign.center,
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
   
   Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
     final isSelected = viewModel.selectedTag?.id == tag.id;
@@ -660,6 +574,7 @@ class ShopView extends StackedView<ShopViewModel> {
     }).toList();
   }
  
+  
   Widget popularDrawsSlider(
       BuildContext context,
       List<Product> productList,

@@ -28,6 +28,7 @@ import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
 import '../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
+import '../../components/tags_horizontal_list.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -899,6 +900,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
           ),
           verticalSpaceMedium,
+
+          TagsHorizontalList(
+          tags: viewModel.tags,
+          selectedTag: viewModel.selectedTag,
+          onTagSelected: viewModel.setSelectedTag,
+          isLoading: viewModel.isLoadingTags,
+          hasError: viewModel.hasTagsError,
+          errorMessage: viewModel.tagsError,
+          onRetry: viewModel.refreshTags,
+          height: 90, // Adjust height as needed
+          itemWidth: 80, // Adjust width as needed
+        ),
+        verticalSpaceMedium,
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -1128,9 +1142,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         selected: category.id ==
             viewModel.selectedId, // Check if this category is selected
         onSelected: (bool selected) {
-          viewModel.setSelectedCategory(
-              selected ? category.id : 0); // Update viewModel properly
-          viewModel.notifyListeners(); // Notify the listeners to rebuild the UI
+          viewModel.setSelectedCategory(selected ? category.id : 0);
         },
         selectedColor: kcSecondaryColor,
         backgroundColor: uiMode.value == AppUiModes.dark
@@ -1167,9 +1179,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         selected: brand ==
             viewModel.selectedBrand,
         onSelected: (bool selected) {
-          viewModel.setSelectedBrand(
-              selected ? brand : '');
-          viewModel.notifyListeners();
+          viewModel.setSelectedBrand(selected ? brand : '');
         },
         selectedColor: kcSecondaryColor,
         backgroundColor: uiMode.value == AppUiModes.dark

@@ -12,6 +12,7 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/network/interceptors.dart';
+import '../../../core/data/models/tags.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
@@ -27,6 +28,21 @@ class DashboardViewModel extends BaseViewModel {
   double discountAmount = 0.0;
   bool freeDelivery = false;
   Set<String> loadingItems = {};
+  
+
+  // properties for tags
+  List<Tag> _tags = [];
+  Tag? _selectedTag;
+  bool _isLoadingTags = false;
+  bool _hasTagsError = false;
+  String? _tagsError;
+
+  //  getters for tags
+  List<Tag> get tags => _tags;
+  Tag? get selectedTag => _selectedTag;
+  bool get isLoadingTags => _isLoadingTags;
+  bool get hasTagsError => _hasTagsError;
+  String? get tagsError => _tagsError;
 
   static const int allCategoriesId = 0;
 
@@ -47,6 +63,7 @@ class DashboardViewModel extends BaseViewModel {
     selectedId = id;
     selectedBrand = '';
 
+    _applyCurrentFilters();
 
     if (id == allCategoriesId) {
       filteredProductList = productList;
@@ -57,15 +74,14 @@ class DashboardViewModel extends BaseViewModel {
       }).toList();
     }
 
-    brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
-    brands.removeWhere((brand) => brand.isEmpty);
+    computeBrandsForCurrentState();
 
     notifyListeners();
   }
 
   void setSelectedBrand(String brand) {
     selectedBrand = brand;
-
+    _applyCurrentFilters(); 
     List<Product> categoryFiltered;
     if (selectedId == allCategoriesId) {
       categoryFiltered = productList;
@@ -108,6 +124,7 @@ class DashboardViewModel extends BaseViewModel {
     notifyListeners();
     await loadProduct();
     await loadCategories();
+    await fetchProductTags();
     rebuildUi();
 
     if (userLoggedIn.value == true) {
@@ -124,6 +141,16 @@ class DashboardViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
+List<Product> _uniqueById(List<Product> products) {
+  final Map<String, Product> map = {};
+  for (final p in products) {
+    final key = (p.id ?? '').toString();
+    if (key.isEmpty) continue;
+    // keep last occurrence so newProducts can override older items
+    map[key] = p;
+  }
+  return map.values.toList();
+}
 
   Future<void> loadProduct() async {
     print('loading products....');
@@ -133,18 +160,21 @@ class DashboardViewModel extends BaseViewModel {
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
 
-      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
+      if (storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        print('Decoded JSON: $storedProducts');
-        productList = storedProducts
+        final loaded = storedProducts
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .toList();
+
+        // Ensure uniqueness (in case local json itself had duplicates)
+        productList = _uniqueById(loaded);
+
+        // set filtered and brands and compute other state
         filteredProductList = productList;
-        brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
+        computeBrandsForCurrentState();
 
         print('loaded products from local storage list ${productList.length}');
-        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
-        rebuildUi();
+        
       }else{
         print('no value to load');
       }
@@ -203,13 +233,15 @@ class DashboardViewModel extends BaseViewModel {
 
         final totalPages = res.data["pagination"]["totalPages"];
 
-        productList.addAll(newProducts);
+        final combined = <Product>[];
+        combined.addAll(productList);
+        combined.addAll(newProducts);
+        productList = _uniqueById(combined);
 
         // Apply current filters to new products
         _applyCurrentFilters();
 
-        brands = productList.map((product) => product.brandName ?? '').toSet().toList();
-        brands.removeWhere((brand) => brand.isEmpty);
+        computeBrandsForCurrentState();
 
         if (currentPage >= totalPages) {
           isLastPage = true;
@@ -233,19 +265,174 @@ class DashboardViewModel extends BaseViewModel {
       notifyListeners();
     }
   }
-  void _applyCurrentFilters() {
-    List<Product> filtered = productList;
 
+  
+  void _applyCurrentFilters() {
+    List<Product> filtered = List.from(productList);
+
+    // Apply category filter
     if (selectedId != allCategoriesId) {
       filtered = filtered.where((product) => product.categoryId == selectedId).toList();
+      print('After category filter: ${filtered.length}');
     }
 
+    // Apply brand filter
     if (selectedBrand.isNotEmpty) {
       filtered = filtered.where((product) => product.brandName == selectedBrand).toList();
+      print('After brand filter: ${filtered.length}');
+    }
+
+    // Apply tag filter
+    if (_selectedTag != null) {
+      filtered = filtered.where((product) {
+        if (product.tags != null && product.tags!.isNotEmpty) {
+          return product.tags!.any((tag) => tag.id == _selectedTag!.id);
+        }
+        return false;
+      }).toList();
+      print('After tag filter: ${filtered.length}');
     }
 
     filteredProductList = filtered;
+    print('Final filtered count: ${filteredProductList.length}');
   }
+
+void computeBrandsForCurrentState() {
+  // Start from full product list (we'll respect category and tag)
+  Iterable<Product> scope = productList;
+
+  // apply category scope
+  if (selectedId != allCategoriesId) {
+    scope = scope.where((p) => p.categoryId == selectedId);
+  }
+
+  // if a tag is selected, filter scope to products that contain the tag
+  if (_selectedTag != null) {
+    final tagId = _selectedTag!.id;
+    scope = scope.where((p) {
+      final tags = p.tags;
+      if (tags == null || tags.isEmpty) return false;
+
+      try {
+        // Ensure we have a runtime List<dynamic> so analyzer doesn't assume an inner type
+        final List<dynamic> items = List<dynamic>.from(tags);
+
+        for (final dynamic tt in items) {
+          // check common shapes defensively
+          if (tt is Tag) {
+            if (tt.id == tagId) return true;
+          } else if (tt is Map) {
+            final dynamic id = tt['id'];
+            if (id != null && id == tagId) return true;
+          } else if (tt is int) {
+            if (tt == tagId) return true;
+          } else if (tt is String) {
+            if (tt == tagId.toString()) return true;
+          }
+        }
+      } catch (_) {
+        // If anything goes wrong (unexpected shape), don't include the product
+        return false;
+      }
+
+      return false;
+    });
+  }
+
+  // Map brands from remaining scope
+  brands = scope.map((p) => p.brandName ?? '').toSet().toList();
+  brands.removeWhere((b) => b.isEmpty);
+}
+
+
+  Future<void> fetchProductTags() async {
+  _isLoadingTags = true;
+  _hasTagsError = false;
+  _tagsError = null;
+  notifyListeners();
+  
+  try {
+    ApiResponse res = await repo.getProductTags();
+    if (res.statusCode == 200) {
+      List<dynamic> tagsData = res.data['tags'] ?? [];
+      _tags = tagsData
+          .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
+          .toList();
+      _tags.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      _hasTagsError = false;
+      _tagsError = null;
+      print("Loaded ${_tags.length} tags: ${_tags.map((t) => '${t.name} (${t.id})').toList()}");
+    } else {
+      throw Exception('Failed to fetch tags with status: ${res.statusCode}');
+    }
+  } catch (e) {
+    print('Error fetching product tags: $e');
+    _hasTagsError = true;
+    _tagsError = 'Failed to load tags. Please try again.';
+    _tags = [];
+    locator<SnackbarService>().showSnackbar(
+        message: "Failed to load product tags",
+        duration: const Duration(seconds: 2)
+    );
+  } finally {
+    _isLoadingTags = false;
+    notifyListeners();
+  }
+}
+
+void setSelectedTag(Tag? tag) {
+  // toggle: tapping same tag again clears filter
+  if (_selectedTag != null && tag != null && _selectedTag!.id == tag.id) {
+    clearTagFilter();
+    return;
+  }
+
+  _selectedTag = tag;
+  selectedBrand = ''; // clear brand whenever tag changes
+
+  // recompute brands according to the new tag/category state
+  computeBrandsForCurrentState();
+
+  // reuse unified filters so product list updates consistently
+  _applyCurrentFilters();
+  notifyListeners();
+}
+
+void clearTagFilter() {
+  _selectedTag = null;
+  selectedBrand = '';
+
+  // recompute brands back to category/all-products
+  computeBrandsForCurrentState();
+
+  _applyCurrentFilters();
+  notifyListeners();
+}
+
+// Add method to clear all filters (including tags)
+void clearAllFilters() {
+  selectedId = allCategoriesId;
+  selectedBrand = '';
+  _selectedTag = null;
+  _applyCurrentFilters();
+  notifyListeners();
+}
+
+// Add method to get current filter state
+Map<String, dynamic> getCurrentFilters() {
+  return {
+    'category': selectedId != allCategoriesId ? selectedId : null,
+    'brand': selectedBrand.isNotEmpty ? selectedBrand : null,
+    'tag': _selectedTag?.name,
+    'hasFilters': selectedId != allCategoriesId || 
+                 selectedBrand.isNotEmpty || 
+                 _selectedTag != null,
+  };
+}
+
+Future<void> refreshTags() async {
+  await fetchProductTags();
+}
 
   Future<void> loadCategories() async {
     try {
@@ -480,3 +667,4 @@ class DashboardViewModel extends BaseViewModel {
     final seconds = difference.inSeconds.remainder(60);
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
   }
+
