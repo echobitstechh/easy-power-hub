@@ -4,6 +4,7 @@ import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/views/dashboard/productcard.dart';
+import 'package:easyph/ui/views/dashboard/widgets/category_grid.dart';
 import 'package:easyph/ui/views/service/service_view.dart';
 import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,7 +27,9 @@ import 'package:top_bottom_sheet_flutter/top_bottom_sheet_flutter.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
+import '../../components/brand_chips.dart';
 import '../../components/shimmer.dart';
+import '../../components/tag_components.dart';
 import '../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
 import '../../../core/data/models/tags.dart';
@@ -41,108 +44,20 @@ class DashboardView extends StackedView<DashboardViewModel> {
 
   final PageController _pageController = PageController();
 
-  List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
-    List<StaggeredGridTile> tiles = [];
+  final GlobalKey _tagsSectionKey = GlobalKey();
+  final ScrollController _listController = ScrollController();
 
-    final categories = {
-      "solar": 'assets/images/solar.jpg',
-      "electronics": 'assets/images/2148254069.jpg',
-      "light": 'assets/images/107.jpg',
-    };
-
-    categories.forEach((key, imagePath) {
-      final category = model.filteredCategories.firstWhere(
-            (cat) => cat.name.toLowerCase().contains(key),
-        orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
+  void _scrollTagsIntoView() {
+    final ctx = _tagsSectionKey.currentContext;
+    if (ctx != null) {
+      Scrollable.ensureVisible(
+        ctx,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+        alignment: 0.0,
       );
-
-      if (category.id != -1) {
-        tiles.add(StaggeredGridTile.count(
-          crossAxisCellCount: 1,
-          mainAxisCellCount: 1,
-          child: GestureDetector(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (c) => ShopView(filter: category)),
-              );
-            },
-            child: SizedBox(
-              height: 50, //
-              child: actionContainer(imagePath, key.capitalize(), context),
-            ),
-          ),
-        ));
-      }
-    });
-
-    // Services card (always shown)
-    tiles.add(StaggeredGridTile.count(
-      crossAxisCellCount: 1,
-      mainAxisCellCount: 1,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (c) => const ServicesView(),
-          ));
-        },
-        child: actionContainer('assets/images/2148087576.jpg', "Services", context),
-      ),
-    ));
-
-    return tiles;
+    }
   }
-
-  List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
-    List<Widget> tiles = [];
-
-    final categories = {
-      "solar": 'assets/images/solar.jpg',
-      "electronics": 'assets/images/2148254069.jpg',
-      "light": 'assets/images/107.jpg',
-    };
-
-    categories.forEach((key, imagePath) {
-      final category = model.filteredCategories.firstWhere(
-            (cat) => cat.name.toLowerCase().contains(key),
-        orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
-      );
-
-      if (category.id != -1) {
-        tiles.add(
-          GestureDetector(
-            onTap: () {
-              final isSpecial = ['solar', 'electronics', 'light'].contains(key);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (c) => ShopView(
-                    filter: category,
-                    isSpecialCategory: isSpecial,
-                  ),
-                ),
-              );
-            },
-            child: actionContainer(imagePath, key.capitalize(), context),
-          ),
-        );
-      }
-    });
-    tiles.add(
-      GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (c) => const ServicesView(),
-          ));
-        },
-        child: actionContainer('assets/images/2148087576.jpg', "Services", context),
-      ),
-    );
-
-    return tiles;
-  }
-
-
-
-
   @override
   Widget builder(
     BuildContext context,
@@ -166,7 +81,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     AssetImage("assets/images/easy_ph_logo.png"),
                 radius: 20,
               ),
-              const SizedBox(width: 8),
+              horizontalSpaceSmall,
               Expanded(
                 child: Autocomplete<Product>(
                   optionsBuilder: (TextEditingValue productTextEditingValue) {
@@ -293,6 +208,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
           return false;
         },
         child: ListView(
+          controller: _listController,
           padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
           children: [
             const SizedBox(height: 100),
@@ -312,68 +228,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
     );
   }
 
-  Widget actionContainer(String imagePath, String title, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 0.0, right: 8.0),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(10.0),
-        child: Stack(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 5.0,
-                    spreadRadius: 1.0,
-                    offset: Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
-            ),
-            // Overlay
-            Positioned.fill(
-              child: Container(
-                color:
-                    Colors.black.withOpacity(0.5),
-              ),
-            ),
-            // Title Text
-            Positioned(
-              bottom: 8,
-              left: 8,
-              right: 8,
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 4.0,
-                      color: Colors.black,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   void showProductDialog({
     required BuildContext context,
@@ -774,21 +629,20 @@ class DashboardView extends StackedView<DashboardViewModel> {
     if (viewModel.filteredProductList.isEmpty && viewModel.isBusy) {
       return Column(
         children: [
-          _buildShimmerContainer(),
+          buildShimmerContainer(),
           verticalSpaceSmall,
-          _buildShimmerQuickActions(),
+          buildShimmerQuickActions(),
           verticalSpaceMedium,
-          _buildShimmerQuickActions(),
+          buildShimmerQuickActions(),
           verticalSpaceMedium,
-          _buildShimmerSlider(),
+          buildShimmerSlider(),
           verticalSpaceMedium,
-          _buildShimmerSlider(),
+          buildShimmerSlider(),
         ],
       );
     } else {
       return Column(
         children: [
-          verticalSpaceSmall,
           _buildAdsSlideshow(),
           verticalSpaceSmall,
           Container(
@@ -804,14 +658,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 children: buildGridItems(context, viewModel),
               )
           ),
-          verticalSpaceMedium,
-          _buildProductTagsSection(context, viewModel),
+          verticalSpaceSmall,
+          buildProductTagsSection(
+              context,
+              viewModel,
+            sectionKey: _tagsSectionKey,              // NEW
+            onAnyTagTap: _scrollTagsIntoView,
+          ),
           verticalSpaceSmall,
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
               children: viewModel.brands.map((brand) {
-                return _buildBrandChip(brand, viewModel);
+                return buildBrandChip(brand, viewModel);
               }).toList(),
             ),
           ),
@@ -867,62 +726,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
   }
 
 
-  Widget _buildShimmerContainer() {
-    return Shimmer.fromColors(
-      baseColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[700]!
-          : Colors.grey[300]!,
-      highlightColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[300]!
-          : Colors.grey[100]!,
-      child: Container(
-        width: double.infinity,
-        height: 200,
-        decoration: BoxDecoration(
-          color: kcSecondaryColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildShimmerQuickActions() {
-    return Shimmer.fromColors(
-      baseColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[700]!
-          : Colors.grey[300]!,
-      highlightColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[300]!
-          : Colors.grey[100]!,
-      child: Container(
-        width: double.infinity,
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShimmerSlider() {
-    return Shimmer.fromColors(
-      baseColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[700]!
-          : Colors.grey[300]!,
-      highlightColor: uiMode.value == AppUiModes.dark
-          ? Colors.grey[300]!
-          : Colors.grey[100]!,
-      child: Container(
-        height: 300,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-    );
-  }
 
   Widget _notificationIcon(
       int unreadCount, BuildContext context, DashboardViewModel viewModel) {
@@ -1022,83 +826,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
         ));
   }
 
-  Widget _buildCategoryChip(Category category, DashboardViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: ChoiceChip(
-        label: Text(
-          category.name ?? '',
-          style: GoogleFonts.redHatDisplay(
-            textStyle: const TextStyle(),
-          ),
-        ),
-        selected: category.id ==
-            viewModel.selectedId, // Check if this category is selected
-        onSelected: (bool selected) {
-          viewModel.setSelectedCategory(
-              selected ? category.id : 0); // Update viewModel properly
-          viewModel.notifyListeners(); // Notify the listeners to rebuild the UI
-        },
-        selectedColor: kcSecondaryColor,
-        backgroundColor: uiMode.value == AppUiModes.dark
-            ? Colors.grey[500]!
-            : Colors.grey[100]!,
-        labelStyle: TextStyle(
-          color:
-              category.id == viewModel.selectedId ? Colors.white : Colors.black,
-        ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: uiMode.value == AppUiModes.dark
-                ? Colors.grey[500]!
-                : Colors.grey[100]!, // Set the border color to light grey
-            width: 1.0, // Set the border width
-          ),
-          borderRadius: BorderRadius.circular(
-              30.0),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildBrandChip(String brand, DashboardViewModel viewModel) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: ChoiceChip(
-        label: Text(
-          brand ?? '',
-          style: GoogleFonts.redHatDisplay(
-            textStyle: const TextStyle(),
-          ),
-        ),
-        selected: brand ==
-            viewModel.selectedBrand,
-        onSelected: (bool selected) {
-          viewModel.setSelectedBrand(
-              selected ? brand : '');
-          viewModel.notifyListeners();
-        },
-        selectedColor: kcSecondaryColor,
-        backgroundColor: uiMode.value == AppUiModes.dark
-            ? Colors.grey[500]!
-            : Colors.grey[100]!,
-        labelStyle: TextStyle(
-          color:
-          brand == viewModel.selectedBrand ? Colors.white : Colors.black,
-        ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: uiMode.value == AppUiModes.dark
-                ? Colors.grey[500]!
-                : Colors.grey[100]!,
-            width: 1.0,
-          ),
-          borderRadius: BorderRadius.circular(
-              30.0),
-        ),
-      ),
-    );
-  }
+
 
   List<Widget> _buildAppBarActions(
       BuildContext context, bool isLoading, DashboardViewModel viewModel) {
@@ -1217,100 +946,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
     }
   }
 
-  Widget _buildProductTagsSection(BuildContext context, DashboardViewModel viewModel) {
-    if (viewModel.isLoadingTags) {
-      return buildTagsShimmerLoading(false);
-    }
 
-    if (viewModel.hasTagsError) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          children: [
-            const Icon(Icons.error, color: Colors.red, size: 16),
-            const SizedBox(width: 8),
-            Text(
-              viewModel.tagsError ?? 'Error loading tags',
-              style: const TextStyle(color: Colors.red, fontSize: 12),
-            ),
-            const SizedBox(width: 8),
-            TextButton(
-              onPressed: () => viewModel.refreshTags(),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    if (viewModel.tags.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Container(
-      height: 160,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      child: GridView.builder(
-        scrollDirection: Axis.horizontal,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 8.0,
-          mainAxisSpacing: 8.0,
-          childAspectRatio: 1.0,
-        ),
-        itemCount: viewModel.tags.length,
-        itemBuilder: (context, index) {
-          final tag = viewModel.tags[index];
-          return _buildTagChip(context, tag, viewModel);
-        },
-      ),
-    );
-  }
-  Widget _buildTagChip(BuildContext context, Tag tag, DashboardViewModel viewModel) {
-    final isSelected = viewModel.selectedTag?.id == tag.id;
-    return InkWell(
-      onTap: () {
-        viewModel.setSelectedTag(isSelected ? null : tag);
-      },
-      child: Container(
-        margin: const EdgeInsets.all(4),
-        child: Column(
-          children: [
-            Container(
-              height: 50,
-              width: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image: tag.image != null && tag.image!.isNotEmpty
-                    ? DecorationImage(
-                  image: CachedNetworkImageProvider(tag.image!),
-                  fit: BoxFit.cover,
-                )
-                    : null,
-                color: tag.image == null || tag.image!.isEmpty
-                    ? Colors.grey[200]
-                    : null,
-              ),
-              child: tag.image == null || tag.image!.isEmpty
-                  ? const Center(child: Icon(Icons.category, size: 30))
-                  : null,
-            ),
-            // const SizedBox(height: 4),
-            Text(
-              tag.name,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? kcSecondaryColor : null,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
@@ -1322,6 +958,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
   void onDispose(DashboardViewModel viewModel) {
     // viewModel.dispose();
     _pageController.dispose();
+    // _listController.dispose();
   }
 
   @override
