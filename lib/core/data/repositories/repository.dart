@@ -153,7 +153,23 @@ class Repository extends IRepository {
     );
     return response;
   }
-
+  @override
+  Future<ApiResponse> getProductsByTag({
+    required String tagId,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "products",
+      reqParams: {
+        "page": page,
+        "limit": limit,
+        "tag": tagId,
+      },
+    );
+    return response;
+  }
 
   @override
     Future<ApiResponse> getReviews( String productId) async {

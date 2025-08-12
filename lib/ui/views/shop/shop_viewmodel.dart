@@ -157,7 +157,15 @@ class ShopViewModel extends BaseViewModel {
 
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
-    _applyFilters();
+    notifyListeners();
+
+    if (tag != null) {
+      selectedId = allCategoriesId;
+      selectedBrand = '';
+      getProducts(isRefresh: true, tagFilter: tag);
+    } else {
+      getProducts(isRefresh: true);
+    }
   }
 
   void clearAllFilters() {
@@ -273,90 +281,95 @@ class ShopViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> getProducts({bool isRefresh = false}) async {
-    // If a tag is selected, don't load more products via pagination
-    if (_selectedTag != null && !isRefresh) {
-      print('Tag is selected, skipping pagination load');
-      return;
-    }
-
+  Future<void> getProducts({bool isRefresh = false, Tag? tagFilter}) async {
     if (isLoadingMore && !isRefresh) return;
-    if (isLastPage && !isRefresh) return;
 
-    print('Getting products - Page $currentPage');
     try {
-      if (isRefresh) {
+      if (isRefresh || tagFilter != null) {
         productList.clear();
         filteredProductList.clear();
         currentPage = 1;
         isLastPage = false;
-        _selectedTag = null;
       }
+      if (tagFilter != null) {
+        setBusy(true);
+        ApiResponse res = await repo.getProductsByTag(
+          tagId: tagFilter.id!,
+          page: 1,
+          limit: 100,
+        );
 
-      isLoadingMore = true;
-      notifyListeners();
+        if (res.statusCode == 200) {
+          productList = (res.data["products"] as List)
+              .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+              .where((product) => product.status?.toLowerCase() == 'active')
+              .toList();
 
-      ApiResponse res = await repo.getProducts(
-        page: currentPage,
-        limit: pageLimit,
-      );
+          List<Map<String, dynamic>> storedProducts = productList.map((e) => e.toJson()).toList();
+          await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
-      if (res.statusCode == 200) {
-        List<Product> newProducts = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
-
-        final totalPages = res.data["pagination"]["totalPages"];
-
-        Set<String> existingIds = productList.map((p) => p.id!).toSet();
-        for (Product newProduct in newProducts) {
-          if (!existingIds.contains(newProduct.id)) {
-            productList.add(newProduct);
-          }
-        }
-
-        _applyCurrentFilters();
-
-        Set<String> uniqueBrands = {};
-        for (Product product in productList) {
-          if (product.brandName != null && product.brandName!.isNotEmpty) {
-            uniqueBrands.add(product.brandName!);
-          }
-        }
-        brands = uniqueBrands.toList();
-
-        if (currentPage >= totalPages) {
+          _applyCurrentFilters();
           isLastPage = true;
-        } else {
-          currentPage++;
         }
-
-        // Save unique products to storage
-        Set<String> seenIds = {};
-        List<Product> uniqueProducts = [];
-        for (Product product in productList) {
-          if (!seenIds.contains(product.id)) {
-            uniqueProducts.add(product);
-            seenIds.add(product.id!);
-          }
-        }
-
-        List<Map<String, dynamic>> storedProducts = uniqueProducts.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
-
-        rebuildUi();
-      } else {
-        log.e("API Error: ${res.data["message"]}");
       }
+      else {
+        if (isLastPage && !isRefresh) return;
+
+        isLoadingMore = true;
+        notifyListeners();
+
+        ApiResponse res = await repo.getProducts(
+          page: currentPage,
+          limit: pageLimit,
+        );
+
+        if (res.statusCode == 200) {
+          List<Product> newProducts = (res.data["products"] as List)
+              .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+              .where((product) => product.status?.toLowerCase() == 'active')
+              .toList();
+
+          final totalPages = res.data["pagination"]["totalPages"];
+
+          // Add new products avoiding duplicates
+          Set<String> existingIds = productList.map((p) => p.id!).toSet();
+          for (Product newProduct in newProducts) {
+            if (!existingIds.contains(newProduct.id)) {
+              productList.add(newProduct);
+            }
+          }
+
+          _applyCurrentFilters();
+
+          if (currentPage >= totalPages) {
+            isLastPage = true;
+          } else {
+            currentPage++;
+          }
+          List<Map<String, dynamic>> storedProducts = productList.map((e) => e.toJson()).toList();
+          await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
+        }
+      }
+      Set<String> uniqueBrands = {};
+      for (Product product in productList) {
+        if (product.brandName != null && product.brandName!.isNotEmpty) {
+          uniqueBrands.add(product.brandName!);
+        }
+      }
+      brands = uniqueBrands.toList();
+
     } catch (e) {
       log.e("Error fetching products: $e");
+      locator<SnackbarService>().showSnackbar(
+          message: "Failed to load products",
+          duration: const Duration(seconds: 2)
+      );
     } finally {
       isLoadingMore = false;
+      setBusy(false);
       notifyListeners();
     }
   }
-
   void _applyCurrentFilters() {
     Set<String> seenProductIds = {};
     List<Product> filtered = [];

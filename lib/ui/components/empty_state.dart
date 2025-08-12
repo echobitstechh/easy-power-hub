@@ -28,7 +28,7 @@ class EmptyState extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Lottie.asset("assets/animations/$animation"),
-              const SizedBox(height: 20), // Spacing between animation and text
+              const SizedBox(height: 5), // Spacing between animation and text
               Text(
                 label,
                 style: const TextStyle(
