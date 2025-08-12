@@ -25,6 +25,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getProductTags();
 
+  Future<ApiResponse> getProductsByTag({required String tagId, int page = 1, int limit = 10});
+
   Future<ApiResponse> getReviews( String productId);
 
   Future<ApiResponse> getRaffle();

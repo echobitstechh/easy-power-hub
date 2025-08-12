@@ -12,6 +12,7 @@ import '../../../core/data/models/product.dart';
 import '../../../core/data/models/tags.dart';
 import '../../../utils/money_util.dart';
 import '../../components/empty_state.dart';
+import '../../components/shimmer.dart';
 import 'shop_viewmodel.dart';
 
 /// @author George David
@@ -21,8 +22,9 @@ import 'shop_viewmodel.dart';
 
 class ShopView extends StackedView<ShopViewModel> {
   final Category? filter;
+  final bool isSpecialCategory;
 
-  ShopView({Key? key, this.filter}) : super(key: key);
+  ShopView({Key? key, this.filter, this.isSpecialCategory = false}) : super(key: key);
 
   @override
   Widget builder(
@@ -326,10 +328,13 @@ class ShopView extends StackedView<ShopViewModel> {
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
-                                  children:
-                                  viewModel.filteredCategories.map((category) {
-                                    return _buildCategoryChip(category, viewModel);
-                                  }).toList(),
+                                  children: viewModel.filteredProductList
+                                      .map((product) => product.brandName ?? '')
+                                      .where((brand) => brand.isNotEmpty)
+                                      .toSet()
+                                      .toList()
+                                      .map((brand) => _buildBrandChip(brand, viewModel))
+                                      .toList(),
                                 ),
                               ),
                               if (categoryProducts.isEmpty && !viewModel.isBusy)
@@ -364,108 +369,127 @@ class ShopView extends StackedView<ShopViewModel> {
       ),
     );
   }
-  Widget _buildProductTagsSection( context, ShopViewModel viewModel) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (viewModel.isLoadingTags) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                SizedBox(width: 8),
-                Text('Loading tags...'), //come naback and make it a pregress icon
-              ],
-            ),
-          ),
-        ],
-        if (viewModel.hasTagsError) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 16),
-                const SizedBox(width: 8),
-                Text(
-                  viewModel.tagsError ?? 'Error loading tags',
-                  style: const TextStyle(color: Colors.red, fontSize: 12),
-                ),
-                const SizedBox(width: 8),
-                TextButton(
-                  onPressed: () => viewModel.refreshTags(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-        ],
-        if (viewModel.tags.isNotEmpty) ...[
-          if (viewModel.tags.isNotEmpty) ...[
-            Container(
-                height: 160,
-                margin: const EdgeInsets.symmetric(vertical: 8.0),
-                child: GridView.builder(
-                  scrollDirection: Axis.horizontal, // Enable horizontal scrolling
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // 2 rows (since we're scrolling horizontally)
-                    crossAxisSpacing: 8.0,
-                    mainAxisSpacing: 8.0,
-                    childAspectRatio: 1.0,
-                  ),
-                  itemCount: viewModel.tags.length,
-                  itemBuilder: (context, index) {
-                    final tag = viewModel.tags[index];
-                    return _buildTagChip(context, tag, viewModel);
-                  },
-                )
+  Widget _buildProductTagsSection(BuildContext context, ShopViewModel viewModel) {
+    if (viewModel.isLoadingTags) {
+      return buildTagsShimmerLoading(isSpecialCategory);
+    }
 
-            ),
-          ],
-        ],
-        if (viewModel.tags.isEmpty && !viewModel.isLoadingTags && !viewModel.hasTagsError) ...[
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              'No product tags available',
-              style: TextStyle(color: Colors.grey, fontSize: 12),
-            ),
+    if (viewModel.tags.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    if (isSpecialCategory) {
+      return SizedBox(
+        height: 80,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: viewModel.tags.length,
+          itemBuilder: (context, index) {
+            final tag = viewModel.tags[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+              child: _buildCompactTagChip(context, tag, viewModel),
+            );
+          },
+        ),
+      );
+    } else {
+      return Container(
+        height: 160,
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        child: GridView.builder(
+          scrollDirection: Axis.horizontal,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+            childAspectRatio: 1.0,
           ),
-        ],
-      ],
-    );
-  }
-  Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
+          itemCount: viewModel.tags.length,
+          itemBuilder: (context, index) {
+            final tag = viewModel.tags[index];
+            return _buildTagChip(context, tag, viewModel);
+          },
+        ),
+      );
+    }
+  }  Widget _buildTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
     final isSelected = viewModel.selectedTag?.id == tag.id;
     return InkWell(
       onTap: () {
         viewModel.setSelectedTag(isSelected ? null : tag);
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0, vertical: 2.0),
-            child: Container(
+      child: Container(
+        margin: const EdgeInsets.all(4),
+        child: Column(
+          children: [
+            Container(
+              height: 50,
+              width: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: tag.image != null && tag.image!.isNotEmpty
+                    ? DecorationImage(
+                  image: CachedNetworkImageProvider(tag.image!),
+                  fit: BoxFit.cover,
+                )
+                    : null,
+                color: tag.image == null || tag.image!.isEmpty
+                    ? Colors.grey[200]
+                    : null,
+              ),
+              child: tag.image == null || tag.image!.isEmpty
+                  ? const Center(child: Icon(Icons.category, size: 30))
+                  : null,
+            ),
+            // const SizedBox(height: 4),
+            Text(
+              tag.name,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? kcSecondaryColor : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget _buildCompactTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
+    final isSelected = viewModel.selectedTag?.id == tag.id;
+    return InkWell(
+      onTap: () {
+        viewModel.setSelectedTag(isSelected ? null : tag);
+      },
+      child: Container(
+        width: 70,
+        margin: const EdgeInsets.symmetric(vertical: 4.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? Border.all(color: kcSecondaryColor, width: 2)
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
               height: 50,
               decoration: BoxDecoration(
                 color: Theme.of(context).brightness == Brightness.dark
                     ? kcDarkGreyColor
                     : Colors.white,
-                borderRadius: const BorderRadius.all(Radius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12)),
+                borderRadius: BorderRadius.circular(12),
                 child: tag.image != null && tag.image!.isNotEmpty
                     ? CachedNetworkImage(
                   imageUrl: tag.image!,
-                  height: MediaQuery.of(context).size.height * 0.15,
-                  width: double.infinity,
+                  height: 50,
+                  width: 50,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Center(
                     child: Shimmer.fromColors(
@@ -484,49 +508,25 @@ class ShopView extends StackedView<ShopViewModel> {
                     : Container(
                   color: Colors.grey[200],
                   child: const Center(
-                    child: Icon(Icons.category, size: 40),
+                    child: Icon(Icons.category, size: 30),
                   ),
                 ),
               ),
             ),
-          ),
-
-          // Tag details
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isSelected) ...[
-                      const Icon(
-                        Icons.check_circle,
-                        color: kcSecondaryColor,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 1),
-                    ],
-                    Expanded(
-                      child: Text(
-                        tag.name,
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                          color: isSelected ? kcSecondaryColor : null,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            const SizedBox(height: 4),
+            Text(
+              tag.name,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? kcSecondaryColor : null,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -623,7 +623,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                     0.15, // Reduced image size
                                 width: double.infinity,
                                 fit: BoxFit
-                                    .fitHeight, // Ensures it fits properly
+                                    .fitHeight,
                                 errorWidget: (context, url, error) =>
                                 const Icon(Icons.error),
                                 fadeInDuration:
@@ -710,7 +710,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                       const Icon(
                                         Icons.star,
                                         size: 16,
-                                        color: Colors.grey, // Base star color
+                                        color: Colors.grey,
                                       ),
                                       ShaderMask(
                                         shaderCallback: (Rect bounds) {
@@ -724,7 +724,7 @@ class ShopView extends StackedView<ShopViewModel> {
                                             colors: const [
                                               Colors.amber,
                                               Colors.grey
-                                            ], // Fill and empty colors
+                                            ],
                                           ).createShader(bounds);
                                         },
                                         child: const Icon(
@@ -757,6 +757,53 @@ class ShopView extends StackedView<ShopViewModel> {
           },
         )
       ],
+    );
+  }
+  Widget _buildBrandChip(String brand,ShopViewModel  viewModel) {
+    final availableBrands = viewModel.filteredProductList
+        .map((product) => product.brandName ?? '')
+        .where((b) => b.isNotEmpty)
+        .toSet()
+        .toList();
+
+    if (!availableBrands.contains(brand)) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: ChoiceChip(
+        label: Text(
+          brand ?? '',
+          style: GoogleFonts.redHatDisplay(
+            textStyle: const TextStyle(),
+          ),
+        ),
+        selected: brand ==
+            viewModel.selectedBrand,
+        onSelected: (bool selected) {
+          viewModel.setSelectedBrand(
+              selected ? brand : '');
+          viewModel.notifyListeners();
+        },
+        selectedColor: kcSecondaryColor,
+        backgroundColor: uiMode.value == AppUiModes.dark
+            ? Colors.grey[500]!
+            : Colors.grey[100]!,
+        labelStyle: TextStyle(
+          color:
+          brand == viewModel.selectedBrand ? Colors.white : Colors.black,
+        ),
+        shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: uiMode.value == AppUiModes.dark
+                ? Colors.grey[500]!
+                : Colors.grey[100]!,
+            width: 1.0,
+          ),
+          borderRadius: BorderRadius.circular(
+              30.0),
+        ),
+      ),
     );
   }
 
