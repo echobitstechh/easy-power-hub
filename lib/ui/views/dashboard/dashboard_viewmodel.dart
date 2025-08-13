@@ -485,7 +485,6 @@ class DashboardViewModel extends BaseViewModel {
   void addToRaffleCart(Product product) async {
     print('adding to cart');
 
-    // Add product ID to loading set
     loadingItems.add(product.id!);
     notifyListeners();
 
@@ -495,12 +494,10 @@ class DashboardViewModel extends BaseViewModel {
       );
 
       if (existingIndex != -1) {
-        final updatedItem = CartItem(
+         CartItem(
           product: cart.value[existingIndex].product,
           quantity: cart.value[existingIndex].quantity! + 1,
         );
-
-        cart.value[existingIndex] = updatedItem;
       } else {
         cart.value.add(CartItem(product: product, quantity: 1));
       }
