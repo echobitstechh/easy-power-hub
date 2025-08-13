@@ -67,7 +67,6 @@ class DashboardViewModel extends BaseViewModel {
 
   final snackBar = locator<SnackbarService>();
 
-  // Add loading items set for cart operations
   Set<String> loadingItems = {};
 
   @override
@@ -156,15 +155,17 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void setSelectedTag(Tag? tag) {
-    clearAllFilters();
     _selectedTag = tag;
+    selectedId = allCategoriesId;
+    selectedBrand = '';
+    _applyFilters();
     final uniqueBrands = <String>{};
-    for (final product in productList) {
+    for (final product in filteredProductList) {
       final b = product.brandName;
       if (b != null && b.isNotEmpty) uniqueBrands.add(b);
     }
     brands = uniqueBrands.toList()..sort();
-    _applyFilters();
+    notifyListeners();
   }
 
   void clearAllFilters() {
