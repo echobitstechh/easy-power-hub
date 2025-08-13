@@ -20,15 +20,10 @@ import '../../../core/data/models/tags.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
-  int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
-  List<Raffle> raffleList = [];
-  List<Project> projects = [];
   List<Ads> adsList = [];
-  List<ProjectResource> projectResources = [];
-  List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
-  List<String> brands = []; // ← stable list; built from full productList only
+  List<String> brands = [];
   List<Product> filteredProductList = [];
   List<Category> filteredCategories = [];
   List<Category> categories = [];
@@ -68,11 +63,6 @@ class DashboardViewModel extends BaseViewModel {
   final snackBar = locator<SnackbarService>();
 
   Set<String> loadingItems = {};
-
-  @override
-  void initialise() {
-    init();
-  }
 
   void _applyFilters() {
     final seenProductIds = <String>{};
@@ -143,9 +133,6 @@ class DashboardViewModel extends BaseViewModel {
     _selectedTag = null;
     selectedId = id;
     _applyFilters();
-
-    // ⚠️ Do NOT rebuild `brands` from `filteredProductList`.
-    // Keep `brands` as a stable list from the full catalog so other chips remain visible.
   }
 
   void setSelectedBrand(String brand) {
@@ -197,11 +184,6 @@ class DashboardViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
-  void changeSelected(int i) {
-    selectedIndex = i;
-    rebuildUi();
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -209,7 +191,6 @@ class DashboardViewModel extends BaseViewModel {
 
   Future<void> init() async {
     setBusy(true);
-    print("loading the initials");
     notifyListeners();
     await loadProduct();
     await loadCategories();
@@ -222,7 +203,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> loadProduct() async {
-    print('loading products....');
+
     try {
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
@@ -244,7 +225,6 @@ class DashboardViewModel extends BaseViewModel {
         }
 
         filteredProductList = List.from(productList);
-        print('loaded ${productList.length} unique products from local storage');
 
         // Build brands from FULL productList (stable)
         final uniqueBrands = <String>{};

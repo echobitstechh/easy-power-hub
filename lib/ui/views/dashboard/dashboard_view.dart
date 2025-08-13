@@ -951,7 +951,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
-    viewModel.initialise();
+    viewModel.init();
   }
 
   @override

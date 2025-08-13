@@ -20,13 +20,8 @@ import '../../../core/data/models/tags.dart';
 
 class ShopViewModel extends BaseViewModel {
   final repo = locator<Repository>();
-  int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
-  List<Raffle> raffleList = [];
-  List<Project> projects = [];
   List<Ads> adsList = [];
-  List<ProjectResource> projectResources = [];
-  List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
   List<String> brands = [];
   List<Product> filteredProductList = [];
@@ -67,10 +62,6 @@ class ShopViewModel extends BaseViewModel {
 
   final snackBar = locator<SnackbarService>();
 
-  @override
-  void initialise() {
-    init();
-  }
 
   void _applyFilters() {
     final seenProductIds = <String>{};
@@ -99,6 +90,7 @@ class ShopViewModel extends BaseViewModel {
     filteredProductList = filtered;
     notifyListeners();
   }
+
   void resetFilters() {
     selectedId = allCategoriesId;
     selectedBrand = '';
@@ -200,10 +192,6 @@ class ShopViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
-  void changeSelected(int i) {
-    selectedIndex = i;
-    rebuildUi();
-  }
 
   @override
   void dispose() {
