@@ -563,6 +563,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+
                               Text(
                                 MoneyUtils().formatAmount((double.tryParse(item.salePrice ?? '0.0') ?? 0.0).toInt()),
                                 style: const TextStyle(

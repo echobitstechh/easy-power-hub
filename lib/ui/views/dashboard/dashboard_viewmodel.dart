@@ -60,6 +60,7 @@ class DashboardViewModel extends BaseViewModel {
   bool get hasTagsError => _hasTagsError;
   String? get tagsError => _tagsError;
 
+
   final snackBar = locator<SnackbarService>();
 
   Set<String> loadingItems = {};
