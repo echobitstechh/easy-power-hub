@@ -15,7 +15,6 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../core/data/models/category.dart';
-import '../../../core/data/models/project.dart';
 import '../../../core/data/models/tags.dart';
 
 class DashboardViewModel extends BaseViewModel {
