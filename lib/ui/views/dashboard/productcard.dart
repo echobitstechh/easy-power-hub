@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easyph/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
@@ -17,6 +16,7 @@ import '../../../state.dart';
 import '../../../utils/money_util.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
+import '../cart/cart_viewmodel.dart';
 import '../shop/shop_view.dart';
 
 class ProductCard extends StatefulWidget {
@@ -44,42 +44,6 @@ class _ProductCardState extends State<ProductCard> {
     selectedImage = (widget.product.images != null && widget.product.images!.isNotEmpty)
         ? widget.product.images!.first
         : ''; // Fallback value
-  }
-
-  void addToRaffleCart(Product product) async {
-    // setBusy(true);
-    // notifyListeners();
-    try {
-      final existingItem = cart.value.firstWhere(
-            (raffleItem) => raffleItem.product?.id == product.id,
-        orElse: () => CartItem(product: product, quantity: 0),
-      );
-
-      if (existingItem.quantity != null && existingItem.quantity! > 0 && existingItem.product != null) {
-        existingItem.quantity = (existingItem.quantity! + 1);
-      } else {
-        existingItem.quantity = 1;
-        cart.value.add(existingItem);
-      }
-
-      // Save to local storage
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
-      // Save to online cart using API
-      final response = await repo.addToCart({
-        "productId": product.id,
-        "quantity": existingItem.quantity,
-      });
-
-      if (response.statusCode == 200) {
-        locator<SnackbarService>().showSnackbar(message: "Raffle added to cart", duration: const Duration(seconds: 2));
-      } else {
-        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: const Duration(seconds: 2));
-      }
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to add raffle to cart: $e", duration: const Duration(seconds: 2));
-    }
   }
 
   Future<void> loadProduct() async {
@@ -114,58 +78,63 @@ class _ProductCardState extends State<ProductCard> {
     }
   }
 
-  Future<void> decreaseRaffleQuantity(CartItem item) async {
+  Future<void> addOrIncrementProduct(Product product) async {
     try {
-      if (item.quantity! > 1) {
-        item.quantity = item.quantity! - 1;
-
-        // Update online cart
+      final existingIndex = cart.value.indexWhere((item) => item.product?.id == product.id);
+      
+      if (existingIndex >= 0) {
+        cart.value[existingIndex].quantity = cart.value[existingIndex].quantity! + 1;
+        
+        await repo.modifyCartItem(product.id.toString(), "increment");
+      } else {
+        cart.value.add(CartItem(
+          product: product,
+          quantity: 1,
+        ));
+        
         await repo.addToCart({
-          "productId": item.product?.id,
-          "quantity": item.quantity,
+          "productId": product.id,
+          "quantity": 1
         });
-      } else if (item.quantity! == 1) {
-        // Remove from local cart
-        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
-
-        // Remove from online cart
-        await repo.deleteFromCart(item.product!.id!);
       }
-
-      // Save to local storage
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      
+      cart.value = [...cart.value];
+      
+      locator<SnackbarService>().showSnackbar(
+        message: "Added to cart",
+        duration: Duration(seconds: 1)
+      );
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
-    print(e);
+      locator<SnackbarService>().showSnackbar(
+        message: "Error: ${e.toString()}"
+      );
     }
   }
 
-  Future<void> increaseRaffleQuantity(CartItem item) async {
-
+  Future<void> modifyQuantity(CartItem item, String action) async {
     try {
-      item.quantity = item.quantity! + 1;
-      int index = cart.value.indexWhere((raffleItem) => raffleItem.product?.id == item.product?.id);
-      if (index != -1) {
-        cart.value[index] = item;
-        cart.value = List.from(cart.value);
+      final index = cart.value.indexOf(item);
+      if (index == -1) return;
 
-        // Update online cart
-        await repo.addToCart({
-          "productId": item.product?.id,
-          "quantity": item.quantity,
-        });
-
-        // Save to local storage
-        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      if (action == "increment") {
+        cart.value[index].quantity = item.quantity! + 1;
+        await repo.modifyCartItem(item.product!.id.toString(), "increment");
+      } 
+      else if (action == "decrement") {
+        if (item.quantity! > 1) {
+          cart.value[index].quantity = item.quantity! - 1;
+          await repo.modifyCartItem(item.product!.id.toString(), "decrement");
+        } else {
+          cart.value.removeAt(index);
+          await repo.deleteFromCart(item.product!.id.toString());
+        }
       }
+      
+      cart.value = [...cart.value];
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
-
-    } finally {
-
-      cart.notifyListeners();
+      locator<SnackbarService>().showSnackbar(
+        message: "Error: ${e.toString()}"
+      );
     }
   }
 
@@ -222,7 +191,12 @@ class _ProductCardState extends State<ProductCard> {
                 children: (widget.product.images ?? [])
                     .map((image) => GestureDetector(
                   onTap: () => updateImage(image),
-                  child: buildImageContainer(image, 80, 80),
+                  
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: buildImageContainer(image, 80, 80),
+                  ),
+
                 ))
                     .toList(),
               ),
@@ -369,13 +343,7 @@ class _ProductCardState extends State<ProductCard> {
                                     child:  Row(
                                       children: [
                                         InkWell(
-                                          onTap: (){
-                                            if(mounted){
-                                              setState(() {
-                                                decreaseRaffleQuantity(cartItem);
-                                              });
-                                            }
-                                            },
+                                          onTap: () async => await modifyQuantity(cartItem, "decrement"),
                                           child: Container(
                                             height: 30,
                                             width: 30,
@@ -398,13 +366,7 @@ class _ProductCardState extends State<ProductCard> {
                                         ),
                                         horizontalSpaceSmall,
                                         InkWell(
-                                          onTap: (){
-                                            if(mounted){
-                                              setState(() {
-                                                increaseRaffleQuantity(cartItem);
-                                              });
-                                            }
-                                            },
+                                          onTap: () async => await modifyQuantity(cartItem, "increment"),
                                           child: Container(
                                             height: 30,
                                             width: 30,
@@ -428,13 +390,7 @@ class _ProductCardState extends State<ProductCard> {
 
                             )
                                 : InkWell(
-                              onTap: () async {
-                                if(mounted){
-                                  setState(() {
-                                    addToRaffleCart(widget.product);
-                                  });
-                                }
-                              },
+                              onTap: () async => await addOrIncrementProduct(widget.product),
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(

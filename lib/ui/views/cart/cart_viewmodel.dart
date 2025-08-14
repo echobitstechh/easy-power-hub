@@ -9,6 +9,7 @@ import 'package:easyph/state.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:easyph/core/data/models/product.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -50,7 +51,7 @@ class CartViewModel extends BaseViewModel {
     notifyListeners(); // Notify overall ViewModel listeners
   }
 
-  void removeItem(CartItem item) async {
+  Future<void> removeItem(CartItem item) async {
 
     //print('wee2 ${item.product?.id}');
     await repo.deleteFromCart(item.product!.id.toString())
@@ -87,7 +88,7 @@ class CartViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void modifyCartQuantity(CartItem item, String action) async {
+  Future<void> modifyCartQuantity(CartItem item, String action) async {
     setBusy(true);
     try {
       ApiResponse res = await repo.modifyCartItem(item.product!.id.toString(), action);
@@ -108,6 +109,30 @@ class CartViewModel extends BaseViewModel {
     } catch (e) {
       log.e("Cart modification error: $e");
       snackBar.showSnackbar(message: "An error occurred while updating the cart");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> addNewItemToCart(Product product) async {
+    setBusy(true);
+    try {
+      final response = await repo.addToCart({
+        "productId": product.id,
+        "quantity": 1,
+      });
+      
+      if (response.statusCode == 200) {
+        await refreshData();
+        locator<SnackbarService>().showSnackbar(
+          message: "Added to cart",
+          duration: const Duration(seconds: 2)
+        );
+      } else {
+        snackBar.showSnackbar(message: response.data["message"]);
+      }
+    } catch (e) {
+      snackBar.showSnackbar(message: "Failed to add item to cart: $e");
     } finally {
       setBusy(false);
     }
