@@ -21,7 +21,7 @@ abstract class IRepository {
 
   Future<ApiResponse> initializePayment(Map<String, dynamic> req);
 
-  Future<ApiResponse> getProducts();
+  Future<ApiResponse> getProducts(int page, int pageSize);
 
   Future<ApiResponse> getProductTags();
 

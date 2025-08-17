@@ -12,7 +12,6 @@ import 'package:easyph/ui/views/cart/payment_success_page.dart' as _i16;
 import 'package:easyph/ui/views/change_password/change_password_view.dart'
     as _i12;
 import 'package:easyph/ui/views/dashboard/dashboard_view.dart' as _i5;
-import 'package:easyph/ui/views/dashboard/raffle_detail.dart' as _i9;
 import 'package:easyph/ui/views/delete_account/delete_account_view.dart'
     as _i14;
 import 'package:easyph/ui/views/enter_email/enter_email_view.dart' as _i13;
@@ -118,10 +117,6 @@ class StackedRouter extends _i1.RouterBase {
       page: _i8.ProfileView,
     ),
     _i1.RouteDef(
-      Routes.raffleDetail,
-      page: _i9.RaffleDetail,
-    ),
-    _i1.RouteDef(
       Routes.wallet,
       page: _i10.Wallet,
     ),
@@ -208,14 +203,6 @@ class StackedRouter extends _i1.RouterBase {
     _i8.ProfileView: (data) {
       return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i8.ProfileView(),
-        settings: data,
-      );
-    },
-    _i9.RaffleDetail: (data) {
-      final args = data.getArgs<RaffleDetailArguments>(nullOk: false);
-      return _i19.MaterialPageRoute<dynamic>(
-        builder: (context) =>
-            _i9.RaffleDetail(raffle: args.raffle, key: args.key),
         settings: data,
       );
     },

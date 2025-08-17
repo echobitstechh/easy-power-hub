@@ -3,7 +3,6 @@ import 'package:easyph/core/network/api_service.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/ui/bottom_sheets/notice/notice_sheet.dart';
 import 'package:easyph/ui/dialogs/info_alert/info_alert_dialog.dart';
-import 'package:easyph/ui/views/dashboard/raffle_detail.dart';
 import 'package:easyph/ui/views/home/home_view.dart';
 import 'package:easyph/ui/views/startup/startup_view.dart';
 import 'package:stacked/stacked_annotations.dart';
@@ -40,14 +39,9 @@ import '../ui/views/service/service_view.dart';
     MaterialRoute(page: AuthView),
     MaterialRoute(page: DashboardView),
     MaterialRoute(page: CartView),
-    // MaterialRoute(page: ShopCartView),
     MaterialRoute(page: ServicesView),
     MaterialRoute(page: ProfileView),
-    // MaterialRoute(page: Checkout),
-    MaterialRoute(page: RaffleDetail),
-    // MaterialRoute(page: Receipt),
     MaterialRoute(page: Wallet),
-    // MaterialRoute(page: Track),
 
     MaterialRoute(page: OtpView),
     MaterialRoute(page: ChangePasswordView),

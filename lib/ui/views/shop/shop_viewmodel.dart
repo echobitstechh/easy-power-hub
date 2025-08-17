@@ -165,7 +165,7 @@ class ShopViewModel extends BaseViewModel {
     print("loading the initials" );
     notifyListeners();
     await loadProduct();
-    await loadCategories();
+    // await loadCategories();
     await fetchProductTags();
     if (userLoggedIn.value == true) {
       initCart();
@@ -222,7 +222,7 @@ class ShopViewModel extends BaseViewModel {
   Future<void> getProducts() async {
     print('getting online products');
     try {
-      ApiResponse res = await repo.getProducts();
+      ApiResponse res = await repo.getProducts( 1, 10);
 
       if (res.statusCode == 200) {
         List<Product> updatedProductList = (res.data["products"] as List)
@@ -247,28 +247,28 @@ class ShopViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> loadCategories() async {
-    try {
-      await getCategories();
-      if (categories.isEmpty) {
-        dynamic storedDonations = await locator<LocalStorage>()
-            .fetch(LocalStorageDir.donationsCategories);
-        if (storedDonations != null) {
-          categories = List<Map<String, dynamic>>.from(storedDonations)
-              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active) // Filter out inactive
-              .toList();
-        }
-      }
-      filteredCategories = [
-        Category(id: 0, name: 'All', status: CategoryStatus.active),
-        ...categories,
-      ];
-      notifyListeners();
-    } catch (e) {
-      log.e("Error loading categories: $e");
-    }
-  }
+  // Future<void> loadCategories() async {
+  //   try {
+  //     await getCategories();
+  //     if (categories.isEmpty) {
+  //       dynamic storedDonations = await locator<LocalStorage>()
+  //           .fetch(LocalStorageDir.donationsCategories);
+  //       if (storedDonations != null) {
+  //         categories = List<Map<String, dynamic>>.from(storedDonations)
+  //             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
+  //             .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+  //             .toList();
+  //       }
+  //     }
+  //     filteredCategories = [
+  //       Category(id: 0, name: 'All', status: CategoryStatus.active),
+  //       ...categories,
+  //     ];
+  //     notifyListeners();
+  //   } catch (e) {
+  //     log.e("Error loading categories: $e");
+  //   }
+  // }
 
   Future<void> getCategories() async {
     setBusy(true);
@@ -279,10 +279,10 @@ class ShopViewModel extends BaseViewModel {
             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
             .where((category) => category.status == CategoryStatus.active) // Filter out inactive
             .toList();
-        List<Map<String, dynamic>> storedCategories =
+        // List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.donationsCategories, storedCategories);
+        // await locator<LocalStorage>()
+        //     .save(LocalStorageDir.donationsCategories, storedCategories);
         filteredCategories = [
           Category(id: 0, name: 'All', status: CategoryStatus.active),
           ...categories,
@@ -355,7 +355,7 @@ class ShopViewModel extends BaseViewModel {
 
       List<Map<String, dynamic>> storedList =
       cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      await locator<LocalStorage>().save(LocalStorageDir.cart, storedList);
 
       final response = await repo.addToCart({
         "productId": product.id,
@@ -405,7 +405,7 @@ class ShopViewModel extends BaseViewModel {
       }
 
       List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      await locator<LocalStorage>().save(LocalStorageDir.cart, storedList);
     } catch (e) {
       locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
       log.e(e);
@@ -432,7 +432,7 @@ class ShopViewModel extends BaseViewModel {
 
         // Save to local storage
         List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+        await locator<LocalStorage>().save(LocalStorageDir.cart, storedList);
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));

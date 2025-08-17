@@ -132,10 +132,14 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> getProducts() async {
+  Future<ApiResponse> getProducts(int page, int pageSize) async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
       endpoint: "products",
+      reqParams: {
+        "page": page,
+        "page_size": pageSize,
+      },
     );
 
     return response;

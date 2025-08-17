@@ -153,7 +153,7 @@ class DashboardViewModel extends BaseViewModel {
 
   Future<void> getProducts() async {
     try {
-      ApiResponse res = await repo.getProducts();
+      ApiResponse res = await repo.getProducts( 1, 10);
 
       if (res.statusCode == 200) {
         // Fetch updated products from API
@@ -180,35 +180,35 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> loadCategories() async {
-    try {
-      // First try to load from API
-      await getCategories();
-
-      // If API fails, fall back to local storage
-      if (categories.isEmpty) {
-        dynamic storedDonations = await locator<LocalStorage>()
-            .fetch(LocalStorageDir.donationsCategories);
-        if (storedDonations != null) {
-          categories = List<Map<String, dynamic>>.from(storedDonations)
-              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active) // Filter out inactive
-              .toList();
-
-          globalCategories.value = categories;
-        }
-      }
-
-      // Always include "All" option and update filtered list
-      filteredCategories = [
-        Category(id: 0, name: 'All', status: CategoryStatus.active),
-        ...categories,
-      ];
-      notifyListeners();
-    } catch (e) {
-      log.e("Error loading categories: $e");
-    }
-  }
+  // Future<void> loadCategories() async {
+  //   try {
+  //     // First try to load from API
+  //     await getCategories();
+  //
+  //     // If API fails, fall back to local storage
+  //     if (categories.isEmpty) {
+  //       dynamic storedDonations = await locator<LocalStorage>()
+  //           .fetch(LocalStorageDir.donationsCategories);
+  //       if (storedDonations != null) {
+  //         categories = List<Map<String, dynamic>>.from(storedDonations)
+  //             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
+  //             .where((category) => category.status == CategoryStatus.active) // Filter out inactive
+  //             .toList();
+  //
+  //         globalCategories.value = categories;
+  //       }
+  //     }
+  //
+  //     // Always include "All" option and update filtered list
+  //     filteredCategories = [
+  //       Category(id: 0, name: 'All', status: CategoryStatus.active),
+  //       ...categories,
+  //     ];
+  //     notifyListeners();
+  //   } catch (e) {
+  //     log.e("Error loading categories: $e");
+  //   }
+  // }
 
   Future<void> getCategories() async {
     setBusy(true);
@@ -241,7 +241,7 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  void addToRaffleCart(Product product) async {
+  void addProductToCart(Product product) async {
     loadingItems.add(product.id!);
     notifyListeners();
     try {
@@ -321,20 +321,18 @@ class DashboardViewModel extends BaseViewModel {
 
   void initCart() async {
     try {
-      // Fetch stored data from local storage
-      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
+
+      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
 
       if (storedData != null) {
-        // Parse the stored JSON data into a list of CartItem
+
         List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
             .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
             .toList();
 
-        // Update the cart with the retrieved items
         cart.value = localCart;
       }
     } catch (e) {
-      // Handle any errors that might occur during fetching or parsing
       print('Failed to load cart from local storage: $e');
     }
   }

@@ -8,12 +8,7 @@ import '../../ui/views/cart/raffle_reciept.dart';
 import '../data/models/cart_item.dart';
 
 class PaystackUtil {
-  //static final _plugin = PaystackPlugin();
 
-
-  static void initialize(String publicKey) {
-   // _plugin.initialize(publicKey: publicKey);
-  }
 
   static Future<bool> processPayment({
     required BuildContext context,
@@ -24,8 +19,7 @@ class PaystackUtil {
     String? accessCode,
     String? url,
   }) async {
-    
-    print('processing url is $url');
+
 
     if (url == null || url.isEmpty) {
       locator<SnackbarService>().showSnackbar(

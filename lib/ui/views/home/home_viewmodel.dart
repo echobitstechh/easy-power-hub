@@ -1,19 +1,16 @@
-import 'dart:io';
+
 import 'package:easyph/app/app.bottomsheets.dart';
 import 'package:easyph/app/app.dialogs.dart';
 import 'package:easyph/app/app.locator.dart';
-import 'package:easyph/core/utils/config.dart';
-import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/app_strings.dart';
 import 'package:easyph/ui/views/cart/cart_view.dart';
 import 'package:easyph/ui/views/dashboard/dashboard_view.dart';
+import 'package:easyph/ui/views/home/widgets/update_card.dart';
 import 'package:easyph/ui/views/profile/profile_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:update_available/update_available.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/order_item.dart';
@@ -45,20 +42,9 @@ class HomeViewModel extends BaseViewModel {
   TextEditingController reviewController = TextEditingController();
 
 
-  @override
-  void dispose() {
-    currentModuleNotifier.removeListener(notifyListeners);
-    super.dispose();
-  }
-
-  HomeViewModel() {
-    currentModuleNotifier.addListener(notifyListeners);
-  }
-
-
   void changeSelected(int index) {
     selectedTab = index;
-    notifyListeners();
+    rebuildUi();
   }
 
   Widget get currentPage {
@@ -81,75 +67,10 @@ class HomeViewModel extends BaseViewModel {
   Future<void> checkForUpdates(BuildContext context) async {
     final availability = await getUpdateAvailability();
     if (availability is UpdateAvailable) {
-      showUpdateCard(context);
-    }
-  }
-
-  void showUpdateCard(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Card(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SvgPicture.asset(
-                  'assets/icons/update.svg',
-                  height: 94,
-                ),
-                const ListTile(
-                  title: Text(
-                    'App Updates',
-                    style: TextStyle(
-                        fontSize: 22,
-                        fontFamily: "Panchang",
-                        fontWeight: FontWeight.bold,
-                        color: kcSecondaryColor),
-                  ),
-                  subtitle: Text(
-                    'A new version of Easy PH is now available. download now to enjoy our lastest features.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontFamily: "Panchang",
-                    ),
-                  ),
-                ),
-                ButtonBar(
-                  children: <Widget>[
-                    TextButton(
-                      style: ButtonStyle(
-                          backgroundColor:
-                          MaterialStateProperty.all(kcSecondaryColor)),
-                      onPressed: () {
-                        Platform.isIOS
-                            ? _launchURL(AppConfig.APPLESTOREURL)
-                            : _launchURL(AppConfig.GOOGLESTOREURL);
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Update Now',
-                          style: TextStyle(
-                              fontFamily: "Panchang",
-                              fontWeight: FontWeight.bold,
-                              color: kcWhiteColor)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
+      showDialog(
+        context: context,
+        builder: (context) => const UpdateCardDialog(),
+      );
     }
   }
 
@@ -184,7 +105,6 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
-
   Future<void> fetchDeliveredOrders() async {
     setBusy(true);
     try {
@@ -202,7 +122,6 @@ class HomeViewModel extends BaseViewModel {
             .toList();
 
         if (unratedOrders.isNotEmpty) {
-          print('found order with false review');
           Order unratedOrder = unratedOrders.first;
           _dialogService.showCustomDialog(
             variant: DialogType.rating,
@@ -210,14 +129,11 @@ class HomeViewModel extends BaseViewModel {
             description: "Please rate your recently delivered order.",
             data: unratedOrder,
           );
-        }else{
-          print('no order with false reviews');
         }
       }
     } catch (e) {
       locator<SnackbarService>()
           .showSnackbar(message: "Failed to load orders", duration: const Duration(seconds: 2));
-      print("Failed to load orders: $e");
     } finally {
       setBusy(false);
     }
