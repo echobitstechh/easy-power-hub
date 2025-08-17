@@ -20,13 +20,8 @@ import '../../../core/data/models/tags.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
-  int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
-  List<Raffle> raffleList = [];
-  List<Project> projects = [];
   List<Ads> adsList = [];
-  List<ProjectResource> projectResources = [];
-  List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
   List<String> brands = [];
   List<Product> filteredProductList = [];
@@ -65,68 +60,45 @@ class DashboardViewModel extends BaseViewModel {
   bool get hasTagsError => _hasTagsError;
   String? get tagsError => _tagsError;
 
+
   final snackBar = locator<SnackbarService>();
 
-  // Add loading items set for cart operations
   Set<String> loadingItems = {};
 
-  @override
-  void initialise() {
-    init();
-  }
-
   void _applyFilters() {
-    // Create a Set to track unique product IDs and prevent duplicates
-    Set<String> seenProductIds = {};
-    List<Product> filtered = [];
+    final seenProductIds = <String>{};
+    final filtered = <Product>[];
 
-    // Start with all products
-    for (Product product in productList) {
-      // Skip if we've already seen this product ID
-      if (seenProductIds.contains(product.id)) {
-        continue;
-      }
+    for (final product in productList) {
+      // skip duplicates
+      final pid = product.id;
+      if (pid == null || seenProductIds.contains(pid)) continue;
 
-      bool matchesFilters = true;
+      bool matches = true;
 
-      // Apply category filter
+      // category filter
       if (selectedId != allCategoriesId) {
-        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+        matches = matches && (product.categoryId == selectedId);
       }
 
-      // Apply brand filter
+      // brand filter
       if (selectedBrand.isNotEmpty) {
-        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+        matches = matches && (product.brandName == selectedBrand);
       }
 
-      // Apply tag filter
+      // tag filter
       if (_selectedTag != null) {
-        bool hasMatchingTag = false;
-        if (product.tags != null && product.tags!.isNotEmpty) {
-          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
-        }
-        matchesFilters = matchesFilters && hasMatchingTag;
+        final hasTag = (product.tags ?? []).any((t) => t.id == _selectedTag!.id);
+        matches = matches && hasTag;
       }
 
-      // Add to filtered list if it matches all filters and hasn't been seen
-      if (matchesFilters) {
+      if (matches) {
         filtered.add(product);
-        seenProductIds.add(product.id!);
+        seenProductIds.add(pid);
       }
     }
 
     filteredProductList = filtered;
-    print('After applying filters: ${filteredProductList.length} unique products');
-
-    // Update brands based on filtered products
-    Set<String> uniqueBrands = {};
-    for (Product product in filteredProductList) {
-      if (product.brandName != null && product.brandName!.isNotEmpty) {
-        uniqueBrands.add(product.brandName!);
-      }
-    }
-    brands = uniqueBrands.toList();
-
     notifyListeners();
   }
 
@@ -136,23 +108,25 @@ class DashboardViewModel extends BaseViewModel {
     _selectedTag = null;
 
     // Remove duplicates from productList before applying to filtered list
-    Set<String> seenIds = {};
-    List<Product> uniqueProducts = [];
-    for (Product product in productList) {
-      if (!seenIds.contains(product.id)) {
+    final seenIds = <String>{};
+    final uniqueProducts = <Product>[];
+    for (final product in productList) {
+      if (product.id != null && !seenIds.contains(product.id)) {
         uniqueProducts.add(product);
         seenIds.add(product.id!);
       }
     }
 
     filteredProductList = uniqueProducts;
-    Set<String> uniqueBrands = {};
-    for (Product product in filteredProductList) {
-      if (product.brandName != null && product.brandName!.isNotEmpty) {
-        uniqueBrands.add(product.brandName!);
-      }
+
+    // Build brands from the FULL catalog (not filtered)
+    final uniqueBrands = <String>{};
+    for (final product in productList) {
+      final b = product.brandName;
+      if (b != null && b.isNotEmpty) uniqueBrands.add(b);
     }
-    brands = uniqueBrands.toList();
+    brands = uniqueBrands.toList()..sort();
+
     notifyListeners();
   }
 
@@ -160,8 +134,6 @@ class DashboardViewModel extends BaseViewModel {
     _selectedTag = null;
     selectedId = id;
     _applyFilters();
-    brands = filteredProductList.map((product) => product.brandName ?? '').toSet().toList();
-    brands.removeWhere((brand) => brand.isEmpty);
   }
 
   void setSelectedBrand(String brand) {
@@ -172,8 +144,16 @@ class DashboardViewModel extends BaseViewModel {
 
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
-    // When a tag is selected, apply filters immediately
+    selectedId = allCategoriesId;
+    selectedBrand = '';
     _applyFilters();
+    final uniqueBrands = <String>{};
+    for (final product in filteredProductList) {
+      final b = product.brandName;
+      if (b != null && b.isNotEmpty) uniqueBrands.add(b);
+    }
+    brands = uniqueBrands.toList()..sort();
+    notifyListeners();
   }
 
   void clearAllFilters() {
@@ -205,11 +185,6 @@ class DashboardViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
-  void changeSelected(int i) {
-    selectedIndex = i;
-    rebuildUi();
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -217,7 +192,6 @@ class DashboardViewModel extends BaseViewModel {
 
   Future<void> init() async {
     setBusy(true);
-    print("loading the initials");
     notifyListeners();
     await loadProduct();
     await loadCategories();
@@ -230,7 +204,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> loadProduct() async {
-    print('loading products....');
+
     try {
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
       log.i("Loaded jsonProducts from storage: $storedJsonProduct");
@@ -242,25 +216,25 @@ class DashboardViewModel extends BaseViewModel {
             .toList();
 
         // Remove duplicates from loaded products
-        Set<String> seenIds = {};
+        final seenIds = <String>{};
         productList = [];
-        for (Product product in loadedProducts) {
-          if (!seenIds.contains(product.id)) {
+        for (final product in loadedProducts) {
+          if (product.id != null && !seenIds.contains(product.id)) {
             productList.add(product);
             seenIds.add(product.id!);
           }
         }
 
         filteredProductList = List.from(productList);
-        print('loaded ${productList.length} unique products from local storage');
 
-        Set<String> uniqueBrands = {};
-        for (Product product in filteredProductList) {
-          if (product.brandName != null && product.brandName!.isNotEmpty) {
-            uniqueBrands.add(product.brandName!);
-          }
+        // Build brands from FULL productList (stable)
+        final uniqueBrands = <String>{};
+        for (final product in productList) {
+          final b = product.brandName;
+          if (b != null && b.isNotEmpty) uniqueBrands.add(b);
         }
-        brands = uniqueBrands.toList();
+        brands = uniqueBrands.toList()..sort();
+
         rebuildUi();
       } else {
         print('no value to load');
@@ -329,9 +303,9 @@ class DashboardViewModel extends BaseViewModel {
         final totalPages = res.data["pagination"]["totalPages"];
 
         // Add new products, avoiding duplicates
-        Set<String> existingIds = productList.map((p) => p.id!).toSet();
-        for (Product newProduct in newProducts) {
-          if (!existingIds.contains(newProduct.id)) {
+        final existingIds = productList.map((p) => p.id!).toSet();
+        for (final newProduct in newProducts) {
+          if (newProduct.id != null && !existingIds.contains(newProduct.id)) {
             productList.add(newProduct);
           }
         }
@@ -339,13 +313,13 @@ class DashboardViewModel extends BaseViewModel {
         // Apply current filters to all products
         _applyCurrentFilters();
 
-        Set<String> uniqueBrands = {};
-        for (Product product in productList) {
-          if (product.brandName != null && product.brandName!.isNotEmpty) {
-            uniqueBrands.add(product.brandName!);
-          }
+        // Rebuild brands from FULL productList (stable)
+        final uniqueBrands = <String>{};
+        for (final product in productList) {
+          final b = product.brandName;
+          if (b != null && b.isNotEmpty) uniqueBrands.add(b);
         }
-        brands = uniqueBrands.toList();
+        brands = uniqueBrands.toList()..sort();
 
         if (currentPage >= totalPages) {
           isLastPage = true;
@@ -354,10 +328,10 @@ class DashboardViewModel extends BaseViewModel {
         }
 
         // Save unique products to storage
-        Set<String> seenIds = {};
-        List<Product> uniqueProducts = [];
-        for (Product product in productList) {
-          if (!seenIds.contains(product.id)) {
+        final seenIds = <String>{};
+        final uniqueProducts = <Product>[];
+        for (final product in productList) {
+          if (product.id != null && !seenIds.contains(product.id)) {
             uniqueProducts.add(product);
             seenIds.add(product.id!);
           }
@@ -380,12 +354,12 @@ class DashboardViewModel extends BaseViewModel {
 
   void _applyCurrentFilters() {
     // Create a Set to track unique product IDs and prevent duplicates
-    Set<String> seenProductIds = {};
-    List<Product> filtered = [];
+    final seenProductIds = <String>{};
+    final filtered = <Product>[];
 
-    for (Product product in productList) {
+    for (final product in productList) {
       // Skip if we've already seen this product ID
-      if (seenProductIds.contains(product.id)) {
+      if (product.id != null && seenProductIds.contains(product.id)) {
         continue;
       }
 
@@ -413,7 +387,9 @@ class DashboardViewModel extends BaseViewModel {
       // Add to filtered list if it matches all filters and hasn't been seen
       if (matchesFilters) {
         filtered.add(product);
-        seenProductIds.add(product.id!);
+        if (product.id != null) {
+          seenProductIds.add(product.id!);
+        }
       }
     }
 
@@ -510,7 +486,6 @@ class DashboardViewModel extends BaseViewModel {
   void addToRaffleCart(Product product) async {
     print('adding to cart');
 
-    // Add product ID to loading set
     loadingItems.add(product.id!);
     notifyListeners();
 
@@ -520,12 +495,10 @@ class DashboardViewModel extends BaseViewModel {
       );
 
       if (existingIndex != -1) {
-        final updatedItem = CartItem(
+         CartItem(
           product: cart.value[existingIndex].product,
           quantity: cart.value[existingIndex].quantity! + 1,
         );
-
-        cart.value[existingIndex] = updatedItem;
       } else {
         cart.value.add(CartItem(product: product, quantity: 1));
       }

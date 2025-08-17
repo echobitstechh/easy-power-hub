@@ -32,11 +32,24 @@ class ShopView extends StackedView<ShopViewModel> {
       ShopViewModel viewModel,
       Widget? child,
       ) {
+
     List<Product> categoryProducts = viewModel.filteredProductList;
+    List<Tag> categoryTags = viewModel.tags;
     if (filter != null) {
       categoryProducts = viewModel.filteredProductList.where((product) {
         return product.categoryId == filter?.id;
       }).toList();
+
+      // final productTagIds = categoryProducts
+      //     .expand((product) => product.tags != null
+      //     ? product.tags!.map((tag) => tag.id)
+      //     : <dynamic>[])
+      //     .toSet();
+      //
+      // categoryTags = categoryTags
+      //     .where((tag) => productTagIds.contains(tag.id))
+      //     .toList();
+
     }
 
     List<Map<String, String>> slides = [];
@@ -457,6 +470,7 @@ class ShopView extends StackedView<ShopViewModel> {
       ),
     );
   }
+
   Widget _buildCompactTagChip(BuildContext context, Tag tag, ShopViewModel viewModel) {
     final isSelected = viewModel.selectedTag?.id == tag.id;
     return InkWell(
@@ -848,7 +862,7 @@ class ShopView extends StackedView<ShopViewModel> {
   @override
   void onViewModelReady(ShopViewModel viewModel) {
     super.onViewModelReady(viewModel);
-    viewModel.initialise();
+    viewModel.init();
   }
 
   @override

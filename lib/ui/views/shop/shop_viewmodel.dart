@@ -20,13 +20,8 @@ import '../../../core/data/models/tags.dart';
 
 class ShopViewModel extends BaseViewModel {
   final repo = locator<Repository>();
-  int selectedIndex = 0;
   final log = getLogger("DashboardViewModel");
-  List<Raffle> raffleList = [];
-  List<Project> projects = [];
   List<Ads> adsList = [];
-  List<ProjectResource> projectResources = [];
-  List<Raffle> featuredRaffle = [];
   List<Product> productList = [];
   List<String> brands = [];
   List<Product> filteredProductList = [];
@@ -67,54 +62,32 @@ class ShopViewModel extends BaseViewModel {
 
   final snackBar = locator<SnackbarService>();
 
-  @override
-  void initialise() {
-    init();
-  }
 
   void _applyFilters() {
-    Set<String> seenProductIds = {};
-    List<Product> filtered = [];
+    final seenProductIds = <String>{};
+    final filtered = <Product>[];
+    for (final product in productList) {
+      final pid = product.id;
+      if (pid == null || seenProductIds.contains(pid)) continue;
 
-    for (Product product in productList) {
-      if (seenProductIds.contains(product.id)) {
-        continue;
-      }
-
-      bool matchesFilters = true;
-
+      bool matches = true;
       if (selectedId != allCategoriesId) {
-        matchesFilters = matchesFilters && (product.categoryId == selectedId);
+        matches = matches && (product.categoryId == selectedId);
       }
-
       if (selectedBrand.isNotEmpty) {
-        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
+        matches = matches && (product.brandName == selectedBrand);
       }
-
       if (_selectedTag != null) {
-        bool hasMatchingTag = false;
-        if (product.tags != null && product.tags!.isNotEmpty) {
-          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
-        }
-        matchesFilters = matchesFilters && hasMatchingTag;
+        final hasTag = (product.tags ?? []).any((t) => t.id == _selectedTag!.id);
+        matches = matches && hasTag;
       }
-      if (matchesFilters) {
+
+      if (matches) {
         filtered.add(product);
-        seenProductIds.add(product.id!);
+        seenProductIds.add(pid);
       }
     }
-
     filteredProductList = filtered;
-    print('After applying filters: ${filteredProductList.length} unique products');
-
-    Set<String> uniqueBrands = {};
-    for (Product product in filteredProductList) {
-      if (product.brandName != null && product.brandName!.isNotEmpty) {
-        uniqueBrands.add(product.brandName!);
-      }
-    }
-    brands = uniqueBrands.toList();
-
     notifyListeners();
   }
 
@@ -150,30 +123,52 @@ class ShopViewModel extends BaseViewModel {
   }
 
   void setSelectedBrand(String brand) {
+    selectedBrand = selectedBrand == brand ? '' : brand;
     _selectedTag = null;
-    selectedBrand = brand;
     _applyFilters();
   }
 
   void setSelectedTag(Tag? tag) {
-    _selectedTag = tag;
-    notifyListeners();
-
-    if (tag != null) {
-      selectedId = allCategoriesId;
-      selectedBrand = '';
-      getProducts(isRefresh: true, tagFilter: tag);
-    } else {
-      getProducts(isRefresh: true);
+    if (tag == _selectedTag) {
+      clearAllFilters();
+      return;
     }
-  }
 
-  void clearAllFilters() {
+    _selectedTag = tag;
     selectedId = allCategoriesId;
     selectedBrand = '';
-    _selectedTag = null;
     _applyFilters();
+    _updateBrandsList();
+    notifyListeners();
   }
+
+  void _updateBrandsList() {
+    final uniqueBrands = <String>{};
+    for (final product in filteredProductList) {
+      final b = product.brandName;
+      if (b != null && b.isNotEmpty) uniqueBrands.add(b);
+    }
+    brands = uniqueBrands.toList()..sort();
+  }
+
+
+  void clearAllFilters() {
+    _selectedTag = null;
+    selectedId = allCategoriesId;
+    selectedBrand = '';
+    final seenIds = <String>{};
+    final uniqueProducts = <Product>[];
+    for (final product in productList) {
+      if (product.id != null && !seenIds.contains(product.id)) {
+        uniqueProducts.add(product);
+        seenIds.add(product.id!);
+      }
+    }
+    filteredProductList = uniqueProducts;
+
+    notifyListeners();
+  }
+
 
   Map<String, dynamic> getCurrentFilters() {
     return {
@@ -197,10 +192,6 @@ class ShopViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
-  void changeSelected(int i) {
-    selectedIndex = i;
-    rebuildUi();
-  }
 
   @override
   void dispose() {
