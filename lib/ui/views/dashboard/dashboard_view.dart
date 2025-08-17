@@ -4,11 +4,9 @@ import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
 import 'package:easyph/ui/common/ui_helpers.dart';
 import 'package:easyph/ui/views/dashboard/widget/ads_sliders.dart';
-import 'package:easyph/ui/views/dashboard/productcard.dart';
-import 'package:easyph/ui/views/dashboard/widgets/category_grid.dart';
-import 'package:easyph/ui/views/service/service_view.dart';
-import 'package:easyph/utils/money_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easyph/ui/views/dashboard/widget/category_grid.dart';
+import 'package:easyph/ui/views/dashboard/widget/productcard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
@@ -21,16 +19,13 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../app/app.locator.dart';
-import '../../../core/data/models/category.dart';
 import '../../../core/data/models/product.dart';
-import '../../components/brand_chips.dart';
 import '../../components/shimmer.dart';
 import '../../components/tag_components.dart';
 import '../../components/product_grid.dart';
 import '../../components/selectable_brand_chips.dart';
 import '../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
-import '../../../core/data/models/tags.dart';
 
 /// @author George David
 /// email: georgequin19@gmail.com
@@ -56,6 +51,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
       );
     }
   }
+
   @override
   Widget builder(
     BuildContext context,
@@ -75,8 +71,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
           title: Row(
             children: [
               const CircleAvatar(
-                backgroundImage:
-                    AssetImage("assets/images/easy_ph_logo.png"),
+                backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
                 radius: 20,
               ),
               horizontalSpaceSmall,
@@ -86,15 +81,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     if (productTextEditingValue.text == '') {
                       return const Iterable<Product>.empty();
                     }
-                    return viewModel.filteredProductList.where((Product product) {
+                    return viewModel.filteredProductList
+                        .where((Product product) {
                       final query = productTextEditingValue.text.toLowerCase();
                       return (product.productName != null &&
-                          product.productName!.toLowerCase().contains(query)) ||
+                              product.productName!
+                                  .toLowerCase()
+                                  .contains(query)) ||
                           (product.brandName != null &&
                               product.brandName!.toLowerCase().contains(query));
                     });
                   },
-                  displayStringForOption: (Product product) => product.productName ?? '',
+                  displayStringForOption: (Product product) =>
+                      product.productName ?? '',
                   onSelected: (Product value) {
                     debugPrint('You just selected ${value.productName}');
                     showModalBottomSheet(
@@ -119,7 +118,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     return Container(
                       height: 40,
                       decoration: BoxDecoration(
-                        color:  uiMode.value == AppUiModes.dark
+                        color: uiMode.value == AppUiModes.dark
                             ? kcMediumGrey
                             : kcWhiteColor,
                         borderRadius: BorderRadius.circular(8),
@@ -136,54 +135,55 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       ),
                     );
                   },
-                    optionsViewBuilder: (BuildContext context,
-                        AutocompleteOnSelected<Product> onSelected,
-                        Iterable<Product> options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            constraints: const BoxConstraints(
-                              maxHeight: 250,
-                              maxWidth: 350,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final Product product = options.elementAt(index);
-                                return ListTile(
-                                  leading: (product.images != null && product.images!.isNotEmpty)
-                                      ? Image.network(
-                                    product.images!.first,
-                                    width: 35,
-                                    height: 35,
-                                    fit: BoxFit.cover,
-                                  )
-                                      : const Icon(Icons.image, size: 30),
-                                  title: Text(
-                                    product.productName ?? "",
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    maxLines: 2,
+                  optionsViewBuilder: (BuildContext context,
+                      AutocompleteOnSelected<Product> onSelected,
+                      Iterable<Product> options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            maxHeight: 250,
+                            maxWidth: 350,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              final Product product = options.elementAt(index);
+                              return ListTile(
+                                leading: (product.images != null &&
+                                        product.images!.isNotEmpty)
+                                    ? Image.network(
+                                        product.images!.first,
+                                        width: 35,
+                                        height: 35,
+                                        fit: BoxFit.cover,
+                                      )
+                                    : const Icon(Icons.image, size: 30),
+                                title: Text(
+                                  product.productName ?? "",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  onTap: () => onSelected(product),
-                                );
-                              },
-                            ),
+                                  maxLines: 2,
+                                ),
+                                onTap: () => onSelected(product),
+                              );
+                            },
                           ),
                         ),
-                      );
+                      ),
+                    );
                   },
                 ),
               )
@@ -195,37 +195,37 @@ class DashboardView extends StackedView<DashboardViewModel> {
         ),
         body: RefreshIndicator(
           onRefresh: () async {
-    await viewModel.getProducts(isRefresh: true);
-    },
-      child: NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification scrollInfo) {
-          if (scrollInfo is ScrollEndNotification &&
-              scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-            viewModel.getProducts();
-          }
-          return false;
-        },
-        child: ListView(
-          controller: _listController,
-          padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-          children: [
-            const SizedBox(height: 100),
-            _buildShimmerOrContent(context, viewModel),
-            if (viewModel.isLoadingMore)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-          ],
+            await viewModel.init();
+          },
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification scrollInfo) {
+              if (scrollInfo is ScrollEndNotification &&
+                  scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent - 200) {
+                viewModel.getProducts();
+              }
+              return false;
+            },
+            child: ListView(
+              controller: _listController,
+              padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+              children: [
+                const SizedBox(height: 100),
+                _buildShimmerOrContent(context, viewModel),
+                if (viewModel.isLoadingMore)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
-      ),
-    ),
       ),
     );
   }
-
 
   void showProductDialog({
     required BuildContext context,
@@ -311,8 +311,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
     );
   }
 
-
-
   Widget _buildShimmerOrContent(
       BuildContext context, DashboardViewModel viewModel) {
     if (viewModel.filteredProductList.isEmpty && viewModel.isBusy) {
@@ -336,12 +334,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
           const VideoBanner(),
           verticalSpaceSmall,
           Container(
-            padding: const EdgeInsets.all(0),
-            child: GridView.count(
-              crossAxisCount: 2,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 2,
               padding: const EdgeInsets.all(0),
               child: GridView.count(
                 crossAxisCount: 2,
@@ -352,13 +344,12 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 children: buildGridItems(context, viewModel),
-              )
-          ),
+              )),
           verticalSpaceSmall,
           buildProductTagsSection(
-              context,
-              viewModel,
-            sectionKey: _tagsSectionKey,              // NEW
+            context,
+            viewModel,
+            sectionKey: _tagsSectionKey, // NEW
             onAnyTagTap: _scrollTagsIntoView,
           ),
           verticalSpaceSmall,
@@ -377,10 +368,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
       );
     }
   }
-
-
-
-
 
   // Widget _notificationIcon(
   //     int unreadCount, BuildContext context, DashboardViewModel viewModel) {
@@ -482,9 +469,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
   //       ));
   // }
 
-
-
-
   List<Widget> _buildAppBarActions(
       BuildContext context, bool isLoading, DashboardViewModel viewModel) {
     if (isLoading) {
@@ -542,7 +526,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
         )
       ];
     } else {
-
       return [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -553,32 +536,35 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 // _notificationIcon(unreadCount.value, context, viewModel),
                 // const SizedBox(width: 3),
                 InkWell(
-                  onTap: () {
-                    locator<NavigationService>().navigateTo(Routes.profileView);
-                  },
+                    onTap: () {
+                      locator<NavigationService>()
+                          .navigateTo(Routes.profileView);
+                    },
                     child: CircleAvatar(
                       radius: 20,
                       backgroundImage: (profile.value.profilePicture != null &&
-                          profile.value.profilePicture!.isNotEmpty)
+                              profile.value.profilePicture!.isNotEmpty)
                           ? (profile.value.profilePicture!.startsWith('http')
-                          ? CachedNetworkImageProvider(profile.value.profilePicture!)
-                      as ImageProvider<Object>
-                          : AssetImage(profile.value.profilePicture!)
-                      as ImageProvider<Object>)
+                              ? CachedNetworkImageProvider(
+                                      profile.value.profilePicture!)
+                                  as ImageProvider<Object>
+                              : AssetImage(profile.value.profilePicture!)
+                                  as ImageProvider<Object>)
                           : const AssetImage('assets/images/display_pic.png')
-                      as ImageProvider<Object>,
+                              as ImageProvider<Object>,
                       onBackgroundImageError: (exception, stackTrace) {
-                        debugPrint('Failed to load profile picture: $exception');
+                        debugPrint(
+                            'Failed to load profile picture: $exception');
                       },
-                    )
-                )
+                    ))
               ] else ...[
                 InkWell(
                   onTap: () {
                     locator<NavigationService>().navigateTo(Routes.authView);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       color: kcSecondaryColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
@@ -602,14 +588,11 @@ class DashboardView extends StackedView<DashboardViewModel> {
     }
   }
 
-
-
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
     viewModel.init();
   }
-
 
   @override
   DashboardViewModel viewModelBuilder(
@@ -759,6 +742,7 @@ class RaffleRow extends StatelessWidget {
       ),
     );
   }
+
   Future<Color?> _updateTextColor(String imageUrl) async {
     final PaletteGenerator paletteGenerator =
         await PaletteGenerator.fromImageProvider(
@@ -776,7 +760,8 @@ class BackGroundTile extends StatelessWidget {
   final Color backgroundColor;
   final IconData icondata;
 
-  const BackGroundTile({super.key, required this.backgroundColor, required this.icondata});
+  const BackGroundTile(
+      {super.key, required this.backgroundColor, required this.icondata});
 
   @override
   Widget build(BuildContext context) {

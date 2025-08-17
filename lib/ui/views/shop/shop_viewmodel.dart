@@ -529,7 +529,7 @@ class ShopViewModel extends BaseViewModel {
 
   void initCart() async {
     try {
-      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
+      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
 
       if (storedData != null) {
         List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)

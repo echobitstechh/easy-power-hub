@@ -193,8 +193,8 @@ class DashboardViewModel extends BaseViewModel {
   Future<void> init() async {
     setBusy(true);
     notifyListeners();
-    await loadProduct();
-    await loadCategories();
+    await getProducts();
+    await getCategories();
     await fetchProductTags();
     if (userLoggedIn.value == true) {
       initCart();
@@ -395,28 +395,7 @@ class DashboardViewModel extends BaseViewModel {
     filteredProductList = filtered;
   }
 
-  Future<void> loadCategories() async {
-    try {
-      await getCategories();
-      if (categories.isEmpty) {
-        dynamic storedDonations = await locator<LocalStorage>()
-            .fetch(LocalStorageDir.donationsCategories);
-        if (storedDonations != null) {
-          categories = List<Map<String, dynamic>>.from(storedDonations)
-              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active)
-              .toList();
-        }
-      }
-      filteredCategories = [
-        Category(id: 0, name: 'All', status: CategoryStatus.active),
-        ...categories,
-      ];
-      notifyListeners();
-    } catch (e) {
-      log.e("Error loading categories: $e");
-    }
-  }
+
 
   Future<void> getCategories() async {
     setBusy(true);
@@ -484,7 +463,7 @@ class DashboardViewModel extends BaseViewModel {
     await fetchProductTags();
   }
 
-  void addToRaffleCart(Product product) async {
+  void addProductToCart(Product product) async {
     print('adding to cart');
 
     loadingItems.add(product.id!);
@@ -533,7 +512,7 @@ class DashboardViewModel extends BaseViewModel {
 
   void initCart() async {
     try {
-      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
+      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.cart);
 
       if (storedData != null) {
         List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
@@ -546,20 +525,20 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  Future<void> decreaseRaffleQuantity(RaffleCartItem item) async {
+  Future<void> decreaseRaffleQuantity(CartItem item) async {
     setBusy(true);
     try {
       if (item.quantity! > 1) {
         item.quantity = item.quantity! - 1;
 
         await repo.addToCart({
-          "raffle": item.raffle?.id,
+          "raffle": item.id,
           "quantity": item.quantity,
         });
       } else if (item.quantity! == 1) {
-        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.raffle?.id);
+        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.id);
 
-        await repo.deleteFromCart(item.raffle!.id!);
+        await repo.deleteFromCart(item.id!);
       }
 
       // Save to local storage

@@ -2,11 +2,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easyph/app/app.router.dart';
 import 'package:easyph/ui/views/dashboard/dashboard_viewmodel.dart';
-import 'package:easyph/ui/views/dashboard/widget/product_image_container.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-//import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../../app/app.locator.dart';
@@ -251,7 +248,7 @@ class _ProductCardState extends State<ProductCard> {
                                           onTap: (){
                                             if(mounted){
                                               setState(() {
-                                                decreaseRaffleQuantity(cartItem);
+                                                widget.dashboardViewModel?.decreaseRaffleQuantity(cartItem);
                                               });
                                             }
                                             },
@@ -280,7 +277,7 @@ class _ProductCardState extends State<ProductCard> {
                                           onTap: (){
                                             if(mounted){
                                               setState(() {
-                                                increaseRaffleQuantity(cartItem);
+                                                widget.dashboardViewModel?.increaseRaffleQuantity(cartItem);
                                               });
                                             }
                                             },
