@@ -1,173 +1,54 @@
-import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easyph/app/app.router.dart';
+import 'package:easyph/ui/views/dashboard/dashboard_viewmodel.dart';
+import 'package:easyph/ui/views/dashboard/widget/product_image_container.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 //import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
-import '../../../app/app.locator.dart';
-import '../../../core/data/models/cart_item.dart';
-import '../../../core/data/models/product.dart';
-import '../../../core/network/interceptors.dart';
-import '../../../core/utils/local_store_dir.dart';
-import '../../../core/utils/local_stotage.dart';
-import '../../../state.dart';
-import '../../../utils/money_util.dart';
-import '../../common/app_colors.dart';
-import '../../common/ui_helpers.dart';
-import '../shop/shop_view.dart';
+
+import '../../../../app/app.locator.dart';
+import '../../../../core/data/models/cart_item.dart';
+import '../../../../core/data/models/product.dart';
+import '../../../../core/network/interceptors.dart';
+import '../../../../state.dart';
+import '../../../../utils/money_util.dart';
+import '../../../common/app_colors.dart';
+import '../../../common/ui_helpers.dart';
+import '../../shop/shop_view.dart';
 
 class ProductCard extends StatefulWidget {
   final Product product;
+  DashboardViewModel? dashboardViewModel;
 
-  const ProductCard({Key? key, required this.product}) : super(key: key);
+  ProductCard({Key? key, required this.product, this.dashboardViewModel}) : super(key: key);
 
   @override
   _ProductCardState createState() => _ProductCardState();
 }
-bool isFavorited = false;
+
+
+
 class _ProductCardState extends State<ProductCard> {
   String selectedImage = '';
   Color iconColor = kcBlackColor;
 
-  List<Product> filteredProductList = [];
-  List<Product> productList = [];
   List<Review> productReviews = [];
 
   @override
   void initState() {
     super.initState();
-    loadProduct();
     fetchProductReviews();
     selectedImage = (widget.product.images != null && widget.product.images!.isNotEmpty)
         ? widget.product.images!.first
-        : ''; // Fallback value
+        : '';
+    widget.dashboardViewModel?.filteredProductList = widget.dashboardViewModel!.filteredProductList
+        .where((product) => product.categoryId == widget.product.categoryId)
+        .toList();
   }
 
-  void addToRaffleCart(Product product) async {
-    // setBusy(true);
-    // notifyListeners();
-    try {
-      final existingItem = cart.value.firstWhere(
-            (raffleItem) => raffleItem.product?.id == product.id,
-        orElse: () => CartItem(product: product, quantity: 0),
-      );
-
-      if (existingItem.quantity != null && existingItem.quantity! > 0 && existingItem.product != null) {
-        existingItem.quantity = (existingItem.quantity! + 1);
-      } else {
-        existingItem.quantity = 1;
-        cart.value.add(existingItem);
-      }
-
-      // Save to local storage
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
-      // Save to online cart using API
-      final response = await repo.addToCart({
-        "productId": product.id,
-        "quantity": existingItem.quantity,
-      });
-
-      if (response.statusCode == 200) {
-        locator<SnackbarService>().showSnackbar(message: "Raffle added to cart", duration: const Duration(seconds: 2));
-      } else {
-        locator<SnackbarService>().showSnackbar(message: response.data["message"], duration: const Duration(seconds: 2));
-      }
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to add raffle to cart: $e", duration: const Duration(seconds: 2));
-    }
-  }
-
-  Future<void> loadProduct() async {
-    print('loading products....');
-    try {
-
-      dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-      print("Loaded jsonProducts from storage: $storedJsonProduct");
-
-
-      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
-        List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        print('Decoded JSON: $storedProducts');
-        // Populate productList and filteredProductList
-        productList = storedProducts
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-        print('loaded products from local storage list ${productList.length}');
-        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
-        if(mounted){
-          setState(() {
-            productList = productList;
-            filteredProductList = productList.where((product) => product.categoryId == widget.product.categoryId).toList();
-          });
-        }
-      }else{
-        print('no value to load');
-      }
-
-    } catch (e) {
-      print("Error loading products: $e");
-    }
-  }
-
-  Future<void> decreaseRaffleQuantity(CartItem item) async {
-    try {
-      if (item.quantity! > 1) {
-        item.quantity = item.quantity! - 1;
-
-        // Update online cart
-        await repo.addToCart({
-          "productId": item.product?.id,
-          "quantity": item.quantity,
-        });
-      } else if (item.quantity! == 1) {
-        // Remove from local cart
-        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
-
-        // Remove from online cart
-        await repo.deleteFromCart(item.product!.id!);
-      }
-
-      // Save to local storage
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
-    print(e);
-    }
-  }
-
-  Future<void> increaseRaffleQuantity(CartItem item) async {
-
-    try {
-      item.quantity = item.quantity! + 1;
-      int index = cart.value.indexWhere((raffleItem) => raffleItem.product?.id == item.product?.id);
-      if (index != -1) {
-        cart.value[index] = item;
-        cart.value = List.from(cart.value);
-
-        // Update online cart
-        await repo.addToCart({
-          "productId": item.product?.id,
-          "quantity": item.quantity,
-        });
-
-        // Save to local storage
-        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-      }
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
-
-    } finally {
-
-      cart.notifyListeners();
-    }
-  }
 
   Future<void> fetchProductReviews() async {
     try {
@@ -198,25 +79,23 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    print('widget value: ${widget.product.productName}');
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Product Details"),
         toolbarHeight: 100,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share, size: 25),
-            onPressed: ()  {
-
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.share, size: 25),
+        //     onPressed: ()  {
+        //     },
+        //   ),
+        // ],
       ),
       body: ListView(
         children: [
           Row(
-            mainAxisSize: MainAxisSize.min, // Shrinks the Row's size to fit its content
+            mainAxisSize: MainAxisSize.min,
             children: [
               Column(
                 children: (widget.product.images ?? [])
@@ -431,7 +310,7 @@ class _ProductCardState extends State<ProductCard> {
                               onTap: () async {
                                 if(mounted){
                                   setState(() {
-                                    addToRaffleCart(widget.product);
+                                    widget.dashboardViewModel?.addProductToCart(widget.product);
                                   });
                                 }
                               },
@@ -462,24 +341,6 @@ class _ProductCardState extends State<ProductCard> {
                             );
                           }),
                     ),
-                    // IconButton(
-                    //   icon: Icon(
-                    //     isFavorited
-                    //         ? Icons.favorite // Icon when favorited
-                    //         : Icons.favorite_border_outlined, // Icon when not favorited
-                    //     size: 30,
-                    //     color: isFavorited ? kcSecondaryColor : iconColor, // Toggle color
-                    //   ),
-                    //   onPressed: () {
-                    //     if(mounted){
-                    //       setState(() {
-                    //         isFavorited = !isFavorited; // Toggle the boolean
-                    //       });
-                    //     }
-                    //   },
-                    // ),
-
-
                   ],
                 ),
 
@@ -506,9 +367,9 @@ class _ProductCardState extends State<ProductCard> {
             height: 200, // Adjust height to match the size of your cards
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: filteredProductList.length,
+              itemCount: widget.dashboardViewModel?.filteredProductList.length,
               itemBuilder: (context, index) {
-                Product product = filteredProductList[index];
+                Product product = widget.dashboardViewModel!.filteredProductList[index];
 
                 return Padding(
                   padding: const EdgeInsets.all(10.0),

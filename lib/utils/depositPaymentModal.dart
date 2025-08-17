@@ -8,8 +8,6 @@ import '../ui/common/app_colors.dart';
 import '../ui/common/ui_helpers.dart';
 import '../ui/components/submit_button.dart';
 
-
-
 class DepositsPaymentModalWidget extends StatelessWidget {
   final Function(PaymentMethod) onPaymentMethodSelected;
   final VoidCallback onProceedWithPayment;
@@ -26,7 +24,6 @@ class DepositsPaymentModalWidget extends StatelessWidget {
     required this.amountController,
   }) : super(key: key);
 
-
   void handleProceedWithPayment(BuildContext context) {
     isPaymentProcessing.value = true;
 
@@ -37,11 +34,8 @@ class DepositsPaymentModalWidget extends StatelessWidget {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-
-
     return ValueListenableBuilder<Profile?>(
         valueListenable: profile,
         builder: (context, profileData, _) {
@@ -53,157 +47,156 @@ class DepositsPaymentModalWidget extends StatelessWidget {
                   topLeft: Radius.circular(25.0),
                 ),
               ),
-              child:
-
-      SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom, // This adds padding equal to the height of the keyboard when it's open
-        ),
-        child: Container(
-          // padding: const EdgeInsets.all(16.0),
-          decoration:  BoxDecoration(
-            color: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : Colors.white,
-            borderRadius: const BorderRadius.only(
-              topRight: Radius.circular(25.0),
-              topLeft: Radius.circular(25.0),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Header Section
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                decoration: const BoxDecoration(
-                  color: kcPrimaryColor, // Yellowish background
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(25.0),
-                    topLeft: Radius.circular(25.0),
-                  ), // Adjusted border-radius only for the top
-                ),
-                child: Text(
-                  "Deposit into wallet",
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.bricolageGrotesque(
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-          
-              // Enter Amount Section
-              _buildTotalSection(amountController),
-          
-              const SizedBox(height: 10),
-          
-              if(selectedPaymentMethod == PaymentMethod.wallet)
-                Align(
-                alignment: Alignment.centerLeft,
+              child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    "Current Balance:₦0}",
-         // ${profile.value.accountPointsLocal ??
-          style: TextStyle(
-                      color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
-                      fontSize: 12,
-                      fontFamily: 'roboto',
-                      fontWeight: FontWeight.w500,
-                    ),
+                  padding: EdgeInsets.only(
+                    bottom: MediaQuery.of(context)
+                        .viewInsets
+                        .bottom, // This adds padding equal to the height of the keyboard when it's open
                   ),
-                ),
-              ),
-          
-              const SizedBox(height: 20),
-
-              // Payment Method Options
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Choose Method",
-                      style: GoogleFonts.redHatDisplay(
-                        textStyle:  TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                          color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
+                  child: Container(
+                    // padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: uiMode.value == AppUiModes.dark
+                          ? kcDarkGreyColor
+                          : Colors.white,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(25.0),
+                        topLeft: Radius.circular(25.0),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Header Section
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          decoration: const BoxDecoration(
+                            color: kcPrimaryColor, // Yellowish background
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(25.0),
+                              topLeft: Radius.circular(25.0),
+                            ), // Adjusted border-radius only for the top
+                          ),
+                          child: Text(
+                            "Deposit into wallet",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.bricolageGrotesque(
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 20,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Expanded(
-                      child: _buildPaymentMethodOption(
-                        context,
-                        paymentMethodIcon: "flutter_wave",
-                        method: PaymentMethod.flutterwave,
-                        selectedMethod: selectedPaymentMethod,
-                        onTap: () => onPaymentMethodSelected(PaymentMethod.flutterwave),
-                      ),
-                    ),
-                    horizontalSpaceSmall,
-                    Expanded(child: _buildPaymentMethodOption(
-                      context,
-                      paymentMethodIcon: "paystack",
-                      method: PaymentMethod.paystack,
-                      selectedMethod: selectedPaymentMethod,
-                      onTap: () => onPaymentMethodSelected(PaymentMethod.paystack),
-                    ),)
+                        const SizedBox(height: 20),
 
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+                        // Enter Amount Section
+                        _buildTotalSection(amountController),
 
-              // Proceed Button
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: isPaymentProcessing, // Listen to the notifier
-                    builder: (context, isLoading, child) {
-                      return SubmitButton(
-                        isLoading: isLoading, // Reflect loading state
-                        label: "Proceed",
-                        submit: () => handleProceedWithPayment(context),
-                        color: kcPrimaryColor,
-                      );
-                    },
+                        const SizedBox(height: 10),
+
+                        if (selectedPaymentMethod == PaymentMethod.wallet)
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Text(
+                                "Current Balance:₦0}",
+                                // ${profile.value.accountPointsLocal ??
+                                style: TextStyle(
+                                  color: uiMode.value == AppUiModes.dark
+                                      ? kcWhiteColor
+                                      : kcBlackColor,
+                                  fontSize: 12,
+                                  fontFamily: 'roboto',
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                        const SizedBox(height: 20),
+
+                        // Payment Method Options
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Choose Method",
+                                style: GoogleFonts.redHatDisplay(
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                    color: uiMode.value == AppUiModes.dark
+                                        ? kcWhiteColor
+                                        : kcBlackColor,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              Expanded(
+                                child: _buildPaymentMethodOption(
+                                  context,
+                                  paymentMethodIcon: "paystack",
+                                  method: PaymentMethod.paystack,
+                                  selectedMethod: selectedPaymentMethod,
+                                  onTap: () => onPaymentMethodSelected(
+                                      PaymentMethod.paystack),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Proceed Button
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: ValueListenableBuilder<bool>(
+                            valueListenable:
+                                isPaymentProcessing, // Listen to the notifier
+                            builder: (context, isLoading, child) {
+                              return SubmitButton(
+                                isLoading: isLoading, // Reflect loading state
+                                label: "Proceed",
+                                submit: () => handleProceedWithPayment(context),
+                                color: kcPrimaryColor,
+                              );
+                            },
+                          ),
+                        ),
+
+                        verticalSpaceSmall
+                      ],
+                    ),
                   ),
                 ),
-          
-              verticalSpaceSmall
-            ],
-          ),
-        ),
-      ),
-      ));});
-
-
+              ));
+        });
   }
 
   Widget _buildPaymentMethodOption(
-      BuildContext context, {
-        required String paymentMethodIcon,
-        required PaymentMethod method,
-        required PaymentMethod selectedMethod,
-        required VoidCallback onTap,
-      }) {
+    BuildContext context, {
+    required String paymentMethodIcon,
+    required PaymentMethod method,
+    required PaymentMethod selectedMethod,
+    required VoidCallback onTap,
+  }) {
     bool isSelected = selectedMethod == method;
 
     return InkWell(
@@ -211,9 +204,11 @@ class DepositsPaymentModalWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcVeryLightGrey,
+          color: uiMode.value == AppUiModes.dark
+              ? kcDarkGreyColor
+              : kcVeryLightGrey,
           border: Border.all(
-            color: isSelected ?  kcSecondaryColor : Colors.transparent,
+            color: isSelected ? kcSecondaryColor : Colors.transparent,
             width: 2,
           ),
           borderRadius: BorderRadius.circular(10),
@@ -234,8 +229,10 @@ class DepositsPaymentModalWidget extends StatelessWidget {
           Text(
             "Enter Amount",
             style: GoogleFonts.redHatDisplay(
-              textStyle:  TextStyle(
-                color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
+              textStyle: TextStyle(
+                color: uiMode.value == AppUiModes.dark
+                    ? kcWhiteColor
+                    : kcBlackColor,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -247,12 +244,16 @@ class DepositsPaymentModalWidget extends StatelessWidget {
             keyboardType: TextInputType.number,
             decoration: InputDecoration(
               hintText: "amount",
-              hintStyle:  TextStyle(
-                color: uiMode.value == AppUiModes.dark ? Colors.black : Colors.grey,
+              hintStyle: TextStyle(
+                color: uiMode.value == AppUiModes.dark
+                    ? Colors.black
+                    : Colors.grey,
                 fontSize: 14,
               ),
               filled: true,
-              fillColor: uiMode.value == AppUiModes.dark ? Colors.grey[500] : Colors.grey[200],
+              fillColor: uiMode.value == AppUiModes.dark
+                  ? Colors.grey[500]
+                  : Colors.grey[200],
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide.none,
@@ -321,6 +322,4 @@ class DepositsPaymentModalWidget extends StatelessWidget {
       },
     );
   }
-
 }
-

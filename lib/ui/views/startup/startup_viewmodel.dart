@@ -13,14 +13,14 @@ import '../../../state.dart';
 class StartupViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
 
-  // Place anything here that needs to happen before we get into the application
+
   Future runStartupLogic() async {
     await Future.delayed(const Duration(seconds: 3));
 
     String? token = await locator<LocalStorage>().fetch(LocalStorageDir.authToken);
     String? user = await locator<LocalStorage>().fetch(LocalStorageDir.authUser);
     bool? onboarded = await locator<LocalStorage>().fetch(LocalStorageDir.onboarded);
-    //bool? onboarded = false;
+
     if (onboarded == null || onboarded == false) {
       _navigationService.replaceWithOnboardingView3();
     } else {
@@ -29,7 +29,6 @@ class StartupViewModel extends BaseViewModel {
         profile.value = Profile.fromJson(Map<String, dynamic>.from(jsonDecode(user)));
       }
       _navigationService.replaceWithHomeView();
-      // _navigationService.replaceWithAuthView();
     }
   }
 

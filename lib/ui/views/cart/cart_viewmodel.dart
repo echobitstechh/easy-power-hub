@@ -30,7 +30,7 @@ class CartViewModel extends BaseViewModel {
   final refferalCode = TextEditingController();
 
   ValueNotifier<PaymentMethod> selectedPaymentMethod =
-      ValueNotifier(PaymentMethod.flutterwave);
+      ValueNotifier(PaymentMethod.paystack);
   ValueNotifier<bool> isPaymentProcessing = ValueNotifier(false);
 
   PaymentMethod get selectedMethod => selectedPaymentMethod.value;
@@ -127,7 +127,7 @@ class CartViewModel extends BaseViewModel {
         List<Map<String, dynamic>> storedList =
             cart.value.map((e) => e.toJson()).toList();
         await locator<LocalStorage>()
-            .save(LocalStorageDir.raffleCart, storedList);
+            .save(LocalStorageDir.cart, storedList);
 
         getRaffleSubTotal();
         rebuildUi(); // Ensure UI rebuilds properly
@@ -185,12 +185,12 @@ class CartViewModel extends BaseViewModel {
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
           cart.value = onlineItems;
-          await locator<LocalStorage>().save(LocalStorageDir.raffleCart, onlineItems.map((e) => e.toJson()).toList());
+          await locator<LocalStorage>().save(LocalStorageDir.cart, onlineItems.map((e) => e.toJson()).toList());
           cart.notifyListeners();
           notifyListeners();
         } else {
           cart.value.clear();
-          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
+          await locator<LocalStorage>().delete(LocalStorageDir.cart);
           notifyListeners();
     }
     }

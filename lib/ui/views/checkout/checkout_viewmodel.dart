@@ -1,3 +1,4 @@
+import 'package:easyph/core/utils/config.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -21,7 +22,7 @@ class CheckoutViewModel extends BaseViewModel {
   String paymentMethod = "paystack";
   String pickUpOption = "Pickup";
   String shippingId = "";
-  String publicKeyTest = MoneyUtils().payStackPublicKey;
+  String publicKeyTest = AppConfig.paystackApiKeyTest;
 
   int calculatedDeliveryFee = 0;
   int calculatedFinalTotal = 0;
@@ -171,13 +172,13 @@ class CheckoutViewModel extends BaseViewModel {
               .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
               .toList();
           cart.value = onlineItems;
-          await locator<LocalStorage>().save(LocalStorageDir.raffleCart,
+          await locator<LocalStorage>().save(LocalStorageDir.cart,
               onlineItems.map((e) => e.toJson()).toList());
           cart.notifyListeners();
           notifyListeners();
         } else {
           cart.value.clear();
-          await locator<LocalStorage>().delete(LocalStorageDir.raffleCart);
+          await locator<LocalStorage>().delete(LocalStorageDir.cart);
         }
       }
     } catch (e) {

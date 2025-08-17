@@ -1,6 +1,6 @@
 import 'package:easyph/state.dart';
 import 'package:easyph/ui/common/app_colors.dart';
-import 'package:easyph/ui/views/dashboard/productcard.dart';
+import 'package:easyph/ui/views/dashboard/widget/productcard.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';

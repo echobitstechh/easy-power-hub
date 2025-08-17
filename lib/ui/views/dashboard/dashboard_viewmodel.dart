@@ -207,7 +207,6 @@ class DashboardViewModel extends BaseViewModel {
 
     try {
       dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-      log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
       if (storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
         List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
@@ -430,8 +429,10 @@ class DashboardViewModel extends BaseViewModel {
             .toList();
         List<Map<String, dynamic>> storedCategories =
         categories.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.donationsCategories, storedCategories);
+        // await locator<LocalStorage>()
+        //     .save(LocalStorageDir.donationsCategories, storedCategories);
+
+        // Update filtered list
         filteredCategories = [
           Category(id: 0, name: 'All', status: CategoryStatus.active),
           ...categories,
@@ -505,7 +506,7 @@ class DashboardViewModel extends BaseViewModel {
 
       List<Map<String, dynamic>> storedList =
       cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      // await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
 
       final response = await repo.addToCart({
         "productId": product.id,
@@ -561,8 +562,11 @@ class DashboardViewModel extends BaseViewModel {
         await repo.deleteFromCart(item.raffle!.id!);
       }
 
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+      // Save to local storage
+      // List<Map<String, dynamic>> storedList =
+      //     cart.value.map((e) => e.toJson()).toList();
+      // await locator<LocalStorage>()
+      //     .save(LocalStorageDir.raffleCart, storedList);
     } catch (e) {
       locator<SnackbarService>().showSnackbar(message: "Failed to decrease product quantity: $e", duration: const Duration(seconds: 2));
       log.e(e);
@@ -586,8 +590,11 @@ class DashboardViewModel extends BaseViewModel {
           "quantity": item.quantity,
         });
 
-        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+        // Save to local storage
+        // List<Map<String, dynamic>> storedList =
+        //     cart.value.map((e) => e.toJson()).toList();
+        // await locator<LocalStorage>()
+        //     .save(LocalStorageDir.raffleCart, storedList);
       }
     } catch (e) {
       locator<SnackbarService>().showSnackbar(message: "Failed to increase product quantity: $e", duration: const Duration(seconds: 2));

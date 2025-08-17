@@ -118,7 +118,6 @@ dependency_overrides:
 
 
 dev_dependencies:
-  sentry_dart_plugin: ^3.1.1
   flutter_test:
     sdk: flutter
 
@@ -184,6 +183,7 @@ flutter:
     - assets/animations/
     - assets/icons/
     - assets/gif/
+    - assets/videos/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
@@ -211,9 +211,3 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
 
-
-sentry:
-  upload_debug_symbols: true
-  upload_source_maps: true
-  project: flutter
-  org: echobitstech

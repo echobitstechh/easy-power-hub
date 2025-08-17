@@ -10,6 +10,7 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:update_available/update_available.dart';
 import 'app/dev_utils.dart';
 import 'app/errorHandler.dart';
+import 'core/utils/config.dart';
 import 'firebase_options.dart';
 import 'core/utils/paystack_util.dart';
 import 'core/utils/local_store_dir.dart';
@@ -28,7 +29,7 @@ FlutterLocalNotificationsPlugin();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ComprehensiveErrorHandler.initialize();
-  await DeepLinkHandler.initialize();
+  // await DeepLinkHandler.initialize();
   runZonedGuarded(_runApp, ComprehensiveErrorHandler.handleZonedError);
 }
 
@@ -42,8 +43,6 @@ Future<void> _runApp() async {
   setupLocator();
   setupDialogUi();
   setupBottomSheetUi();
-
-  PaystackUtil.initialize(MoneyUtils().payStackPublicKey);
 
   runApp(const MyApp());
 }
