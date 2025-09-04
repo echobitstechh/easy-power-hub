@@ -329,8 +329,7 @@ class RaffleReceiptPage extends StatelessWidget {
                     } catch (e) {
                       print(e);
                     }
-                    await locator<LocalStorage>().delete(LocalStorageDir.cart);
-                    cart.notifyListeners();
+                    //await locator<LocalStorage>().delete(LocalStorageDir.cart);cart.notifyListeners();
 
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);
                   },
@@ -377,7 +376,7 @@ class RaffleReceiptPage extends StatelessWidget {
                     } catch (e) {
                       print(e);
                     }
-                    await locator<LocalStorage>().delete(LocalStorageDir.cart);
+                    //await locator<LocalStorage>().delete(LocalStorageDir.cart);
                     cart.notifyListeners();
 
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);

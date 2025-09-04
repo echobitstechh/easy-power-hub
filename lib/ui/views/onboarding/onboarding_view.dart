@@ -46,8 +46,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                     padding: const EdgeInsets.only(top: 16.0, right: 16.0),
                     child: TextButton(
                       onPressed: () async {
-                        await locator<LocalStorage>()
-                            .save(LocalStorageDir.onboarded, true);
+                       // await locator<LocalStorage>().save(LocalStorageDir.onboarded, true);
                         locator<NavigationService>()
                             .clearStackAndShow(Routes.homeView);
                       },

@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easyph/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-//import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../core/data/models/cart_item.dart';
@@ -16,7 +15,6 @@ import '../../../state.dart';
 import '../../../utils/money_util.dart';
 import '../../common/app_colors.dart';
 import '../../common/ui_helpers.dart';
-import '../cart/cart_viewmodel.dart';
 import '../shop/shop_view.dart';
 
 class ProductCard extends StatefulWidget {
@@ -39,77 +37,13 @@ class _ProductCardState extends State<ProductCard> {
   @override
   void initState() {
     super.initState();
-    loadProduct();
     fetchProductReviews();
     selectedImage = (widget.product.images != null && widget.product.images!.isNotEmpty)
         ? widget.product.images!.first
         : ''; // Fallback value
   }
 
-  Future<void> loadProduct() async {
-    print('loading products....');
-    try {
 
-      dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-      print("Loaded jsonProducts from storage: $storedJsonProduct");
-
-
-      if ( storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
-        List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        print('Decoded JSON: $storedProducts');
-        // Populate productList and filteredProductList
-        productList = storedProducts
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-        print('loaded products from local storage list ${productList.length}');
-        print('loaded products from local storage ${productList.map((e) => e.salePrice)}');
-        if(mounted){
-          setState(() {
-            productList = productList;
-            filteredProductList = productList.where((product) => product.categoryId == widget.product.categoryId).toList();
-          });
-        }
-      }else{
-        print('no value to load');
-      }
-
-    } catch (e) {
-      print("Error loading products: $e");
-    }
-  }
-
-  Future<void> addOrIncrementProduct(Product product) async {
-    try {
-      final existingIndex = cart.value.indexWhere((item) => item.product?.id == product.id);
-      
-      if (existingIndex >= 0) {
-        cart.value[existingIndex].quantity = cart.value[existingIndex].quantity! + 1;
-        
-        await repo.modifyCartItem(product.id.toString(), "increment");
-      } else {
-        cart.value.add(CartItem(
-          product: product,
-          quantity: 1,
-        ));
-        
-        await repo.addToCart({
-          "productId": product.id,
-          "quantity": 1
-        });
-      }
-      
-      cart.value = [...cart.value];
-      
-      locator<SnackbarService>().showSnackbar(
-        message: "Added to cart",
-        duration: Duration(seconds: 1)
-      );
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(
-        message: "Error: ${e.toString()}"
-      );
-    }
-  }
 
   Future<void> modifyQuantity(CartItem item, String action) async {
     try {
@@ -390,7 +324,6 @@ class _ProductCardState extends State<ProductCard> {
 
                             )
                                 : InkWell(
-                              onTap: () async => await addOrIncrementProduct(widget.product),
                               child: Container(
                                 height: 50,
                                 decoration: BoxDecoration(
@@ -418,24 +351,6 @@ class _ProductCardState extends State<ProductCard> {
                             );
                           }),
                     ),
-                    // IconButton(
-                    //   icon: Icon(
-                    //     isFavorited
-                    //         ? Icons.favorite // Icon when favorited
-                    //         : Icons.favorite_border_outlined, // Icon when not favorited
-                    //     size: 30,
-                    //     color: isFavorited ? kcSecondaryColor : iconColor, // Toggle color
-                    //   ),
-                    //   onPressed: () {
-                    //     if(mounted){
-                    //       setState(() {
-                    //         isFavorited = !isFavorited; // Toggle the boolean
-                    //       });
-                    //     }
-                    //   },
-                    // ),
-
-
                   ],
                 ),
 

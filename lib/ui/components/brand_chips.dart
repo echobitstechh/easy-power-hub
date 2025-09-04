@@ -18,7 +18,7 @@ Widget buildBrandChip(String brand, DashboardViewModel viewModel) {
       ),
       selected: brand == viewModel.selectedBrand,
       onSelected: (bool selected) {
-        viewModel.setSelectedBrand(selected ? brand : '');
+       // viewModel.setSelectedBrand(selected ? brand : '');
       },
       selectedColor: kcSecondaryColor,
       backgroundColor: uiMode.value == AppUiModes.dark

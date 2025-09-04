@@ -20,8 +20,8 @@ Widget buildCategoryChip(Category category, DashboardViewModel viewModel) {
       selected: category.id ==
           viewModel.selectedId, // Check if this category is selected
       onSelected: (bool selected) {
-        viewModel.setSelectedCategory(
-            selected ? category.id : 0); // Update viewModel properly
+        // viewModel.setSelectedCategory(
+        //     selected ? category.id : 0); // Update viewModel properly
         viewModel.notifyListeners(); // Notify the listeners to rebuild the UI
       },
       selectedColor: kcSecondaryColor,

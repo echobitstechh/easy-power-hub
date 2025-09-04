@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:collection';
+import 'dart:async';
+import 'dart:developer';
 
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.logger.dart';
@@ -17,6 +20,81 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/project.dart';
 import '../../../core/data/models/tags.dart';
+
+class DatabaseManager {
+  static final DatabaseManager _instance = DatabaseManager._internal();
+  factory DatabaseManager() => _instance;
+  DatabaseManager._internal();
+
+  final Queue<_Operation> _operationQueue = Queue();
+  bool _isProcessing = false;
+  final Map<String, Completer> _activeOperations = {};
+
+  Future<T> executeOperation<T>(Future<T> Function() operation, {String? operationId}) async {
+    final completer = Completer<T>();
+    final id = operationId ?? DateTime.now().millisecondsSinceEpoch.toString();
+
+    // Prevent duplicate operations
+    if (_activeOperations.containsKey(id)) {
+      return _activeOperations[id]!.future as Future<T>;
+    }
+
+    _activeOperations[id] = completer;
+
+    final operationWrapper = _Operation(
+      id: id,
+      execute: () async {
+        try {
+          final result = await operation().timeout(
+            const Duration(seconds: 30), // Prevent indefinite locks
+            onTimeout: () => throw TimeoutException('Database operation timed out', const Duration(seconds: 30)),
+          );
+          completer.complete(result);
+        } catch (e) {
+          completer.completeError(e);
+        } finally {
+          _activeOperations.remove(id);
+        }
+      },
+    );
+
+    _operationQueue.add(operationWrapper);
+    _processQueue();
+    return completer.future;
+  }
+
+  void _processQueue() async {
+    if (_isProcessing || _operationQueue.isEmpty) return;
+
+    _isProcessing = true;
+    while (_operationQueue.isNotEmpty) {
+      final operation = _operationQueue.removeFirst();
+      try {
+        await operation.execute();
+      } catch (e) {
+        print('Database operation ${operation.id} failed: $e');
+      }
+    }
+    _isProcessing = false;
+  }
+
+  void clearQueue() {
+    _operationQueue.clear();
+    for (final completer in _activeOperations.values) {
+      if (!completer.isCompleted) {
+        completer.completeError('Operation cancelled');
+      }
+    }
+    _activeOperations.clear();
+  }
+}
+
+class _Operation {
+  final String id;
+  final Future<void> Function() execute;
+
+  _Operation({required this.id, required this.execute});
+}
 
 class ShopViewModel extends BaseViewModel {
   final repo = locator<Repository>();
@@ -62,34 +140,9 @@ class ShopViewModel extends BaseViewModel {
 
   final snackBar = locator<SnackbarService>();
 
+  Timer? _debounceTimer;
+  bool _isInitializing = false;
 
-  void _applyFilters() {
-    final seenProductIds = <String>{};
-    final filtered = <Product>[];
-    for (final product in productList) {
-      final pid = product.id;
-      if (pid == null || seenProductIds.contains(pid)) continue;
-
-      bool matches = true;
-      if (selectedId != allCategoriesId) {
-        matches = matches && (product.categoryId == selectedId);
-      }
-      if (selectedBrand.isNotEmpty) {
-        matches = matches && (product.brandName == selectedBrand);
-      }
-      if (_selectedTag != null) {
-        final hasTag = (product.tags ?? []).any((t) => t.id == _selectedTag!.id);
-        matches = matches && hasTag;
-      }
-
-      if (matches) {
-        filtered.add(product);
-        seenProductIds.add(pid);
-      }
-    }
-    filteredProductList = filtered;
-    notifyListeners();
-  }
 
   void resetFilters() {
     selectedId = allCategoriesId;
@@ -116,40 +169,8 @@ class ShopViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  void setSelectedCategory(int id) {
-    _selectedTag = null;
-    selectedId = id;
-    _applyFilters();
-  }
 
-  void setSelectedBrand(String brand) {
-    selectedBrand = selectedBrand == brand ? '' : brand;
-    _selectedTag = null;
-    _applyFilters();
-  }
 
-  void setSelectedTag(Tag? tag) {
-    if (tag == _selectedTag) {
-      clearAllFilters();
-      return;
-    }
-
-    _selectedTag = tag;
-    selectedId = allCategoriesId;
-    selectedBrand = '';
-    _applyFilters();
-    _updateBrandsList();
-    notifyListeners();
-  }
-
-  void _updateBrandsList() {
-    final uniqueBrands = <String>{};
-    for (final product in filteredProductList) {
-      final b = product.brandName;
-      if (b != null && b.isNotEmpty) uniqueBrands.add(b);
-    }
-    brands = uniqueBrands.toList()..sort();
-  }
 
 
   void clearAllFilters() {
@@ -168,7 +189,6 @@ class ShopViewModel extends BaseViewModel {
 
     notifyListeners();
   }
-
 
   Map<String, dynamic> getCurrentFilters() {
     return {
@@ -192,408 +212,69 @@ class ShopViewModel extends BaseViewModel {
     return difference <= 14;
   }
 
-
   @override
   void dispose() {
+    _debounceTimer?.cancel();
+    DatabaseManager().clearQueue();
     super.dispose();
   }
 
   Future<void> init() async {
+    if (_isInitializing) return; // Prevent multiple init calls
+
+    _isInitializing = true;
     setBusy(true);
     print("loading the initials");
     notifyListeners();
-    await loadProduct();
-    await loadCategories();
-    await fetchProductTags();
-    if (userLoggedIn.value == true) {
-      initCart();
-    }
-    setBusy(false);
-    notifyListeners();
-  }
 
-  Future<void> loadProduct() async {
-    print('loading products....');
     try {
-      dynamic storedJsonProduct = await locator<LocalStorage>().fetch(LocalStorageDir.product);
-      log.i("Loaded jsonProducts from storage: $storedJsonProduct");
 
-      if (storedJsonProduct != null && storedJsonProduct.isNotEmpty) {
-        List<dynamic> storedProducts = jsonDecode(storedJsonProduct);
-        List<Product> loadedProducts = storedProducts
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .toList();
-
-        Set<String> seenIds = {};
-        productList = [];
-        for (Product product in loadedProducts) {
-          if (!seenIds.contains(product.id)) {
-            productList.add(product);
-            seenIds.add(product.id!);
-          }
-        }
-
-        filteredProductList = List.from(productList);
-        print('loaded ${productList.length} unique products from local storage');
-
-        Set<String> uniqueBrands = {};
-        for (Product product in filteredProductList) {
-          if (product.brandName != null && product.brandName!.isNotEmpty) {
-            uniqueBrands.add(product.brandName!);
-          }
-        }
-        brands = uniqueBrands.toList();
-        rebuildUi();
-      } else {
-        print('no value to load');
+      if (userLoggedIn.value == true) {
+        initCart();
       }
-
-      getProducts();
     } catch (e) {
-      log.e("Error loading products: $e");
+      log.e("Error during initialization: $e");
+    } finally {
+      _isInitializing = false;
+      setBusy(false);
+      notifyListeners();
     }
   }
+
 
   Future<void> refreshData() async {
     setBusy(true);
     notifyListeners();
-    getResourceList();
     setBusy(false);
     notifyListeners();
   }
 
-  void getResourceList() {
-    getProducts(isRefresh: true);
-    getCategories();
-    fetchProductTags();
 
-    if (userLoggedIn.value == true) {
-      initCart();
-    }
-  }
 
-  Future<void> getProducts({bool isRefresh = false, Tag? tagFilter}) async {
-    if (isLoadingMore && !isRefresh) return;
 
-    try {
-      if (isRefresh || tagFilter != null) {
-        productList.clear();
-        filteredProductList.clear();
-        currentPage = 1;
-        isLastPage = false;
-      }
-      if (tagFilter != null) {
-        setBusy(true);
-        ApiResponse res = await repo.getProductsByTag(
-          tagId: tagFilter.id!,
-          page: 1,
-          limit: 100,
-        );
 
-        if (res.statusCode == 200) {
-          productList = (res.data["products"] as List)
-              .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-              .where((product) => product.status?.toLowerCase() == 'active')
-              .toList();
 
-          List<Map<String, dynamic>> storedProducts = productList.map((e) => e.toJson()).toList();
-          await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
 
-          _applyCurrentFilters();
-          isLastPage = true;
-        }
-      }
-      else {
-        if (isLastPage && !isRefresh) return;
 
-        isLoadingMore = true;
-        notifyListeners();
-
-        ApiResponse res = await repo.getProducts(
-          page: currentPage,
-          limit: pageLimit,
-        );
-
-        if (res.statusCode == 200) {
-          List<Product> newProducts = (res.data["products"] as List)
-              .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-              .where((product) => product.status?.toLowerCase() == 'active')
-              .toList();
-
-          final totalPages = res.data["pagination"]["totalPages"];
-
-          // Add new products avoiding duplicates
-          Set<String> existingIds = productList.map((p) => p.id!).toSet();
-          for (Product newProduct in newProducts) {
-            if (!existingIds.contains(newProduct.id)) {
-              productList.add(newProduct);
-            }
-          }
-
-          _applyCurrentFilters();
-
-          if (currentPage >= totalPages) {
-            isLastPage = true;
-          } else {
-            currentPage++;
-          }
-          List<Map<String, dynamic>> storedProducts = productList.map((e) => e.toJson()).toList();
-          await locator<LocalStorage>().save(LocalStorageDir.product, jsonEncode(storedProducts));
-        }
-      }
-      Set<String> uniqueBrands = {};
-      for (Product product in productList) {
-        if (product.brandName != null && product.brandName!.isNotEmpty) {
-          uniqueBrands.add(product.brandName!);
-        }
-      }
-      brands = uniqueBrands.toList();
-
-    } catch (e) {
-      log.e("Error fetching products: $e");
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to load products",
-          duration: const Duration(seconds: 2)
-      );
-    } finally {
-      isLoadingMore = false;
-      setBusy(false);
-      notifyListeners();
-    }
-  }
-  void _applyCurrentFilters() {
-    Set<String> seenProductIds = {};
-    List<Product> filtered = [];
-
-    for (Product product in productList) {
-      if (seenProductIds.contains(product.id)) {
-        continue;
-      }
-
-      bool matchesFilters = true;
-
-      if (selectedId != allCategoriesId) {
-        matchesFilters = matchesFilters && (product.categoryId == selectedId);
-      }
-
-      if (selectedBrand.isNotEmpty) {
-        matchesFilters = matchesFilters && (product.brandName == selectedBrand);
-      }
-
-      if (_selectedTag != null) {
-        bool hasMatchingTag = false;
-        if (product.tags != null && product.tags!.isNotEmpty) {
-          hasMatchingTag = product.tags!.any((tag) => tag.id == _selectedTag!.id);
-        }
-        matchesFilters = matchesFilters && hasMatchingTag;
-      }
-
-      if (matchesFilters) {
-        filtered.add(product);
-        seenProductIds.add(product.id!);
-      }
-    }
-
-    filteredProductList = filtered;
-  }
-
-  Future<void> loadCategories() async {
-    try {
-      await getCategories();
-      if (categories.isEmpty) {
-        dynamic storedDonations = await locator<LocalStorage>()
-            .fetch(LocalStorageDir.donationsCategories);
-        if (storedDonations != null) {
-          categories = List<Map<String, dynamic>>.from(storedDonations)
-              .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-              .where((category) => category.status == CategoryStatus.active)
-              .toList();
-        }
-      }
-      filteredCategories = [
-        Category(id: 0, name: 'All', status: CategoryStatus.active),
-        ...categories,
-      ];
-      notifyListeners();
-    } catch (e) {
-      log.e("Error loading categories: $e");
-    }
-  }
-
-  Future<void> getCategories() async {
-    setBusy(true);
-    try {
-      ApiResponse res = await repo.getCategories();
-      if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
-        categories = (res.data["categories"] as List)
-            .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-            .where((category) => category.status == CategoryStatus.active)
-            .toList();
-        List<Map<String, dynamic>> storedCategories =
-        categories.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>()
-            .save(LocalStorageDir.donationsCategories, storedCategories);
-        filteredCategories = [
-          Category(id: 0, name: 'All', status: CategoryStatus.active),
-          ...categories,
-        ];
-      }
-    } catch (e) {
-      log.e("Error fetching categories: $e");
-    } finally {
-      setBusy(false);
-      notifyListeners();
-    }
-  }
-
-  Future<void> fetchProductTags() async {
-    _isLoadingTags = true;
-    _hasTagsError = false;
-    _tagsError = null;
-    notifyListeners();
-    try {
-      ApiResponse res = await repo.getProductTags();
-      if (res.statusCode == 200) {
-        List<dynamic> tagsData = res.data['tags'] ?? [];
-        _tags = tagsData
-            .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
-            .toList();
-        _tags.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _hasTagsError = false;
-        _tagsError = null;
-        print("Loaded ${_tags.length} tags: ${_tags.map((t) => '${t.name} (${t.id})').toList()}");
-      } else {
-        throw Exception('Failed to fetch tags with status: ${res.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error fetching product tags: $e');
-      _hasTagsError = true;
-      _tagsError = 'Failed to load tags. Please try again.';
-      _tags = [];
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to load product tags",
-          duration: const Duration(seconds: 2)
-      );
-    } finally {
-      _isLoadingTags = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> refreshTags() async {
-    await fetchProductTags();
-  }
-
-  void addToRaffleCart(Product product) async {
-    print('adding to cart');
-    try {
-      final existingIndex = cart.value.indexWhere(
-            (raffleItem) => raffleItem.product?.id == product.id,
-      );
-
-      if (existingIndex != -1) {
-        final updatedItem = CartItem(
-          product: cart.value[existingIndex].product,
-          quantity: cart.value[existingIndex].quantity! + 1,
-        );
-
-        cart.value[existingIndex] = updatedItem;
-      } else {
-        cart.value.add(CartItem(product: product, quantity: 1));
-      }
-
-      List<Map<String, dynamic>> storedList =
-      cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
-      final response = await repo.addToCart({
-        "productId": product.id,
-        "quantity": cart.value.firstWhere((item) => item.product?.id == product.id).quantity,
-      });
-
-      if (response.statusCode == 200) {
-        locator<SnackbarService>().showSnackbar(
-            message: "Product added to cart", duration: const Duration(seconds: 2));
-      } else {
-        locator<SnackbarService>().showSnackbar(
-            message: response.data["message"], duration: const Duration(seconds: 2));
-      }
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to add raffle to cart: $e",
-          duration: const Duration(seconds: 2));
-    } finally {
-      notifyListeners();
-    }
-  }
 
   void initCart() async {
     try {
-      dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
+      await DatabaseManager().executeOperation(() async {
+        dynamic storedData = await locator<LocalStorage>().fetch(LocalStorageDir.raffleCart);
 
-      if (storedData != null) {
-        List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
-            .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
-            .toList();
-        cart.value = localCart;
-      }
+        if (storedData != null) {
+          List<CartItem> localCart = List<Map<String, dynamic>>.from(storedData)
+              .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
+              .toList();
+          cart.value = localCart;
+        }
+      }, operationId: 'init_cart');
     } catch (e) {
       print('Failed to load cart from local storage: $e');
     }
   }
 
-  Future<void> decreaseRaffleQuantity(RaffleCartItem item) async {
-    setBusy(true);
-    try {
-      if (item.quantity! > 1) {
-        item.quantity = item.quantity! - 1;
 
-        await repo.addToCart({
-          "raffle": item.raffle?.id,
-          "quantity": item.quantity,
-        });
-      } else if (item.quantity! == 1) {
-        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.raffle?.id);
-
-        await repo.deleteFromCart(item.raffle!.id!);
-      }
-
-      List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-      await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to decrease raffle quantity: $e", duration: const Duration(seconds: 2));
-      log.e(e);
-    } finally {
-      setBusy(false);
-      cart.notifyListeners();
-    }
-  }
-
-  Future<void> increaseRaffleQuantity(CartItem item) async {
-    setBusy(true);
-    try {
-      item.quantity = item.quantity! + 1;
-      int index = cart.value.indexWhere((raffleItem) => raffleItem.product?.id == item.product?.id);
-      if (index != -1) {
-        cart.value[index] = item;
-        cart.value = List.from(cart.value);
-
-        await repo.addToCart({
-          "raffle": item.product?.id,
-          "quantity": item.quantity,
-        });
-
-        List<Map<String, dynamic>> storedList = cart.value.map((e) => e.toJson()).toList();
-        await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-      }
-    } catch (e) {
-      locator<SnackbarService>().showSnackbar(message: "Failed to increase raffle quantity: $e", duration: const Duration(seconds: 2));
-      log.e(e);
-    } finally {
-      setBusy(false);
-      cart.notifyListeners();
-    }
-  }
 
   String formatRemainingTime(DateTime drawDate) {
     final now = DateTime.now();
