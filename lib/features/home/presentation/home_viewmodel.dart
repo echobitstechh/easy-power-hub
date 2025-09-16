@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:update_available/update_available.dart';
+// import 'package:update_available/update_available.dart';
 import 'package:wahala_hq/features/home/presentation/widgets/update_card.dart';
 import '../../dashboard/presentation/dashboad_view.dart';
 
@@ -37,12 +37,12 @@ class HomeViewModel extends BaseViewModel {
     return pages[selectedTab];
   }
 
-  Future<void> checkForUpdates(BuildContext context) async {
-    final availability = await getUpdateAvailability();
-    if (availability is UpdateAvailable) {
-      const UpdateCard();
-    }
-  }
+  // Future<void> checkForUpdates(BuildContext context) async {
+  //   final availability = await getUpdateAvailability();
+  //   if (availability is UpdateAvailable) {
+  //     const UpdateCard();
+  //   }
+  // }
 
   void clearSelectedTab() {
     selectedTab = -1;
