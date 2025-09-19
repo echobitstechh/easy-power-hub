@@ -52,8 +52,8 @@ class UpdateCard extends StatelessWidget {
                       MaterialStateProperty.all(kcSecondaryColor)),
                   onPressed: () {
                     final url = Platform.isIOS
-                        ? AppConfig.appleStoreUrl
-                        : AppConfig.playStoreUrl;
+                        ? AppConfig.APPLESTOREURL
+                        : AppConfig.GOOGLESTOREURL;
                     _launchURL(url);
                     Navigator.pop(context);
                   },

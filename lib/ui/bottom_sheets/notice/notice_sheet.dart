@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wahala_hq/ui/common/app_colors.dart';
-import 'package:wahala_hq/ui/common/ui_helpers.dart';
+import 'package:easy_ph/ui/common/app_colors.dart';
+import 'package:easy_ph/ui/common/ui_helpers.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 

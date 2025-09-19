@@ -1,5 +1,5 @@
 
-import 'package:wahala_hq/features/startup/data/models/user_dto.dart';
+import 'package:easy_ph/features/startup/data/models/user_dto.dart';
 
 import '../../../../core/network/interceptors.dart';
 

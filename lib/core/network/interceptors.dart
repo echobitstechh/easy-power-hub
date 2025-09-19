@@ -47,109 +47,99 @@ final requestInterceptors = InterceptorsWrapper(
   onResponse: (Response response, ResponseInterceptorHandler handler) {
     handler.next(response);
   },
-  onError: (DioError dioError, ErrorInterceptorHandler handler) async {
+  onError: (DioException dioError, ErrorInterceptorHandler handler) async {
+    // Handle common Dio exceptions
+    switch (dioError.type) {
+      case DioExceptionType.connectionTimeout:
+        await showDialog("Connection Timed Out", null, isDialogBeingDisplayed);
+        handler.next(dioError);
+        return;
+      case DioExceptionType.receiveTimeout:
+        await showDialog("Receive Timed Out", null, isDialogBeingDisplayed);
+        handler.next(dioError);
+        return;
+      case DioExceptionType.sendTimeout:
+        await showDialog("Send Timed Out", null, isDialogBeingDisplayed);
+        handler.next(dioError);
+        return;
+      case DioExceptionType.unknown:
+        await showDialog("Network is unreachable", null, isDialogBeingDisplayed);
+        handler.next(dioError);
+        return;
+      default:
+        break;
+    }
 
-    // Future<DialogResponse?> showDialog(String title, String? description) async {
-    //   if (!isDialogBeingDisplayed) {
-    //     isDialogBeingDisplayed = true;
-    //      DialogResponse? res = await locator<DialogService>().showCustomDialog(
-    //       variant: DialogType.infoAlert,
-    //       title: title,
-    //       description: description,
-    //     );
-    //     isDialogBeingDisplayed = false;
-    //     return res;
-    //   }
-    //   return null;
-    // }
-
-    if (dioError.type == DioErrorType.connectTimeout) {
-      await showDialog("Connection Timed Out", null, isDialogBeingDisplayed);
-    }
-    else if (dioError.type == DioErrorType.other) {
-      await showDialog("Network is unreachable", null, isDialogBeingDisplayed);
-    }
-    else if (dioError.type == DioErrorType.receiveTimeout) {
-      await showDialog("Receive Timed Out", null, isDialogBeingDisplayed);
-      // stopLoadingOnTimeout(currentViewModel);
-    }
-    // else if (dioError.response?.statusCode == 401 && !dioError.requestOptions.path.startsWith('auth')) {
-    else if (dioError.response?.statusCode == 401) {
-      print('value of path is ${dioError.requestOptions.path}');
+    // Handle 401 (unauthorized)
+    if (dioError.response?.statusCode == 401) {
+      // Prevent infinite retry loops
       if (refreshTokenRetryCount >= maxRetryCount) {
-        // Reset counter and redirect user to login
         refreshTokenRetryCount = 0;
-        ApiResponse res = await repo.logOut();
-        if (res.statusCode == 200) {
-          // locator<NavigationService>()
-          //     .clearStackAndShow(Routes.authView, arguments:const AuthViewArguments(authType: AuthType.selection) );
-        }
+        await repo.logOut();
+        return;
       }
+
       refreshTokenRetryCount++;
-      String? refreshToken = await locator<LocalStorage>().fetch(LocalStorageDir.authRefreshToken);
+      final refreshToken =
+      await locator<LocalStorage>().fetch(LocalStorageDir.authRefreshToken);
 
       if (refreshToken != null) {
-        bool refreshTokenResult = await refreshAccessToken();
+        final refreshSuccess = await refreshAccessToken();
 
-        if (refreshTokenResult) {
+        if (refreshSuccess) {
           refreshTokenRetryCount = 0;
-          String newAccessToken = await locator<LocalStorage>().fetch(LocalStorageDir.authToken);
+          final newAccessToken =
+          await locator<LocalStorage>().fetch(LocalStorageDir.authToken);
+
           final opts = Options(
             method: dioError.requestOptions.method,
-            headers: {...dioError.requestOptions.headers,
-              'Authorization': 'Bearer $newAccessToken',},
+            headers: <String, dynamic>{
+              ...dioError.requestOptions.headers,
+              'Authorization': 'Bearer $newAccessToken',
+            },
           );
-          apiService.dio.request(
+
+          // retry failed request
+          apiService.dio
+              .request(
             dioError.requestOptions.path,
             options: opts,
             data: dioError.requestOptions.data,
             queryParameters: dioError.requestOptions.queryParameters,
-          ).then(
-                (r) => handler.resolve(r),
-            onError: (e) => handler.reject(e),
-          );
+          )
+              .then((r) => handler.resolve(r), onError: (e) => handler.reject(e));
+
+          return;
         } else {
           final res = await locator<DialogService>().showCustomDialog(
-              variant: DialogType.infoAlert,
-              title: "Session Expired",
-              description: "Login again to continue");
-          if (res!.confirmed) {
+            variant: DialogType.infoAlert,
+            title: "Session Expired",
+            description: "Login again to continue",
+          );
+          if (res?.confirmed == true) {
             userLoggedIn.value = false;
             await locator<LocalStorage>().delete(LocalStorageDir.authToken);
             await locator<LocalStorage>().delete(LocalStorageDir.authUser);
             await locator<LocalStorage>().delete(LocalStorageDir.authRefreshToken);
-            // locator<NavigationService>()
-            //     .clearStackAndShow(Routes.authView, arguments:const AuthViewArguments(authType: AuthType.selection) );
           }
+          return;
         }
-      }
-      else {
-        if (kDebugMode) {
-          print('refresh token is null');
-        }
-        final res = await showDialogWithResponse("Session Expired", "Login again to continue", isDialogBeingDisplayed);
-        if (res!.confirmed) {
-          // locator<NavigationService>()
-          //     .clearStackAndShow(Routes.authView, arguments:const AuthViewArguments(authType: AuthType.selection) );
-        }
-
+      } else {
+        if (kDebugMode) print('refresh token is null');
+        await showDialogWithResponse(
+          "Session Expired",
+          "Login again to continue",
+          isDialogBeingDisplayed,
+        );
+        return;
       }
     }
-    else if(dioError.response?.statusCode == 401 && dioError.requestOptions.path.startsWith('/auth')){
-      if (kDebugMode) {
-        print('incorrect credentials');
-      }
-      if(dioError.response != null && dioError.response!.statusMessage != null){
-        await showDialog(dioError.response!.statusMessage!, null, isDialogBeingDisplayed);
-      }
 
-    }
-    else{
-      handler.next(dioError);
-    }
-
+    // Pass error down the chain if not handled
+    handler.next(dioError);
   },
 );
+
 
 Future<bool> refreshAccessToken() async {
 

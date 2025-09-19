@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 
+import 'core/data/models/cart_item.dart';
+import 'core/data/models/category.dart';
+import 'core/data/models/profile.dart';
 import 'features/startup/domain/entities/user.dart';
 
 enum AppUiModes { dark, light }
+enum PaymentMethod { wallet, paystack }
 
 
-ValueNotifier<User> profile = ValueNotifier(const User());
+ValueNotifier<List<CartItem>> cart = ValueNotifier([]);
+ValueNotifier<Profile> profile = ValueNotifier(Profile());
 ValueNotifier<bool> userLoggedIn = ValueNotifier(false);
 ValueNotifier<bool> isFirstLaunch = ValueNotifier(true);
 ValueNotifier<AppUiModes> uiMode = ValueNotifier(AppUiModes.light);
+ValueNotifier<int> unreadCount = ValueNotifier(0);
+ValueNotifier<bool> appLoading = ValueNotifier(false);
+ValueNotifier<bool> isLoginByEmail = ValueNotifier(false);
+ValueNotifier<bool> isOtpRequestedByEmail = ValueNotifier(false);
+ValueNotifier<List<Category>> globalCategories = ValueNotifier([]);

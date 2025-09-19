@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:wahala_hq/features/auth/presentation/widgets/login_form.dart';
-import 'package:wahala_hq/features/auth/presentation/widgets/otp_form.dart';
-import 'package:wahala_hq/features/auth/presentation/widgets/register_form.dart';
+import 'package:easy_ph/features/auth/presentation/widgets/login_form.dart';
+import 'package:easy_ph/features/auth/presentation/widgets/otp_form.dart';
+import 'package:easy_ph/features/auth/presentation/widgets/register_form.dart';
 
 import 'auth_viewmodel.dart';
 

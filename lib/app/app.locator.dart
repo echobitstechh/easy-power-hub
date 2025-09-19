@@ -9,7 +9,12 @@
 import 'package:stacked_services/src/bottom_sheet/bottom_sheet_service.dart';
 import 'package:stacked_services/src/dialog/dialog_service.dart';
 import 'package:stacked_services/src/navigation/navigation_service.dart';
+import 'package:stacked_services/src/snackbar/snackbar_service.dart';
 import 'package:stacked_shared/stacked_shared.dart';
+
+import '../core/data/repositories/repository.dart';
+import '../core/network/api_service.dart';
+import '../core/utils/local_stotage.dart';
 
 final locator = StackedLocator.instance;
 
@@ -25,4 +30,8 @@ Future<void> setupLocator({
   locator.registerLazySingleton(() => BottomSheetService());
   locator.registerLazySingleton(() => DialogService());
   locator.registerLazySingleton(() => NavigationService());
+  locator.registerLazySingleton(() => LocalStorage());
+  locator.registerLazySingleton(() => SnackbarService());
+  locator.registerLazySingleton(() => ApiService());
+  locator.registerLazySingleton(() => Repository());
 }

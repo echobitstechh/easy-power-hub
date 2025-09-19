@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:wahala_hq/ui/common/app_colors.dart';
+import 'package:easy_ph/ui/common/app_colors.dart';
 
 import '../../state.dart';
 

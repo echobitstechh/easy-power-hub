@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wahala_hq/app/app.bottomsheets.dart';
-import 'package:wahala_hq/app/app.dialogs.dart';
-import 'package:wahala_hq/app/app.locator.dart';
-import 'package:wahala_hq/app/app.router.dart';
+import 'package:easy_ph/app/app.bottomsheets.dart';
+import 'package:easy_ph/app/app.dialogs.dart';
+import 'package:easy_ph/app/app.locator.dart';
+import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 Future<void> main() async {

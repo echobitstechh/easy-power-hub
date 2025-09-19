@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wahala_hq/app/app.locator.dart';
+import 'package:easy_ph/app/app.locator.dart';
 
 import '../helpers/test_helpers.dart';
 

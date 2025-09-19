@@ -1,53 +1,32 @@
 import 'dart:math' as math;
-
 import 'package:dio/dio.dart';
 
 class CustomPrettyDioLogger extends Interceptor {
-  /// Print request [Options]
   final bool request;
-
-  /// Print request header [Options.headers]
   final bool requestHeader;
-
-  /// Print request data [Options.data]
   final bool requestBody;
-
-  /// Print [Response.data]
   final bool responseBody;
-
-  /// Print [Response.headers]
   final bool responseHeader;
-
-  /// Print error message
   final bool error;
-
-  /// InitialTab count to logPrint json response
-  static const int initialTab = 1;
-
-  /// 1 tab length
-  static const String tabStep = '    ';
-
-  /// Print compact json response
   final bool compact;
-
-  /// Width size per logPrint
   final int maxWidth;
 
-  /// Log printer; defaults logPrint log to console.
-  /// In flutter, you'd better use debugPrint.
-  /// you can also write log in a file.
   void Function(Object object) logPrint;
 
-  CustomPrettyDioLogger(
-      {this.request = true,
-      this.requestHeader = false,
-      this.requestBody = false,
-      this.responseHeader = false,
-      this.responseBody = true,
-      this.error = true,
-      this.maxWidth = 90,
-      this.compact = true,
-      this.logPrint = print});
+  static const int initialTab = 1;
+  static const String tabStep = '    ';
+
+  CustomPrettyDioLogger({
+    this.request = true,
+    this.requestHeader = false,
+    this.requestBody = false,
+    this.responseHeader = false,
+    this.responseBody = true,
+    this.error = true,
+    this.maxWidth = 90,
+    this.compact = true,
+    this.logPrint = print,
+  });
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
@@ -61,16 +40,17 @@ class CustomPrettyDioLogger extends Interceptor {
       requestHeaders['contentType'] = options.contentType?.toString();
       requestHeaders['responseType'] = options.responseType.toString();
       requestHeaders['followRedirects'] = options.followRedirects;
-      requestHeaders['connectTimeout'] = options.connectTimeout;
-      requestHeaders['receiveTimeout'] = options.receiveTimeout;
+      requestHeaders['connectTimeout'] = options.connectTimeout?.inMilliseconds;
+      requestHeaders['receiveTimeout'] = options.receiveTimeout?.inMilliseconds;
       _printMapAsTable(requestHeaders, header: 'Headers');
       _printMapAsTable(options.extra, header: 'Extras');
     }
     if (requestBody && options.method != 'GET') {
       final dynamic data = options.data;
       if (data != null) {
-        if (data is Map) _printMapAsTable(options.data as Map?, header: 'Body');
-        if (data is FormData) {
+        if (data is Map) {
+          _printMapAsTable(options.data as Map?, header: 'Body');
+        } else if (data is FormData) {
           final formDataMap = <String, dynamic>{}
             ..addEntries(data.fields)
             ..addEntries(data.files);
@@ -84,14 +64,15 @@ class CustomPrettyDioLogger extends Interceptor {
   }
 
   @override
-  void onError(DioError err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler handler) {
     if (error) {
-      if (err.type == DioErrorType.response) {
+      if (err.type == DioExceptionType.badResponse) {
         final uri = err.response?.requestOptions.uri;
         _printBoxed(
-            header:
-                'DioError ║ Status: ${err.response?.statusCode} ${err.response?.statusMessage}',
-            text: uri.toString());
+          header:
+          'DioException ║ Status: ${err.response?.statusCode} ${err.response?.statusMessage}',
+          text: uri.toString(),
+        );
         if (err.response != null && err.response?.data != null) {
           logPrint('╔ ${err.type.toString()}');
           _printResponse(err.response!);
@@ -99,7 +80,10 @@ class CustomPrettyDioLogger extends Interceptor {
         _printLine('╚');
         logPrint('');
       } else {
-        _printBoxed(header: 'DioError ║ ${err.type}', text: err.message);
+        _printBoxed(
+          header: 'DioException ║ ${err.type}',
+          text: err.message,
+        );
       }
     }
     super.onError(err, handler);
@@ -139,7 +123,7 @@ class CustomPrettyDioLogger extends Interceptor {
       } else if (response.data is List) {
         logPrint('║${_indent()}[');
         _printList(response.data as List);
-        logPrint('║${_indent()}[');
+        logPrint('║${_indent()}]');
       } else {
         _printBlock(response.data.toString());
       }
@@ -150,9 +134,10 @@ class CustomPrettyDioLogger extends Interceptor {
     final uri = response.requestOptions.uri;
     final method = response.requestOptions.method;
     _printBoxed(
-        header:
-            'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}',
-        text: uri.toString());
+      header:
+      'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}',
+      text: uri.toString(),
+    );
   }
 
   void _printRequestHeader(RequestOptions options) {
@@ -175,15 +160,6 @@ class CustomPrettyDioLogger extends Interceptor {
       logPrint('$pre$msg');
     }
   }
-
-  // void _printBlock(String msg) {
-  //   final lines = (msg.length / maxWidth).ceil();
-  //   for (var i = 0; i < lines; ++i) {
-  //     logPrint((i >= 0 ? '║ ' : '') +
-  //         msg.substring(i * maxWidth,
-  //             math.min<int>(i * maxWidth + maxWidth, msg.length)));
-  //   }
-  // }
 
   void _printBlock(String msg) {
     const maxLength = 300;
@@ -208,11 +184,11 @@ class CustomPrettyDioLogger extends Interceptor {
   String _indent([int tabCount = initialTab]) => tabStep * tabCount;
 
   void _printPrettyMap(
-    Map data, {
-    int tabs = initialTab,
-    bool isListItem = false,
-    bool isLast = false,
-  }) {
+      Map data, {
+        int tabs = initialTab,
+        bool isListItem = false,
+        bool isLast = false,
+      }) {
     var _tabs = tabs;
     final isRoot = _tabs == initialTab;
     final initialIndent = _indent(_tabs);
@@ -244,7 +220,6 @@ class CustomPrettyDioLogger extends Interceptor {
       } else {
         String msg = value.toString().replaceAll('\n', '');
 
-        // 👇 Patch: Detect & truncate base64 or large blob fields
         if (key.toString().toLowerCase().contains('picture') ||
             msg.contains("/9j/") ||
             msg.length > 3000) {
@@ -286,8 +261,8 @@ class CustomPrettyDioLogger extends Interceptor {
 
   bool _canFlattenMap(Map map) {
     return map.values
-            .where((dynamic val) => val is Map || val is List)
-            .isEmpty &&
+        .where((dynamic val) => val is Map || val is List)
+        .isEmpty &&
         map.toString().length < maxWidth;
   }
 
@@ -298,8 +273,7 @@ class CustomPrettyDioLogger extends Interceptor {
   void _printMapAsTable(Map? map, {String? header}) {
     if (map == null || map.isEmpty) return;
     logPrint('╔ $header ');
-    map.forEach(
-        (dynamic key, dynamic value) => _printKV(key.toString(), value));
+    map.forEach((dynamic key, dynamic value) => _printKV(key.toString(), value));
     _printLine('╚');
   }
 }

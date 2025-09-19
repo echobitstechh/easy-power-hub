@@ -9,48 +9,42 @@ import '../utils/local_stotage.dart';
 import 'api_response.dart';
 import 'interceptors.dart';
 
-
 /// @author George David
 /// email: georgequin19@gmail.com
-/// Feb, 2024
-///
-
+/// Refactored Sept, 2025
 
 enum HttpMethod { get, post, postRefresh, patch, put, delete }
 
 class ApiService {
   final log = getLogger('ApiService');
-
   final Dio dio;
 
-  ApiService() : dio = _dio();
+  ApiService() : dio = _createDio();
 
-  static final Map<String, String> _requestHeaders = {
+  // Default headers
+  static final _defaultHeaders = {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
   };
 
-  static const int _timeout = 50000;
+  // 20s feels safer than 50s (reduce perceived “freezing”)
+  static const _timeout = Duration(seconds: 20);
 
   static final _options = BaseOptions(
     baseUrl: AppConfig.baseUrl,
-    headers: _requestHeaders,
+    headers: _defaultHeaders,
     connectTimeout: _timeout,
     receiveTimeout: _timeout,
   );
 
-  static Dio _dio() {
-    Dio dio;
+  static Dio _createDio() {
+    final dio = Dio(_options);
     if (!kReleaseMode) {
-      dio = Dio(_options)
-        ..interceptors.add(logInterceptor)
-        ..interceptors.add(requestInterceptors);
-    } else {
-      dio = Dio(_options)..interceptors.add(requestInterceptors);
+      dio.interceptors.add(logInterceptor);
     }
+    dio.interceptors.add(requestInterceptors);
     return dio;
   }
-
 
   Future<ApiResponse> call({
     required HttpMethod method,
@@ -62,115 +56,117 @@ class ApiService {
     bool useFormData = false,
   }) async {
     try {
+
+      final options = Options(headers: await _buildHeaders(protected: protected));
+
+
+      late Response response;
+
       switch (method) {
-        case HttpMethod.post:
-          Response response = await apiService.dio.post(
-            endpoint,
-            queryParameters: reqParams,
-            data: useFormData ? formData : reqBody,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getToken()}"}),
-          );
-          return ApiResponse(response);
-
-
-        case HttpMethod.postRefresh:
-          Response response = await apiService.dio.post(
-            endpoint,
-            queryParameters: reqParams,
-            data: useFormData ? formData : reqBody,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getRefreshToken()}"}),
-          );
-          return ApiResponse(response);
-
         case HttpMethod.get:
-          Response response = await apiService.dio.get(
+          response = await dio.get(
+            endpoint,
             queryParameters: reqParams,
-            endpoint,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getToken()}"}),
+            options: options,
           );
-          return ApiResponse(response);
+          break;
+        case HttpMethod.post:
+          response = await dio.post(
+            endpoint,
+            queryParameters: reqParams,
+            data: useFormData ? formData : reqBody,
+            options: options,
+          );
+          break;
+        case HttpMethod.postRefresh:
+          response = await dio.post(
+            endpoint,
+            queryParameters: reqParams,
+            data: useFormData ? formData : reqBody,
+            options: Options(
+              headers: {"Authorization": "Bearer ${await _getRefreshToken()}"},
+            ),
+          );
+          break;
         case HttpMethod.patch:
-          Response response = await apiService.dio.patch(
+          response = await dio.patch(
             endpoint,
             data: useFormData ? formData : reqBody,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getToken()}"}),
+            options: options,
           );
-          return ApiResponse(response);
+          break;
         case HttpMethod.put:
-          Response response = await apiService.dio.put(
+          response = await dio.put(
             endpoint,
             data: useFormData ? formData : reqBody,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getToken()}"}),
+            options: options,
           );
-          return ApiResponse(response);
+          break;
         case HttpMethod.delete:
-          Response response = await apiService.dio.delete(
+          response = await dio.delete(
             endpoint,
             data: useFormData ? formData : reqBody,
-            options: Options(
-                headers: !protected
-                    ? {}
-                    : {"Authorization": "Bearer ${await _getToken()}"}),
+            options: options,
           );
-          return ApiResponse(response);
+          break;
+      }
 
+      return ApiResponse(response);
+    } on DioException catch (e, s) {
+      log.e("API error", error: e, stackTrace: s);
+
+
+      // Graceful fallbacks
+      switch (e.type) {
+        case DioExceptionType.connectionTimeout:
+          return _timeoutResponse("Connection timeout");
+        case DioExceptionType.sendTimeout:
+          return _timeoutResponse("Send timeout");
+        case DioExceptionType.receiveTimeout:
+          return _timeoutResponse("Receive timeout");
+        case DioExceptionType.badResponse:
+          return ApiResponse(e.response!);
+        case DioExceptionType.cancel:
+          return _errorResponse(499, "Request cancelled");
+        case DioExceptionType.unknown:
+        default:
+          return _errorResponse(101, "Network is unreachable");
       }
-    } on DioError catch (e) {
-      log.e(e.message);
-      if (e.type == DioErrorType.connectTimeout) {
-        return ApiResponse(
-          Response(
-            statusCode: 504,
-            data: "Request timeout",
-            requestOptions: RequestOptions(path: ''),
-          ),
-        );
-      } else if (e.type == DioErrorType.other) {
-        return ApiResponse(
-          Response(
-            statusCode: 101,
-            data: "Network is unreachable",
-            requestOptions: RequestOptions(path: ''),
-          ),
-        );
-      } else if (e.type == DioErrorType.receiveTimeout) {
-        return ApiResponse(
-          Response(
-            statusCode: 504,
-            data: "Receive timeout",
-            requestOptions: RequestOptions(path: ''),
-          ),
-        );
-      }
-      return ApiResponse(e.response!);
     }
   }
 
+  // Helpers for consistent fallback responses
+  ApiResponse _timeoutResponse(String message) => ApiResponse(
+    Response(
+      statusCode: 504,
+      data: message,
+      requestOptions: RequestOptions(path: ''),
+    ),
+  );
+
+  ApiResponse _errorResponse(int code, String message) => ApiResponse(
+    Response(
+      statusCode: code,
+      data: message,
+      requestOptions: RequestOptions(path: ''),
+    ),
+  );
+
+  Future<Map<String, dynamic>> _buildHeaders({bool protected = true, bool refresh = false}) async {
+    if (!protected) return {};
+    return {
+      "Authorization": "Bearer ${refresh ? await _getRefreshToken() : await _getToken()}"
+    };
+  }
+
+
   Future<String> _getToken() async {
     final localStorage = locator<LocalStorage>();
-    String? token = await localStorage.fetch(LocalStorageDir.authToken);
-    return token ?? "";
+    return await localStorage.fetch(LocalStorageDir.authToken) ?? "";
   }
 
   Future<String> _getRefreshToken() async {
     final localStorage = locator<LocalStorage>();
-    String? token = await localStorage.fetch(LocalStorageDir.authRefreshToken);
-    return token ?? "";
+    return await localStorage.fetch(LocalStorageDir.authRefreshToken) ?? "";
   }
-
 }

@@ -73,8 +73,8 @@ lib/
 Clone and get dependencies:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/wahala_hq.git
-cd wahala_hq
+git clone https://github.com/YOUR_USERNAME/easy_ph.git
+cd easy_ph
 flutter pub get
 
 
