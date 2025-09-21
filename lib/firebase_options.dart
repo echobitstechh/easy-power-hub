@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,20 +47,32 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBPeMyQDL2y3deRsz3T7trWXqzf9u0sdoA',
-    appId: '1:37884773488:android:975eef0b94903bfcf620b5',
-    messagingSenderId: '37884773488',
-    projectId: 'easy-power-hub',
-    storageBucket: 'easy-power-hub.firebasestorage.app',
+    apiKey: 'AIzaSyC7SzR7nNTjTkxXrK1IQnRRdU00W-UJM6U',
+    appId: '1:875974620022:android:81a401add9720d1f140057',
+    messagingSenderId: '875974620022',
+    projectId: 'easy-ph',
+    storageBucket: 'easy-ph.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDRjSHJ4HXK474e_yT63JqyotTFDTG5hGM',
-    appId: '1:37884773488:ios:5ef16a69d293aaa8f620b5',
-    messagingSenderId: '37884773488',
-    projectId: 'easy-power-hub',
-    storageBucket: 'easy-power-hub.firebasestorage.app',
+    apiKey: 'AIzaSyAKvRXM4jGYcr0wOZV9ot3Y8UrteRrvI_8',
+    appId: '1:875974620022:ios:f1528dfad9c87ca7140057',
+    messagingSenderId: '875974620022',
+    projectId: 'easy-ph',
+    storageBucket: 'easy-ph.firebasestorage.app',
+    androidClientId: '875974620022-cnjh2q702m25k602gkuao6hc5o124ks6.apps.googleusercontent.com',
+    iosClientId: '875974620022-ab75vd5sgukrjsgl48uvnq4tdr3vook3.apps.googleusercontent.com',
     iosBundleId: 'com.echobitstech.easyph',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyCqvkBRvzIVtfsZF23_jdTLlBrFvDscR6E',
+    appId: '1:875974620022:web:f84b0e3d101ca360140057',
+    messagingSenderId: '875974620022',
+    projectId: 'easy-ph',
+    authDomain: 'easy-ph.firebaseapp.com',
+    storageBucket: 'easy-ph.firebasestorage.app',
+    measurementId: 'G-86Z9LZ60TS',
   );
 
 }

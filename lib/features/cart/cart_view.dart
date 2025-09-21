@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,6 +12,7 @@ import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
 import '../../ui/components/empty_state.dart';
 import 'cart_viewmodel.dart';
+
 
 class CartView extends StackedView<CartViewModel> {
   const CartView({Key? key}) : super(key: key);
@@ -64,10 +64,56 @@ class CartView extends StackedView<CartViewModel> {
   CartViewModel viewModelBuilder(BuildContext context) => CartViewModel();
 }
 
-class _CartContent extends StatelessWidget {
+class _CartContent extends StatefulWidget {
   final CartViewModel viewModel;
 
   const _CartContent({required this.viewModel});
+
+  @override
+  State<_CartContent> createState() => _CartContentState();
+}
+
+class _CartContentState extends State<_CartContent> with TickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _animation;
+  bool _showAnimation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.viewModel.hasItems && widget.viewModel.shouldShowAnimation()) {
+      _showAnimation = true;
+      _animationController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1000),
+      );
+
+      // Animate the offset from 0 to -30
+      _animation = Tween<double>(begin: 0, end: -30).animate(
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+      );
+
+      _animationController.forward().then((_) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (mounted) {
+            _animationController.reverse().then((_) {
+              _animationController.dispose();
+              _showAnimation = false;
+              widget.viewModel.setAnimationShown();
+            });
+          }
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (mounted && _animationController.isAnimating) {
+      _animationController.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -101,13 +147,25 @@ class _CartContent extends StatelessWidget {
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       CartItem item = cartItems[index];
-                      return _buildCartItem(context, viewModel, item);
+
+                      if (index == 0 && _showAnimation) {
+                        return AnimatedBuilder(
+                          animation: _animation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: Offset(_animation.value, 0),
+                              child: _buildCartItem(context, widget.viewModel, item),
+                            );
+                          },
+                        );
+                      }
+                      return _buildCartItem(context, widget.viewModel, item);
                     },
                   );
                 },
               ),
             ),
-            if (cart.value.isNotEmpty) _buildProceedToPaySection(context, viewModel),
+            if (cart.value.isNotEmpty) _buildProceedToPaySection(context, widget.viewModel),
           ],
         ),
       ),
@@ -121,7 +179,7 @@ class _CartContent extends StatelessWidget {
       onDismissed: (direction) {
         viewModel.removeItem(item);
         locator<SnackbarService>().showSnackbar(
-          message: "${item.product?.productName} removed from cart.", duration: Duration(seconds: 3)
+            message: "${item.product?.productName} removed from cart.", duration: const Duration(seconds: 3)
         );
       },
       background: Container(

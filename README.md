@@ -1,121 +1,184 @@
-# Wahala HQ 🧭
+# 📱 EasyPH Mobile App Documentation
 
-> Crowdsourced problems, community-powered solutions.
-
-Wahala HQ is a scalable Flutter application built to help users discover, report, and analyze societal challenges — called “wahalas.” The platform empowers users to propose solutions, visualize issue density via heatmaps, and monitor recurring trends through a custom pain index.
-
----
-
-## 🧰 Tech Stack & Tooling
-
-| Layer           | Tool/Package                 | Version          |
-|-----------------|------------------------------|------------------|
-| Flutter SDK     | `flutter`                    | `3.19.3`         |
-| Dart SDK        | `dart`                       | `3.3.1`          |
-| Java            | `openjdk`                    | `17.0.8`         |
-| Android Gradle  | `gradle`                     | `8.4`            |
-| iOS Deployment  | `Xcode`                      | `15.2+`          |
-| Architecture    | `stacked`                    | `3.4.0`          |
-| Dependency Mgmt | `get_it`, `stacked_services` | `8.0.0`, `1.0.0` |
-| Icons           | `flutter_svg`                | `2.0.10+1`       |
-| Update Checker  | `update_available`           | `0.1.4`          |
-| Testing         | `mockito`, `build_runner`    | `5.4.2`, `2.4.6` |
+## 1. Introduction
+**App Name**: EasyPH  
+**Platform**: Flutter (cross-platform: Android & iOS)  
+**Purpose**: EasyPH is an e-commerce & services hub that allows users to purchase products (solar, electronics, lighting) and request services (installation, repairs, utility).
 
 ---
 
-## 📁 Project Structure
+## 2. Core Features
+### 🔐 User Authentication
+- Email/phone + password login
+- Social login (Google, Facebook)
+- OTP verification
 
-lib/
-├── app/ # Dependency injection, routes, app-wide config
-├── core/ # Base utils, theme, constants
-├── features/ # Modular feature folders
-│ ├── auth/
-│ ├── dashboard/
-│ ├── home/
-│ └── ...
-├── ui/
-│ ├── common/ # Shared UI elements (colors, typography)
-│ ├── views/ # Entry views (pages/screens)
-│ └── widgets/ # Reusable UI widgets
-└── main.dart # App entry point
+### 🏠 Dashboard
+- Category grid (Products, Services)
+- Carousel banners
+- Featured products/services
 
+### 🛒 Products Module
+- Browse by category (Solar, Electronics, Lighting)
+- Product detail view
+- Add to cart / wishlist
 
----
+### 🛠 Services Module
+- Request utility personnel for installation/repair
+- Booking & scheduling
+- Service history tracking
 
-## 🚀 Features
+### 💳 Cart & Checkout
+- Flexible payment options: Paystack, Flutterwave, Wallet
+- Pay on delivery, instant payment, installment plan
+- Order summary and confirmation
 
-- 🔍 **Explore Feed** – Browse trending “wahalas” in your area
-- 🧠 **Propose Solutions** – Suggest how to solve community problems
-- 🗺️ **Heatmap View** – See where the issues cluster
-- 📊 **Pain Index** – Analyze recurring or critical issues
-- 📢 **Real-time Notifications**
-- 🧪 **Version Checker** – Alerts users to app updates
-- 🔐 **Authentication** – Register/Login with form validation and OTP flow
-- 👤 **User Profile Support** – Basic personalization
+### 👛 Wallet
+- Fund wallet via card/bank transfer
+- View transactions
+- Refund/returns management
 
----
+### 🔔 Notifications
+- Push notifications for orders, promos, and system alerts
+- In-app notification center
 
-## 🏁 Getting Started
-
-### ✅ Prerequisites
-
-- Flutter SDK `>=3.10.0 <4.0.0`
-- Dart `>=3.3.0`
-- Xcode 15+ (for iOS)
-- Android SDK / Android Studio
-- Java 17+
-- Node.js (optional for tooling)
+### 👤 Profile
+- View & update user info
+- Manage addresses
+- Order & service history
 
 ---
 
-### 🧩 Setup
-
-Clone and get dependencies:
-
-```bash
-git clone https://github.com/YOUR_USERNAME/easy_ph.git
-cd easy_ph
-flutter pub get
-
-
-## 🧱 Architecture
-
-### Design Pattern
-
-- **MVVM** (Model–View–ViewModel) via [`stacked`](https://pub.dev/packages/stacked)
-- **Dependency Injection** with [`get_it`](https://pub.dev/packages/get_it)
-- **Navigator 2.0-style Routing** via [`stacked_services`](https://pub.dev/packages/stacked_services)
-- **Widget Separation** for maintainability, reuse, and unit testing
+## 3. Technical Architecture
+- **Frontend**: Flutter (Stacked MVVM architecture)
+- **Backend**: Node.js + Express (with Sequelize & PostgreSQL)
+- **APIs**: REST APIs (JSON format)
+- **State Management**: Stacked + Reactive Services
+- **Payments**: Paystack & Flutterwave SDKs
+- **Authentication**: Firebase Auth (email/OTP) + backend token sync
+- **Notifications**: Firebase Cloud Messaging (FCM)
 
 ---
 
-### State Management
-
-- **ViewModel-driven** logic and UI updates
-- Reactive updates using:
-  - `notifyListeners()` — lightweight state change notifier
-  - `rebuildUi()` — specific to `stacked`, more scoped rebuilds
+## 4. Navigation Flow
+- Routing handled via `app.router.dart`
+- Centralized navigation control
 
 ---
 
-### Testing Strategy
+## 5. Data Models (Flutter)
 
-- ✅ **ViewModels**: Unit tested using mocks and stubs (`mockito`)
-- 🧪 **Widgets**: Using [`flutter_test`](https://api.flutter.dev/flutter/flutter_test/flutter_test-library.html)
-- 🖼️ **Golden Tests**: Planned for consistent UI rendering
-- 🔁 **Integration Tests**: Can be extended with [`integration_test`](https://pub.dev/packages/integration_test)
+### User
+```dart
+class User {
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String phoneNumber;
+  final String token;
+}
+class Product {
+  final String id;
+  final String name;
+  final String category;
+  final double price;
+  final String imageUrl;
+  final Discount? discount;
+}
+class CartItem {
+  final String id;
+  final Product product;
+  final int quantity;
+}
+class Order {
+  final String id;
+  final List<CartItem> items;
+  final double totalAmount;
+  final String status;
+}
+class Wallet {
+  final String id;
+  final double balance;
+  final List<Transaction> transactions;
+}
+7. User Guide
+Sign Up & Login
 
----
+Open the app
 
-## 📦 Notable Dependencies
+Register with email/phone and password
 
-| Package             | Purpose                                 |
-|---------------------|------------------------------------------|
-| [`stacked`](https://pub.dev/packages/stacked)          | MVVM architecture + services + reactive ViewModels |
-| [`flutter_svg`](https://pub.dev/packages/flutter_svg) | Rendering SVG-based icons in a performant way     |
-| [`update_available`](https://pub.dev/packages/update_available) | Cross-platform version update checker             |
-| [`mockito`](https://pub.dev/packages/mockito)         | Mocking services for unit tests                   |
-| [`build_runner`](https://pub.dev/packages/build_runner) | Code generation for mocks, annotations, etc.      |
+Verify OTP to activate account
 
+Browsing Products
 
+Navigate to Products tab
 
+Search, filter, or select categories
+
+Placing an Order
+
+Add item(s) to cart
+
+Choose delivery or pickup option
+
+Select payment method (wallet, card, pay on delivery)
+
+Confirm order
+
+Requesting a Service
+
+Go to Services tab
+
+Choose service type (installation, repair, etc.)
+
+Book and confirm schedule
+
+Track assigned technician
+
+Managing Wallet
+
+Fund wallet with card or bank transfer
+
+View wallet balance
+
+Review transaction history
+
+Profile & Notifications
+
+Update personal details
+
+Manage addresses
+
+Check alerts in notification center
+
+8. Deployment & Configuration
+
+Environment Variables
+
+API URLs
+
+Firebase configs
+
+Paystack/Flutterwave keys
+
+Staging vs Production
+
+Different API base URLs
+
+Store Deployment
+
+Generate signed APK/IPA
+
+Upload to Play Store / App Store
+
+9. Maintenance & Support
+
+Bug reporting process via GitHub Issues
+
+Versioning: Semantic Versioning
+
+Changelog maintained in /CHANGELOG.md
+
+© 2025 EchobitsTech – All Rights Reserved.

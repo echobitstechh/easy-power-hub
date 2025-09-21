@@ -114,15 +114,12 @@ class Login extends StatelessWidget {
               verticalSpaceMedium,
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: appLoading,
-                  builder: (context, isLoading, child) => SubmitButton(
-                    isLoading: isLoading,
-                    boldText: true,
-                    label: "Login",
-                    submit: () => model.login(),
-                    color: kcPrimaryColor,
-                  ),
+                child: SubmitButton(
+                  isLoading: model.isBusy,
+                  boldText: true,
+                  label: "Login",
+                  submit: () => model.login(),
+                  color: kcPrimaryColor,
                 ),
               ),
               verticalSpaceMedium,

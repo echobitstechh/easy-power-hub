@@ -1,26 +1,43 @@
 {
   "project_info": {
-    "project_number": "37884773488",
-    "project_id": "easy-power-hub",
-    "storage_bucket": "easy-power-hub.firebasestorage.app"
+    "project_number": "875974620022",
+    "project_id": "easy-ph",
+    "storage_bucket": "easy-ph.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:37884773488:android:975eef0b94903bfcf620b5",
+        "mobilesdk_app_id": "1:875974620022:android:81a401add9720d1f140057",
         "android_client_info": {
           "package_name": "com.echobitstech.easyph"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "875974620022-bs34t4r64a8d5qf023cbecu7c07c8mg5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBPeMyQDL2y3deRsz3T7trWXqzf9u0sdoA"
+          "current_key": "AIzaSyC7SzR7nNTjTkxXrK1IQnRRdU00W-UJM6U"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "875974620022-bs34t4r64a8d5qf023cbecu7c07c8mg5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "875974620022-ab75vd5sgukrjsgl48uvnq4tdr3vook3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.echobitstech.easyph"
+              }
+            }
+          ]
         }
       }
     }

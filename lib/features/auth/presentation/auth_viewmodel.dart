@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -125,7 +126,24 @@ class AuthViewModel extends BaseViewModel {
         phone.text = '0${phone.text}';
       }
 
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+
+      String? fcmToken;
+
+      // Check for APNS token on iOS before getting the FCM token
+      if (Platform.isIOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+
+          _log.w("APNS token not available. FCM token might not be generated.");
+        }
+      }
+
+      fcmToken = await FirebaseMessaging.instance.getToken();
 
       final requestBody = {
         if (inputController.text.contains('@')) "email": inputController.text,
@@ -148,11 +166,11 @@ class AuthViewModel extends BaseViewModel {
           _handleSuccessfulLogin(data);
         }
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "An error occurred during login.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "An error occurred during login.", duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Login error: $e");
-      _snackBar.showSnackbar(message: "Unable to login. Please try again.");
+      _snackBar.showSnackbar(message: "Unable to login. Please try again.", duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -161,8 +179,25 @@ class AuthViewModel extends BaseViewModel {
   Future<void> register() async {
     setBusy(true);
     try {
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
+      String? fcmToken;
+
+      // Check for APNS token on iOS before getting the FCM token
+      if (Platform.isIOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          // If APNS token is not available, log a warning and continue without it
+          // The backend might handle this gracefully
+          _log.w("APNS token not available. FCM token might not be generated.");
+        }
+      }
+
+      fcmToken = await FirebaseMessaging.instance.getToken();
       ApiResponse res = await _repo.register({
         "firstName": firstname.text,
         "lastName": lastname.text,
@@ -174,13 +209,13 @@ class AuthViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         _handleSuccessfulLogin(res.data);
-        _snackBar.showSnackbar(message: res.data["message"]);
+        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Registration error: $e");
-      _snackBar.showSnackbar(message: "Registration failed. Please try again.");
+      _snackBar.showSnackbar(message: "Registration failed. Please try again.", duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -196,17 +231,17 @@ class AuthViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
-        _snackBar.showSnackbar(message: 'OTP verified successfully');
+        _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
         _navigationService.navigateTo(
           Routes.authView,
           arguments: AuthViewArguments(initialPage: PresentPage.register),
         );
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed');
+        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("OTP submission error: $e");
-      _snackBar.showSnackbar(message: 'An error occurred. Please try again later.');
+      _snackBar.showSnackbar(message: 'An error occurred. Please try again later.', duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -232,13 +267,13 @@ class AuthViewModel extends BaseViewModel {
           profile.value.reference = res.data['data']["sendTokenResponse"]["data"]["reference"];
         }
         isOtpRequested = true;
-        _snackBar.showSnackbar(message: 'OTP sent successfully');
+        _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred');
+        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Request OTP unhandled error: $e');
-      _snackBar.showSnackbar(message: 'An unexpected error occurred');
+      _snackBar.showSnackbar(message: 'An unexpected error occurred', duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }

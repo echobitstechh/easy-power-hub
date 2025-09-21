@@ -23,6 +23,15 @@ class CartViewModel extends BaseViewModel {
   int _cartDiscount = 0;
   int _cartFinalTotal = 0;
   bool _isLoading = false;
+  bool _animationShown = false;
+
+  bool shouldShowAnimation() {
+    return !_animationShown;
+  }
+
+  void setAnimationShown() {
+    _animationShown = true;
+  }
 
   final refferalCode = TextEditingController();
 
@@ -34,6 +43,8 @@ class CartViewModel extends BaseViewModel {
   int get cartFinalTotal => _cartFinalTotal;
   bool get isLoading => _isLoading;
   PaymentMethod get selectedMethod => selectedPaymentMethod.value;
+  /// A getter to check if the cart has any items.
+  bool get hasItems => cart.value.isNotEmpty;
 
   final Map<String, int> selectedInstallments = {}; // productId -> selected frequency
 

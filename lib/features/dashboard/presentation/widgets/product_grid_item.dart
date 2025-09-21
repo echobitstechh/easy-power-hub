@@ -114,6 +114,8 @@ class ProductGridItem extends StatelessWidget {
     );
   }
 
+
+
   Widget _buildProductDetails(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(5),
@@ -140,12 +142,16 @@ class ProductGridItem extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt()),
-                style: const TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              // The fix is here: wrap the Text widget in an Expanded widget
+              Expanded(
+                child: Text(
+                  MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt()),
+                  style: const TextStyle(
+                    fontFamily: 'Roboto',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               _buildRating(),

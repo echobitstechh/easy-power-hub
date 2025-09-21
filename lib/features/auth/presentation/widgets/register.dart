@@ -150,22 +150,19 @@ class Register extends StatelessWidget {
                 verticalSpace(30),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ValueListenableBuilder<bool>(
-                    valueListenable: appLoading,
-                    builder: (context, isLoading, child) => SubmitButton(
-                      isLoading: appLoading.value,
-                      label: "Create Account",
-                      submit: () {
-                        if (formKey.currentState!.validate()) {
-                          model.register();
-                        } else {
-                          // Show a snackbar or dialog to inform the user
-                          print('Form validation failed.');
-                        }
-                      },
-                      color: kcPrimaryColor,
-                      boldText: true,
-                    ),
+                  child: SubmitButton(
+                    isLoading: model.isBusy,
+                    label: "Create Account",
+                    submit: () {
+                      if (formKey.currentState!.validate()) {
+                        model.register();
+                      } else {
+                        // Show a snackbar or dialog to inform the user
+                        print('Form validation failed.');
+                      }
+                    },
+                    color: kcPrimaryColor,
+                    boldText: true,
                   ),
                 ),
                 verticalSpaceLarge,
