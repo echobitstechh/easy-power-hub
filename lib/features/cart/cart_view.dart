@@ -121,7 +121,7 @@ class _CartContent extends StatelessWidget {
       onDismissed: (direction) {
         viewModel.removeItem(item);
         locator<SnackbarService>().showSnackbar(
-          message: "${item.product?.productName} removed from cart.",
+          message: "${item.product?.productName} removed from cart.", duration: Duration(seconds: 3)
         );
       },
       background: Container(

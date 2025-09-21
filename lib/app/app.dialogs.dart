@@ -8,11 +8,13 @@ import 'package:stacked_services/stacked_services.dart';
 
 import 'app.locator.dart';
 import '../ui/dialogs/info_alert/info_alert_dialog.dart';
+import '../ui/dialogs/info_alert/phone_input_dialog.dart';
 import '../ui/dialogs/info_alert/rating_dialog.dart';
 
 enum DialogType {
   infoAlert,
   rating,
+  phoneInput,
 }
 
 void setupDialogUi() {
@@ -23,6 +25,8 @@ void setupDialogUi() {
         InfoAlertDialog(request: request, completer: completer),
     DialogType.rating: (context, request, completer) =>
         RatingDialog(request: request, completer: completer),
+    DialogType.phoneInput: (context, request, completer) =>
+        PhoneInputDialog(request: request, completer: completer),
   };
 
   dialogService.registerCustomDialogBuilders(builders);

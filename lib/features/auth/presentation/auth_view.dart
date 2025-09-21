@@ -1,96 +1,114 @@
+
+import 'package:easy_ph/features/auth/presentation/widgets/login.dart';
+import 'package:easy_ph/features/auth/presentation/widgets/otp_form.dart';
+import 'package:easy_ph/features/auth/presentation/widgets/register.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:easy_ph/features/auth/presentation/widgets/login_form.dart';
-import 'package:easy_ph/features/auth/presentation/widgets/otp_form.dart';
-import 'package:easy_ph/features/auth/presentation/widgets/register_form.dart';
 
+import '../../../ui/common/app_colors.dart';
 import 'auth_viewmodel.dart';
 
-class AuthView extends StatefulWidget {
-  final bool showLogin;
+/// @author George David
+/// email: georgequin19@gmail.com
+/// Feb, 2024
 
-  const AuthView({super.key, this.showLogin = false});
-
-  @override
-  State<AuthView> createState() => _AuthViewState();
+enum PresentPage {
+  login,
+  register,
+  signup,
 }
 
-class _AuthViewState extends State<AuthView> with TickerProviderStateMixin {
-  late AuthViewModel _cachedViewModel;
+class AuthView extends StackedView<AuthViewModel> {
+  final PresentPage? initialPage;
+  final Map<String, dynamic>? parametersArg;
+
+  const AuthView({super.key, this.initialPage, this.parametersArg});
 
   @override
-  Widget build(BuildContext context) {
-    return ViewModelBuilder<AuthViewModel>.reactive(
-      viewModelBuilder: () => AuthViewModel(),
-      onViewModelReady: (viewModel) {
-        viewModel.init(vsync: this);
-        _cachedViewModel = viewModel;
+  Widget builder(
+      BuildContext context,
+      AuthViewModel viewModel,
+      Widget? child,
+      ) {
+    // Determine the current page to display
+    final currentWidget = switch (viewModel.presentPage) {
+      PresentPage.login => const Login(),
+      PresentPage.signup => OTPView(
+        isOtpRequested: viewModel.isOtpRequested,
+        userId: parametersArg?['userId'],
+        verificationCode: parametersArg?['verificationCode'],
+        phone: parametersArg?['phone'],
+        email: parametersArg?['email'],
+      ),
+      PresentPage.register => const Register(),
+    };
 
-        // Optionally jump to login screen on start
-        if (widget.showLogin) {
-          viewModel.goToLogin();
-        }
-      },
-      builder: (context, viewModel, child) {
-        return Scaffold(
-          body: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.asset('assets/images/wahala_small.png', fit: BoxFit.cover),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity != null) {
-                      if (details.primaryVelocity! < -200) {
-                        _cachedViewModel.flipForward();
-                      } else if (details.primaryVelocity! > 200) {
-                        _cachedViewModel.flipBackward();
-                      }
-                    }
-                  },
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 400),
-                    switchInCurve: Curves.easeInOut,
-                    switchOutCurve: Curves.easeInOut,
-                    transitionBuilder: (child, animation) {
-                      final rotate = Tween(begin: 1.0, end: 0.0).animate(animation);
-                      return AnimatedBuilder(
-                        animation: rotate,
-                        builder: (context, _) {
-                          return Transform(
-                            transform: Matrix4.rotationY(3.14 * rotate.value),
-                            alignment: Alignment.center,
-                            child: child,
-                          );
-                        },
-                        child: child,
-                      );
-                    },
-                    child: KeyedSubtree(
-                      key: ValueKey(viewModel.currentIndex),
-                      child: getAuthPanel(viewModel.currentIndex),
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Top Decorative Background
+          Align(
+            alignment: Alignment.topCenter,
+            child: ClipPath(
+              clipper: CurvedClipper(),
+              child: Container(
+                height: 300,
+                color: kcClipColor,
+              ),
+            ),
+          ),
+          // Main Content
+          CustomScrollView(
+            slivers: [
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: currentWidget,
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
-  Widget getAuthPanel(int index) {
-    switch (index) {
-      case 0:
-        return const RegisterForm();
-      case 1:
-        return const LoginForm();
-      case 2:
-        return const OtpForm();
-      default:
-        return const RegisterForm();
+  @override
+  void onViewModelReady(AuthViewModel viewModel) {
+    if (initialPage != null) {
+      viewModel.setPresentPage(initialPage!);
+      if (parametersArg != null) {
+        viewModel.setParameters(parametersArg!);
+      }
     }
+  }
+
+  @override
+  AuthViewModel viewModelBuilder(BuildContext context) => AuthViewModel();
+}
+
+class CurvedClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    final Path path = Path();
+    path.lineTo(0, size.height - 300);
+    path.quadraticBezierTo(
+      size.width / 2,
+      size.height,
+      size.width,
+      size.height - 0,
+    );
+    path.lineTo(size.width, 0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    return false;
   }
 }

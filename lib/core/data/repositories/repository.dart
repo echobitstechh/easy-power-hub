@@ -153,7 +153,7 @@ class Repository extends IRepository {
       params["brand"] = brand;
     }
     if (categoryId != null) {
-      params["category"] = categoryId;
+      params["categoryId"] = categoryId;
     }
 
     ApiResponse response = await api.call(
@@ -166,10 +166,15 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> getProductTags() async {
+  Future<ApiResponse> getProductTags({int? categoryId}) async {
+    Map<String, dynamic> params = {};
+    if (categoryId != null) {
+      params["categoryId"] = categoryId;
+    }
     ApiResponse response = await api.call(
       method: HttpMethod.get,
       endpoint: "tags",
+      reqParams: params,
     );
     return response;
   }

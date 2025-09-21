@@ -13,6 +13,8 @@ import '../../../core/data/models/order_item.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../state.dart';
 import '../../../ui/common/app_strings.dart';
+import '../../Profile/profile_view.dart';
+import '../../cart/cart_view.dart';
 import '../../dashboard/presentation/dashboad_view.dart';
 import '../../shop/shop_view.dart';
 
@@ -30,9 +32,10 @@ class HomeViewModel extends BaseViewModel {
   final List<Widget> _pages = [
     DashboardView(),
     ShopView(),
-    // CartView(),
+    CartView(),
+    CartView(),
     // ServicesView(),
-    // ProfileView(),
+     ProfileView(),
   ];
 
 
@@ -72,12 +75,12 @@ class HomeViewModel extends BaseViewModel {
       final res = await _repo.rating({"orderId": order.id, "reviews": reviews});
 
       if (res.statusCode == 200) {
-        _snackbarService.showSnackbar(message: "Review submitted successfully");
+        _snackbarService.showSnackbar(message: "Review submitted successfully", duration: Duration(seconds: 3));
       } else {
-        _snackbarService.showSnackbar(message: "Failed to submit review");
+        _snackbarService.showSnackbar(message: "Failed to submit review", duration: Duration(seconds: 3));
       }
     } catch (e) {
-      _snackbarService.showSnackbar(message: "Error submitting review");
+      _snackbarService.showSnackbar(message: "Error submitting review", duration: Duration(seconds: 3));
     } finally {
       setBusy(false);
     }
@@ -105,7 +108,7 @@ class HomeViewModel extends BaseViewModel {
         }
       }
     } catch (e) {
-      _snackbarService.showSnackbar(message: "Failed to load orders");
+      _snackbarService.showSnackbar(message: "Failed to load orders", duration: Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -125,7 +128,7 @@ class HomeViewModel extends BaseViewModel {
         notifyListeners();
       }
     } catch (e) {
-      _snackbarService.showSnackbar(message: "Could not fetch cart");
+      _snackbarService.showSnackbar(message: "Could not fetch cart", duration: Duration(seconds: 2));
     } finally {
       setBusy(false);
     }

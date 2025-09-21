@@ -1,5 +1,4 @@
 
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/category_grid.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/product_card.dart';
@@ -16,6 +15,7 @@ import '../../../state.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/brand_chips.dart';
+import '../../../ui/components/product_search_bar.dart';
 import '../../../ui/components/shimmer_loading.dart';
 import '../../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
@@ -46,7 +46,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: uiMode == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
+        backgroundColor: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
         body: RefreshIndicator(
           onRefresh: () async {
             await viewModel.getProducts(isRefresh: true);
@@ -113,142 +113,16 @@ class DashboardView extends StackedView<DashboardViewModel> {
               width: 40,
             ),
             horizontalSpaceSmall,
-            Expanded(
-              child: Autocomplete<Product>(
-                optionsBuilder: (TextEditingValue productTextEditingValue) {
-                  if (productTextEditingValue.text.isEmpty) {
-                    return const Iterable<Product>.empty();
-                  }
-                  final query = productTextEditingValue.text.toLowerCase();
-                  return viewModel.filteredProductList.where((Product product) {
-                    return (product.productName?.toLowerCase().contains(query) ?? false) ||
-                        (product.brandName?.toLowerCase().contains(query) ?? false);
-                  });
-                },
-                displayStringForOption: (Product product) => product.productName ?? '',
-                onSelected: (Product value) {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    isDismissible: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(25.0),
-                          topRight: Radius.circular(25.0)),
-                    ),
-                    backgroundColor: Colors.black.withOpacity(0.7),
-                    builder: (BuildContext context) {
-                      return ProductCard(product: value);
-                    },
-                  );
-                },
-                fieldViewBuilder: (BuildContext context,
-                    TextEditingController textEditingController,
-                    FocusNode focusNode,
-                    VoidCallback onFieldSubmitted) {
-                  return Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: uiMode.value == AppUiModes.dark
-                          ? kcMediumGrey
-                          : kcWhiteColor,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TextField(
-                      controller: textEditingController,
-                      focusNode: focusNode,
-                      decoration: const InputDecoration(
-                        hintText: 'Search product...',
-                        prefixIcon: Icon(Icons.search),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 10),
-                      ),
-                    ),
-                  );
-                },
-                optionsViewBuilder: (BuildContext context,
-                    AutocompleteOnSelected<Product> onSelected,
-                    Iterable<Product> options) {
-                  return Align(
-                    alignment: Alignment.topLeft,
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(8),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          maxHeight: 250,
-                          maxWidth: 350,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: options.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final Product product = options.elementAt(index);
-                            return ListTile(
-                              leading: (product.images != null && product.images!.isNotEmpty)
-                                  ? Image.network(
-                                product.images!.first,
-                                width: 35,
-                                height: 35,
-                                fit: BoxFit.cover,
-                              )
-                                  : const Icon(Icons.image, size: 30),
-                              title: Text(
-                                product.productName ?? "",
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                maxLines: 2,
-                              ),
-                              onTap: () => onSelected(product),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            ProductSearchBar(viewModel: viewModel),
             const SizedBox(width: 10),
             ValueListenableBuilder<bool>(
               valueListenable: userLoggedIn,
               builder: (context, isLoggedIn, child) {
-                // if (isLoggedIn) {
-                //   return ValueListenableBuilder(
-                //     valueListenable: profile,
-                //     builder: (context, userProfile, child) {
-                //       return InkWell(
-                //         onTap: () {
-                //           //todo uncomment when profile is returned
-                //           // locator<NavigationService>().navigateTo(Routes.profileView);
-                //         },
-                //         child: CircleAvatar(
-                //           radius: 20,
-                //           backgroundImage: (userProfile.profilePicture != null &&
-                //               userProfile.profilePicture!.isNotEmpty)
-                //               ? (userProfile.profilePicture!.startsWith('http')
-                //               ? CachedNetworkImageProvider(userProfile.profilePicture!)
-                //           as ImageProvider<Object>
-                //               : AssetImage(userProfile.profilePicture!)
-                //           as ImageProvider<Object>)
-                //               : const AssetImage('assets/images/display_pic.png')
-                //           as ImageProvider<Object>,
-                //           onBackgroundImageError: (exception, stackTrace) {
-                //             debugPrint('Failed to load profile picture: $exception');
-                //           },
-                //         ),
-                //       );
-                //     },
-                //   );
-                // } else {
+                if (isLoggedIn) {
+                  // This is the section that should be uncommented and used when the user is logged in
+                  return SizedBox();
+                }
+                else {
                   return InkWell(
                     onTap: () {
                       locator<NavigationService>().navigateTo(Routes.authView);
@@ -273,8 +147,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
                     ),
                   );
                 }
-              // },
-            ),
+              },
+            )
           ],
         ),
       ),

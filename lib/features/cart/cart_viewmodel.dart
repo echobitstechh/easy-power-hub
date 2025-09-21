@@ -65,13 +65,13 @@ class CartViewModel extends BaseViewModel {
         cart.value.removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
         cart.notifyListeners();
         await getCartSummary();
-        _snackBar.showSnackbar(message: "Item removed successfully.");
+        _snackBar.showSnackbar(message: "Item removed successfully.", duration: Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: "Failed to remove item: ${res.data['message']}");
+        _snackBar.showSnackbar(message: "Failed to remove item: ${res.data['message']}", duration: Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Error removing item: $e");
-      _snackBar.showSnackbar(message: "An error occurred while removing the item.");
+      _snackBar.showSnackbar(message: "An error occurred while removing the item.", duration: Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -126,7 +126,7 @@ class CartViewModel extends BaseViewModel {
         cart.notifyListeners();
         await getCartSummary(); // Get the updated summary from the server
       } else {
-        _snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}");
+        _snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}", duration: Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Cart modification error: $e");
@@ -154,11 +154,11 @@ class CartViewModel extends BaseViewModel {
           duration: const Duration(seconds: 2),
         );
       } else {
-        _snackBar.showSnackbar(message: response.data["message"]);
+        _snackBar.showSnackbar(message: response.data["message"], duration: Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Failed to add item to cart: $e");
-      _snackBar.showSnackbar(message: "Failed to add item to cart: $e");
+      _snackBar.showSnackbar(message: "Failed to add item to cart: $e", duration: Duration(seconds: 3));
     } finally {
       setBusy(false);
     }
@@ -179,13 +179,13 @@ class CartViewModel extends BaseViewModel {
         notifyListeners();
       } else {
         _snackBar.showSnackbar(
-          message: "Failed to clear cart: ${res.data['message']}",
+          message: "Failed to clear cart: ${res.data['message']}", duration: Duration(seconds: 3)
         );
       }
     } catch (e) {
       _log.e("Error clearing the cart: $e");
       _snackBar.showSnackbar(
-        message: "An error occurred while clearing the cart: $e",
+        message: "An error occurred while clearing the cart: $e", duration: Duration(seconds: 3)
       );
     } finally {
       setBusy(false);
@@ -217,11 +217,12 @@ class CartViewModel extends BaseViewModel {
         await getCartSummary();
         await _localStorage.save(LocalStorageDir.productCart, cart.value.map((e) => e.toJson()).toList());
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to load cart from server.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to load cart from server.",
+            duration: Duration(seconds: 3));
       }
     } catch (e) {
       _log.e('Failed to load online cart: $e');
-      _snackBar.showSnackbar(message: "Failed to load cart from server.");
+      _snackBar.showSnackbar(message: "Failed to load cart from server.", duration: Duration(seconds: 3));
     } finally {
       _isLoading = false;
       setBusy(false);
@@ -267,17 +268,17 @@ class CartViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         // The server-side response confirms the update
         await getCartSummary();
-        _snackBar.showSnackbar(message: "Installment option updated.");
+        _snackBar.showSnackbar(message: "Installment option updated.", duration: Duration(seconds: 3));
       } else {
         // Rollback on failure
         selectedInstallments.remove(item.product!.id!);
         item.installmentFrequency = null;
         notifyListeners();
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to update installment.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to update installment.", duration: Duration(seconds: 3));
       }
     } catch (e) {
       _log.e("Error updating installment: $e");
-      _snackBar.showSnackbar(message: "An error occurred: $e");
+      _snackBar.showSnackbar(message: "An error occurred: $e", duration: Duration(seconds: 2));
     } finally {
       setBusy(false);
     }

@@ -5,21 +5,24 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:easy_ph/core/data/models/category.dart' as _i10;
-import 'package:easy_ph/core/data/models/product.dart' as _i11;
+import 'package:easy_ph/core/data/models/category.dart' as _i12;
+import 'package:easy_ph/core/data/models/product.dart' as _i13;
 import 'package:easy_ph/features/auth/presentation/auth_view.dart' as _i6;
+import 'package:easy_ph/features/auth/presentation/password_reset/password_reset_view.dart'
+    as _i9;
 import 'package:easy_ph/features/cart/cart_view.dart' as _i7;
 import 'package:easy_ph/features/dashboard/presentation/widgets/product_card.dart'
     as _i8;
 import 'package:easy_ph/features/home/presentation/home_view.dart' as _i2;
 import 'package:easy_ph/features/onboarding/presentation/onboarding_view.dart'
     as _i4;
+import 'package:easy_ph/features/Profile/profile_view.dart' as _i10;
 import 'package:easy_ph/features/shop/shop_view.dart' as _i5;
 import 'package:easy_ph/features/startup/presentation/startup_view.dart' as _i3;
-import 'package:flutter/material.dart' as _i9;
+import 'package:flutter/material.dart' as _i11;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i12;
+import 'package:stacked_services/stacked_services.dart' as _i14;
 
 class Routes {
   static const homeView = '/home-view';
@@ -36,6 +39,10 @@ class Routes {
 
   static const productCard = '/product-card';
 
+  static const enterEmailView = '/enter-email-view';
+
+  static const profileView = '/profile-view';
+
   static const all = <String>{
     homeView,
     startupView,
@@ -44,6 +51,8 @@ class Routes {
     authView,
     cartView,
     productCard,
+    enterEmailView,
+    profileView,
   };
 }
 
@@ -77,23 +86,31 @@ class StackedRouter extends _i1.RouterBase {
       Routes.productCard,
       page: _i8.ProductCard,
     ),
+    _i1.RouteDef(
+      Routes.enterEmailView,
+      page: _i9.EnterEmailView,
+    ),
+    _i1.RouteDef(
+      Routes.profileView,
+      page: _i10.ProfileView,
+    ),
   ];
 
   final _pagesMap = <Type, _i1.StackedRouteFactory>{
     _i2.HomeView: (data) {
-      return _i9.MaterialPageRoute<dynamic>(
+      return _i11.MaterialPageRoute<dynamic>(
         builder: (context) => const _i2.HomeView(),
         settings: data,
       );
     },
     _i3.StartupView: (data) {
-      return _i9.MaterialPageRoute<dynamic>(
+      return _i11.MaterialPageRoute<dynamic>(
         builder: (context) => const _i3.StartupView(),
         settings: data,
       );
     },
     _i4.OnboardingView: (data) {
-      return _i9.PageRouteBuilder<dynamic>(
+      return _i11.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             const _i4.OnboardingView(),
         settings: data,
@@ -105,7 +122,7 @@ class StackedRouter extends _i1.RouterBase {
       final args = data.getArgs<ShopViewArguments>(
         orElse: () => const ShopViewArguments(),
       );
-      return _i9.PageRouteBuilder<dynamic>(
+      return _i11.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) => _i5.ShopView(
             key: args.key,
             filter: args.filter,
@@ -120,23 +137,37 @@ class StackedRouter extends _i1.RouterBase {
       final args = data.getArgs<AuthViewArguments>(
         orElse: () => const AuthViewArguments(),
       );
-      return _i9.MaterialPageRoute<dynamic>(
-        builder: (context) =>
-            _i6.AuthView(key: args.key, showLogin: args.showLogin),
+      return _i11.MaterialPageRoute<dynamic>(
+        builder: (context) => _i6.AuthView(
+            key: args.key,
+            initialPage: args.initialPage,
+            parametersArg: args.parametersArg),
         settings: data,
       );
     },
     _i7.CartView: (data) {
-      return _i9.MaterialPageRoute<dynamic>(
+      return _i11.MaterialPageRoute<dynamic>(
         builder: (context) => const _i7.CartView(),
         settings: data,
       );
     },
     _i8.ProductCard: (data) {
       final args = data.getArgs<ProductCardArguments>(nullOk: false);
-      return _i9.MaterialPageRoute<dynamic>(
+      return _i11.MaterialPageRoute<dynamic>(
         builder: (context) =>
             _i8.ProductCard(key: args.key, product: args.product),
+        settings: data,
+      );
+    },
+    _i9.EnterEmailView: (data) {
+      return _i11.MaterialPageRoute<dynamic>(
+        builder: (context) => const _i9.EnterEmailView(),
+        settings: data,
+      );
+    },
+    _i10.ProfileView: (data) {
+      return _i11.MaterialPageRoute<dynamic>(
+        builder: (context) => const _i10.ProfileView(),
         settings: data,
       );
     },
@@ -156,9 +187,9 @@ class ShopViewArguments {
     this.isSpecialCategory = false,
   });
 
-  final _i9.Key? key;
+  final _i11.Key? key;
 
-  final _i10.Category? filter;
+  final _i12.Category? filter;
 
   final bool isSpecialCategory;
 
@@ -184,27 +215,32 @@ class ShopViewArguments {
 class AuthViewArguments {
   const AuthViewArguments({
     this.key,
-    this.showLogin = false,
+    this.initialPage,
+    this.parametersArg,
   });
 
-  final _i9.Key? key;
+  final _i11.Key? key;
 
-  final bool showLogin;
+  final _i6.PresentPage? initialPage;
+
+  final Map<String, dynamic>? parametersArg;
 
   @override
   String toString() {
-    return '{"key": "$key", "showLogin": "$showLogin"}';
+    return '{"key": "$key", "initialPage": "$initialPage", "parametersArg": "$parametersArg"}';
   }
 
   @override
   bool operator ==(covariant AuthViewArguments other) {
     if (identical(this, other)) return true;
-    return other.key == key && other.showLogin == showLogin;
+    return other.key == key &&
+        other.initialPage == initialPage &&
+        other.parametersArg == parametersArg;
   }
 
   @override
   int get hashCode {
-    return key.hashCode ^ showLogin.hashCode;
+    return key.hashCode ^ initialPage.hashCode ^ parametersArg.hashCode;
   }
 }
 
@@ -214,9 +250,9 @@ class ProductCardArguments {
     required this.product,
   });
 
-  final _i9.Key? key;
+  final _i11.Key? key;
 
-  final _i11.Product product;
+  final _i13.Product product;
 
   @override
   String toString() {
@@ -235,7 +271,7 @@ class ProductCardArguments {
   }
 }
 
-extension NavigatorStateExtension on _i12.NavigationService {
+extension NavigatorStateExtension on _i14.NavigationService {
   Future<dynamic> navigateToHomeView([
     int? routerId,
     bool preventDuplicates = true,
@@ -279,8 +315,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> navigateToShopView({
-    _i9.Key? key,
-    _i10.Category? filter,
+    _i11.Key? key,
+    _i12.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -298,8 +334,9 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> navigateToAuthView({
-    _i9.Key? key,
-    bool showLogin = false,
+    _i11.Key? key,
+    _i6.PresentPage? initialPage,
+    Map<String, dynamic>? parametersArg,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -307,7 +344,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
         transition,
   }) async {
     return navigateTo<dynamic>(Routes.authView,
-        arguments: AuthViewArguments(key: key, showLogin: showLogin),
+        arguments: AuthViewArguments(
+            key: key, initialPage: initialPage, parametersArg: parametersArg),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -329,8 +367,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> navigateToProductCard({
-    _i9.Key? key,
-    required _i11.Product product,
+    _i11.Key? key,
+    required _i13.Product product,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -339,6 +377,34 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }) async {
     return navigateTo<dynamic>(Routes.productCard,
         arguments: ProductCardArguments(key: key, product: product),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToEnterEmailView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return navigateTo<dynamic>(Routes.enterEmailView,
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> navigateToProfileView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return navigateTo<dynamic>(Routes.profileView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -388,8 +454,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> replaceWithShopView({
-    _i9.Key? key,
-    _i10.Category? filter,
+    _i11.Key? key,
+    _i12.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -407,8 +473,9 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> replaceWithAuthView({
-    _i9.Key? key,
-    bool showLogin = false,
+    _i11.Key? key,
+    _i6.PresentPage? initialPage,
+    Map<String, dynamic>? parametersArg,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -416,7 +483,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
         transition,
   }) async {
     return replaceWith<dynamic>(Routes.authView,
-        arguments: AuthViewArguments(key: key, showLogin: showLogin),
+        arguments: AuthViewArguments(
+            key: key, initialPage: initialPage, parametersArg: parametersArg),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -438,8 +506,8 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }
 
   Future<dynamic> replaceWithProductCard({
-    _i9.Key? key,
-    required _i11.Product product,
+    _i11.Key? key,
+    required _i13.Product product,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -448,6 +516,34 @@ extension NavigatorStateExtension on _i12.NavigationService {
   }) async {
     return replaceWith<dynamic>(Routes.productCard,
         arguments: ProductCardArguments(key: key, product: product),
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithEnterEmailView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return replaceWith<dynamic>(Routes.enterEmailView,
+        id: routerId,
+        preventDuplicates: preventDuplicates,
+        parameters: parameters,
+        transition: transition);
+  }
+
+  Future<dynamic> replaceWithProfileView([
+    int? routerId,
+    bool preventDuplicates = true,
+    Map<String, String>? parameters,
+    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
+        transition,
+  ]) async {
+    return replaceWith<dynamic>(Routes.profileView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

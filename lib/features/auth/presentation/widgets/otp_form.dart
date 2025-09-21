@@ -1,74 +1,117 @@
-// Updated OTP Form with input state
+
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
+
+import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
+import '../../../../ui/common/ui_helpers.dart';
+import '../../../../ui/components/code_input.dart';
 import '../../../../ui/components/submit_button.dart';
+import '../auth_view.dart';
 import '../auth_viewmodel.dart';
 
-class OtpForm extends ViewModelWidget<AuthViewModel> {
-  const OtpForm({super.key});
+class OTPView extends StatelessWidget {
+  final bool isOtpRequested;
+  final String? userId;
+  final String? verificationCode;
+  final String? phone;
+  final String? email;
+
+  const OTPView({
+    super.key,
+    this.isOtpRequested = false,
+    this.userId,
+    this.verificationCode,
+    this.phone,
+    this.email,
+  });
 
   @override
-  Widget build(BuildContext context, AuthViewModel viewModel) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 24),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset('assets/icons/logo.svg', height: 64),
-            const SizedBox(height: 24),
-            const Text("Enter OTP", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            const Text("An OTP has been sent to your email"),
-            const SizedBox(height: 12),
-            Form(
-              key: viewModel.otpFormKey,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(6, (index) {
-                  return Container(
-                    width: 40,
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    child: TextFormField(
-                      controller: viewModel.otpControllers[index],
-                      textAlign: TextAlign.center,
-                      maxLength: 1,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(counterText: ''),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '';
-                        }
-                        return null;
-                      },
-                    ),
-                  );
-                }),
+  Widget build(BuildContext context) {
+    return ViewModelBuilder<AuthViewModel>.reactive(
+      onViewModelReady: (model) {
+        model.isOtpRequested = isOtpRequested;
+        if (phone != null) model.phone.text = phone!;
+        if (email != null) model.email.text = email!;
+      },
+      viewModelBuilder: () => AuthViewModel(),
+      builder: (context, model, child) => ListView(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                verticalSpaceMassive,
+                Text(
+                  model.isOtpRequested ? "Input OTP" : "Create account",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: kcPrimaryColor,
+                  ),
+                ),
+                verticalSpaceTiny,
+                Text(
+                  model.isOtpRequested
+                      ? "Please enter the code sent to your email or phone"
+                      : "Create an account to explore our high-quality products.",
+                  style: const TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          verticalSpaceMedium,
+          if (!model.isOtpRequested)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: model.isPhoneNumber ? model.phone : model.email,
+                decoration: InputDecoration(
+                  hintText: model.isPhoneNumber ? "Enter phone number" : "Enter email or phone",
+                  prefixText: model.isPhoneNumber ? "+234 " : null,
+                  border: const OutlineInputBorder(),
+                ),
+                keyboardType: model.isPhoneNumber ? TextInputType.phone : TextInputType.emailAddress,
+                onChanged: (value) => model.onEmailOrPhoneChanged(value),
               ),
             ),
-            const SizedBox(height: 12),
-            GestureDetector(
-              onTap: viewModel.resendOtp,
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Resend", style: TextStyle(color: kcSecondaryColor)),
-                  Icon(Icons.arrow_forward, size: 16, color: kcSecondaryColor),
-                ],
+          verticalSpaceMedium,
+          if (model.isOtpRequested)
+            Padding(
+              padding: const EdgeInsets.all(40.0),
+              child: CodeInputWidget(
+                codeController: model.otp,
+                onCompleted: (String value) => model.submitOtp(),
               ),
             ),
-            const SizedBox(height: 24),
-            SubmitButton(
-              isLoading: viewModel.isVerifyingOtp,
-              label: "Sign Up",
-              color: kcPrimaryColor,
-              submit: viewModel.verifyOtp,
-            )
-          ],
-        ),
+          verticalSpaceSmall,
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: appLoading,
+              builder: (context, isLoading, child) => SubmitButton(
+                isLoading: isLoading,
+                boldText: true,
+                label: model.isOtpRequested ? 'Verify OTP' : 'Get OTP',
+                submit: () => model.isOtpRequested ? model.submitOtp() : model.requestOtp(),
+                color: kcPrimaryColor,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Already a user? ", style: TextStyle(fontSize: 12)),
+              GestureDetector(
+                onTap: () => model.setPresentPage(PresentPage.login),
+                child: const Text("Login", style: TextStyle(fontSize: 14, color: kcSecondaryColor)),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

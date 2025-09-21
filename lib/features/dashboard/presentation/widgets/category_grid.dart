@@ -1,9 +1,11 @@
 
+import 'package:easy_ph/app/app.router.dart';
 import 'package:easy_ph/features/dashboard/presentation/dashboad_view.dart';
 import 'package:easy_ph/features/shop/shop_view.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:stacked_services/stacked_services.dart';
+import '../../../../app/app.locator.dart';
 import '../../../../core/data/models/category.dart';
 import '../dashboard_viewmodel.dart';
 
@@ -27,14 +29,21 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
         GestureDetector(
           onTap: () {
             final isSpecial = ['solar', 'electronics', 'light'].contains(key);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (c) => ShopView(
-                  filter: category,
-                  isSpecialCategory: isSpecial,
-                ),
-              ),
+            locator<NavigationService>().navigateToShopView(
+              filter: category,
+              isSpecialCategory: isSpecial,
+            );locator<NavigationService>().navigateToShopView(
+              filter: category,
+              isSpecialCategory: isSpecial,
             );
+            // Navigator.of(context).push(
+            //   MaterialPageRoute(
+            //     builder: (c) => ShopView(
+            //       filter: category,
+            //       isSpecialCategory: isSpecial,
+            //     ),
+            //   ),
+            // );
           },
           child: actionContainer(imagePath, key.toUpperCase(), context),
         ),

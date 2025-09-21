@@ -121,7 +121,7 @@ class DashboardViewModel extends BaseViewModel {
         limit: pageLimit,
         tag: _selectedTag?.name,
         brand: _selectedBrand.isNotEmpty ? _selectedBrand : null,
-          categoryId: _selectedCategoryId != allCategoriesId ? _selectedCategoryId.toString() : null
+        categoryId: _selectedCategoryId != allCategoriesId ? _selectedCategoryId.toString() : null,
       );
 
       if (res.statusCode == 200) {
@@ -153,7 +153,7 @@ class DashboardViewModel extends BaseViewModel {
     } catch (e) {
       _log.e("Error fetching products: $e");
       _snackBar.showSnackbar(
-          message: "An error occurred while fetching products.");
+          message: "An error occurred while fetching products.", duration: Duration(seconds: 3));
     } finally {
       _isLoadingMore = false;
       notifyListeners();
@@ -172,6 +172,7 @@ class DashboardViewModel extends BaseViewModel {
     _selectedTag = null;
     _selectedBrand = '';
     getProducts(isRefresh: true);
+    fetchProductTags(categoryId: categoryId);
   }
 
   void filterProductsByBrand(String brand) {
@@ -195,19 +196,19 @@ class DashboardViewModel extends BaseViewModel {
       }
     } catch (e) {
       _log.e("Error fetching categories: $e");
-      _snackBar.showSnackbar(message: "An error occurred while fetching categories.");
+      _snackBar.showSnackbar(message: "An error occurred while fetching categories.", duration: Duration(seconds: 3));
     } finally {
       notifyListeners();
     }
   }
 
-  Future<void> fetchProductTags() async {
+  Future<void> fetchProductTags({int? categoryId}) async {
     _isLoadingTags = true;
     _hasTagsError = false;
     _tagsError = null;
     notifyListeners();
     try {
-      final res = await _repo.getProductTags();
+      final res = await _repo.getProductTags(categoryId: categoryId);
       if (res.statusCode == 200) {
         final List<dynamic> tagsData = res.data['tags'] ?? [];
         _tags = tagsData
