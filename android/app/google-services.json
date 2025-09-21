@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "37884773488",
+    "project_id": "easy-power-hub",
+    "storage_bucket": "easy-power-hub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37884773488:android:975eef0b94903bfcf620b5",
+        "android_client_info": {
+          "package_name": "com.echobitstech.easyph"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPeMyQDL2y3deRsz3T7trWXqzf9u0sdoA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
