@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import '../../core/data/models/product.dart';
 import '../../features/dashboard/presentation/dashboard_viewmodel.dart';
-import '../../features/dashboard/presentation/widgets/product_card.dart';
+import '../../features/dashboard/presentation/product_details/product_card.dart';
 import '../../state.dart';
 import '../common/app_colors.dart';
 
@@ -42,7 +42,7 @@ class ProductSearchBar extends StatelessWidget {
             ),
             backgroundColor: Colors.black.withOpacity(0.7),
             builder: (BuildContext context) {
-              return ProductCard(product: value);
+              return ProductCard(product: value, dashboardViewModel: viewModel,);
             },
           );
         },
@@ -53,7 +53,7 @@ class ProductSearchBar extends StatelessWidget {
           return Container(
             height: 40,
             decoration: BoxDecoration(
-              color: uiMode.value == AppUiModes.dark ? kcMediumGrey : Colors.transparent,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[600]! : Colors.grey, // The fix
@@ -86,7 +86,7 @@ class ProductSearchBar extends StatelessWidget {
                   maxWidth: 350,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ListView.builder(

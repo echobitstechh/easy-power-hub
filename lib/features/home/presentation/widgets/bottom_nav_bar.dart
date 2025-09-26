@@ -18,6 +18,11 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final navBarBackgroundColor = isDarkMode ? kcDarkGreyColor : kcWhiteColor;
+    final selectedItemColor = kcSecondaryColor;
+    final unselectedItemColor = Colors.grey;
+
     return ValueListenableBuilder<List<CartItem>>(
       valueListenable: cart,
       builder: (context, currentModule, _) {
@@ -30,9 +35,7 @@ class BottomNavBar extends StatelessWidget {
 
         return BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          backgroundColor: uiMode.value == AppUiModes.dark
-              ? kcDarkGreyColor
-              : kcWhiteColor,
+          backgroundColor: navBarBackgroundColor,
           selectedLabelStyle: TextStyle(color: selectedColor),
           selectedItemColor: selectedColor,
           unselectedItemColor: iconColor,

@@ -1,3 +1,4 @@
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -17,9 +18,14 @@ import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
 import 'auth_service.dart';
-import 'auth_view.dart';
 
 enum RegistrationResult { success, failure }
+
+enum RegistrationStep {
+  collectContact,
+  verifyOtp,
+  completeProfile,
+}
 
 class AuthViewModel extends BaseViewModel {
   final _log = getLogger("AuthViewModel");
@@ -29,13 +35,7 @@ class AuthViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _localStorage = locator<LocalStorage>();
 
-  // Page Navigation State
-  PresentPage _presentPage = PresentPage.login;
-  PresentPage get presentPage => _presentPage;
-  void setPresentPage(PresentPage page) {
-    _presentPage = page;
-    notifyListeners();
-  }
+
 
   // Text Controllers & UI State
   final firstname = TextEditingController();
@@ -59,6 +59,13 @@ class AuthViewModel extends BaseViewModel {
 
   bool get isPhoneNumber => _isPhoneNumberNotifier.value;
 
+  RegistrationStep _registrationStep = RegistrationStep.collectContact;
+  RegistrationStep get registrationStep => _registrationStep;
+
+  void setRegistrationStep(RegistrationStep step) {
+    _registrationStep = step;
+    notifyListeners();
+  }
 
   bool _obscure = true;
   bool get obscure => _obscure;
@@ -76,9 +83,6 @@ class AuthViewModel extends BaseViewModel {
 
   final bool _isLoginByEmail = true;
   bool get isLoginByEmail => _isLoginByEmail;
-
-
-
 
   // Method to handle initial parameters from navigation
   void setParameters(Map<String, dynamic> params) {
@@ -138,7 +142,6 @@ class AuthViewModel extends BaseViewModel {
       if (Platform.isIOS) {
         String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         if (apnsToken == null) {
-
           _log.w("APNS token not available. FCM token might not be generated.");
         }
       }
@@ -148,8 +151,6 @@ class AuthViewModel extends BaseViewModel {
       final requestBody = {
         if (inputController.text.contains('@')) "email": inputController.text,
         if (RegExp(r'^\d').hasMatch(inputController.text)) "phoneNumber": inputController.text,
-        // if (email.text.isNotEmpty) "email": email.text,
-        // if (phone.text.isNotEmpty) "phoneNumber": phone.text,
         "password": password.text,
         "fcmToken": fcmToken,
       };
@@ -187,12 +188,9 @@ class AuthViewModel extends BaseViewModel {
 
       String? fcmToken;
 
-      // Check for APNS token on iOS before getting the FCM token
       if (Platform.isIOS) {
         String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         if (apnsToken == null) {
-          // If APNS token is not available, log a warning and continue without it
-          // The backend might handle this gracefully
           _log.w("APNS token not available. FCM token might not be generated.");
         }
       }
@@ -233,8 +231,7 @@ class AuthViewModel extends BaseViewModel {
       if (res.statusCode == 200) {
         _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
         _navigationService.navigateTo(
-          Routes.authView,
-          arguments: AuthViewArguments(initialPage: PresentPage.register),
+          Routes.register,
         );
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
@@ -340,6 +337,107 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
+  // --- New Methods for Multi-Step Registration ---
+
+  Future<void> requestOtpForRegistration() async {
+    final isPhone = RegExp(r'^\d').hasMatch(inputController.text);
+    if (isPhone && inputController.text.length < 11) {
+      _snackBar.showSnackbar(message: 'Please enter a valid phone number.');
+      return;
+    }
+    if (!isPhone && !inputController.text.contains('@')) {
+      _snackBar.showSnackbar(message: 'Please enter a valid email address.');
+      return;
+    }
+
+    setBusy(true);
+    try {
+      ApiResponse res = await _repo.requestOtp({
+        if (isPhone) "phoneNumber": inputController.text,
+        if (!isPhone) "email": inputController.text,
+      });
+
+      if (res.statusCode == 200) {
+        profile.value.id = res.data['data']["userId"];
+        profile.value.email = isPhone ? '' : inputController.text;
+        profile.value.phoneNumber = isPhone ? inputController.text : '';
+
+        _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
+        setRegistrationStep(RegistrationStep.verifyOtp);
+      } else {
+        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
+      }
+    } catch (e) {
+      _log.e('Request OTP unhandled error: $e');
+      _snackBar.showSnackbar(message: 'An unexpected error occurred', duration: const Duration(seconds: 2));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> verifyOtpForRegistration() async {
+    setBusy(true);
+    try {
+      ApiResponse res = await _repo.submitOtp({
+        "userId": profile.value.id,
+        "verificationCode": otp.text,
+        "vRef": profile.value.reference,
+      });
+
+      if (res.statusCode == 200) {
+        _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
+        setRegistrationStep(RegistrationStep.completeProfile);
+      } else {
+        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
+      }
+    } catch (e) {
+      _log.e("OTP submission error: $e");
+      _snackBar.showSnackbar(message: 'An error occurred. Please try again later.', duration: const Duration(seconds: 2));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> completeRegistration() async {
+    setBusy(true);
+    try {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true, badge: true, sound: true,
+      );
+
+      String? fcmToken;
+      if (Platform.isIOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          _log.w("APNS token not available. FCM token might not be generated.");
+        }
+      }
+      fcmToken = await FirebaseMessaging.instance.getToken();
+
+      ApiResponse res = await _repo.register({
+        "userId": profile.value.id,
+        "firstName": firstname.text,
+        "lastName": lastname.text,
+        "email": email.text.isEmpty ? profile.value.email : email.text,
+        "phoneNumber": phone.text.isEmpty ? profile.value.phoneNumber : phone.text,
+        "password": password.text,
+        "fcmToken": fcmToken,
+      });
+
+      if (res.statusCode == 200) {
+        _handleSuccessfulLogin(res.data);
+        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+      } else {
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
+      }
+    } catch (e) {
+      _log.e("Registration error: $e");
+      _snackBar.showSnackbar(message: "Registration failed. Please try again.", duration: const Duration(seconds: 2));
+    } finally {
+      setBusy(false);
+    }
+  }
+
 
   // --- Helper Methods ---
 
@@ -347,32 +445,15 @@ class AuthViewModel extends BaseViewModel {
     profile.value.id = data['userId'];
     profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
     _navigationService.navigateTo(
-      Routes.authView,
-      arguments: AuthViewArguments(
-        initialPage: PresentPage.signup,
-        parametersArg: {
-          'isOtpRequested': 'true',
-          'userId': data['userId'],
-          if (phone.text.isNotEmpty) 'verificationCode': data['sendTokenResponse']?['data']?['token'],
-          if (phone.text.isNotEmpty) 'phone': phone.text,
-          if (email.text.isNotEmpty) 'email': email.text,
-        },
-      ),
+      Routes.register,
+
     );
   }
 
   void _handleIncompleteProfileFlow(dynamic data) {
     profile.value.id = data['userId'];
     _navigationService.navigateTo(
-      Routes.authView,
-      arguments: AuthViewArguments(
-        initialPage: PresentPage.register,
-        parametersArg: {
-          'userId': data['userId'],
-          if (phone.text.isNotEmpty) 'phone': phone.text,
-          if (email.text.isNotEmpty) 'email': email.text,
-        },
-      ),
+      Routes.register
     );
   }
 

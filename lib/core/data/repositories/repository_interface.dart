@@ -92,11 +92,13 @@ abstract class IRepository {
 
   Future<ApiResponse> saveShipping(Map<String, dynamic> req);
 
+  Future<ApiResponse> editShipping(String addressId, Map<String, dynamic> req);
+
   Future<ApiResponse> calculateOrder(Map<String, dynamic> req);
 
   Future<ApiResponse> setDefaultShipping(Map<String, dynamic> req, String id);
 
-  Future<ApiResponse> deleteDefaultShipping(String productId);
+  Future<ApiResponse> deleteShipping(String productId);
 
   Future<ApiResponse> reviewOrder(Map<String, dynamic> req);
 }

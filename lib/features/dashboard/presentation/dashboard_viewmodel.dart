@@ -77,7 +77,7 @@ class DashboardViewModel extends BaseViewModel {
 
   Future<void> _loadData() async {
     await Future.wait([
-      getProducts(),
+      getProducts(isRefresh: true),
       getCategories(),
       fetchProductTags(),
     ]);
@@ -121,7 +121,9 @@ class DashboardViewModel extends BaseViewModel {
         limit: pageLimit,
         tag: _selectedTag?.name,
         brand: _selectedBrand.isNotEmpty ? _selectedBrand : null,
-        categoryId: _selectedCategoryId != allCategoriesId ? _selectedCategoryId.toString() : null,
+        categoryId: _selectedCategoryId != allCategoriesId
+            ? _selectedCategoryId.toString()
+            : null,
       );
 
       if (res.statusCode == 200) {
@@ -130,6 +132,16 @@ class DashboardViewModel extends BaseViewModel {
             .where((product) => product.status?.toLowerCase() == 'active')
             .toList();
 
+        if (newProducts.isEmpty && isRefresh) {
+
+          _snackBar.showSnackbar(
+              message: "No products found for the selected filter.",
+              duration: const Duration(seconds: 3));
+          await resetFilters();
+          return;
+        }
+
+
         final existingIds = productList.map((p) => p.id!).toSet();
         for (final newProduct in newProducts) {
           if (newProduct.id != null && !existingIds.contains(newProduct.id)) {
@@ -137,7 +149,9 @@ class DashboardViewModel extends BaseViewModel {
           }
         }
 
-        brands = (res.data["brands"] as List).map((b) => b.toString()).toList();
+        if (isRefresh) {
+          brands = (res.data["brands"] as List).map((b) => b.toString()).toList();
+        }
         filteredProductList = List.from(productList);
 
         if (newProducts.length < pageLimit) {
@@ -148,12 +162,14 @@ class DashboardViewModel extends BaseViewModel {
       } else {
         _log.e("API Error: ${res.data["message"]}");
         _snackBar.showSnackbar(
-            message: res.data["message"] ?? "Failed to fetch products.", duration: Duration(seconds: 3));
+            message: res.data["message"] ?? "Failed to fetch products.",
+            duration: Duration(seconds: 3));
       }
     } catch (e) {
       _log.e("Error fetching products: $e");
       _snackBar.showSnackbar(
-          message: "An error occurred while fetching products.", duration: Duration(seconds: 3));
+          message: "An error occurred while fetching products.",
+          duration: Duration(seconds: 3));
     } finally {
       _isLoadingMore = false;
       notifyListeners();
@@ -180,15 +196,27 @@ class DashboardViewModel extends BaseViewModel {
     getProducts(isRefresh: true);
   }
 
+  Future<void> resetFilters() async {
+    _selectedTag = null;
+    _selectedBrand = '';
+    _selectedCategoryId = allCategoriesId;
+    getProducts(isRefresh: true);
+    print('tried to reset filters');
+  }
+
+
   Future<void> getCategories() async {
     try {
       final res = await _repo.getCategories();
-      if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
+      if (res.statusCode == 200 &&
+          res.data != null &&
+          res.data["categories"] != null) {
         categories = (res.data["categories"] as List)
             .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
             .where((category) => category.status == CategoryStatus.active)
             .toList();
-        await _localStorage.save(LocalStorageDir.category, categories.map((e) => e.toJson()).toList());
+        await _localStorage.save(LocalStorageDir.category,
+            categories.map((e) => e.toJson()).toList());
         filteredCategories = [
           Category(id: 0, name: 'All', status: CategoryStatus.active),
           ...categories,
@@ -196,7 +224,9 @@ class DashboardViewModel extends BaseViewModel {
       }
     } catch (e) {
       _log.e("Error fetching categories: $e");
-      _snackBar.showSnackbar(message: "An error occurred while fetching categories.", duration: Duration(seconds: 3));
+      _snackBar.showSnackbar(
+          message: "An error occurred while fetching categories.",
+          duration: Duration(seconds: 3));
     } finally {
       notifyListeners();
     }
@@ -214,7 +244,8 @@ class DashboardViewModel extends BaseViewModel {
         _tags = tagsData
             .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
             .toList();
-        _tags.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+        _tags.sort(
+            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
         _log.i("Loaded ${_tags.length} tags.");
       } else {
         _log.e("API Error fetching tags: ${res.data['message']}");
@@ -228,6 +259,96 @@ class DashboardViewModel extends BaseViewModel {
     } finally {
       _isLoadingTags = false;
       notifyListeners();
+    }
+  }
+
+  void addProductToCart(Product product) async {
+    loadingItems.add(product.id!);
+    notifyListeners();
+
+    try {
+      final existingIndex = cart.value.indexWhere(
+        (raffleItem) => raffleItem.product?.id == product.id,
+      );
+
+      if (existingIndex != -1) {
+        CartItem(
+          product: cart.value[existingIndex].product,
+          quantity: cart.value[existingIndex].quantity! + 1,
+        );
+      } else {
+        cart.value.add(CartItem(product: product, quantity: 1));
+        cart.notifyListeners();
+      }
+
+      List<Map<String, dynamic>> storedList =
+          cart.value.map((e) => e.toJson()).toList();
+      // await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
+
+      final response = await _repo.addToCart({
+        "productId": product.id,
+        "quantity": cart.value
+            .firstWhere((item) => item.product?.id == product.id)
+            .quantity,
+      });
+
+      if (response.statusCode == 200) {
+        locator<SnackbarService>().showSnackbar(
+            message: "Product added to cart",
+            duration: const Duration(seconds: 2));
+      } else {
+        locator<SnackbarService>().showSnackbar(
+            message: response.data["message"],
+            duration: const Duration(seconds: 2));
+      }
+    } catch (e) {
+      locator<SnackbarService>().showSnackbar(
+          message: "Failed to add product to cart: $e",
+          duration: const Duration(seconds: 2));
+    } finally {
+      // Remove product ID from loading set
+      loadingItems.remove(product.id!);
+      cart.notifyListeners();
+      notifyListeners();
+    }
+  }
+
+  void modifyCartQuantity(CartItem item, String action) async {
+    setBusy(true);
+    try {
+      final res = await _repo.modifyCartItem(item.product!.id.toString(), action);
+
+      if (res.statusCode == 200) {
+        if (action == "increment") {
+          item.quantity = item.quantity! + 1;
+        } else if (action == "decrement" && item.quantity! > 1) {
+          item.quantity = item.quantity! - 1;
+        }
+
+        cart.notifyListeners();
+      } else {
+        _snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}", duration: Duration(seconds: 2));
+      }
+    } catch (e) {
+      _log.e("Cart modification error: $e");
+      _snackBar.showSnackbar(message: "An error occurred while updating the cart", duration: Duration(seconds: 2));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<List<Review>> fetchProductReviews(Product product) async {
+    try {
+      final response = await _repo.getReviews(product.id!);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> reviewJson = response.data["reviews"];
+        return reviewJson.map((r) => Review.fromJson(r)).toList();
+      }
+      return[];
+    } catch (e) {
+      print("Failed to load reviews: $e");
+      return [];
     }
   }
 }

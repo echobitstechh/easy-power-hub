@@ -241,14 +241,14 @@ class ProfileViewModel extends BaseViewModel {
       await _localStorage.delete(LocalStorageDir.productCart);
       await _localStorage.delete(LocalStorageDir.authRefreshToken);
       cart.value.clear();
-      _navigationService.clearStackAndShow(Routes.authView);
+      _navigationService.clearStackAndShow(Routes.login);
     }
   }
 
   // Navigation Handlers
   // void navigateToWallet() => _navigationService.navigateTo(Routes.walletView);
-  // void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
-  // void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
-  // void navigateToSupport() => _navigationService.navigateTo(Routes.support);
-  // void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
+  void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
+  void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
+  void navigateToSupport() => _navigationService.navigateTo(Routes.supportView);
+  void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
 }

@@ -70,8 +70,20 @@ final requestInterceptors = InterceptorsWrapper(
         break;
     }
 
+    // Check if the endpoint is for login or password reset
+    final isAuthEndpoint = dioError.requestOptions.path.contains("auth/login") ||
+        dioError.requestOptions.path.contains("auth/refresh-token");
+
+
     // Handle 401 (unauthorized)
     if (dioError.response?.statusCode == 401) {
+
+      if (isAuthEndpoint) {
+        // Let the original error pass through so the login/signup view can handle it
+        handler.next(dioError);
+        return;
+      }
+
       // Prevent infinite retry loops
       if (refreshTokenRetryCount >= maxRetryCount) {
         refreshTokenRetryCount = 0;
@@ -144,10 +156,10 @@ final requestInterceptors = InterceptorsWrapper(
 Future<bool> refreshAccessToken() async {
 
     ApiResponse res = await repo.refresh({ "userId": profile.value.id,
-      "Refresh-Token": await locator<LocalStorage>().fetch(LocalStorageDir.authRefreshToken)});
-    if (res.statusCode == 200 && res.data['data']["accessToken"] != null) {
-      String accessToken = res.data['data']["accessToken"];
-      String refreshToken = res.data['data']["refreshToken"];
+      "refreshToken": await locator<LocalStorage>().fetch(LocalStorageDir.authRefreshToken)});
+    if (res.statusCode == 200 && res.data["token"] != null) {
+      String accessToken = res.data["token"];
+      String refreshToken = res.data["refreshToken"];
       await locator<LocalStorage>().save(LocalStorageDir.authToken, accessToken);
       await locator<LocalStorage>().save(LocalStorageDir.authRefreshToken, refreshToken);
       print('refresh successful');

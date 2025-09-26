@@ -6,7 +6,7 @@ import '../../../core/data/models/category.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/empty_state.dart';
-import '../../../ui/components/shimmer_loading.dart';
+import '../../ui/components/shimmers/shimmer_loading.dart';
 import '../../ui/components/brand_chips.dart';
 import '../../ui/components/product_search_bar.dart';
 import '../dashboard/presentation/dashboard_viewmodel.dart';

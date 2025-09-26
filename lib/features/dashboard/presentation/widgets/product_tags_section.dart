@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../ui/common/ui_helpers.dart';
-import '../../../../ui/components/shimmer.dart';
+import '../../../../ui/components/shimmers/shimmer.dart';
 import '../dashboard_viewmodel.dart';
 import 'tag_chip.dart';
 

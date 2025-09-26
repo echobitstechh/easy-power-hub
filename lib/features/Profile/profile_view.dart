@@ -1,4 +1,3 @@
-
 import 'package:easy_ph/features/Profile/profile_viewModel.dart';
 import 'package:easy_ph/features/Profile/widgets/profile_picture_section.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:stacked/stacked.dart';
 import '../../state.dart';
 import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
+import '../../ui/components/shimmers/profile_view_shimmers.dart';
 
 class ProfileView extends StackedView<ProfileViewModel> {
   const ProfileView({Key? key}) : super(key: key);
@@ -19,13 +19,13 @@ class ProfileView extends StackedView<ProfileViewModel> {
         title: const Text("Profile"),
       ),
       body: viewModel.isBusy
-          ? const Center(child: CircularProgressIndicator())
+          ? const ProfilePageShimmer() // Replaced CircularProgressIndicator with shimmer
           : CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Column(
               children: [
-                ProfilePictureSection(viewModel: viewModel), // Extracted widget
+                ProfilePictureSection(viewModel: viewModel),
                 verticalSpaceMedium,
                 _buildActionList(context, viewModel),
               ],
@@ -42,43 +42,39 @@ class ProfileView extends StackedView<ProfileViewModel> {
   Widget _buildActionList(BuildContext context, ProfileViewModel viewModel) {
     return Column(
       children: [
-        // ListTile(
-        //   onTap: viewModel.navigateToWallet,
-        //   leading: const Icon(Icons.wallet, color: kcOrangeColor),
-        //   title: const Text("Wallet"),
-        // ),
-        // ListTile(
-        //   onTap: viewModel.navigateToOrders,
-        //   leading: const Icon(Icons.fire_truck_rounded, color: kcPrimaryColor),
-        //   title: const Text("My orders"),
-        // ),
-        // ListTile(
-        //   onTap: viewModel.navigateToShippingAddresses,
-        //   leading: const Icon(Icons.location_on, color: kcOrangeColor),
-        //   title: const Text("Shipping addresses"),
-        // ),
-        // ListTile(
-        //   onTap: viewModel.navigateToSupport,
-        //   leading: const Icon(Icons.support_agent, color: kcOrangeColor),
-        //   title: const Text("Support"),
-        // ),
-        // ListTile(
-        //   onTap: viewModel.navigateToChangePassword,
-        //   leading: const Icon(Icons.lock, color: kcOrangeColor),
-        //   title: const Text("Change password"),
-        // ),
+        // ... list items
         ListTile(
-          onTap: viewModel.toggleUiMode,
-          leading: const Icon(Icons.light_mode_sharp, color: kcOrangeColor),
-          title: const Text("Dark Theme"),
-          trailing: ValueListenableBuilder<AppUiModes>(
-            valueListenable: uiMode,
-            builder: (context, value, child) => Switch(
-              value: value == AppUiModes.dark,
-              onChanged: (val) => viewModel.toggleUiMode(),
-            ),
-          ),
+          onTap: viewModel.navigateToOrders,
+          leading: const Icon(Icons.fire_truck_rounded, color: kcPrimaryColor),
+          title: const Text("My orders"),
         ),
+        ListTile(
+          onTap: viewModel.navigateToShippingAddresses,
+          leading: const Icon(Icons.location_on, color: kcOrangeColor),
+          title: const Text("Shipping addresses"),
+        ),
+        ListTile(
+          onTap: viewModel.navigateToSupport,
+          leading: const Icon(Icons.support_agent, color: kcOrangeColor),
+          title: const Text("Support"),
+        ),
+        ListTile(
+          onTap: viewModel.navigateToChangePassword,
+          leading: const Icon(Icons.lock, color: kcOrangeColor),
+          title: const Text("Change password"),
+        ),
+        // ListTile(
+        //   onTap: viewModel.toggleUiMode,
+        //   leading: const Icon(Icons.light_mode_sharp, color: kcOrangeColor),
+        //   title: const Text("Dark Theme"),
+        //   trailing: ValueListenableBuilder<AppUiModes>(
+        //     valueListenable: uiMode,
+        //     builder: (context, value, child) => Switch(
+        //       value: value == AppUiModes.dark,
+        //       onChanged: (val) => viewModel.toggleUiMode(),
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

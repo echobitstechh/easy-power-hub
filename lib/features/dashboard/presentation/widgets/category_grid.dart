@@ -1,6 +1,7 @@
 
 import 'package:easy_ph/app/app.router.dart';
 import 'package:easy_ph/features/dashboard/presentation/dashboad_view.dart';
+import 'package:easy_ph/features/services/service_view.dart';
 import 'package:easy_ph/features/shop/shop_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -54,8 +55,7 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
     GestureDetector(
       onTap: () {
         Navigator.of(context).push(MaterialPageRoute(
-          //todo switch back to service view
-          builder: (c) =>  DashboardView(),
+          builder: (c) =>  ServicesView(),
         ));
       },
       child: actionContainer('assets/images/2148087576.jpg', "Services", context),

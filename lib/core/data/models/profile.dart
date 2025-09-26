@@ -1,4 +1,6 @@
 
+import 'package:easy_ph/core/data/models/delivery_zone.dart';
+
 class Profile {
   String? id;
   String? email;
@@ -91,6 +93,7 @@ class Address {
   final String? phoneNumber;
   final String? type;
   final String? userId;
+  final DeliveryZone? deliveryZone;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -102,6 +105,7 @@ class Address {
      this.phoneNumber,
      this.type,
      this.userId,
+     this.deliveryZone,
      this.createdAt,
      this.updatedAt,
   });
@@ -115,6 +119,7 @@ class Address {
       phoneNumber: json['phoneNumber'],
       type: json['type'],
       userId: json['userId'],
+      deliveryZone: json['deliveryZone'] != null ? DeliveryZone.fromJson(json['deliveryZone']) : null,
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
     );
@@ -128,6 +133,7 @@ class Address {
     'phoneNumber': phoneNumber,
     'type': type,
     'userId': userId,
+    'deliveryZone': deliveryZone?.toJson(),
     'createdAt': createdAt?.toIso8601String(),
     'updatedAt': updatedAt?.toIso8601String(),
   };

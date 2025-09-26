@@ -1,7 +1,7 @@
 
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:easy_ph/features/dashboard/presentation/widgets/product_card.dart';
+import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
@@ -37,7 +37,7 @@ class ProductGridItem extends StatelessWidget {
           ),
           backgroundColor: Colors.black.withOpacity(0.7),
           builder: (BuildContext context) {
-            return ProductCard(product: product);
+            return ProductCard(product: product, dashboardViewModel: viewModel);
           },
         );
       },
@@ -165,7 +165,7 @@ class ProductGridItem extends StatelessWidget {
   Widget _buildCartButton() {
     return InkWell(
       onTap: () {
-        //viewModel.addToRaffleCart(product);
+        viewModel.addProductToCart(product);
       },
       child: viewModel.loadingItems.contains(product.id)
           ? const SizedBox(

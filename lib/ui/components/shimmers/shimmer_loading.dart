@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../common/ui_helpers.dart';
+import '../../common/ui_helpers.dart';
 
 /// A set of reusable shimmer loading widgets for different UI elements.
 class ShimmerLoading extends StatelessWidget {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../state.dart';
-import '../common/app_colors.dart';
+import '../../../state.dart';
+import '../../common/app_colors.dart';
 
 Widget buildShimmerServiceItem(BuildContext context) {
   final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;

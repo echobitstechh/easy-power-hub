@@ -107,7 +107,7 @@ class EnterEmailViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         _snackBar.showSnackbar(message: "Password changed successfully.");
-        _navigationService.clearStackAndShow(Routes.authView);
+        _navigationService.clearStackAndShow(Routes.login);
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to reset password. Please try again.");
       }

@@ -12,6 +12,7 @@ import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
 import '../../ui/components/empty_state.dart';
 import 'cart_viewmodel.dart';
+import 'checkout/checkout_view.dart';
 
 
 class CartView extends StackedView<CartViewModel> {
@@ -115,6 +116,8 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
     super.dispose();
   }
 
+// The rest of your _CartContent class is correct.
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -123,7 +126,8 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
           topLeft: Radius.circular(25.0),
           topRight: Radius.circular(25.0),
         ),
-        color: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
+
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.only(
@@ -176,11 +180,11 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
     return Dismissible(
       key: Key(item.product?.id ?? UniqueKey().toString()),
       direction: DismissDirection.endToStart,
+      // The fix is here: don't call notifyListeners() directly from the ViewModel.
+      // The Dismissible widget handles the removal of the item from the tree.
       onDismissed: (direction) {
         viewModel.removeItem(item);
-        locator<SnackbarService>().showSnackbar(
-            message: "${item.product?.productName} removed from cart.", duration: const Duration(seconds: 3)
-        );
+
       },
       background: Container(
         alignment: Alignment.centerRight,
@@ -192,7 +196,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
         margin: const EdgeInsets.symmetric(vertical: 8),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: uiMode.value == AppUiModes.light ? kcWhiteColor : kcMediumGrey,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
@@ -218,7 +222,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                           textStyle: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
                           ),
                         ),
                         maxLines: 2,
@@ -232,7 +235,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                           textStyle: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
                           ),
                         ),
                       ),
@@ -290,7 +292,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
             }
           },
           icon: const Icon(Icons.remove_circle_outline, size: 24),
-          color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
         ),
         Text(
           "${item.quantity ?? 0}",
@@ -298,7 +299,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
             textStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
             ),
           ),
         ),
@@ -339,7 +339,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
 
               return ChoiceChip(
                 label: Text("${frequency}x"),
-                backgroundColor: uiMode.value == AppUiModes.light ? Colors.grey[200] : kcDarkGreyColor,
+                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 selectedColor: kcPrimaryColor,
                 labelStyle: TextStyle(
                   color: isSelected ? kcWhiteColor : (uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor),
@@ -367,14 +367,14 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
     return SafeArea(
       child: Container(
         decoration: BoxDecoration(
-          color: uiMode.value == AppUiModes.dark ? kcMediumGrey : kcWhiteColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(8),
             topRight: Radius.circular(8),
           ),
-          boxShadow: const [
+          boxShadow:  [
             BoxShadow(
-              color: Colors.black12,
+              color: Theme.of(context).scaffoldBackgroundColor,
               blurRadius: 6,
               offset: Offset(0, -4),
             ),
@@ -488,7 +488,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
             style: TextStyle(
               fontWeight: label == "Total" ? FontWeight.bold : FontWeight.w500,
               fontSize: label == "Total" ? 16 : 14,
-              color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
             ),
           ),
           horizontalSpaceTiny,
@@ -497,7 +496,6 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
             style: GoogleFonts.roboto(
               textStyle: TextStyle(
                 fontSize: fontSize,
-                color: color ?? (uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor),
                 fontWeight: fontWeight,
               ),
             ),
@@ -510,18 +508,17 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
   Widget _buildCheckoutButton(BuildContext context, CartViewModel viewModel) {
     return InkWell(
       onTap: () {
-        //todo uncomment after creating checkout page
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => CheckoutView(
-        //       cartSubtotal: viewModel.cartSubtotal,
-        //       cartDiscount: viewModel.cartDiscount,
-        //       cartItems: cart.value,
-        //       calculatedFinalTotal: viewModel.cartFinalTotal,
-        //     ),
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckoutView(
+              cartSubtotal: viewModel.cartSubtotal,
+              cartDiscount: viewModel.cartDiscount,
+              cartItems: cart.value,
+              calculatedFinalTotal: viewModel.cartFinalTotal,
+            ),
+          ),
+        );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),

@@ -16,6 +16,7 @@ import '../../../ui/common/app_strings.dart';
 import '../../Profile/profile_view.dart';
 import '../../cart/cart_view.dart';
 import '../../dashboard/presentation/dashboad_view.dart';
+import '../../services/service_view.dart';
 import '../../shop/shop_view.dart';
 
 class HomeViewModel extends BaseViewModel {
@@ -33,9 +34,8 @@ class HomeViewModel extends BaseViewModel {
     DashboardView(),
     ShopView(),
     CartView(),
-    CartView(),
-    // ServicesView(),
-     ProfileView(),
+    ServicesView(),
+    ProfileView(),
   ];
 
 

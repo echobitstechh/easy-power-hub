@@ -27,8 +27,7 @@ class EnterEmailView extends StatelessWidget {
               textStyle: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: uiMode.value == AppUiModes.dark ? Colors.white : Colors.black,
-              ),
+                  ),
             ),
           ),
         ),
@@ -55,7 +54,6 @@ class EnterEmailView extends StatelessWidget {
                     textStyle: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
-                      color: Colors.black,
                     ),
                   ),
                 ),

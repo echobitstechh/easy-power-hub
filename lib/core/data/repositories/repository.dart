@@ -549,6 +549,19 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> editShipping(String addressId, Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.put,
+      endpoint: "profile/addresses/$addressId",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+
+
+  @override
   Future<ApiResponse> calculateOrder(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
@@ -595,10 +608,10 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> deleteDefaultShipping(String productId) async {
+  Future<ApiResponse> deleteShipping(String addressId) async {
     ApiResponse response = await api.call(
-      method: HttpMethod.post,
-      endpoint: "user/delete_shipping/$productId",
+      method: HttpMethod.delete,
+      endpoint: "profile/addresses/$addressId",
     );
 
     return response;

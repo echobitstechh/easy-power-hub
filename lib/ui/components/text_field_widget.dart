@@ -55,7 +55,6 @@ class TextFieldWidget extends StatelessWidget {
       onChanged: onChanged as void Function(String value)?,
       cursorColor: uiMode.value == AppUiModes.light ? kcBlackColor : kcWhiteColor,
       style: TextStyle(
-          color: uiMode.value == AppUiModes.light ? kcBlackColor : kcWhiteColor,
           fontSize: 14),
       validator: validator as String? Function(String?)?,
       obscureText: obscureText,
@@ -81,7 +80,6 @@ class TextFieldWidget extends StatelessWidget {
 
         labelText: hint,
         labelStyle: TextStyle(
-            color: uiMode.value == AppUiModes.light ? kcLightGrey : kcWhiteColor,
             fontSize: 14),
         prefixIcon: leading == null
             ? null

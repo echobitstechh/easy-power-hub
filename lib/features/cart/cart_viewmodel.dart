@@ -62,29 +62,36 @@ class CartViewModel extends BaseViewModel {
 
   /// Removes an item from the cart both locally and on the server.
   Future<void> removeItem(CartItem item) async {
-    setBusy(true);
+    // The fix: Immediately remove the item from the local list
+    cart.value.removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
+    cart.notifyListeners();
+
     try {
       if (item.product?.id == null) {
         _log.e("Attempted to remove item with null product ID.");
         return;
       }
 
+      // Perform the API call to delete from the server
       final res = await _repo.deleteFromCart(item.product!.id!);
 
       if (res.statusCode == 200) {
-        // Use a more efficient `removeWhere` to ensure the correct item is removed
-        cart.value.removeWhere((cartItem) => cartItem.product?.id == item.product?.id);
-        cart.notifyListeners();
         await getCartSummary();
-        _snackBar.showSnackbar(message: "Item removed successfully.", duration: Duration(seconds: 2));
+        locator<SnackbarService>().showSnackbar(
+            message: "${item.product?.productName} removed from cart.",
+            duration: const Duration(seconds: 1));
       } else {
         _snackBar.showSnackbar(message: "Failed to remove item: ${res.data['message']}", duration: Duration(seconds: 2));
+        // If the API call fails, you should add the item back to the list
+        cart.value.add(item);
+        cart.notifyListeners();
       }
     } catch (e) {
       _log.e("Error removing item: $e");
       _snackBar.showSnackbar(message: "An error occurred while removing the item.", duration: Duration(seconds: 2));
-    } finally {
-      setBusy(false);
+      // If an error occurs, re-add the item to the cart
+      cart.value.add(item);
+      cart.notifyListeners();
     }
   }
 

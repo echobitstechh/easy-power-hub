@@ -50,6 +50,6 @@ class OnboardingViewModel extends BaseViewModel {
   }
 
   void finishOnboarding() {
-    _navigationService.clearStackAndShow(Routes.authView);
+    _navigationService.clearStackAndShow(Routes.login);
   }
 }

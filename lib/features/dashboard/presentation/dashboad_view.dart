@@ -1,7 +1,7 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/category_grid.dart';
-import 'package:easy_ph/features/dashboard/presentation/widgets/product_card.dart';
+import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/product_tags_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,7 +16,7 @@ import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/brand_chips.dart';
 import '../../../ui/components/product_search_bar.dart';
-import '../../../ui/components/shimmer_loading.dart';
+import '../../../ui/components/shimmers/shimmer_loading.dart';
 import '../../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
 import 'widgets/ads_carousel.dart';
@@ -46,7 +46,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
         statusBarBrightness: Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: uiMode.value == AppUiModes.dark ? kcDarkGreyColor : kcWhiteColor,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: RefreshIndicator(
           onRefresh: () async {
             await viewModel.getProducts(isRefresh: true);
@@ -125,7 +125,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 else {
                   return InkWell(
                     onTap: () {
-                      locator<NavigationService>().navigateTo(Routes.authView);
+                      locator<NavigationService>().navigateTo(Routes.login);
                     },
                     child: Container(
                       // Adjusted height and padding for consistency
@@ -139,7 +139,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
                       child: Text(
                         "Login",
                         style: TextStyle(
-                          color: uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor,
                           fontWeight: FontWeight.w400,
                           fontSize: 18,
                         ),
@@ -248,7 +247,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
                           style: GoogleFonts.redHatDisplay(
                             textStyle: const TextStyle(
                               fontSize: 12,
-                              color: kcBlackColor,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
