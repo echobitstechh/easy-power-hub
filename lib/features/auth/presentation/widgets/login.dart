@@ -123,6 +123,7 @@ class Login extends StackedView<AuthViewModel> {
                 ),
               ),
               verticalSpaceMedium,
+
               // if (Platform.isAndroid) ...[
               //   verticalSpaceMedium,
               //   const Row(
