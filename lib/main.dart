@@ -7,7 +7,8 @@ import 'package:easy_ph/app/app.dialogs.dart';
 import 'package:easy_ph/app/app.locator.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:uni_links/uni_links.dart';
+//import 'package:uni_links/uni_links.dart';
+import 'package:uni_links5/uni_links.dart';
 
 import 'firebase_options.dart';
 

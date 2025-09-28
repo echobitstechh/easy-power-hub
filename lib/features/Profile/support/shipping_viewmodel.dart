@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:open_mail_app/open_mail_app.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -45,31 +45,34 @@ class SupportViewModel extends BaseViewModel {
 
   // _sendEmail now gets the context from the NavigationService
   Future<void> _sendEmail() async {
-    EmailContent email = EmailContent(
-      to: [
-        "support@easyph.com",
-      ],
-      bcc: ['dev@easyph.com', 'support@echobitstech.com'],
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'support@easyph.com',
+      queryParameters: {
+        'bcc': 'dev@easyph.com,support@echobitstech.com',
+      },
     );
 
-    final context = _navigationService.navigatorKey?.currentContext;
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      _snackBar.showSnackbar(message: 'Could not launch email app.');
+    }
+  }
 
-    if (context != null) {
-      OpenMailAppResult result =
-      await OpenMailApp.composeNewEmailInMailApp(
-          nativePickerTitle: 'Select email app to compose',
-          emailContent: email);
-      if (!result.didOpen && !result.canOpen) {
-        _snackBar.showSnackbar(message: 'Could not launch email app.');
-      } else if (!result.didOpen && result.canOpen) {
-        showDialog(
-          context: context,
-          builder: (_) => MailAppPickerDialog(
-            mailApps: result.options,
-            emailContent: email,
-          ),
-        );
-      }
+  Future<void> _launchFaqs() async {
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'marketing@easypowerhub.com',
+      queryParameters: {
+        'bcc': 'dev@easyph.com,echobitstech@gmail.com',
+      },
+    );
+
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      _snackBar.showSnackbar(message: 'Could not launch email app.');
     }
   }
 
@@ -77,35 +80,35 @@ class SupportViewModel extends BaseViewModel {
   //   await UrlLauncherUtil.launchUrl(Uri.parse(url));
   // }
 
-  Future<void> _launchFaqs() async {
-    EmailContent email = EmailContent(
-      to: [
-        'marketing@easypowerhub.com',
-        'support@echobitstech.com'
-      ],
-      bcc: ['dev@easyph.com', 'echobitstech@gmail.com'],
-    );
-
-    OpenMailAppResult result =
-    await OpenMailApp.composeNewEmailInMailApp(
-        nativePickerTitle: 'Select email app to compose',
-        emailContent: email);
-    if (!result.didOpen && !result.canOpen) {
-      _snackBar.showSnackbar(message: 'Could not launch email app.');
-    } else if (!result.didOpen && result.canOpen) {
-      final context = StackedService.navigatorKey?.currentContext;
-      if (context != null) {
-        showDialog(
-          context: context,
-          builder: (_) => MailAppPickerDialog(
-            mailApps: result.options,
-            emailContent: email,
-          ),
-        );
-      }
-
-    }
-  }
+  // Future<void> _launchFaqs() async {
+  //   EmailContent email = EmailContent(
+  //     to: [
+  //       'marketing@easypowerhub.com',
+  //       'support@echobitstech.com'
+  //     ],
+  //     bcc: ['dev@easyph.com', 'echobitstech@gmail.com'],
+  //   );
+  //
+  //   OpenMailAppResult result =
+  //   await OpenMailApp.composeNewEmailInMailApp(
+  //       nativePickerTitle: 'Select email app to compose',
+  //       emailContent: email);
+  //   if (!result.didOpen && !result.canOpen) {
+  //     _snackBar.showSnackbar(message: 'Could not launch email app.');
+  //   } else if (!result.didOpen && result.canOpen) {
+  //     final context = StackedService.navigatorKey?.currentContext;
+  //     if (context != null) {
+  //       showDialog(
+  //         context: context,
+  //         builder: (_) => MailAppPickerDialog(
+  //           mailApps: result.options,
+  //           emailContent: email,
+  //         ),
+  //       );
+  //     }
+  //
+  //   }
+  // }
 
 
   void _launchDialer(String phoneNumber) async {
