@@ -105,7 +105,7 @@ class EnterEmailView extends StatelessWidget {
                 verticalSpaceMedium,
                 SubmitButton(
                   isLoading: viewModel.isBusy,
-                  label: "Continue",
+                  label: viewModel.codeSent ? "Reset Password" : "Continue",
                   submit: () {
                     if (formKey.currentState!.validate()) {
                       viewModel.codeSent

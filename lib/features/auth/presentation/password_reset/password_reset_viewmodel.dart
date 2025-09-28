@@ -67,27 +67,23 @@ class EnterEmailViewModel extends BaseViewModel {
   }
 
   // --- Core Logic ---
-
   Future<void> sendCode() async {
-    await runBusyFuture(
-      _sendCodeInternal(),
-      busyObject: 'sendCode',
-    );
-  }
-
-  Future<void> _sendCodeInternal() async {
+    setBusy(true);
     try {
       ApiResponse res = await _repo.forgotPassword({"email": emailController.text});
 
-      if (res.statusCode == 201) {
+      if (res.statusCode == 200) {
         _snackBar.showSnackbar(message: "Code sent to ${emailController.text}");
         _codeSent = true;
+        notifyListeners();
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to send code. Please try again.");
       }
     } catch (e) {
       _log.e('Error in sendCode: $e');
       _snackBar.showSnackbar(message: "Unable to send code: $e");
+    } finally {
+      setBusy(false);
     }
   }
 
