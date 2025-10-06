@@ -31,12 +31,18 @@ abstract class IRepository {
 
   Future<ApiResponse> getReviews( String productId);
 
+  Future<ApiResponse> deleteFromFavourites( String favouriteId);
+
+  Future<ApiResponse> getFavourites();
+
 
   Future<ApiResponse> getServices();
 
   Future<ApiResponse> getProfile();
 
   Future<ApiResponse> initTransaction(Map<String, dynamic> req);
+
+  Future<ApiResponse> addToFavourites(Map<String, dynamic> req);
 
   Future<ApiResponse> saveOrder(Map<String, dynamic> req);
 

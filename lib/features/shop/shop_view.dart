@@ -30,7 +30,6 @@ class ShopView extends StackedView<DashboardViewModel> {
       DashboardViewModel viewModel,
       Widget? child,
       ) {
-    // Correctly build slides based on filter
     List<Map<String, String>> slides = [];
     if (filter != null && filter?.image != null) {
       slides = [
@@ -62,7 +61,7 @@ class ShopView extends StackedView<DashboardViewModel> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: RefreshIndicator(
         onRefresh: () async {
           await viewModel.getProducts(isRefresh: true);
@@ -99,7 +98,7 @@ class ShopView extends StackedView<DashboardViewModel> {
                             child: DashboardShimmer(),
                           ),
                         )
-                      else if (viewModel.filteredProductList.isEmpty)
+                      else if (!viewModel.isBusy && viewModel.filteredProductList.isEmpty)
                         SliverFillRemaining(
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -250,6 +249,8 @@ class ShopView extends StackedView<DashboardViewModel> {
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
+    viewModel.filteredProductList = [];
+    viewModel.setBusy(true);
     if (filter != null) {
       viewModel.setSelectedCategory(filter!.id);
     } else {

@@ -76,18 +76,24 @@ class EnterEmailViewModel extends BaseViewModel {
   }
 
   Future<void> _sendCodeInternal() async {
+    setBusy(true);
+    notifyListeners();
     try {
       ApiResponse res = await _repo.forgotPassword({"email": emailController.text});
 
-      if (res.statusCode == 201) {
-        _snackBar.showSnackbar(message: "Code sent to ${emailController.text}");
+      if (res.statusCode == 200) {
+        _snackBar.showSnackbar(message: "Code sent to ${emailController.text}", duration: const Duration(seconds: 2));
         _codeSent = true;
+        notifyListeners();
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to send code. Please try again.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to send code. Please try again.", duration: Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Error in sendCode: $e');
-      _snackBar.showSnackbar(message: "Unable to send code: $e");
+      _snackBar.showSnackbar(message: "Unable to send code: $e", duration: Duration(seconds: 2));
+    }finally{
+      setBusy(false);
+      notifyListeners();
     }
   }
 
@@ -99,6 +105,8 @@ class EnterEmailViewModel extends BaseViewModel {
   }
 
   Future<void> _resetPasswordInternal() async {
+    setBusy(true);
+    notifyListeners();
     try {
       ApiResponse res = await _repo.newPassword({
         "token": codeController.text,
@@ -106,14 +114,17 @@ class EnterEmailViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
-        _snackBar.showSnackbar(message: "Password changed successfully.");
+        _snackBar.showSnackbar(message: "Password changed successfully.", duration: Duration(seconds: 2));
         _navigationService.clearStackAndShow(Routes.login);
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to reset password. Please try again.");
+        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to reset password. Please try again.", duration: Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Error in resetPassword: $e');
-      _snackBar.showSnackbar(message: "Error resetting password: $e");
+      _snackBar.showSnackbar(message: "Error resetting password: $e", duration: Duration(seconds: 2));
+    }finally{
+      setBusy(false);
+      notifyListeners();
     }
   }
 }

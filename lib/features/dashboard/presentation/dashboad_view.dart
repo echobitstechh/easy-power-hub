@@ -1,7 +1,5 @@
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/category_grid.dart';
-import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/product_tags_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +8,8 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
-import '../../../core/data/models/product.dart';
 import '../../../state.dart';
+import '../../../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/brand_chips.dart';
@@ -91,7 +89,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
     );
   }
 
-  // Extracted SliverAppBar for cleaner code
   Widget _buildSliverAppBar(BuildContext context, DashboardViewModel viewModel) {
     return SliverAppBar(
       elevation: 0,
@@ -103,10 +100,6 @@ class DashboardView extends StackedView<DashboardViewModel> {
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Row(
           children: [
-            // const CircleAvatar(
-            //   backgroundImage: AssetImage("assets/images/easy_ph_logo.png"),
-            //   radius: 20,
-            // ),
             Image.asset(
               "assets/images/easy_ph_logo.png",
               height: 40,

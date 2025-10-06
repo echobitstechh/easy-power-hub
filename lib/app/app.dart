@@ -28,6 +28,7 @@ import '../features/auth/presentation/widgets/register.dart';
 import '../features/home/presentation/home_view.dart';
 import '../features/onboarding/presentation/onboarding_view.dart';
 import '../ui/bottom_sheets/address_sheet/add_address_bottom_sheet.dart';
+import '../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
 import '../ui/bottom_sheets/order_status/order_status_timeline.dart';
 import '../ui/bottom_sheets/profile_screen_sheet.dart';
 import '../ui/dialogs/info_alert/phone_input_dialog.dart';
@@ -95,6 +96,7 @@ import '../ui/dialogs/info_alert/phone_input_dialog.dart';
     StackedBottomsheet(classType: ProfileScreenSheet),
     StackedBottomsheet(classType: OrderStatusTimelineSheet),
     StackedBottomsheet(classType: AddAddressBottomSheet),
+    // StackedBottomsheet(classType: FavoritesBottomSheet),
     // @stacked-bottom-sheet
   ],
   dialogs: [

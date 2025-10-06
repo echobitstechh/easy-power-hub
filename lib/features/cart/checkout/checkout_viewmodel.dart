@@ -44,10 +44,12 @@ class CheckoutViewModel extends BaseViewModel {
   bool isShippingLoading = false;
   bool loading = false;
   bool makingDefault = false;
+  bool isPayOnDeliveryDisabled = false;
 
   List<Address> shippingAddresses = [];
   List<DeliveryZone> deliveryZones = [];
   DeliveryZone? selectedDeliveryZone;
+
 
   final houseAddressController = TextEditingController();
   final cityController = TextEditingController();
@@ -63,6 +65,7 @@ class CheckoutViewModel extends BaseViewModel {
     await fetchOnlineCart();
     await getDeliveryZones();
     await getShippings();
+    checkPayOnDeliveryEligibility();
     if (shippingId.isNotEmpty) {
       await calculateOrder();
     }
@@ -302,5 +305,23 @@ class CheckoutViewModel extends BaseViewModel {
         print('calling get shipping after clossing sheet');
         await getShippings();
 
+  }
+
+  void checkPayOnDeliveryEligibility() {
+    bool hasLightingProduct = false;
+    for (final item in cart.value) {
+      if (item.product?.categoryId == 3) {
+        hasLightingProduct = true;
+        break;
+      }
+    }
+
+    isPayOnDeliveryDisabled = hasLightingProduct;
+
+    // If Pay on Delivery is disabled, switch to Paystack
+    if (isPayOnDeliveryDisabled) {
+      updatePaymentMethod('paystack');
+    }
+    notifyListeners();
   }
 }

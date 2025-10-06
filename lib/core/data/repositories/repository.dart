@@ -207,6 +207,37 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> getFavourites() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "favorites",
+    );
+
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> addToFavourites(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "favorites",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> deleteFromFavourites(String favouriteId) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.delete,
+      endpoint: "favorites/$favouriteId",
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> getServices() async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,

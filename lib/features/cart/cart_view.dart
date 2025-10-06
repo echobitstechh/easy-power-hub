@@ -8,6 +8,7 @@ import '../../../app/app.locator.dart';
 import '../../core/data/models/cart_item.dart';
 import '../../core/utils/money_util.dart';
 import '../../state.dart';
+import '../../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
 import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
 import '../../ui/components/empty_state.dart';
@@ -37,6 +38,22 @@ class CartView extends StackedView<CartViewModel> {
             color: kcWhiteColor,
           ),
         ),
+        actions: [
+       IconButton(
+      icon:  Icon(Icons.favorite, color:Colors.red,),
+      onPressed: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          builder: (context) => FractionallySizedBox(
+            heightFactor: 0.9, // 90% screen
+            child: FavoritesBottomSheet(),
+          ),
+        );
+      },
+    )
+        ],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -220,7 +237,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                         item.product?.productName ?? 'Product Name',
                         style: GoogleFonts.bricolageGrotesque(
                           textStyle: TextStyle(
-                            fontSize: 15,
+                            fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -233,7 +250,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.roboto(
                           textStyle: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -241,7 +258,25 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                     ],
                   ),
                 ),
-                _buildQuantityControl(viewModel, item),
+                Column(
+                  children: [
+                    _buildQuantityControl(viewModel, item),
+                    InkWell(
+                      onTap: () {
+                        viewModel.removeItem(item);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(1),
+                        decoration: BoxDecoration(
+                          color: Colors.red[400],
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+
+                    )
+                  ],
+                ),
               ],
             ),
             if (_shouldShowInstallmentOptions(item)) ...[

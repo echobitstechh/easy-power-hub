@@ -55,10 +55,10 @@ class TagChip extends StatelessWidget {
             Expanded( // Use Expanded to allow the text to fill remaining space
               child: Text(
                 tag.name,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 8,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? kcSecondaryColor : Theme.of(context).textTheme.bodyLarge?.color,
                 ),

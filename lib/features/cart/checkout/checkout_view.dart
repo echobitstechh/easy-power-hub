@@ -124,6 +124,8 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                       CheckoutPaymentOptions(
                         selectedMethod: viewModel.paymentMethod,
                         onMethodChanged: viewModel.updatePaymentMethod,
+                        isPayOnDeliveryDisabled: viewModel.isPayOnDeliveryDisabled,
+                        disabledMessage: "Pay on delivery is not available for Lighthouse products.",
                       ),
                     ],
                   ),

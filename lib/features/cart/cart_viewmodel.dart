@@ -6,6 +6,7 @@ import 'package:stacked_services/stacked_services.dart';
 import '../../app/app.locator.dart';
 import '../../app/app.logger.dart';
 import '../../core/data/models/cart_item.dart';
+import '../../core/data/models/favourite.dart';
 import '../../core/data/models/product.dart';
 import '../../core/data/repositories/repository.dart';
 import '../../core/utils/local_store_dir.dart';
@@ -24,6 +25,13 @@ class CartViewModel extends BaseViewModel {
   int _cartFinalTotal = 0;
   bool _isLoading = false;
   bool _animationShown = false;
+
+  List<FavoriteItem> _favorites = [];
+  List<FavoriteItem> get favorites => _favorites;
+
+  bool isProductFavorite(String productId) {
+    return _favorites.any((f) => f.product.id == productId);
+  }
 
   bool shouldShowAnimation() {
     return !_animationShown;
@@ -301,4 +309,6 @@ class CartViewModel extends BaseViewModel {
       setBusy(false);
     }
   }
+
+
 }

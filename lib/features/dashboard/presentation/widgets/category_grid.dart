@@ -37,14 +37,6 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
               filter: category,
               isSpecialCategory: isSpecial,
             );
-            // Navigator.of(context).push(
-            //   MaterialPageRoute(
-            //     builder: (c) => ShopView(
-            //       filter: category,
-            //       isSpecialCategory: isSpecial,
-            //     ),
-            //   ),
-            // );
           },
           child: actionContainer(imagePath, key.toUpperCase(), context),
         ),

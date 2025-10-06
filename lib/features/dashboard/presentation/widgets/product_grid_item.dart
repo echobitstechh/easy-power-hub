@@ -4,7 +4,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/data/models/product.dart';
 import '../../../../core/utils/money_util.dart';
@@ -136,7 +138,10 @@ class ProductGridItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              _buildCartButton(),
+              if ((product.availability ?? 0) < 1)
+                _buildWhatsAppButton()
+              else
+                _buildCartButton(),
             ],
           ),
           Row(
@@ -180,6 +185,25 @@ class ProductGridItem extends StatelessWidget {
         Icons.shopping_cart_outlined,
         color: kcSecondaryColor,
         size: 20,
+      ),
+    );
+  }
+
+  Widget _buildWhatsAppButton() {
+    return InkWell(
+      onTap: () async {
+        final phoneNumber = '+2349040811471';
+        final message = "Hello, I'd like to inquire about the product: ${product.productName}";
+        final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
+        if (await canLaunchUrl(Uri.parse(url))) {
+          await launchUrl(Uri.parse(url));
+        } else {
+
+        }
+      },
+      child: SvgPicture.asset(
+        'assets/icons/whatsapp.svg',
+        height: 20, // Icon size
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:easy_ph/features/Profile/profile_viewModel.dart';
+import 'package:easy_ph/features/Profile/widgets/company_address_view.dart';
 import 'package:easy_ph/features/Profile/widgets/profile_picture_section.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -33,6 +34,9 @@ class ProfileView extends StackedView<ProfileViewModel> {
           ),
           SliverToBoxAdapter(
             child: _buildSignOutAndDeleteSection(viewModel),
+          ),
+          SliverToBoxAdapter( // Add the new section here
+            child: CompanyAddressSection(),
           ),
         ],
       ),

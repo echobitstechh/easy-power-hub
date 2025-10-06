@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/app.locator.dart';
 import '../../../../core/data/models/cart_item.dart';
@@ -75,18 +77,28 @@ class _ProductCardState extends State<ProductCard> {
 
   @override
   Widget build(BuildContext context) {
+    final isFavorite =  widget.dashboardViewModel.isProductFavorite(widget.product.id!);
     return Scaffold(
       appBar: AppBar(
+
         centerTitle: true,
         title: const Text("Product Details"),
         toolbarHeight: 100,
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.share, size: 25),
-        //     onPressed: ()  {
-        //     },
-        //   ),
-        // ],
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.red : Colors.grey,
+            ),
+            onPressed: () {
+              widget.dashboardViewModel.toggleFavorite(widget.product);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.share, size: 25),
+            onPressed: () {},
+          ),
+        ],
       ),
       body: ListView(
         children: [
@@ -186,12 +198,14 @@ class _ProductCardState extends State<ProductCard> {
                           : ValueListenableBuilder<List<CartItem>>(
                           valueListenable: cart,
                           builder: (context, value, child) {
-                            bool isInCart = value.any((item) =>
-                            item.product?.id == widget.product.id);
-                            CartItem? cartItem = isInCart
-                                ? value.firstWhere((item) =>
-                            item.product?.id == widget.product.id)
-                                : null;
+                            bool isInCart = value.any((item) => item.product?.id == widget.product.id);
+                            CartItem? cartItem = isInCart ? value.firstWhere((item) => item.product?.id == widget.product.id) : null;
+                            final bool isAvailable = (widget.product.availability ?? 0) >= 1;
+
+                            if (!isAvailable) {
+                              // product not available → show WhatsApp button
+                              return _buildWhatsAppContactButton(widget.product);
+                            }
 
                             return isInCart && cartItem != null
                                 ? Container(
@@ -559,6 +573,50 @@ class _ProductCardState extends State<ProductCard> {
             color: Colors.grey,
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildWhatsAppContactButton(Product product) {
+    return InkWell(
+      onTap: () async {
+        final phoneNumber = '+2349040811471';
+        final message = "Hello, I'd like to inquire about the product: ${product.productName}";
+        final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
+        if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url));
+        } else {
+
+        }
+      },
+      child: Container(
+        height: 50,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.green.shade600, // Use a distinct WhatsApp color
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/whatsapp.svg',
+                height: 20,
+                color: Colors.white,
+              ),
+              const SizedBox(width: 5),
+              const Text(
+                "Inquire/Contact us",
+                style: TextStyle(
+                  color: kcWhiteColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

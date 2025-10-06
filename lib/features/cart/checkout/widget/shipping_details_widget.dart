@@ -33,7 +33,7 @@ class ShippingDetailsWidget extends StatelessWidget {
                 ),
               ],
             ),
-            verticalSpaceSmall,
+            verticalSpaceTiny,
             viewModel.isShippingLoading
                 ? const Center(child: CircularProgressIndicator())
                 : viewModel.shippingAddresses.isEmpty
@@ -41,6 +41,8 @@ class ShippingDetailsWidget extends StatelessWidget {
                 : Column(
               children: viewModel.shippingAddresses.map((address) {
                 return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  visualDensity: const VisualDensity(horizontal: 0, vertical: -4),
                   title: Text(address.address ?? 'No address'),
                   subtitle: Text('${address.city ?? ''}, ${address.state ?? ''}'),
                   trailing: Radio(

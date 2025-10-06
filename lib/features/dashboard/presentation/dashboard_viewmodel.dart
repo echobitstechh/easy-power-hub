@@ -5,6 +5,7 @@ import '../../../app/app.locator.dart';
 import '../../../app/app.logger.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
+import '../../../core/data/models/favourite.dart';
 import '../../../core/data/models/product.dart';
 import '../../../core/data/models/tags.dart';
 import '../../../core/data/repositories/repository.dart';
@@ -23,6 +24,14 @@ class DashboardViewModel extends BaseViewModel {
   List<Product> filteredProductList = [];
   List<Category> categories = [];
   List<Category> filteredCategories = [];
+  List<FavoriteItem> _favorites = [];
+  List<FavoriteItem> get favorites => _favorites;
+
+  bool isProductFavorite(String productId) {
+    return _favorites.any((f) => f.product.id == productId);
+  }
+
+
 
   bool _isLoadingMore = false;
   bool get isLoadingMore => _isLoadingMore;
@@ -72,6 +81,7 @@ class DashboardViewModel extends BaseViewModel {
     await runBusyFuture(_loadData());
     if (userLoggedIn.value == true) {
       initCart();
+      fetchFavorites();
     }
   }
 
@@ -149,6 +159,15 @@ class DashboardViewModel extends BaseViewModel {
           }
         }
 
+        productList.sort((a, b) {
+          final aAvailable = (a.availability ?? 0) >= 1;
+          final bAvailable = (b.availability ?? 0) >= 1;
+
+          if (aAvailable && !bAvailable) return -1;
+          if (!aAvailable && bAvailable) return 1;
+          return 0; // Maintain original order if availability is the same
+        });
+
         if (isRefresh) {
           brands = (res.data["brands"] as List).map((b) => b.toString()).toList();
         }
@@ -172,7 +191,9 @@ class DashboardViewModel extends BaseViewModel {
           duration: Duration(seconds: 3));
     } finally {
       _isLoadingMore = false;
+
       notifyListeners();
+      // setBusy(false);
     }
   }
 
@@ -203,7 +224,6 @@ class DashboardViewModel extends BaseViewModel {
     getProducts(isRefresh: true);
     print('tried to reset filters');
   }
-
 
   Future<void> getCategories() async {
     try {
@@ -258,6 +278,7 @@ class DashboardViewModel extends BaseViewModel {
       _hasTagsError = true;
     } finally {
       _isLoadingTags = false;
+      setBusy(false);
       notifyListeners();
     }
   }
@@ -350,5 +371,43 @@ class DashboardViewModel extends BaseViewModel {
       print("Failed to load reviews: $e");
       return [];
     }
+  }
+
+  Future<void> toggleFavorite(Product product) async {
+    final isFavorite = isProductFavorite(product.id!);
+
+    if (isFavorite) {
+      final favoriteItem = _favorites.firstWhere((f) => f.product.id == product.id);
+      await removeFavorite(favoriteItem.id);
+    } else {
+      await addToFavorites(product.id!);
+    }
+  }
+
+  Future<void> fetchFavorites() async {
+    print('fetch favs');
+    setBusy(true);
+    try {
+      final res = await _repo.getFavourites();
+      _favorites = (res as List).map((e) => FavoriteItem.fromJson(e)).toList();
+    } finally {
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+
+  Future<void> addToFavorites(String productId) async {
+    final response = await _repo.addToFavourites({"productId": productId});
+    if (response.statusCode == 201) {
+      _snackBar.showSnackbar(message: 'Product added to favorites', duration: Duration(seconds: 2));
+      await fetchFavorites();
+    }
+
+  }
+
+  Future<void> removeFavorite(String favoriteId) async {
+    await _repo.deleteFromFavourites(favoriteId);
+    _favorites.removeWhere((f) => f.id == favoriteId);
+    notifyListeners();
   }
 }

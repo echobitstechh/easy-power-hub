@@ -52,7 +52,7 @@ class ProductTagsSection extends StatelessWidget {
     }
 
     // Define the dimensions of a single tag chip
-    const double tagChipHeight = 60.0; // Adjusted for a cleaner look
+    const double tagChipHeight = 70.0; // Adjusted for a cleaner look
     const double tagChipWidth = 70.0;
     const double spacing = 8.0;
 

@@ -216,18 +216,6 @@ class ProfileViewModel extends BaseViewModel {
     }
   }
 
-  // UI Toggles & Actions
-  void toggleUiMode() async {
-    final currentMode = uiMode.value;
-    if (currentMode == AppUiModes.light) {
-      uiMode.value = AppUiModes.dark;
-      await _localStorage.save(LocalStorageDir.uiMode, "dark");
-    } else {
-      uiMode.value = AppUiModes.light;
-      await _localStorage.save(LocalStorageDir.uiMode, "light");
-    }
-  }
-
   Future<void> onSignOut() async {
     final res = await _dialogService.showConfirmationDialog(
       title: "Are you sure?",
