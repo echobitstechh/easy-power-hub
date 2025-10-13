@@ -1,20 +1,15 @@
-import 'dart:convert';
-
 import 'package:easyph/app/app.locator.dart';
 import 'package:easyph/app/app.logger.dart';
 import 'package:easyph/core/data/models/cart_item.dart';
 import 'package:easyph/core/data/models/product.dart';
-import 'package:easyph/core/data/models/raffle_cart_item.dart';
 import 'package:easyph/core/data/repositories/repository.dart';
-import 'package:easyph/core/network/api_response.dart';
 import 'package:easyph/core/utils/local_store_dir.dart';
 import 'package:easyph/core/utils/local_stotage.dart';
 import 'package:easyph/state.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../core/data/models/category.dart';
-import '../../../core/data/models/tags.dart';
+import '../../../core/network/api_response.dart';
 
 class DashboardViewModel extends BaseViewModel {
   final repo = locator<Repository>();
@@ -37,46 +32,14 @@ class DashboardViewModel extends BaseViewModel {
   bool modalShown = false;
   bool appBarLoading = false;
   bool shouldShowShowcase = true;
-  bool get isTagFilterActive => _selectedTag != null;
-
-  List<Tag> _tags = [];
-  Tag? _selectedTag;
-  bool _isLoadingTags = false;
-  bool _hasTagsError = false;
-  String? _tagsError;
 
   int currentPage = 1;
   bool isLastPage = false;
   bool isLoadingMore = false;
   final int pageLimit = 10;
-
-  List<Tag> get tags => _tags;
-  List<String> get productTags => _tags.map((tag) => tag.name).toList();
-  Tag? get selectedTag => _selectedTag;
-  String? get selectedTagName => _selectedTag?.name;
-  bool get isLoadingTags => _isLoadingTags;
-  bool get hasTagsError => _hasTagsError;
-  String? get tagsError => _tagsError;
-
-
   final snackBar = locator<SnackbarService>();
 
   Set<String> loadingItems = {};
-
-  Map<String, dynamic> getCurrentFilters() {
-    return {
-      'category': selectedId != allCategoriesId ? selectedId : null,
-      'brand': selectedBrand.isNotEmpty ? selectedBrand : null,
-      'tag': _selectedTag?.name,
-      'hasFilters': selectedId != allCategoriesId || selectedBrand.isNotEmpty || _selectedTag != null,
-    };
-  }
-
-  bool showcaseShown = false;
-  void setShowcaseShown(bool value) {
-    showcaseShown = value;
-    notifyListeners();
-  }
 
   bool isNewProduct(String createdAt) {
     final productDate = DateTime.parse(createdAt);
@@ -93,7 +56,8 @@ class DashboardViewModel extends BaseViewModel {
   Future<void> init() async {
     setBusy(true);
     notifyListeners();
-    //await loadProduct();
+    await getProducts();
+    await getCategories();
     if (userLoggedIn.value == true) {
       initCart();
     }
@@ -129,4 +93,111 @@ class DashboardViewModel extends BaseViewModel {
     print('onEnd');
     notifyListeners();
   }
+
+  Future<void> getProducts({bool isRefresh = false}) async {
+    if (isLoadingMore && !isRefresh) return;
+    if (isLastPage && !isRefresh) return;
+
+    try {
+      if (isRefresh) {
+        productList.clear();
+        currentPage = 1;
+        isLastPage = false;
+      }
+
+      isLoadingMore = true;
+      notifyListeners();
+
+      final res = await repo.getProducts(
+        page: currentPage,
+        limit: pageLimit,
+      );
+
+      if (res.statusCode == 200) {
+        final newProducts = (res.data["products"] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active')
+            .toList();
+
+        final totalPages = res.data["pagination"]["totalPages"];
+
+        final existingIds = productList.map((p) => p.id!).toSet();
+        for (final newProduct in newProducts) {
+          if (newProduct.id != null && !existingIds.contains(newProduct.id)) {
+            productList.add(newProduct);
+          }
+        }
+
+        final uniqueBrands = <String>{};
+        for (final product in productList) {
+          final b = product.brandName;
+          if (b != null && b.isNotEmpty) uniqueBrands.add(b);
+        }
+        brands = uniqueBrands.toList()..sort();
+
+        if (currentPage >= totalPages) {
+          isLastPage = true;
+        } else {
+          currentPage++;
+        }
+        if (selectedBrand.isNotEmpty) {
+          filteredProductList = productList
+              .where((product) => product.brandName?.toLowerCase() == selectedBrand.toLowerCase())
+              .toList();
+        } else {
+          filteredProductList = List.from(productList);
+        }
+        notifyListeners();
+
+      } else {
+        log.e("API Error: ${res.data["message"]}");
+      }
+    } catch (e) {
+      log.e("Error fetching products: $e");
+    } finally {
+      isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  void filterProductsByBrand(String brand) {
+    if (brand == "All" || brand.trim().isEmpty) {
+      selectedBrand = '';
+      filteredProductList = List.from(productList);
+    } else {
+      selectedBrand = brand;
+      filteredProductList = productList
+          .where((product) => product.brandName?.toLowerCase() == brand.toLowerCase())
+          .toList();
+    }
+    notifyListeners();
+  }
+
+  Future<void> getCategories() async {
+    setBusy(true);
+    try {
+      ApiResponse res = await repo.getCategories();
+      if (res.statusCode == 200 && res.data != null && res.data["categories"] != null) {
+        categories = (res.data["categories"] as List)
+            .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
+            .where((category) => category.status == CategoryStatus.active)
+            .toList();
+        List<Map<String, dynamic>> storedCategories =
+        categories.map((e) => e.toJson()).toList();
+        // await locator<LocalStorage>().save(LocalStorageDir.donationsCategories, storedCategories);
+        filteredCategories = [
+          Category(id: 0, name: 'All', status: CategoryStatus.active),
+          ...categories,
+        ];
+      }
+    } catch (e) {
+      log.e("Error fetching categories: $e");
+    } finally {
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+
+
+
 }

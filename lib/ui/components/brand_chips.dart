@@ -6,7 +6,7 @@ import '../../state.dart';
 import '../common/app_colors.dart';
 import '../views/dashboard/dashboard_viewmodel.dart';
 
-Widget buildBrandChip(String brand, DashboardViewModel viewModel) {
+Widget buildBrandChip(String brand, dynamic viewModel ) {
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 5.0),
     child: ChoiceChip(
@@ -18,7 +18,7 @@ Widget buildBrandChip(String brand, DashboardViewModel viewModel) {
       ),
       selected: brand == viewModel.selectedBrand,
       onSelected: (bool selected) {
-       // viewModel.setSelectedBrand(selected ? brand : '');
+        viewModel.filterProductsByBrand(selected ? brand : '');
       },
       selectedColor: kcSecondaryColor,
       backgroundColor: uiMode.value == AppUiModes.dark
