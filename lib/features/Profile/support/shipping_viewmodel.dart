@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
-import 'package:open_mail_app/open_mail_app.dart';
+import 'package:open_mail/open_mail.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
-import '../../../core/utils/url_launcher_util.dart';
 
 class SupportViewModel extends BaseViewModel {
   final _snackBar = locator<SnackbarService>();
@@ -43,70 +42,42 @@ class SupportViewModel extends BaseViewModel {
     ];
   }
 
-  // _sendEmail now gets the context from the NavigationService
   Future<void> _sendEmail() async {
-    EmailContent email = EmailContent(
-      to: [
-        "support@easyph.com",
-      ],
-      bcc: ['dev@easyph.com', 'support@echobitstech.com'],
-    );
-
     final context = _navigationService.navigatorKey?.currentContext;
 
-    if (context != null) {
-      OpenMailAppResult result =
-      await OpenMailApp.composeNewEmailInMailApp(
-          nativePickerTitle: 'Select email app to compose',
-          emailContent: email);
-      if (!result.didOpen && !result.canOpen) {
-        _snackBar.showSnackbar(message: 'Could not launch email app.');
-      } else if (!result.didOpen && result.canOpen) {
-        showDialog(
-          context: context,
-          builder: (_) => MailAppPickerDialog(
-            mailApps: result.options,
-            emailContent: email,
-          ),
-        );
+    if (context == null) {
+      _snackBar.showSnackbar(message: 'Unable to get current context.');
+      return;
+    }
+
+    try {
+      // Compose email content
+      final emailData = EmailContent(
+        to: ['support@easyph.com'],
+        bcc: ['dev@easyph.com', 'support@echobitstech.com'],
+        subject: 'Support Request',
+        body: 'Hi, I need help with...',
+      );
+
+      // Try to open directly
+      final emailResult = await OpenMail.composeNewEmailInMailApp(
+        emailContent: emailData,
+        nativePickerTitle: 'Select an email app',
+      );
+
+      if (!emailResult.didOpen && !emailResult.canOpen) {
+        _snackBar.showSnackbar(message: 'No mail app found on device.');
+      }else{
+        _snackBar.showSnackbar(message: 'Email sent successfully.');
       }
+    } catch (e) {
+      _snackBar.showSnackbar(message: 'Error opening mail app: $e');
     }
   }
 
   // void _launchFaqs(String url) async {
   //   await UrlLauncherUtil.launchUrl(Uri.parse(url));
   // }
-
-  Future<void> _launchFaqs() async {
-    EmailContent email = EmailContent(
-      to: [
-        'marketing@easypowerhub.com',
-        'support@echobitstech.com'
-      ],
-      bcc: ['dev@easyph.com', 'echobitstech@gmail.com'],
-    );
-
-    OpenMailAppResult result =
-    await OpenMailApp.composeNewEmailInMailApp(
-        nativePickerTitle: 'Select email app to compose',
-        emailContent: email);
-    if (!result.didOpen && !result.canOpen) {
-      _snackBar.showSnackbar(message: 'Could not launch email app.');
-    } else if (!result.didOpen && result.canOpen) {
-      final context = StackedService.navigatorKey?.currentContext;
-      if (context != null) {
-        showDialog(
-          context: context,
-          builder: (_) => MailAppPickerDialog(
-            mailApps: result.options,
-            emailContent: email,
-          ),
-        );
-      }
-
-    }
-  }
-
 
   void _launchDialer(String phoneNumber) async {
       final res = await FlutterPhoneDirectCaller.callNumber(phoneNumber);
