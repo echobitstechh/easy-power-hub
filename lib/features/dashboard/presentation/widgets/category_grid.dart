@@ -38,7 +38,11 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
               isSpecialCategory: isSpecial,
             );
           },
-          child: actionContainer(imagePath, key.toUpperCase(), context),
+          child: actionContainer(
+            imagePath, 
+            key == 'light' ? "LIGHTING'S AND FITTINGS" : key.toUpperCase(),
+            context
+          ),
         ),
       );
     }
@@ -90,7 +94,11 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
           },
           child: SizedBox(
             height: 50, //
-            child: actionContainer(imagePath, key, context),
+            child: actionContainer(
+              imagePath,
+              key == 'light' ? "LIGHTING'S AND FITTINGS" : key,
+              context
+            ),
           ),
         ),
       ));
