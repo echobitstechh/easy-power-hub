@@ -40,7 +40,7 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
           },
           child: actionContainer(
             imagePath, 
-            key == 'light' ? "LIGHTING'S AND FITTINGS" : key.toUpperCase(),
+            key == 'light' ? "LIGHTING AND FITTINGS" : key.toUpperCase(),
             context
           ),
         ),
@@ -96,7 +96,7 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
             height: 50, //
             child: actionContainer(
               imagePath,
-              key == 'light' ? "LIGHTING'S AND FITTINGS" : key,
+              key == 'light' ? "LIGHTING AND FITTINGS" : key,
               context
             ),
           ),

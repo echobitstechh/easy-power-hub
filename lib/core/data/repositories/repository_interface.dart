@@ -25,6 +25,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getProducts({required int page, required int limit});
 
+  Future<ApiResponse> searchProducts({required int page, required int limit, required String query});
+
   Future<ApiResponse> getProductTags();
 
   Future<ApiResponse> getProductsByTag({required String tagId, int page = 1, int limit = 10});

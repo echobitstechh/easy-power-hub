@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../core/data/models/product.dart';
@@ -22,7 +23,9 @@ class _SearchScreenState extends State<SearchScreen> {
   final FocusNode _focusNode = FocusNode();
   List<Product> _searchResults = [];
   bool _isSearching = false;
+  bool _isLoading = false;
   String _searchQuery = '';
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -36,6 +39,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     _focusNode.dispose();
@@ -43,22 +47,37 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onSearchChanged() {
+    final query = _searchController.text.trim();
+    
     setState(() {
-      _searchQuery = _searchController.text.toLowerCase().trim();
+      _searchQuery = query.toLowerCase();
+      
       if (_searchQuery.isEmpty) {
         _searchResults = [];
         _isSearching = false;
+        _isLoading = false;
+        _debounceTimer?.cancel();
       } else {
         _isSearching = true;
-        _searchResults = widget.viewModel.filteredProductList.where((product) {
-          final productName = product.productName?.toLowerCase() ?? '';
-          final brandName = product.brandName?.toLowerCase() ?? '';
-          
-          return productName.contains(_searchQuery) ||
-                 brandName.contains(_searchQuery);
-        }).toList();
+        _isLoading = true;
+        _debounceTimer?.cancel();
+
+        _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+          _performSearch(query);
+        });
       }
     });
+  }
+
+  Future<void> _performSearch(String query) async {
+    final results = await widget.viewModel.searchProducts(query);
+    
+    if (_searchController.text.trim() == query) {
+      setState(() {
+        _searchResults = results;
+        _isLoading = false;
+      });
+    }
   }
 
   void _clearSearch() {
@@ -171,6 +190,10 @@ class _SearchScreenState extends State<SearchScreen> {
       return _buildEmptyState(isDarkMode);
     }
 
+    if (_isLoading) {
+      return _buildSearchShimmer(isDarkMode);
+    }
+
     if (_isSearching && _searchResults.isEmpty) {
       return _buildNoResults(isDarkMode);
     }
@@ -199,7 +222,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Find products by name or brand',
+            'Find products by name, brand or category',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[500],
@@ -387,6 +410,30 @@ class _SearchScreenState extends State<SearchScreen> {
                                   color: Colors.grey[600],
                                 ),
                               ),
+                            const SizedBox(height: 4),
+                            if (product.tags != null && product.tags!.isNotEmpty)
+                              Wrap(
+                                spacing: 4,
+                                runSpacing: 4,
+                                children: product.tags!.take(2).map((tag) {
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isDarkMode 
+                                          ? Colors.grey[700] 
+                                          : Colors.grey[200],
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      tag.name,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: isDarkMode ? Colors.grey[300] : Colors.grey[700],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             const SizedBox(height: 6),
                             Row(
                               children: [
@@ -439,4 +486,112 @@ class _SearchScreenState extends State<SearchScreen> {
       ],
     );
   }
+
+  Widget _buildSearchShimmer(bool isDarkMode) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      itemCount: 5, // Show 5 shimmer items
+      itemBuilder: (context, index) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDarkMode ? Colors.grey[850] : kcWhiteColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
+              width: 1,
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image shimmer
+              Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: _shimmerEffect(isDarkMode),
+              ),
+              const SizedBox(width: 12),
+              // Text shimmers
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Product name shimmer
+                    Container(
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: _shimmerEffect(isDarkMode),
+                    ),
+                    const SizedBox(height: 8),
+                    // Brand name shimmer
+                    Container(
+                      height: 12,
+                      width: 100,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: _shimmerEffect(isDarkMode),
+                    ),
+                    const SizedBox(height: 8),
+                    // Price shimmer
+                    Container(
+                      height: 14,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: _shimmerEffect(isDarkMode),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _shimmerEffect(bool isDarkMode) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.3, end: 1.0),
+      duration: const Duration(milliseconds: 1000),
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Colors.transparent,
+                  (isDarkMode ? Colors.grey[700]! : Colors.grey[100]!)
+                      .withOpacity(0.5),
+                  Colors.transparent,
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
+          ),
+        );
+      },
+      onEnd: () {
+        // Restart animation
+        setState(() {});
+      },
+    );
+  }
+
 }
