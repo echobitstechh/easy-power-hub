@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../ui/common/app_colors.dart';
 
-class SearchShimmer extends StatefulWidget {
+class SearchShimmer extends StatelessWidget {
   final bool isDarkMode;
 
   const SearchShimmer({
@@ -9,11 +9,6 @@ class SearchShimmer extends StatefulWidget {
     required this.isDarkMode,
   }) : super(key: key);
 
-  @override
-  State<SearchShimmer> createState() => _SearchShimmerState();
-}
-
-class _SearchShimmerState extends State<SearchShimmer> {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -24,10 +19,10 @@ class _SearchShimmerState extends State<SearchShimmer> {
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: widget.isDarkMode ? Colors.grey[850] : kcWhiteColor,
+            color: isDarkMode ? Colors.grey[850] : kcWhiteColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: widget.isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
+              color: isDarkMode ? Colors.grey[700]! : Colors.grey[200]!,
               width: 1,
             ),
           ),
@@ -39,10 +34,10 @@ class _SearchShimmerState extends State<SearchShimmer> {
                 width: 70,
                 height: 70,
                 decoration: BoxDecoration(
-                  color: widget.isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                  color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: _ShimmerEffect(isDarkMode: widget.isDarkMode),
+                child: _ShimmerEffect(isDarkMode: isDarkMode),
               ),
               const SizedBox(width: 12),
               // Text shimmers
@@ -54,10 +49,10 @@ class _SearchShimmerState extends State<SearchShimmer> {
                     Container(
                       height: 16,
                       decoration: BoxDecoration(
-                        color: widget.isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: _ShimmerEffect(isDarkMode: widget.isDarkMode),
+                      child: _ShimmerEffect(isDarkMode: isDarkMode),
                     ),
                     const SizedBox(height: 8),
                     // Brand name shimmer
@@ -65,10 +60,10 @@ class _SearchShimmerState extends State<SearchShimmer> {
                       height: 12,
                       width: 100,
                       decoration: BoxDecoration(
-                        color: widget.isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: _ShimmerEffect(isDarkMode: widget.isDarkMode),
+                      child: _ShimmerEffect(isDarkMode: isDarkMode),
                     ),
                     const SizedBox(height: 8),
                     // Price shimmer
@@ -76,10 +71,10 @@ class _SearchShimmerState extends State<SearchShimmer> {
                       height: 14,
                       width: 80,
                       decoration: BoxDecoration(
-                        color: widget.isDarkMode ? Colors.grey[800] : Colors.grey[300],
+                        color: isDarkMode ? Colors.grey[800] : Colors.grey[300],
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: _ShimmerEffect(isDarkMode: widget.isDarkMode),
+                      child: _ShimmerEffect(isDarkMode: isDarkMode),
                     ),
                   ],
                 ),
@@ -92,19 +87,15 @@ class _SearchShimmerState extends State<SearchShimmer> {
   }
 }
 
-class _ShimmerEffect extends StatefulWidget {
+class _ShimmerEffect extends StatelessWidget {
   final bool isDarkMode;
 
   const _ShimmerEffect({required this.isDarkMode});
 
   @override
-  State<_ShimmerEffect> createState() => _ShimmerEffectState();
-}
-
-class _ShimmerEffectState extends State<_ShimmerEffect> {
-  @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
+      key: ValueKey(DateTime.now().millisecondsSinceEpoch),
       tween: Tween(begin: 0.3, end: 1.0),
       duration: const Duration(milliseconds: 1000),
       builder: (context, value, child) {
@@ -117,7 +108,7 @@ class _ShimmerEffectState extends State<_ShimmerEffect> {
                 end: Alignment.centerRight,
                 colors: [
                   Colors.transparent,
-                  (widget.isDarkMode ? Colors.grey[700]! : Colors.grey[100]!)
+                  (isDarkMode ? Colors.grey[700]! : Colors.grey[100]!)
                       .withOpacity(0.5),
                   Colors.transparent,
                 ],
@@ -128,9 +119,7 @@ class _ShimmerEffectState extends State<_ShimmerEffect> {
         );
       },
       onEnd: () {
-        if (mounted) {
-          setState(() {});
-        }
+        // Animation will restart automatically due to key change
       },
     );
   }
