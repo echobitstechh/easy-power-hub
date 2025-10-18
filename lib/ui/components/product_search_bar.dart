@@ -1,11 +1,6 @@
-
 import 'package:flutter/material.dart';
-import '../../core/data/models/product.dart';
 import '../../features/dashboard/presentation/dashboard_viewmodel.dart';
-import '../../features/dashboard/presentation/product_details/product_card.dart';
-import '../../features/dashboard/presentation/search_screen.dart';
-import '../../state.dart';
-import '../common/app_colors.dart';
+import '../../features/dashboard/presentation/product-search/search_view.dart';
 
 
 class ProductSearchBar extends StatelessWidget {
@@ -23,7 +18,7 @@ class ProductSearchBar extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => SearchScreen(viewModel: viewModel),
+              builder: (context) => const SearchScreen(), // Remove viewModel parameter
             ),
           );
         },
@@ -58,5 +53,4 @@ class ProductSearchBar extends StatelessWidget {
       ),
     );
   }
-
 }
