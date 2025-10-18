@@ -237,7 +237,7 @@ class _ProductCardState extends State<ProductCard> {
                                         MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            "Goto Cart",
+                                            "Go to Cart",
                                             style: TextStyle(
                                                 color: kcBlackColor,
                                                 fontWeight: FontWeight.w700),

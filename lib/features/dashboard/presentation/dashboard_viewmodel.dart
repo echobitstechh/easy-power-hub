@@ -26,6 +26,11 @@ class DashboardViewModel extends BaseViewModel {
   List<Category> filteredCategories = [];
   List<FavoriteItem> _favorites = [];
   List<FavoriteItem> get favorites => _favorites;
+  List<Product> searchResults = [];
+  bool isSearching = false;
+
+  bool isLoadingSearch = false;
+  String searchQuery = '';
 
   bool isProductFavorite(String productId) {
     return _favorites.any((f) => f.product.id == productId);
@@ -197,6 +202,97 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
+  Future<List<Product>> searchProducts(String query) async {
+    if (query.trim().isEmpty) {
+      return [];
+    }
+
+    try {
+      final res = await _repo.searchProducts(query: query);
+
+      if (res.statusCode == 200 && res.data != null) {
+        final products = (res.data["products"] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active')
+            .toList();
+
+        products.sort((a, b) {
+          final aAvailable = (a.availability ?? 0) >= 1;
+          final bAvailable = (b.availability ?? 0) >= 1;
+          if (aAvailable && !bAvailable) return -1;
+          if (!aAvailable && bAvailable) return 1;
+          return 0;
+        });
+
+        return products;
+      } else {
+        _log.e("Search API Error: ${res.data?["message"] ?? 'Unknown error'}");
+        return [];
+      }
+    } catch (e) {
+      _log.e("Error searching products: $e");
+      return [];
+    }
+  }
+
+  Future<void> performSearch(String query) async {
+    searchQuery = query.trim();
+
+    if (searchQuery.isEmpty) {
+      searchResults = [];
+      isSearching = false;
+      isLoadingSearch = false;
+      notifyListeners();
+      return;
+    }
+
+    isSearching = true;
+    isLoadingSearch = true;
+    notifyListeners();
+
+    try {
+      final res = await _repo.searchProducts(query: searchQuery);
+
+      if (res.statusCode == 200 && res.data != null) {
+        searchResults = (res.data["products"] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((product) => product.status?.toLowerCase() == 'active')
+            .toList();
+
+        // Sort by availability (in stock first)
+        searchResults.sort((a, b) {
+          final aAvailable = (a.availability ?? 0) >= 1;
+          final bAvailable = (b.availability ?? 0) >= 1;
+          if (aAvailable && !bAvailable) return -1;
+          if (!aAvailable && bAvailable) return 1;
+          return 0;
+        });
+      } else {
+        _log.e("Search API Error: ${res.data?["message"] ?? 'Unknown error'}");
+        searchResults = [];
+      }
+    } catch (e) {
+      _log.e("Error searching products: $e");
+      searchResults = [];
+      _snackBar.showSnackbar(
+        message: "Search failed. Please try again.",
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      isLoadingSearch = false;
+      notifyListeners();
+    }
+  }
+
+  // Clear search
+  void clearSearch() {
+    searchQuery = '';
+    searchResults = [];
+    isSearching = false;
+    isLoadingSearch = false;
+    notifyListeners();
+  }
+  
   void setSelectedTag(Tag? tag) {
     _selectedTag = tag;
     _selectedBrand = '';

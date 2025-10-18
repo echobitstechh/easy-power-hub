@@ -166,6 +166,27 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> searchProducts({
+    required String query,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    Map<String, dynamic> params = {
+      "page": page,
+      "limit": limit,
+      "search": query,
+    };
+
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "products",
+      reqParams: params,
+    );
+
+    return response;
+  }
+
+  @override
   Future<ApiResponse> getProductTags({int? categoryId}) async {
     Map<String, dynamic> params = {};
     if (categoryId != null) {
