@@ -15,6 +15,13 @@ if (localPropertiesFile.exists()) {
     }
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
@@ -31,23 +38,24 @@ android {
 
     // ✅ Explicit SDK versions
     compileSdkVersion 34
-    ndkVersion "25.2.9519653" // optional: match your installed NDK version
+    ndkVersion "25.2.9519653"
 
     defaultConfig {
         applicationId "com.echobitstech.easyph"
         minSdkVersion 26
-        targetSdkVersion 34
+        targetSdkVersion 35
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
-//    signingConfigs {
-//        release {
-//            keyAlias localProperties['keyAlias']
-//            keyPassword localProperties['keyPassword']
-//            storeFile localProperties['storeFile'] ? file
-//        }
-//    }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties["keyAlias"]
+            keyPassword keystoreProperties["keyPassword"]
+            storePassword keystoreProperties["storePassword"]
+            storeFile file(keystoreProperties["storeFile"])
+        }
+    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -64,7 +72,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
     }
 }

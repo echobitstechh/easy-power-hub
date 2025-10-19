@@ -69,7 +69,8 @@ class ProfileViewModel extends BaseViewModel {
       }
     } catch (e) {
       _log.e("Error uploading image: $e");
-      _snackBar.showSnackbar(message: "An error occurred while uploading the image.");
+      _snackBar.showSnackbar(message: "An error occurred while uploading the image.",
+          duration: Duration(seconds: 1));
     } finally {
       setBusy(false);
     }
