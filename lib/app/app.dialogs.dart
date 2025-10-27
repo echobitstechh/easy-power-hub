@@ -10,11 +10,13 @@ import 'app.locator.dart';
 import '../ui/dialogs/info_alert/info_alert_dialog.dart';
 import '../ui/dialogs/info_alert/phone_input_dialog.dart';
 import '../ui/dialogs/info_alert/rating_dialog.dart';
+import '../ui/dialogs/info_alert/reason_form_dialog.dart';
 
 enum DialogType {
   infoAlert,
   rating,
   phoneInput,
+  reasonForm,
 }
 
 void setupDialogUi() {
@@ -27,6 +29,8 @@ void setupDialogUi() {
         RatingDialog(request: request, completer: completer),
     DialogType.phoneInput: (context, request, completer) =>
         PhoneInputDialog(request: request, completer: completer),
+    DialogType.reasonForm: (context, request, completer) =>
+        ReasonFormDialog(request: request, completer: completer),
   };
 
   dialogService.registerCustomDialogBuilders(builders);
