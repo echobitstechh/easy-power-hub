@@ -1,4 +1,5 @@
 
+import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
@@ -10,6 +11,10 @@ import '../../app/app.locator.dart';
 import '../../app/app.logger.dart';
 import '../../core/data/repositories/repository.dart';
 import '../../core/network/api_response.dart';
+import './request/service_request_view.dart';
+import 'request/existing_services_view.dart';
+import 'request/existing_services_viewmodel.dart';
+
 
 class ServicesviewModel extends BaseViewModel {
   final _repo = locator<Repository>();
@@ -18,13 +23,53 @@ class ServicesviewModel extends BaseViewModel {
   final _dialogService = locator<DialogService>();
   final dateController = TextEditingController();
   final timeController = TextEditingController();
+  final _navigationService = locator<NavigationService>();
 
   String searchQuery = '';
   List<Service> services = [];
   List<Service> filteredServices = [];
 
+  final _existingServicesViewModel = locator<ExistingServicesViewModel>();
+
+  int get pendingServicesCount => _existingServicesViewModel.pendingServicesCount;
+  int get acceptedServicesCount => _existingServicesViewModel.acceptedServicesCount;
+  int get completedServicesCount => _existingServicesViewModel.completedServicesCount;
+
   Future<void> init() async {
     await runBusyFuture(getServices());
+  }
+
+  Future<void> getServiceCounts() async {
+    try {
+      await _existingServicesViewModel.getServiceRequests();
+      notifyListeners();
+    } catch (e) {
+      _log.e('Error fetching service counts: $e');
+    }
+  }
+
+ void requestService() {
+    _navigationService.navigateWithTransition(
+      const RequestServiceView(),
+      transition: 'rightToLeft',
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  void requestSpecificService(Service service) {
+    _navigationService.navigateWithTransition(
+      RequestServiceView(preselectedService: service),
+      transition: 'rightToLeft',
+      duration: const Duration(milliseconds: 300),
+    );
+  }
+
+  void viewExistingServices() {
+    _navigationService.navigateWithTransition(
+      const ExistingServicesView(),
+      transition: 'rightToLeft', 
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   Future<void> getServices() async {
@@ -36,6 +81,9 @@ class ServicesviewModel extends BaseViewModel {
             .map((data) => Service.fromJson(data))
             .toList();
         filteredServices = services;
+
+        await getServiceCounts();
+
         notifyListeners();
       } else {
         _log.e('Unexpected API response: ${res.data}');
@@ -96,4 +144,5 @@ class ServicesviewModel extends BaseViewModel {
       },
     );
   }
+
 }
