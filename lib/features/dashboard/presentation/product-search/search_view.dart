@@ -335,7 +335,7 @@ class _SearchResultItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _showProductDetails(context), 
+      onTap: () => _showProductDetails(context),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(12),

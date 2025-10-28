@@ -268,55 +268,6 @@ class Repository extends IRepository {
     return response;
   }
 
-  @override
-  Future<ApiResponse> requestService(Map<String, dynamic> req) async {
-    ApiResponse response = await api.call(
-        method: HttpMethod.post,
-        endpoint: "/service-request",
-        reqBody: req,
-      );
-    return response;
-  }
-
-  @override
-  Future<ApiResponse> getExistingService({
-    String? status,
-    int page = 1,
-    int limit = 10,
-  }) async {
-    Map<String, dynamic> params = {
-      "page": page,
-      "limit": limit,
-    };
-
-    if (status != null && status.isNotEmpty) {
-      params["status"] = status;
-    }
-
-    ApiResponse response = await api.call(
-      method: HttpMethod.get,
-      endpoint: "/service-request",
-      reqParams: params,
-    );
-
-    return response;
-  }
-
-  @override
-  Future<ApiResponse> cancelServiceRequest(String id, String reason) async {
-    Map<String, dynamic> body = {
-      "reason": reason,
-    };
-
-    ApiResponse response = await api.call(
-      method: HttpMethod.patch,
-      endpoint: "service-request/$id/cancel",
-      reqBody: body,
-    );
-
-    return response;
-  }
-
 
   @override
   Future<ApiResponse> getProfile() async {

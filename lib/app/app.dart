@@ -29,13 +29,9 @@ import '../features/home/presentation/home_view.dart';
 import '../features/onboarding/presentation/onboarding_view.dart';
 import '../ui/bottom_sheets/address_sheet/add_address_bottom_sheet.dart';
 import '../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
-import '../ui/dialogs/info_alert/reason_form_dialog.dart';
-import '../features/dashboard/presentation/product-search/search_view.dart';
-import '../features/services/widgets/ServiceSuccessView.dart';
 import '../ui/bottom_sheets/order_status/order_status_timeline.dart';
 import '../ui/bottom_sheets/profile_screen_sheet.dart';
 import '../ui/dialogs/info_alert/phone_input_dialog.dart';
-import '../features/services/request/existing_services_viewmodel.dart';
 // @stacked-import
 
 @StackedApp(
@@ -61,8 +57,6 @@ import '../features/services/request/existing_services_viewmodel.dart';
     MaterialRoute(page: OrderList),
     MaterialRoute(page: ShippingAddressesPage),
     MaterialRoute(page: SupportView),
-    MaterialRoute(page: SearchScreen),
-    MaterialRoute(page: ServiceSuccessView),
     MaterialRoute(page: ChangePasswordView),
     MaterialRoute(page: PaymentSuccessView),
     CustomRoute(
@@ -95,7 +89,6 @@ import '../features/services/request/existing_services_viewmodel.dart';
     LazySingleton(classType: AuthService),
     LazySingleton(classType: Repository),
     LazySingleton(classType: AuthViewModel),
-    LazySingleton(classType: ExistingServicesViewModel),
     // @stacked-service
   ],
   bottomsheets: [
@@ -110,7 +103,6 @@ import '../features/services/request/existing_services_viewmodel.dart';
     StackedDialog(classType: InfoAlertDialog),
     StackedDialog(classType: RatingDialog),
     StackedDialog(classType: PhoneInputDialog),
-    StackedDialog(classType: ReasonFormDialog),
     // @stacked-dialog
   ],
 
