@@ -5,42 +5,38 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:easy_ph/core/data/models/category.dart' as _i22;
-import 'package:easy_ph/core/data/models/product.dart' as _i23;
+import 'package:easy_ph/core/data/models/category.dart' as _i20;
+import 'package:easy_ph/core/data/models/product.dart' as _i21;
 import 'package:easy_ph/features/auth/presentation/password_reset/password_reset_view.dart'
     as _i8;
-import 'package:easy_ph/features/auth/presentation/widgets/login.dart' as _i18;
+import 'package:easy_ph/features/auth/presentation/widgets/login.dart' as _i16;
 import 'package:easy_ph/features/auth/presentation/widgets/otp_form.dart'
-    as _i20;
+    as _i18;
 import 'package:easy_ph/features/auth/presentation/widgets/register.dart'
-    as _i19;
+    as _i17;
 import 'package:easy_ph/features/cart/cart_view.dart' as _i6;
 import 'package:easy_ph/features/dashboard/presentation/dashboard_viewmodel.dart'
-    as _i24;
-import 'package:easy_ph/features/dashboard/presentation/product-search/search_view.dart'
-    as _i14;
+    as _i22;
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart'
     as _i7;
 import 'package:easy_ph/features/home/presentation/home_view.dart' as _i2;
 import 'package:easy_ph/features/onboarding/presentation/onboarding_view.dart'
     as _i4;
-import 'package:easy_ph/features/Profile/onSuccess/success_view.dart' as _i17;
+import 'package:easy_ph/features/Profile/onSuccess/success_view.dart' as _i15;
 import 'package:easy_ph/features/Profile/orders/order_view.dart' as _i11;
 import 'package:easy_ph/features/Profile/password/change_password_view.dart'
-    as _i16;
+    as _i14;
 import 'package:easy_ph/features/Profile/profile_view.dart' as _i9;
 import 'package:easy_ph/features/Profile/shipping/shipping_address_view.dart'
     as _i12;
 import 'package:easy_ph/features/Profile/support/support_view.dart' as _i13;
 import 'package:easy_ph/features/services/service_view.dart' as _i10;
-import 'package:easy_ph/features/services/widgets/ServiceSuccessView.dart'
-    as _i15;
 import 'package:easy_ph/features/shop/shop_view.dart' as _i5;
 import 'package:easy_ph/features/startup/presentation/startup_view.dart' as _i3;
-import 'package:flutter/material.dart' as _i21;
+import 'package:flutter/material.dart' as _i19;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i25;
+import 'package:stacked_services/stacked_services.dart' as _i23;
 
 class Routes {
   static const homeView = '/home-view';
@@ -67,10 +63,6 @@ class Routes {
 
   static const supportView = '/support-view';
 
-  static const searchScreen = '/search-screen';
-
-  static const serviceSuccessView = '/service-success-view';
-
   static const changePasswordView = '/change-password-view';
 
   static const paymentSuccessView = '/payment-success-view';
@@ -94,8 +86,6 @@ class Routes {
     orderList,
     shippingAddressesPage,
     supportView,
-    searchScreen,
-    serviceSuccessView,
     changePasswordView,
     paymentSuccessView,
     login,
@@ -155,50 +145,42 @@ class StackedRouter extends _i1.RouterBase {
       page: _i13.SupportView,
     ),
     _i1.RouteDef(
-      Routes.searchScreen,
-      page: _i14.SearchScreen,
-    ),
-    _i1.RouteDef(
-      Routes.serviceSuccessView,
-      page: _i15.ServiceSuccessView,
-    ),
-    _i1.RouteDef(
       Routes.changePasswordView,
-      page: _i16.ChangePasswordView,
+      page: _i14.ChangePasswordView,
     ),
     _i1.RouteDef(
       Routes.paymentSuccessView,
-      page: _i17.PaymentSuccessView,
+      page: _i15.PaymentSuccessView,
     ),
     _i1.RouteDef(
       Routes.login,
-      page: _i18.Login,
+      page: _i16.Login,
     ),
     _i1.RouteDef(
       Routes.register,
-      page: _i19.Register,
+      page: _i17.Register,
     ),
     _i1.RouteDef(
       Routes.oTPView,
-      page: _i20.OTPView,
+      page: _i18.OTPView,
     ),
   ];
 
   final _pagesMap = <Type, _i1.StackedRouteFactory>{
     _i2.HomeView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i2.HomeView(),
         settings: data,
       );
     },
     _i3.StartupView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i3.StartupView(),
         settings: data,
       );
     },
     _i4.OnboardingView: (data) {
-      return _i21.PageRouteBuilder<dynamic>(
+      return _i19.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             const _i4.OnboardingView(),
         settings: data,
@@ -210,7 +192,7 @@ class StackedRouter extends _i1.RouterBase {
       final args = data.getArgs<ShopViewArguments>(
         orElse: () => const ShopViewArguments(),
       );
-      return _i21.PageRouteBuilder<dynamic>(
+      return _i19.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) => _i5.ShopView(
             key: args.key,
             filter: args.filter,
@@ -222,14 +204,14 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i6.CartView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i6.CartView(),
         settings: data,
       );
     },
     _i7.ProductCard: (data) {
       final args = data.getArgs<ProductCardArguments>(nullOk: false);
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => _i7.ProductCard(
             key: args.key,
             product: args.product,
@@ -238,95 +220,83 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i8.EnterEmailView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i8.EnterEmailView(),
         settings: data,
       );
     },
     _i9.ProfileView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i9.ProfileView(),
         settings: data,
       );
     },
     _i10.ServicesView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i10.ServicesView(),
         settings: data,
       );
     },
     _i11.OrderList: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i11.OrderList(),
         settings: data,
       );
     },
     _i12.ShippingAddressesPage: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i12.ShippingAddressesPage(),
         settings: data,
       );
     },
     _i13.SupportView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
+      return _i19.MaterialPageRoute<dynamic>(
         builder: (context) => const _i13.SupportView(),
         settings: data,
       );
     },
-    _i14.SearchScreen: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i14.SearchScreen(),
-        settings: data,
-      );
-    },
-    _i15.ServiceSuccessView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i15.ServiceSuccessView(),
-        settings: data,
-      );
-    },
-    _i16.ChangePasswordView: (data) {
+    _i14.ChangePasswordView: (data) {
       final args = data.getArgs<ChangePasswordViewArguments>(
         orElse: () => const ChangePasswordViewArguments(),
       );
-      return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => _i16.ChangePasswordView(
+      return _i19.MaterialPageRoute<dynamic>(
+        builder: (context) => _i14.ChangePasswordView(
             isResetPassword: args.isResetPassword, key: args.key),
         settings: data,
       );
     },
-    _i17.PaymentSuccessView: (data) {
-      return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i17.PaymentSuccessView(),
+    _i15.PaymentSuccessView: (data) {
+      return _i19.MaterialPageRoute<dynamic>(
+        builder: (context) => const _i15.PaymentSuccessView(),
         settings: data,
       );
     },
-    _i18.Login: (data) {
-      return _i21.PageRouteBuilder<dynamic>(
+    _i16.Login: (data) {
+      return _i19.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            const _i18.Login(),
+            const _i16.Login(),
         settings: data,
         transitionsBuilder:
             data.transition ?? _i1.TransitionsBuilders.slideRight,
         transitionDuration: const Duration(milliseconds: 400),
       );
     },
-    _i19.Register: (data) {
-      return _i21.PageRouteBuilder<dynamic>(
+    _i17.Register: (data) {
+      return _i19.PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            const _i19.Register(),
+            const _i17.Register(),
         settings: data,
         transitionsBuilder:
             data.transition ?? _i1.TransitionsBuilders.slideRight,
         transitionDuration: const Duration(milliseconds: 400),
       );
     },
-    _i20.OTPView: (data) {
+    _i18.OTPView: (data) {
       final args = data.getArgs<OTPViewArguments>(
         orElse: () => const OTPViewArguments(),
       );
-      return _i21.PageRouteBuilder<dynamic>(
-        pageBuilder: (context, animation, secondaryAnimation) => _i20.OTPView(
+      return _i19.PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) => _i18.OTPView(
             key: args.key,
             isOtpRequested: args.isOtpRequested,
             userId: args.userId,
@@ -355,9 +325,9 @@ class ShopViewArguments {
     this.isSpecialCategory = false,
   });
 
-  final _i21.Key? key;
+  final _i19.Key? key;
 
-  final _i22.Category? filter;
+  final _i20.Category? filter;
 
   final bool isSpecialCategory;
 
@@ -387,11 +357,11 @@ class ProductCardArguments {
     required this.dashboardViewModel,
   });
 
-  final _i21.Key? key;
+  final _i19.Key? key;
 
-  final _i23.Product product;
+  final _i21.Product product;
 
-  final _i24.DashboardViewModel dashboardViewModel;
+  final _i22.DashboardViewModel dashboardViewModel;
 
   @override
   String toString() {
@@ -420,7 +390,7 @@ class ChangePasswordViewArguments {
 
   final bool isResetPassword;
 
-  final _i21.Key? key;
+  final _i19.Key? key;
 
   @override
   String toString() {
@@ -449,7 +419,7 @@ class OTPViewArguments {
     this.email,
   });
 
-  final _i21.Key? key;
+  final _i19.Key? key;
 
   final bool isOtpRequested;
 
@@ -488,7 +458,7 @@ class OTPViewArguments {
   }
 }
 
-extension NavigatorStateExtension on _i25.NavigationService {
+extension NavigatorStateExtension on _i23.NavigationService {
   Future<dynamic> navigateToHomeView([
     int? routerId,
     bool preventDuplicates = true,
@@ -532,8 +502,8 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToShopView({
-    _i21.Key? key,
-    _i22.Category? filter,
+    _i19.Key? key,
+    _i20.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -565,9 +535,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToProductCard({
-    _i21.Key? key,
-    required _i23.Product product,
-    required _i24.DashboardViewModel dashboardViewModel,
+    _i19.Key? key,
+    required _i21.Product product,
+    required _i22.DashboardViewModel dashboardViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -667,37 +637,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> navigateToSearchScreen([
-    int? routerId,
-    bool preventDuplicates = true,
-    Map<String, String>? parameters,
-    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
-        transition,
-  ]) async {
-    return navigateTo<dynamic>(Routes.searchScreen,
-        id: routerId,
-        preventDuplicates: preventDuplicates,
-        parameters: parameters,
-        transition: transition);
-  }
-
-  Future<dynamic> navigateToServiceSuccessView([
-    int? routerId,
-    bool preventDuplicates = true,
-    Map<String, String>? parameters,
-    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
-        transition,
-  ]) async {
-    return navigateTo<dynamic>(Routes.serviceSuccessView,
-        id: routerId,
-        preventDuplicates: preventDuplicates,
-        parameters: parameters,
-        transition: transition);
-  }
-
   Future<dynamic> navigateToChangePasswordView({
     bool isResetPassword = false,
-    _i21.Key? key,
+    _i19.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -756,7 +698,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToOTPView({
-    _i21.Key? key,
+    _i19.Key? key,
     bool isOtpRequested = false,
     String? userId,
     String? verificationCode,
@@ -825,8 +767,8 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithShopView({
-    _i21.Key? key,
-    _i22.Category? filter,
+    _i19.Key? key,
+    _i20.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -858,9 +800,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithProductCard({
-    _i21.Key? key,
-    required _i23.Product product,
-    required _i24.DashboardViewModel dashboardViewModel,
+    _i19.Key? key,
+    required _i21.Product product,
+    required _i22.DashboardViewModel dashboardViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -960,37 +902,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> replaceWithSearchScreen([
-    int? routerId,
-    bool preventDuplicates = true,
-    Map<String, String>? parameters,
-    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
-        transition,
-  ]) async {
-    return replaceWith<dynamic>(Routes.searchScreen,
-        id: routerId,
-        preventDuplicates: preventDuplicates,
-        parameters: parameters,
-        transition: transition);
-  }
-
-  Future<dynamic> replaceWithServiceSuccessView([
-    int? routerId,
-    bool preventDuplicates = true,
-    Map<String, String>? parameters,
-    Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
-        transition,
-  ]) async {
-    return replaceWith<dynamic>(Routes.serviceSuccessView,
-        id: routerId,
-        preventDuplicates: preventDuplicates,
-        parameters: parameters,
-        transition: transition);
-  }
-
   Future<dynamic> replaceWithChangePasswordView({
     bool isResetPassword = false,
-    _i21.Key? key,
+    _i19.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -1049,7 +963,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithOTPView({
-    _i21.Key? key,
+    _i19.Key? key,
     bool isOtpRequested = false,
     String? userId,
     String? verificationCode,

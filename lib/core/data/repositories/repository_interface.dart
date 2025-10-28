@@ -37,13 +37,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getFavourites();
 
+
   Future<ApiResponse> getServices();
-
-  Future<ApiResponse> requestService(Map<String, dynamic> req);
-
-  Future<ApiResponse> getExistingService({required int page, required int limit, String status});
-
-  Future<ApiResponse> cancelServiceRequest(String id, String reason);
 
   Future<ApiResponse> getProfile();
 

@@ -1,9 +1,7 @@
-import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/material.dart';
-import 'package:stacked_services/stacked_services.dart';
 import '../../features/dashboard/presentation/dashboard_viewmodel.dart';
 import '../../features/dashboard/presentation/product-search/search_view.dart';
-import '../../../app/app.locator.dart';
+
 
 class ProductSearchBar extends StatelessWidget {
   final DashboardViewModel viewModel;
@@ -18,7 +16,11 @@ class ProductSearchBar extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          locator<NavigationService>().navigateTo(Routes.searchScreen);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const SearchScreen(), // Remove viewModel parameter
+            ),
+          );
         },
         child: Container(
           height: 40,

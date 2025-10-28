@@ -17,7 +17,6 @@ import '../core/network/api_service.dart';
 import '../core/utils/local_stotage.dart';
 import '../features/auth/presentation/auth_service.dart';
 import '../features/auth/presentation/auth_viewmodel.dart';
-import '../features/services/request/existing_services_viewmodel.dart';
 
 final locator = StackedLocator.instance;
 
@@ -39,5 +38,4 @@ Future<void> setupLocator({
   locator.registerLazySingleton(() => AuthService());
   locator.registerLazySingleton(() => Repository());
   locator.registerLazySingleton(() => AuthViewModel());
-  locator.registerLazySingleton(() => ExistingServicesViewModel());
 }
