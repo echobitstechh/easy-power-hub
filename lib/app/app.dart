@@ -61,7 +61,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     MaterialRoute(page: OrderList),
     MaterialRoute(page: ShippingAddressesPage),
     MaterialRoute(page: SupportView),
-    MaterialRoute(page: SearchScreen),
+    MaterialRoute(page: SearchView),
     MaterialRoute(page: ServiceSuccessView),
     MaterialRoute(page: ChangePasswordView),
     MaterialRoute(page: PaymentSuccessView),
@@ -110,7 +110,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     StackedDialog(classType: InfoAlertDialog),
     StackedDialog(classType: RatingDialog),
     StackedDialog(classType: PhoneInputDialog),
-    StackedDialog(classType: ReasonFormDialog),
+    StackedDialog(classType: ServiceRejectReasonDialog),
     // @stacked-dialog
   ],
 

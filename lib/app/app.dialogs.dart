@@ -16,7 +16,7 @@ enum DialogType {
   infoAlert,
   rating,
   phoneInput,
-  reasonForm,
+  serviceRejectReason,
 }
 
 void setupDialogUi() {
@@ -29,8 +29,8 @@ void setupDialogUi() {
         RatingDialog(request: request, completer: completer),
     DialogType.phoneInput: (context, request, completer) =>
         PhoneInputDialog(request: request, completer: completer),
-    DialogType.reasonForm: (context, request, completer) =>
-        ReasonFormDialog(request: request, completer: completer),
+    DialogType.serviceRejectReason: (context, request, completer) =>
+        ServiceRejectReasonDialog(request: request, completer: completer),
   };
 
   dialogService.registerCustomDialogBuilders(builders);

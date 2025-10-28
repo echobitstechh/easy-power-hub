@@ -67,7 +67,7 @@ class Routes {
 
   static const supportView = '/support-view';
 
-  static const searchScreen = '/search-screen';
+  static const searchView = '/search-view';
 
   static const serviceSuccessView = '/service-success-view';
 
@@ -94,7 +94,7 @@ class Routes {
     orderList,
     shippingAddressesPage,
     supportView,
-    searchScreen,
+    searchView,
     serviceSuccessView,
     changePasswordView,
     paymentSuccessView,
@@ -155,8 +155,8 @@ class StackedRouter extends _i1.RouterBase {
       page: _i13.SupportView,
     ),
     _i1.RouteDef(
-      Routes.searchScreen,
-      page: _i14.SearchScreen,
+      Routes.searchView,
+      page: _i14.SearchView,
     ),
     _i1.RouteDef(
       Routes.serviceSuccessView,
@@ -273,9 +273,9 @@ class StackedRouter extends _i1.RouterBase {
         settings: data,
       );
     },
-    _i14.SearchScreen: (data) {
+    _i14.SearchView: (data) {
       return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i14.SearchScreen(),
+        builder: (context) => const _i14.SearchView(),
         settings: data,
       );
     },
@@ -667,14 +667,14 @@ extension NavigatorStateExtension on _i25.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> navigateToSearchScreen([
+  Future<dynamic> navigateToSearchView([
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return navigateTo<dynamic>(Routes.searchScreen,
+    return navigateTo<dynamic>(Routes.searchView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -960,14 +960,14 @@ extension NavigatorStateExtension on _i25.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> replaceWithSearchScreen([
+  Future<dynamic> replaceWithSearchView([
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
   ]) async {
-    return replaceWith<dynamic>(Routes.searchScreen,
+    return replaceWith<dynamic>(Routes.searchView,
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

@@ -18,7 +18,7 @@ class ProductSearchBar extends StatelessWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          locator<NavigationService>().navigateTo(Routes.searchScreen);
+          locator<NavigationService>().navigateTo(Routes.searchView);
         },
         child: Container(
           height: 40,

@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ReasonFormDialog extends StatefulWidget {
+class ServiceRejectReasonDialog extends StatefulWidget {
   final DialogRequest request;
   final Function(DialogResponse) completer;
 
-  const ReasonFormDialog({
+  const ServiceRejectReasonDialog({
     Key? key,
     required this.request,
     required this.completer,
   }) : super(key: key);
 
   @override
-  State<ReasonFormDialog> createState() => _ReasonFormDialogState();
+  State<ServiceRejectReasonDialog> createState() => _ServiceRejectReasonDialogState();
 }
 
-class _ReasonFormDialogState extends State<ReasonFormDialog> {
+class _ServiceRejectReasonDialogState extends State<ServiceRejectReasonDialog> {
   final TextEditingController _reasonController = TextEditingController();
 
   @override

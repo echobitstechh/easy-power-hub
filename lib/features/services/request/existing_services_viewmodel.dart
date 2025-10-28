@@ -108,7 +108,7 @@ class ExistingServicesViewModel extends BaseViewModel {
 
   Future<String?> _showReasonDialog() async {
     final result = await _dialogService.showCustomDialog(
-      variant: DialogType.reasonForm,
+      variant: DialogType.serviceRejectReason,
       title: 'Cancellation Reason',
       description: 'Please tell us why you want to cancel this request.',
     );

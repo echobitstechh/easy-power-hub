@@ -8,8 +8,8 @@ import '../dashboard_viewmodel.dart';
 import '../product_details/product_card.dart';
 import '../../../../ui/components/shimmers/search_shimmer.dart';
 
-class SearchScreen extends StackedView<DashboardViewModel> {
-  const SearchScreen({Key? key}) : super(key: key);
+class SearchView extends StackedView<DashboardViewModel> {
+  const SearchView({Key? key}) : super(key: key);
 
   @override
   Widget builder(
