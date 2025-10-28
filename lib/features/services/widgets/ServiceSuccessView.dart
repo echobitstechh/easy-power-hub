@@ -89,7 +89,7 @@ class ServiceSuccessView extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'CONTINUE SHOPPING',
+                    'VIEW SERVICES',
                     style: GoogleFonts.redHatDisplay(
                       textStyle: const TextStyle(
                         fontSize: 14,

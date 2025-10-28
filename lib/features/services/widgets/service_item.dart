@@ -108,26 +108,6 @@ class ServiceItem extends StatelessWidget {
                 ],
               ),
             ),
-            horizontalSpaceSmall,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chat, color: Colors.green),
-                  onPressed: () => viewModel.openWhatsAppChat(
-                    service.name,
-                    service.phoneNumber ?? '',
-                  ),
-                ),
-                verticalSpaceTiny,
-                IconButton(
-                  icon: const Icon(Icons.phone, color: Colors.blueAccent),
-                  onPressed: () => viewModel.callNumber(
-                    service.phoneNumber ?? '',
-                  ),
-                ),
-              ],
-            ),
           ],
         ),
       ),

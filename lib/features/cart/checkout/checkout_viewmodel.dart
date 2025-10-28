@@ -324,4 +324,5 @@ class CheckoutViewModel extends BaseViewModel {
     }
     notifyListeners();
   }
+
 }

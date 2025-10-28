@@ -41,7 +41,13 @@ class _ReasonFormDialogState extends State<ReasonFormDialog> {
             TextField(
               controller: _reasonController,
               decoration: InputDecoration(
+                // fillColor: Colors.grey[600],
+                // filled: true,
                 hintText: widget.request.description ?? "Write your reason here...",
+                hintStyle: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
