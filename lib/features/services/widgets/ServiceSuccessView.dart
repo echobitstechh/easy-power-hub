@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:stacked_services/stacked_services.dart';
-import '../../../app/app.locator.dart';
 import '../../../ui/common/ui_helpers.dart';
 
-class ServiceSuccessView extends StatelessWidget {
-  const ServiceSuccessView({Key? key}) : super(key: key);
+class SuccessView extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color iconColor;
+  final String buttonText;
+  final VoidCallback onButtonPressed;
+
+  const SuccessView({
+    Key? key,
+    this.title = 'Success!',
+    this.subtitle = 'Operation completed successfully',
+    this.icon = Icons.check,
+    this.iconColor = Colors.green,
+    this.buttonText = 'CONTINUE',
+    required this.onButtonPressed,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final _navigationService = locator<NavigationService>();
-    
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -25,18 +36,18 @@ class ServiceSuccessView extends StatelessWidget {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: iconColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.green.withOpacity(0.3),
+                      color: iconColor.withOpacity(0.3),
                       blurRadius: 20,
                       spreadRadius: 5,
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.check,
+                child: Icon(
+                  icon,
                   color: Colors.white,
                   size: 60,
                 ),
@@ -46,7 +57,7 @@ class ServiceSuccessView extends StatelessWidget {
               verticalSpaceMedium,
               
               Text(
-                'Success!',
+                title,
                 style: GoogleFonts.redHatDisplay(
                   textStyle: const TextStyle(
                     fontSize: 32,
@@ -59,7 +70,7 @@ class ServiceSuccessView extends StatelessWidget {
               verticalSpaceSmall,
               
               Text(
-                'You have Successfully scheduled a Service',
+                subtitle,
                 style: GoogleFonts.redHatDisplay(
                   textStyle: TextStyle(
                     fontSize: 16,
@@ -75,10 +86,7 @@ class ServiceSuccessView extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    _navigationService.back();
-                    _navigationService.back();
-                  },
+                  onPressed: onButtonPressed,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
@@ -89,7 +97,7 @@ class ServiceSuccessView extends StatelessWidget {
                     elevation: 0,
                   ),
                   child: Text(
-                    'VIEW SERVICES',
+                    buttonText,
                     style: GoogleFonts.redHatDisplay(
                       textStyle: const TextStyle(
                         fontSize: 14,
@@ -108,4 +116,46 @@ class ServiceSuccessView extends StatelessWidget {
       ),
     );
   }
+
+  factory SuccessView.serviceScheduled({
+    required VoidCallback onButtonPressed,
+  }) {
+    return SuccessView(
+      title: 'Success!',
+      subtitle: 'You have successfully scheduled a Service',
+      icon: Icons.check,
+      iconColor: Colors.green,
+      buttonText: 'VIEW SERVICES',
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
+  // Factory constructor for order success
+  factory SuccessView.orderPlaced({
+    required VoidCallback onButtonPressed,
+  }) {
+    return SuccessView(
+      title: 'Order Placed!',
+      subtitle: 'Your order has been placed successfully',
+      icon: Icons.shopping_bag,
+      iconColor: Colors.blue,
+      buttonText: 'VIEW ORDERS',
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
+  // Factory constructor for payment success
+  factory SuccessView.paymentCompleted({
+    required VoidCallback onButtonPressed,
+  }) {
+    return SuccessView(
+      title: 'Payment Successful!',
+      subtitle: 'Your payment has been processed',
+      icon: Icons.credit_card,
+      iconColor: Colors.green,
+      buttonText: 'CONTINUE',
+      onButtonPressed: onButtonPressed,
+    );
+  }
+
 }

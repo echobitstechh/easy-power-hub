@@ -2,10 +2,10 @@ import 'package:easy_ph/features/services/widgets/service_request_item.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/empty_state.dart';
+import '../../../ui/components/shimmers/service_requests_shimmer.dart';
 import '../../../../ui/common/app_colors.dart';
 import 'existing_services_viewmodel.dart';
 
@@ -15,7 +15,6 @@ class ExistingServicesView extends StackedView<ExistingServicesViewModel> {
   @override
   Widget builder(
       BuildContext context, ExistingServicesViewModel viewModel, Widget? child) {
-        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
@@ -50,120 +49,70 @@ class ExistingServicesView extends StackedView<ExistingServicesViewModel> {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: viewModel.getServiceRequests,
-                child: viewModel.isBusy
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Service Requests',
-                              style: GoogleFonts.redHatDisplay(
-                                textStyle: const TextStyle(
-                                  fontSize: 20,
-                                  color: kcSecondaryColor,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                            verticalSpaceSmall,
-                            Expanded(
-                              child: Shimmer.fromColors(
-                                baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
-                                highlightColor: isDarkMode ? Colors.grey[600]! : Colors.grey[100]!,
-                                child: ListView.builder(
-                                  itemCount: 4,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      margin: const EdgeInsets.only(bottom: 16.0),
-                                      height: 180,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(12.0),
-                                        border: Border.all(
-                                          color: Colors.grey.withOpacity(0.3),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Service Requests',
+                        style: GoogleFonts.redHatDisplay(
+                          textStyle: const TextStyle(
+                            fontSize: 20,
+                            color: kcSecondaryColor,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      )
-                    : viewModel.serviceRequests.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Service Requests',
-                                  style: GoogleFonts.redHatDisplay(
-                                    textStyle: const TextStyle(
-                                      fontSize: 20,
-                                      color: kcSecondaryColor,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                const Expanded(
-                                  child: Center(
+                      ),
+                      verticalSpaceTiny,
+                      if (!viewModel.isBusy && viewModel.serviceRequests.isNotEmpty)
+                        Text(
+                          'View all existing services',
+                          style: GoogleFonts.redHatDisplay(
+                            textStyle: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      verticalSpaceSmall,
+                      
+                      Expanded(
+                        child: viewModel.isBusy
+                            ? const ServiceRequestsShimmer(itemCount: 4)
+                            : viewModel.serviceRequests.isEmpty
+                                ? const Center(
                                     child: EmptyState(
                                       animation: "assets/animations/empty_notifications.json",
                                       label: "No service requests yet",
                                     ),
+                                  )
+                                : ListView(
+                                    children: [
+                                      ...viewModel.serviceRequests.map((request) {
+                                        return ServiceRequestItem(
+                                          serviceName: request.serviceName,
+                                          status: request.status,
+                                          date: request.date,
+                                          time: request.time,
+                                          address: request.address,
+                                          description: request.description,
+                                          assignedPersonName: request.assignedPersonnel?.name,
+                                          assignedPersonPhone: request.assignedPersonnel?.phone,
+                                          assignedPersonEmail: request.assignedPersonnel?.email,
+                                          onViewDetails: () => viewModel.viewRequestDetails(context, request),
+                                          onCancelRequest: (request.status.toLowerCase() == 'pending' ||
+                                                  request.status.toLowerCase() == 'accepted')
+                                              ? () => viewModel.cancelRequest(request.id)
+                                              : null,
+                                        );
+                                      }).toList(),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            children: [
-                              Text(
-                                'Service Requests',
-                                style: GoogleFonts.redHatDisplay(
-                                  textStyle: const TextStyle(
-                                    fontSize: 20,
-                                    color: kcSecondaryColor,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              verticalSpaceTiny,
-                              Text(
-                                'View all existing services',
-                                style: GoogleFonts.redHatDisplay(
-                                  textStyle: const TextStyle(
-                                    fontSize:12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                              verticalSpaceMedium,
-                              
-                              ...viewModel.serviceRequests.map((request) {
-                                return ServiceRequestItem(
-                                  serviceName: request.serviceName,
-                                  status: request.status,
-                                  date: request.date,
-                                  time: request.time,
-                                  address: request.address,
-                                  description: request.description,
-                                  assignedPersonName: request.assignedPersonnel?.name,
-                                  assignedPersonPhone: request.assignedPersonnel?.phone,
-                                  assignedPersonEmail: request.assignedPersonnel?.email,
-                                  onViewDetails: () => viewModel.viewRequestDetails(context, request),
-                                  onCancelRequest: (request.status.toLowerCase() == 'pending' ||
-                                          request.status.toLowerCase() == 'accepted')
-                                      ? () => viewModel.cancelRequest(request.id)
-                                      : null,
-                                );
-                              }).toList(),
-                            ],
-                          ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

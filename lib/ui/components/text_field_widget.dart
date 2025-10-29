@@ -10,7 +10,7 @@ import '../../state.dart';
 ///
 
 
-class TextFieldWidget extends StatelessWidget {
+class TextFieldWidget extends StatelessWidget { 
   final String? label;
   final String hint;
   final TextEditingController controller;
@@ -25,6 +25,9 @@ class TextFieldWidget extends StatelessWidget {
   final bool filled;
   final InputBorder? border;
   final Color? borderColor; // New property for a flexible border color
+  final Color? focusedBorderColor;
+  final VoidCallback? onTap;
+  final int? maxLines;  
 
   const TextFieldWidget({
     Key? key,
@@ -42,6 +45,9 @@ class TextFieldWidget extends StatelessWidget {
     this.filled = false,
     this.border,
     this.borderColor, // Initialize the new border color
+    this.focusedBorderColor,
+    this.onTap,
+    this.maxLines = 1,  
   }) : super(key: key);
 
   @override
@@ -53,6 +59,8 @@ class TextFieldWidget extends StatelessWidget {
       readOnly: readOnly,
       controller: controller,
       onChanged: onChanged as void Function(String value)?,
+      onTap: onTap,
+      maxLines: maxLines,
       cursorColor: uiMode.value == AppUiModes.light ? kcBlackColor : kcWhiteColor,
       style: TextStyle(
           fontSize: 14),

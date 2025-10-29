@@ -1,7 +1,7 @@
 import 'package:easy_ph/ui/common/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:easy_ph/core/utils/status_util.dart';
 import '../../../ui/common/ui_helpers.dart';
 
 class ServiceRequestItem extends StatelessWidget {
@@ -32,52 +32,10 @@ class ServiceRequestItem extends StatelessWidget {
     this.onCancelRequest,
   }) : super(key: key);
 
-  Color _getStatusColor() {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'accepted':
-      case 'active':
-        return Colors.blue;
-      case 'completed':
-        return Colors.green;
-      case 'cancelled':
-        return Colors.red;
-      case 'declined':
-        return Colors.red.shade700;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusDisplayText() {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return 'Pending';
-      case 'accepted':
-        return 'Accepted';
-      case 'active':
-        return 'Active';
-      case 'completed':
-        return 'Completed';
-      case 'cancelled':
-        return 'Cancelled';
-      case 'declined':
-        return 'Declined';
-      default:
-        return status[0].toUpperCase() + status.substring(1).toLowerCase();
-    }
-  }
-
-  bool _canCancel() {
-    final statusLower = status.toLowerCase();
-    return statusLower == 'pending' || statusLower == 'accepted';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor();
-    final canCancel = _canCancel();
+    final statusColor = StatusUtil.getStatusColor(status);
+    final canCancel = StatusUtil.canCancel(status);
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
@@ -119,7 +77,7 @@ class ServiceRequestItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.0),
                 ),
                 child: Text(
-                  _getStatusDisplayText(),
+                  StatusUtil.getStatusDisplayText(status),
                   style: GoogleFonts.redHatDisplay(
                     textStyle: TextStyle(
                       fontSize: 12,

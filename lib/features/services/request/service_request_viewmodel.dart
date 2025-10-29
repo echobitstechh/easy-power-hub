@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:easy_ph/features/services/widgets/ServiceSuccessView.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:easy_ph/core/utils/date_time_util.dart';
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../app/app.logger.dart';
@@ -98,73 +100,17 @@ class ServiceRequestViewModel extends BaseViewModel {
   }
 
   Future<void> selectDate(BuildContext context) async {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDarkMode
-                ? const ColorScheme.dark(
-                    primary: Colors.orange,
-                    onPrimary: Colors.white,
-                    surface: Color(0xFF1E1E1E),
-                    onSurface: Colors.white,
-                  )
-                : const ColorScheme.light(
-                    primary: Colors.orange,
-                    onPrimary: Colors.white,
-                    surface: Colors.white,
-                    onSurface: Colors.black,
-                  ),
-            dialogBackgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      dateController.text = DateFormat('dd/MM/yyyy').format(picked);
+    final selectedDate = await DateTimeUtil.selectDate(context);
+    if (selectedDate != null) {
+      dateController.text = selectedDate;
       notifyListeners();
     }
   }
 
   Future<void> selectTime(BuildContext context) async {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: isDarkMode
-                ? const ColorScheme.dark(
-                    primary: Colors.orange,
-                    onPrimary: Colors.white,
-                    surface: Color(0xFF1E1E1E),
-                    onSurface: Colors.white,
-                  )
-                : const ColorScheme.light(
-                    primary: Colors.orange,
-                    onPrimary: Colors.white,
-                    surface: Colors.white,
-                    onSurface: Colors.black,
-                  ),
-            dialogBackgroundColor: isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null) {
-      timeController.text = picked.format(context);
+    final selectedTime = await DateTimeUtil.selectTime(context);
+    if (selectedTime != null) {
+      timeController.text = selectedTime;
       notifyListeners();
     }
   }
@@ -257,17 +203,7 @@ class ServiceRequestViewModel extends BaseViewModel {
     }
   }
 
-  String _convertDateFormat(String dateString) {
-    try {
-      final parsedDate = DateFormat('dd/MM/yyyy').parse(dateString);
-      return DateFormat('yyyy-MM-dd').format(parsedDate);
-    } catch (e) {
-      _log.e('Error converting date format: $e');
-      return dateString;
-    }
-  }
-
-  Future<void> submitRequest() async {
+  Future<void> submitRequest(BuildContext context) async {
     if (!_validateForm()) return;
 
     setBusy(true);
@@ -280,7 +216,7 @@ class ServiceRequestViewModel extends BaseViewModel {
         }
       }
 
-      final formattedDate = _convertDateFormat(dateController.text.trim());
+      final formattedDate = DateTimeUtil.convertDateFormat(dateController.text.trim());
 
       final requestBody = {
         'serviceId': _preselectedService!.id,
@@ -297,7 +233,7 @@ class ServiceRequestViewModel extends BaseViewModel {
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         _log.i('Service request successful: ${res.data}');
-        _navigateToSuccess();
+        _navigateToSuccess(context);
       } else {
         _log.e('Service request failed: ${res.statusCode}');
         _snackBar.showSnackbar(
@@ -316,7 +252,25 @@ class ServiceRequestViewModel extends BaseViewModel {
     }
   }
 
-  void _navigateToSuccess() {
-    _navigationService.navigateTo(Routes.serviceSuccessView);
-  }
+void _navigateToSuccess(BuildContext context) {  // ← Add context parameter
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => SuccessView.serviceScheduled(
+        onButtonPressed: () {
+          Navigator.of(context).pop(); // Pop success view
+          Navigator.of(context).pop(); // Pop request view
+        },
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
+      },
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+  );
+}
+
+  void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
 }

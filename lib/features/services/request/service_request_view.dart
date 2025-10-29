@@ -7,7 +7,7 @@ import 'package:stacked/stacked.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../core/data/models/address.dart';
 import './service_request_viewmodel.dart';
-
+import '../../../../ui/components/text_field_widget.dart';
 class RequestServiceView extends StackedView<ServiceRequestViewModel> {
   final Service? preselectedService;
 
@@ -89,7 +89,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                       verticalSpaceMedium,
 
                       Text(
-                        'Enter Service',
+                        'Service Type',
                         style: GoogleFonts.redHatDisplay(
                           textStyle: const TextStyle(
                             fontSize: 14,
@@ -98,44 +98,16 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                         ),
                       ),
                       verticalSpaceTiny,
-                      TextField(
+                      TextFieldWidget(
+                        hint: 'Enter service name',
                         controller: viewModel.serviceNameController,
-                        enabled: !viewModel.isPreselectedService,
-                        decoration: InputDecoration(
-                          hintText: 'Enter service name',
-                          hintStyle: GoogleFonts.redHatDisplay(
-                            textStyle: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          filled: viewModel.isPreselectedService,
-                          fillColor: viewModel.isPreselectedService
-                              ? (isDarkMode
-                                  ? Colors.grey[800]
-                                  : Colors.grey[200])
-                              : null,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          disabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: const BorderSide(color: Colors.orange),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16.0,
-                            vertical: 14.0,
-                          ),
-                        ),
+                        readOnly: viewModel.isPreselectedService,
+                        filled: viewModel.isPreselectedService,
+                        fillColor: viewModel.isPreselectedService
+                            ? (isDarkMode ? Colors.grey[800] : Colors.grey[200])
+                            : null,
+                        borderColor: Colors.grey[300],
+                        focusedBorderColor: Colors.orange,
                       ),
                       verticalSpaceSmall,
 
@@ -206,7 +178,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          // TODO: Navigate to add address screen
+                                          viewModel.navigateToShippingAddresses();
                                         },
                                         style: TextButton.styleFrom(
                                           padding: EdgeInsets.zero,
@@ -307,40 +279,14 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                   ),
                                 ),
                                 verticalSpaceTiny,
-                                TextField(
+                                TextFieldWidget(
+                                  hint: 'dd/mm/yyyy',
                                   controller: viewModel.dateController,
-                                  decoration: InputDecoration(
-                                    hintText: 'dd/mm/yyyy',
-                                    hintStyle: GoogleFonts.redHatDisplay(
-                                      textStyle: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
-                                    suffixIcon: const Icon(Icons.calendar_today,
-                                        size: 20),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide:
-                                          BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide:
-                                          BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: const BorderSide(
-                                          color: Colors.orange),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                      vertical: 14.0,
-                                    ),
-                                  ),
-                                  onTap: () => viewModel.selectDate(context),
                                   readOnly: true,
+                                  suffix: const Icon(Icons.calendar_today, size: 20),
+                                  onTap: () => viewModel.selectDate(context),
+                                  borderColor: Colors.grey[300],
+                                  focusedBorderColor: Colors.orange,
                                 ),
                               ],
                             ),
@@ -360,40 +306,14 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                   ),
                                 ),
                                 verticalSpaceTiny,
-                                TextField(
+                                TextFieldWidget(
+                                  hint: 'Select time',
                                   controller: viewModel.timeController,
-                                  decoration: InputDecoration(
-                                    hintText: 'Select time',
-                                    hintStyle: GoogleFonts.redHatDisplay(
-                                      textStyle: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[400],
-                                      ),
-                                    ),
-                                    suffixIcon:
-                                        const Icon(Icons.access_time, size: 20),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide:
-                                          BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide:
-                                          BorderSide(color: Colors.grey[300]!),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: const BorderSide(
-                                          color: Colors.orange),
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0,
-                                      vertical: 14.0,
-                                    ),
-                                  ),
-                                  onTap: () => viewModel.selectTime(context),
                                   readOnly: true,
+                                  suffix: const Icon(Icons.access_time, size: 20),
+                                  onTap: () => viewModel.selectTime(context),
+                                  borderColor: Colors.grey[300],
+                                  focusedBorderColor: Colors.orange,
                                 ),
                               ],
                             ),
@@ -414,31 +334,12 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                         ),
                       ),
                       verticalSpaceTiny,
-                      TextField(
+                      TextFieldWidget(
+                        hint: 'Describe the issue or service needed...',
                         controller: viewModel.descriptionController,
                         maxLines: 4,
-                        decoration: InputDecoration(
-                          hintText: 'Describe the issue or service needed...',
-                          hintStyle: GoogleFonts.redHatDisplay(
-                            textStyle: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[400],
-                            ),
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: BorderSide(color: Colors.grey[300]!),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                            borderSide: const BorderSide(color: Colors.orange),
-                          ),
-                          contentPadding: const EdgeInsets.all(16.0),
-                        ),
+                        borderColor: Colors.grey[300],
+                        focusedBorderColor: Colors.orange,
                       ),
                       verticalSpaceSmall,
 
@@ -527,7 +428,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                             child: ElevatedButton(
                               onPressed: viewModel.isBusy
                                   ? null
-                                  : viewModel.submitRequest,
+                                  : () => viewModel.submitRequest(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
                                 foregroundColor: Colors.white,

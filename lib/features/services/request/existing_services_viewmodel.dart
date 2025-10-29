@@ -49,6 +49,7 @@ class ExistingServicesViewModel extends BaseViewModel {
 
   Future<void> getServiceRequests({String? status}) async {
     setBusy(true);
+    notifyListeners();
     try {
       ApiResponse res = await _repo.getExistingService(
         status: status,
@@ -67,7 +68,6 @@ class ExistingServicesViewModel extends BaseViewModel {
         
         _calculateServiceCounts();
         
-        notifyListeners();
       } else {
         _log.e('Failed to fetch service requests: ${res.statusCode}');
         _snackBar.showSnackbar(
@@ -83,6 +83,7 @@ class ExistingServicesViewModel extends BaseViewModel {
       );
     } finally {
       setBusy(false);
+      notifyListeners();
     }
   }
     
@@ -106,7 +107,7 @@ class ExistingServicesViewModel extends BaseViewModel {
     );
   }
 
-  Future<String?> _showReasonDialog() async {
+  Future<String?> _showServiceCancelReasonDialog() async {
     final result = await _dialogService.showCustomDialog(
       variant: DialogType.serviceRejectReason,
       title: 'Cancellation Reason',
@@ -129,7 +130,7 @@ class ExistingServicesViewModel extends BaseViewModel {
 
     if (result?.confirmed != true) return;
 
-    final reason = await _showReasonDialog();
+    final reason = await _showServiceCancelReasonDialog();
     if (reason == null || reason.isEmpty) return;
 
     setBusy(true);

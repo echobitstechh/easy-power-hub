@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
 import '../../../core/data/models/service_request.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
+import '../../../core/data/models/timeline_step.dart';
+import 'package:easy_ph/core/utils/status_util.dart';
+
+import '../widgets/get_timeline_steps.dart';
 
 class RequestDetailsBottomSheet extends StatelessWidget {
   final ServiceRequest serviceRequest;
@@ -15,109 +18,11 @@ class RequestDetailsBottomSheet extends StatelessWidget {
     this.onCancelRequest,
   }) : super(key: key);
 
-  String _formatDateTime(dynamic dateTime) {
-    if (dateTime == null) return '';
-    DateTime dt;
-    if (dateTime is DateTime) {
-      dt = dateTime;
-    } else if (dateTime is String) {
-      try {
-        dt = DateTime.parse(dateTime);
-      } catch (_) {
-        return dateTime;
-      }
-    } else {
-      return dateTime.toString();
-    }
-    return DateFormat('yyyy-MM-dd hh:mm a').format(dt);
-  }
-
-  List<TimelineStep> _getTimelineSteps() {
-    final status = serviceRequest.status.toLowerCase();
-    final steps = <TimelineStep>[];
-
-    steps.add(TimelineStep(
-      title: 'Request Submitted',
-      description: 'Your service request has been received',
-      timestamp: _formatDateTime(serviceRequest.createdAt),
-      isCompleted: true,
-    ));
-
-    if (status == 'cancelled') {
-      steps.add(TimelineStep(
-        title: 'Request Cancelled',
-        description: serviceRequest.reason ?? 'You cancelled this service request',
-        timestamp: _formatDateTime(serviceRequest.updatedAt),
-        isCompleted: true,
-        isError: true,
-      ));
-      return steps;
-    } else if (status == 'declined') {
-      steps.add(TimelineStep(
-        title: 'Request Declined',
-        description: serviceRequest.reason ?? 'Your service request was declined',
-        timestamp: _formatDateTime(serviceRequest.updatedAt),
-        isCompleted: true,
-        isError: true,
-      ));
-      return steps;
-    } else if (status == 'accepted') {
-      steps.add(TimelineStep(
-        title: 'Provider Assigned',
-        description: serviceRequest.assignedPersonnel != null
-            ? '${serviceRequest.assignedPersonnel!.name} has been assigned to your request'
-            : 'Provider assigned to your request',
-        timestamp: _formatDateTime(serviceRequest.updatedAt),
-        isCompleted: true,
-      ));
-
-      steps.add(TimelineStep(
-        title: 'Service In Progress',
-        description: 'Service will be completed on scheduled date',
-        timestamp: 'Scheduled: ${serviceRequest.date}, ${serviceRequest.time}',
-        isCompleted: false,
-      ));
-    } else if (status == 'completed') {
-      steps.add(TimelineStep(
-        title: 'Provider Assigned',
-        description: serviceRequest.assignedPersonnel != null
-            ? '${serviceRequest.assignedPersonnel!.name} was assigned to your request'
-            : 'Provider was assigned to your request',
-        timestamp: 'Assigned',
-        isCompleted: true,
-      ));
-
-      steps.add(TimelineStep(
-        title: 'Service Completed',
-        description: 'Service has been successfully completed',
-        timestamp: _formatDateTime(serviceRequest.updatedAt),
-        isCompleted: true,
-      ));
-    } else {
-      steps.add(TimelineStep(
-        title: 'Provider Assignment',
-        description: 'Waiting for provider to be assigned',
-        timestamp: 'Pending',
-        isCompleted: false,
-      ));
-
-      steps.add(TimelineStep(
-        title: 'Service Completion',
-        description: 'Service completion pending',
-        timestamp: 'Pending',
-        isCompleted: false,
-      ));
-    }
-
-    return steps;
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final canCancel = serviceRequest.status.toLowerCase() == 'pending' ||
-        serviceRequest.status.toLowerCase() == 'accepted';
-    final timelineSteps = _getTimelineSteps();
+    final canCancel = StatusUtil.canCancel(serviceRequest.status);
+    final timelineSteps = getTimelineSteps(serviceRequest);
 
     return Container(
       decoration: BoxDecoration(
@@ -203,7 +108,7 @@ class RequestDetailsBottomSheet extends StatelessWidget {
                                 vertical: 6.0,
                               ),
                               decoration: BoxDecoration(
-                                color: _getStatusColor(serviceRequest.status),
+                                color: StatusUtil.getStatusColor(serviceRequest.status),
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
                               child: Text(
@@ -599,36 +504,20 @@ class RequestDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'pending':
-        return Colors.orange;
-      case 'accepted':
-        return Colors.green;
-      case 'completed':
-        return Colors.blue;
-      case 'cancelled':
-        return Colors.red;
-      case 'declined':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-}
-
-class TimelineStep {
-  final String title;
-  final String description;
-  final String timestamp;
-  final bool isCompleted;
-  final bool isError;
-
-  TimelineStep({
-    required this.title,
-    required this.description,
-    required this.timestamp,
-    required this.isCompleted,
-    this.isError = false,
-  });
+  // Color _getStatusColor(String status) {
+  //   switch (status.toLowerCase()) {
+  //     case 'pending':
+  //       return Colors.orange;
+  //     case 'accepted':
+  //       return Colors.green;
+  //     case 'completed':
+  //       return Colors.blue;
+  //     case 'cancelled':
+  //       return Colors.red;
+  //     case 'declined':
+  //       return Colors.red;
+  //     default:
+  //       return Colors.grey;
+  //   }
+  // }
 }
