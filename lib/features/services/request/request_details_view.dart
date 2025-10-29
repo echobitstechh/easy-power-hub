@@ -504,20 +504,4 @@ class RequestDetailsBottomSheet extends StatelessWidget {
     );
   }
 
-  // Color _getStatusColor(String status) {
-  //   switch (status.toLowerCase()) {
-  //     case 'pending':
-  //       return Colors.orange;
-  //     case 'accepted':
-  //       return Colors.green;
-  //     case 'completed':
-  //       return Colors.blue;
-  //     case 'cancelled':
-  //       return Colors.red;
-  //     case 'declined':
-  //       return Colors.red;
-  //     default:
-  //       return Colors.grey;
-  //   }
-  // }
 }
