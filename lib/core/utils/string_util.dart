@@ -22,20 +22,22 @@ String formatDate(dynamic date) {
   return "N/A"; // Default fallback
 }
 
-String formatDateTime(dynamic datetime){
-  if (datetime == null) return "N/A"; // Handle null values
-  if (datetime is String) {
-    try {
-      DateTime parsedDate = DateTime.parse(datetime).toLocal();
-      return DateFormat("dd MMM, yyyy HH:mm").format(parsedDate); // Example: 12 Mar, 2024 14:30
-    } catch (e) {
-      return "Invalid Date";
+  String formatDateTime(dynamic dateTime) {
+    if (dateTime == null) return '';
+    DateTime dt;
+    if (dateTime is DateTime) {
+      dt = dateTime;
+    } else if (dateTime is String) {
+      try {
+        dt = DateTime.parse(dateTime);
+      } catch (_) {
+        return dateTime;
+      }
+    } else {
+      return dateTime.toString();
     }
-  } else if (datetime is DateTime) {
-    return DateFormat("dd MMM, yyyy HH:mm").format(datetime);
+    return DateFormat('yyyy-MM-dd hh:mm a').format(dt);
   }
-  return "N/A"; // Default fallback
-}
 
 String timeAgoFromTimestamp(Timestamp timestamp) {
   final now = DateTime.now();

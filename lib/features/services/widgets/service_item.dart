@@ -1,4 +1,3 @@
-import 'package:easy_ph/core/utils/money_util.dart';
 
 import '../../../core/data/models/service.dart';
 
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../state.dart';
-import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../services_viewmodel.dart';
 
@@ -15,7 +13,7 @@ class ServiceItem extends StatelessWidget {
   final Service service;
   final ServicesviewModel viewModel;
 
-  const ServiceItem({
+  const ServiceItem({ 
     Key? key,
     required this.service,
     required this.viewModel,
@@ -34,11 +32,10 @@ class ServiceItem extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Service Image
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
               child: CachedNetworkImage(
-                imageUrl: service.image ?? 'https://via.placeholder.com/120', // Fallback for null image
+                imageUrl: service.image ?? 'https://via.placeholder.com/120',
                 fit: BoxFit.cover,
                 height: 90,
                 width: 86,
@@ -57,7 +54,6 @@ class ServiceItem extends StatelessWidget {
               ),
             ),
             horizontalSpaceSmall,
-            // Service Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,46 +81,32 @@ class ServiceItem extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   verticalSpaceTiny,
-                  Text(
-                    MoneyUtils().formatAmount(service.price.toInt()),
-                    style: GoogleFonts.roboto(
-                      textStyle: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                  ElevatedButton(
+                    onPressed: () => viewModel.requestSpecificService(service),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 8.0,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      minimumSize: Size.zero,
+                    ),
+                    child: Text(
+                      'Request Service',
+                      style: GoogleFonts.redHatDisplay(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-            horizontalSpaceSmall,
-            // Action Buttons
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.chat, color: Colors.green),
-                  onPressed: () => viewModel.openWhatsAppChat(
-                    service.name,
-                    service.phoneNumber ?? '',
-                  ),
-                ),
-                verticalSpaceTiny,
-                IconButton(
-                  icon: const Icon(Icons.phone, color: Colors.blueAccent), // Changed color for distinction
-                  onPressed: () => viewModel.callNumber(
-                    service.phoneNumber ?? '',
-                  ),
-                ),
-                verticalSpaceSmall,
-                // Example of a button to show the address sheet, if applicable per service
-                // This assumes `showServiceAddressSheet` can be generic or adapted.
-                // You might need to pass the current service to the sheet as well.
-                // TextButton(
-                //   onPressed: () => viewModel.showServiceAddressSheet(context, service),
-                //   child: const Text('Order Service'),
-                // ),
-              ],
             ),
           ],
         ),
