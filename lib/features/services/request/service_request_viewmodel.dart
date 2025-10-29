@@ -252,13 +252,13 @@ class ServiceRequestViewModel extends BaseViewModel {
     }
   }
 
-void _navigateToSuccess(BuildContext context) {  // ← Add context parameter
+void _navigateToSuccess(BuildContext context) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => SuccessView.serviceScheduled(
         onButtonPressed: () {
-          Navigator.of(context).pop(); // Pop success view
-          Navigator.of(context).pop(); // Pop request view
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
         },
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
