@@ -54,7 +54,6 @@ class SuccessView extends StatelessWidget {
               ),
               
               verticalSpaceLarge,
-              verticalSpaceMedium,
               
               Text(
                 title,
