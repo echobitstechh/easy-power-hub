@@ -45,6 +45,9 @@ class CheckoutViewModel extends BaseViewModel {
   bool loading = false;
   bool makingDefault = false;
   bool isPayOnDeliveryDisabled = false;
+  bool _isShippingExpanded = true;
+
+  bool get isShippingExpanded => _isShippingExpanded;
 
   List<Address> shippingAddresses = [];
   List<DeliveryZone> deliveryZones = [];
@@ -59,6 +62,10 @@ class CheckoutViewModel extends BaseViewModel {
 
   void init() async {
     await runBusyFuture(initData());
+  }
+
+  void toggleShippingExpanded() {
+    _isShippingExpanded = !_isShippingExpanded;
   }
 
   Future<void> initData() async {

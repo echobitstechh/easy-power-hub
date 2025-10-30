@@ -56,7 +56,9 @@ class ProductGridItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProductImage(context),
-            _buildProductDetails(context),
+            Expanded(
+              child: _buildProductDetails(context),
+            ),
           ],
         ),
       ),
@@ -106,7 +108,13 @@ class ProductGridItem extends StatelessWidget {
             ),
           ),
         ),
-        if (viewModel.isNewProduct(product.createdAt ?? ''))
+        if ((product.availability ?? 0) < 1)
+          const Positioned(
+            right: 16,
+            top: 16,
+            child: _OutOfStockTag(),
+          )
+        else if (viewModel.isNewProduct(product.createdAt ?? ''))
           const Positioned(
             left: 16,
             top: 16,
@@ -120,8 +128,9 @@ class ProductGridItem extends StatelessWidget {
 
   Widget _buildProductDetails(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(3),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -184,7 +193,7 @@ class ProductGridItem extends StatelessWidget {
           : const Icon(
         Icons.shopping_cart_outlined,
         color: kcSecondaryColor,
-        size: 20,
+        size: 24,
       ),
     );
   }
@@ -193,7 +202,7 @@ class ProductGridItem extends StatelessWidget {
     return InkWell(
       onTap: () async {
         final phoneNumber = '+2349040811471';
-        final message = "Hello, I'd like to inquire about the product: ${product.productName}";
+        final message = "Hello, I'd like to inquire about the product: ${product.productName} with the price of ${MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt())}. Is it available?";
         final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
         if (await canLaunchUrl(Uri.parse(url))) {
           await launchUrl(Uri.parse(url));
@@ -260,6 +269,29 @@ class _NewProductTag extends StatelessWidget {
       ),
       child: const Text(
         'New',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 8,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+class _OutOfStockTag extends StatelessWidget {
+  const _OutOfStockTag();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.red.shade700,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: const Text(
+        'Out of Stock',
         style: TextStyle(
           color: Colors.white,
           fontSize: 8,

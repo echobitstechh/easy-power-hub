@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:easy_ph/ui/common/ui_helpers.dart';
 
-class CompanyAddressSection extends StatelessWidget {
+class CompanyAddressSection extends StatelessWidget { 
   const CompanyAddressSection({super.key});
 
   // Method to launch Google Maps

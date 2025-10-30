@@ -1,6 +1,7 @@
 
 import 'package:easy_ph/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CheckoutPaymentOptions extends StatelessWidget {
   final String selectedMethod;
@@ -30,13 +31,33 @@ class CheckoutPaymentOptions extends StatelessWidget {
             ),
             verticalSpaceSmall,
             RadioListTile<String>(
-              title: const Text('Paystack'),
+              title: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/images/paystack.svg',
+                    height: 24,
+                    width: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Paystack'),
+                ],
+              ),
               value: 'paystack',
               groupValue: selectedMethod,
               onChanged: (value) => onMethodChanged(value!),
             ),
             RadioListTile<String>(
-              title: const Text('Pay on Delivery'),
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.local_shipping_outlined,
+                    size: 24,
+                    color: isPayOnDeliveryDisabled ? Colors.grey : null,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text('Pay on Delivery'),
+                ],
+              ),
               value: 'delivery',
               groupValue: selectedMethod,
               onChanged: isPayOnDeliveryDisabled ? null : (value) => onMethodChanged(value!),

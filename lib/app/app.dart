@@ -1,6 +1,7 @@
 import 'package:easy_ph/features/Profile/orders/order_view.dart';
 import 'package:easy_ph/features/Profile/password/change_password_view.dart';
 import 'package:easy_ph/features/Profile/profile_view.dart';
+import 'package:easy_ph/features/Profile/referral/referrals_view.dart';
 import 'package:easy_ph/features/Profile/shipping/shipping_address_view.dart';
 import 'package:easy_ph/features/Profile/support/support_view.dart';
 import 'package:easy_ph/features/auth/presentation/password_reset/password_reset_view.dart';
@@ -61,6 +62,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     MaterialRoute(page: ShippingAddressesPage),
     MaterialRoute(page: SupportView),
     MaterialRoute(page: SearchView),
+    MaterialRoute(page: ReferralsView),
     MaterialRoute(page: ChangePasswordView),
     MaterialRoute(page: PaymentSuccessView),
     CustomRoute(
