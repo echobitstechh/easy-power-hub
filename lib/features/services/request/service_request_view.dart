@@ -97,7 +97,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                           ),
                         ),
                       ),
-                      verticalSpaceTiny,
+                      verticalSpaceSmall,
                       TextFieldWidget(
                         hint: 'Enter service name',
                         controller: viewModel.serviceNameController,
@@ -210,7 +210,6 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                       color: Colors.grey[400],
                                     ),
                                   ),
-                                  suffixIcon: const Icon(Icons.location_on_outlined),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(8.0),
                                     borderSide: BorderSide(color: Colors.grey[300]!),
@@ -278,7 +277,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                     ),
                                   ),
                                 ),
-                                verticalSpaceTiny,
+                                verticalSpaceSmall,
                                 TextFieldWidget(
                                   hint: 'dd/mm/yyyy',
                                   controller: viewModel.dateController,
@@ -305,7 +304,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                                     ),
                                   ),
                                 ),
-                                verticalSpaceTiny,
+                                verticalSpaceSmall,
                                 TextFieldWidget(
                                   hint: 'Select time',
                                   controller: viewModel.timeController,
@@ -333,7 +332,7 @@ class RequestServiceView extends StackedView<ServiceRequestViewModel> {
                           ),
                         ),
                       ),
-                      verticalSpaceTiny,
+                      verticalSpaceSmall,
                       TextFieldWidget(
                         hint: 'Describe the issue or service needed...',
                         controller: viewModel.descriptionController,

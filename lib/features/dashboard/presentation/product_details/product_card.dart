@@ -479,22 +479,24 @@ class _ProductCardState extends State<ProductCard> {
           ),
           verticalSpaceSmall,
           const Divider(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Product Rating & Reviews',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "${productReviews.length} reviews",
-                  style: const TextStyle(color: Colors.grey),
-                )
-              ],
+          if (productReviews.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Product Rating & Reviews',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "${productReviews.length} reviews",
+                    style: const TextStyle(color: Colors.grey),
+                  )
+                ],
+              ),
             ),
-          ),
+          ],
           verticalSpaceSmall,
           Column(
             children: productReviews.map((review) {

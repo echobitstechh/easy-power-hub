@@ -352,6 +352,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
 
   Widget _buildInstallmentOptions(CartViewModel viewModel, CartItem item) {
     final installmentFrequency = item.product?.installmentFrequency ?? 0;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final selectedFrequency = viewModel.selectedInstallments[item.product?.id] ?? item.installmentFrequency ?? 1;
 
     return Row(
@@ -377,7 +378,7 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 selectedColor: kcPrimaryColor,
                 labelStyle: TextStyle(
-                  color: isSelected ? kcWhiteColor : (uiMode.value == AppUiModes.dark ? kcWhiteColor : kcBlackColor),
+                  color: isSelected ? kcWhiteColor : (isDarkMode ? kcWhiteColor : kcBlackColor),
                   fontSize: 12,
                 ),
                 selected: isSelected,

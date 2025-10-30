@@ -53,56 +53,79 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                       CheckoutOrderSummary(cartItems: cartItems),
                       verticalSpaceSmall,
                       Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    "Shipping Details",
+                        child: ExpansionTile(
+                          title: const Text(
+                            "Shipping Details",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          subtitle: !viewModel.isShippingExpanded && viewModel.shippingId.isNotEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Text(
+                                    viewModel.getSelectedAddressPreview(),
                                     style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 18),
+                                      fontSize: 13,
+                                      color: Colors.grey[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  TextButton.icon(
-                                    onPressed:
-                                        viewModel.showAddAddressBottomSheet,
-                                    icon: const Icon(Icons.add, size: 18),
-                                    label: const Text("Add New"),
+                                )
+                              : !viewModel.isShippingExpanded && viewModel.shippingId.isEmpty
+                                  ? Text(
+                                      "No address selected",
+                                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                    )
+                                  : null,
+                          initiallyExpanded: true,
+                          onExpansionChanged: (expanded) {
+                            viewModel.toggleShippingExpanded();
+                          },
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      TextButton.icon(
+                                        onPressed: viewModel.showAddAddressBottomSheet,
+                                        icon: const Icon(Icons.add, size: 18),
+                                        label: const Text("Add New"),
+                                      ),
+                                    ],
                                   ),
+                                  verticalSpaceSmall,
+                                  viewModel.isShippingLoading
+                                      ? const ShippingListShimmer()
+                                      : viewModel.shippingAddresses.isEmpty
+                                          ? const Text(
+                                              "No shipping addresses found. Add one to continue.")
+                                          : Column(
+                                              children: viewModel.shippingAddresses.map((address) {
+                                                return ListTile(
+                                                  title: Text(address.address ?? 'No address'),
+                                                  subtitle: Text(
+                                                      '${address.city ?? ''}, ${address.state ?? ''}'),
+                                                  trailing: Radio(
+                                                    value: address.id,
+                                                    groupValue: viewModel.shippingId,
+                                                    onChanged: (id) =>
+                                                        viewModel.updateShippingId(id as String),
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
                                 ],
                               ),
-                              verticalSpaceSmall,
-                              viewModel.isShippingLoading
-                                  ? const ShippingListShimmer()
-                                  : viewModel.shippingAddresses.isEmpty
-                                      ? const Text(
-                                          "No shipping addresses found. Add one to continue.")
-                                      : Column(
-                                          children: viewModel.shippingAddresses
-                                              .map((address) {
-                                            return ListTile(
-                                              title: Text(address.address ??
-                                                  'No address'),
-                                              subtitle: Text(
-                                                  '${address.city ?? ''}, ${address.state ?? ''}'),
-                                              trailing: Radio(
-                                                value: address.id,
-                                                groupValue:
-                                                    viewModel.shippingId,
-                                                onChanged: (id) =>
-                                                    viewModel.updateShippingId(
-                                                        id as String),
-                                              ),
-                                            );
-                                          }).toList(),
-                                        ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
                       verticalSpaceSmall,
@@ -156,6 +179,7 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
             ),
     );
   }
+
 
   @override
   CheckoutViewModel viewModelBuilder(BuildContext context) =>

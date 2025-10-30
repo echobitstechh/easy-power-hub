@@ -77,7 +77,7 @@ class ServiceItem extends StatelessWidget {
                         fontSize: 10,
                       ),
                     ),
-                    maxLines: 3,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   verticalSpaceTiny,

@@ -12,6 +12,7 @@ import '../../../../core/data/models/product.dart';
 import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
+import 'product_flags.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product product;
@@ -56,7 +57,9 @@ class ProductGridItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProductImage(context),
-            _buildProductDetails(context),
+            Expanded(
+              child: _buildProductDetails(context),
+            ),
           ],
         ),
       ),
@@ -106,11 +109,17 @@ class ProductGridItem extends StatelessWidget {
             ),
           ),
         ),
-        if (viewModel.isNewProduct(product.createdAt ?? ''))
+        if ((product.availability ?? 0) < 1)
+          const Positioned(
+            right: 16,
+            top: 16,
+            child: OutOfStockTag(),
+          )
+        else if (viewModel.isNewProduct(product.createdAt ?? ''))
           const Positioned(
             left: 16,
             top: 16,
-            child: _NewProductTag(),
+            child: NewProductTag(),
           ),
       ],
     );
@@ -120,8 +129,9 @@ class ProductGridItem extends StatelessWidget {
 
   Widget _buildProductDetails(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(5),
+      padding: const EdgeInsets.all(3),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -184,7 +194,7 @@ class ProductGridItem extends StatelessWidget {
           : const Icon(
         Icons.shopping_cart_outlined,
         color: kcSecondaryColor,
-        size: 20,
+        size: 24,
       ),
     );
   }
@@ -193,7 +203,7 @@ class ProductGridItem extends StatelessWidget {
     return InkWell(
       onTap: () async {
         final phoneNumber = '+2349040811471';
-        final message = "Hello, I'd like to inquire about the product: ${product.productName}";
+        final message = "Hello, I'd like to inquire about the product: ${product.productName} with the price of ${MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt())}. Is it available?";
         final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
         if (await canLaunchUrl(Uri.parse(url))) {
           await launchUrl(Uri.parse(url));
@@ -247,25 +257,4 @@ class ProductGridItem extends StatelessWidget {
   }
 }
 
-class _NewProductTag extends StatelessWidget {
-  const _NewProductTag();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black87,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Text(
-        'New',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}

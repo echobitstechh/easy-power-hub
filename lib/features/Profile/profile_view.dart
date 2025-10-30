@@ -35,9 +35,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
           SliverToBoxAdapter(
             child: _buildSignOutAndDeleteSection(viewModel),
           ),
-          SliverToBoxAdapter( // Add the new section here
-            child: CompanyAddressSection(),
-          ),
+          
         ],
       ),
     );
@@ -61,6 +59,11 @@ class ProfileView extends StackedView<ProfileViewModel> {
           onTap: viewModel.navigateToSupport,
           leading: const Icon(Icons.support_agent, color: kcOrangeColor),
           title: const Text("Support"),
+        ),
+        ListTile(
+          onTap: viewModel.navigateToReferrals,
+          leading: const Icon(Icons.share, color: kcOrangeColor),
+          title: const Text("Referrals"),
         ),
         ListTile(
           onTap: viewModel.navigateToChangePassword,

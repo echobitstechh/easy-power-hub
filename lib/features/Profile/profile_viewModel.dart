@@ -239,5 +239,6 @@ class ProfileViewModel extends BaseViewModel {
   void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
   void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
   void navigateToSupport() => _navigationService.navigateTo(Routes.supportView);
+  void navigateToReferrals() => _navigationService.navigateTo(Routes.referralsView);
   void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
 }
