@@ -65,7 +65,7 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                               ? Padding(
                                   padding: const EdgeInsets.only(top: 4.0),
                                   child: Text(
-                                    _getSelectedAddressPreview(viewModel),
+                                    viewModel.getSelectedAddressPreview(),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey[700],
@@ -180,21 +180,6 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
     );
   }
 
-  String _getSelectedAddressPreview(CheckoutViewModel viewModel) {
-    if (viewModel.shippingId.isEmpty || viewModel.shippingAddresses.isEmpty) {
-      return "No address selected";
-    }
-
-    try {
-      final selectedAddress = viewModel.shippingAddresses.firstWhere(
-        (address) => address.id == viewModel.shippingId,
-      );
-
-      return '${selectedAddress.address ?? ''}, ${selectedAddress.city ?? ''}, ${selectedAddress.state ?? ''}';
-    } catch (e) {
-      return "No address selected";
-    }
-  }
 
   @override
   CheckoutViewModel viewModelBuilder(BuildContext context) =>

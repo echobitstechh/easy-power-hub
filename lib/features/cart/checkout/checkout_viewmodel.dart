@@ -279,6 +279,22 @@ class CheckoutViewModel extends BaseViewModel {
     }
   }
 
+  String getSelectedAddressPreview() {
+    if (shippingId.isEmpty || shippingAddresses.isEmpty) {
+      return "No address selected";
+    }
+
+    try {
+      final selectedAddress = shippingAddresses.firstWhere(
+        (address) => address.id == shippingId,
+      );
+
+      return '${selectedAddress.address ?? ''}, ${selectedAddress.city ?? ''}, ${selectedAddress.state ?? ''}';
+    } catch (e) {
+      return "No address selected";
+    }
+  }
+  
   void updatePaymentMethod(String method) {
     paymentMethod = method;
     notifyListeners();

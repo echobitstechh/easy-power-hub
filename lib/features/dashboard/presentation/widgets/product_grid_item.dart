@@ -12,6 +12,7 @@ import '../../../../core/data/models/product.dart';
 import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
+import 'product_flags.dart';
 
 class ProductGridItem extends StatelessWidget {
   final Product product;
@@ -112,13 +113,13 @@ class ProductGridItem extends StatelessWidget {
           const Positioned(
             right: 16,
             top: 16,
-            child: _OutOfStockTag(),
+            child: OutOfStockTag(),
           )
         else if (viewModel.isNewProduct(product.createdAt ?? ''))
           const Positioned(
             left: 16,
             top: 16,
-            child: _NewProductTag(),
+            child: NewProductTag(),
           ),
       ],
     );
@@ -256,48 +257,4 @@ class ProductGridItem extends StatelessWidget {
   }
 }
 
-class _NewProductTag extends StatelessWidget {
-  const _NewProductTag();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.black87,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Text(
-        'New',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-class _OutOfStockTag extends StatelessWidget {
-  const _OutOfStockTag();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.red.shade700,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Text(
-        'Out of Stock',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 8,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
