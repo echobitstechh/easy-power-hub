@@ -97,6 +97,10 @@ abstract class IRepository {
 
   Future<ApiResponse> getAddresses();
 
+  Future<ApiResponse> getReferralCode();
+
+  Future<ApiResponse> getReferralUsers({required int page, required int limit, String status});
+
   Future<ApiResponse> getDeliveryZones();
 
   Future<ApiResponse> getCategories();

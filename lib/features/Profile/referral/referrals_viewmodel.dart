@@ -1,23 +1,24 @@
+import 'package:easy_ph/app/app.logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
-// import 'package:share_plus/share_plus.dart';
-
-class ReferralItem {
-  final String name;
-  final String dateJoined;
-  final String reward;
-  final String status;
-
-  ReferralItem({
-    required this.name,
-    required this.dateJoined,
-    required this.reward,
-    required this.status,
-  });
-}
+import 'package:stacked_services/stacked_services.dart';
+import 'package:share_plus/share_plus.dart';
+import '../../../app/app.locator.dart';
+import '../../../core/data/repositories/repository.dart';
+import '../../../core/utils/local_stotage.dart';
+import '../../../core/data/models/referral_item.dart';
+import '../../../core/utils/string_util.dart';
 
 class ReferralsViewModel extends BaseViewModel {
+  final _repo = locator<Repository>();
+  final _log = getLogger("ReferralsViewModel");
+  final _snackBar = locator<SnackbarService>();
+  final _localStorage = locator<LocalStorage>();
+  final _navigationService = locator<NavigationService>();
+  final _bottomSheetService = locator<BottomSheetService>();
+  final _dialogService = locator<DialogService>();
+
   int totalReferrals = 0;
   int activeReferrals = 0;
   int bonusEarned = 0;
@@ -25,36 +26,18 @@ class ReferralsViewModel extends BaseViewModel {
   String referralLink = 'https://www.easyopenhub.com/referral/1';
   String minPurchaseAmount = '₦50,000';
 
-  List<ReferralItem> referrals = [
-    ReferralItem(
-      name: 'Usman Gibran',
-      dateJoined: 'Oct 2...',
-      reward: '₦500',
-      status: 'Paid',
-    ),
-    ReferralItem(
-      name: 'Maxy Obi',
-      dateJoined: 'Oct 10...',
-      reward: '₦1,000',
-      status: 'Pending',
-    ),
-    ReferralItem(
-      name: 'David John',
-      dateJoined: 'Oct 15...',
-      reward: '₦2,000',
-      status: 'Paid',
-    ),
-  ];
+  String? referralId;
+  String? referralCode;
 
-  // Initialize - This is where you'll fetch data from API later
-  void initialize() {
-    // TODO: Fetch referral stats from API
-    // TODO: Fetch referral timeline from API
-    
-    // Mock data for now
-    totalReferrals = referrals.length;
-    activeReferrals = referrals.where((r) => r.status.toLowerCase() == 'pending').length;
-    bonusEarned = 0;
+  List<ReferralItem> referrals = [];
+
+  int currentPage = 1;
+  int totalPages = 1;
+  bool hasMoreData = false;
+
+  void initialize() async {
+    await fetchReferralCode();
+    await fetchReferralUsers();
     
     notifyListeners();
   }
@@ -71,31 +54,104 @@ class ReferralsViewModel extends BaseViewModel {
   }
 
   void shareReferralLink() {
-    // Share.share(
-    //   'Join me on EasyOpenHub and get amazing products! Use my referral link: $referralLink',
-    //   subject: 'Join EasyOpenHub',
-    // );
+    if (referralCode == null || referralCode!.isEmpty) {
+      _snackBar.showSnackbar(
+        message: 'Referral code not available',
+      );
+      return;
+    }
+    
+    Share.share(
+      'Join me on EasyPowerHub and get amazing products! 🎁\n\n'
+      'Use my referral code: $referralCode\n'
+      'Or click this link: $referralLink\n\n'
+      'Sign up now and enjoy exclusive deals!',
+      subject: 'Join EasyOpenHub with my referral code',
+    );
   }
 
-  Future<void> fetchReferrals() async {
-    setBusy(true);
-    
+  Future<void> fetchReferralUsers({int page = 1, int limit = 10, String? status}) async {
+    if (page == 1) {
+      setBusy(true);
+    }
+    notifyListeners();
+
     try {
-      // TODO: Replace with actual API call
-      // final response = await _apiService.getReferrals();
-      // referrals = response.data;
-      // totalReferrals = response.totalReferrals;
-      // activeReferrals = response.activeReferrals;
-      // bonusEarned = response.bonusEarned;
+      final response = await _repo.getReferralUsers(
+        page: page,
+        limit: limit,
+        status: status,
+      );
       
-      await Future.delayed(const Duration(seconds: 1)); // Mock delay
-      
-      notifyListeners();
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data['data'] ?? [];
+        final pagination = response.data['pagination'];
+        
+        if (page == 1) {
+          referrals = data.map((item) => ReferralItem.fromJson(item)).toList();
+        } else {
+          referrals.addAll(data.map((item) => ReferralItem.fromJson(item)).toList());
+        }
+        
+        totalPages = pagination['totalPages'] ?? 1;
+        currentPage = pagination['currentPage'] ?? 1;
+        hasMoreData = currentPage < totalPages;
+        
+        totalReferrals = pagination['total'] ?? 0;
+        activeReferrals = referrals.where((r) => 
+          r.bonusStatus.toLowerCase() == 'in progress' || 
+          r.bonusStatus.toLowerCase() == 'pending'
+        ).length;
+        
+        bonusEarned = referrals.where((r) => 
+          r.bonusStatus.toLowerCase() == 'completed'
+        ).length;
+        
+        _log.i('Fetched ${referrals.length} referrals');
+      } else {
+        _snackBar.showSnackbar(
+          message: response.data['message'] ?? 'Failed to fetch referrals',
+        );
+      }
     } catch (e) {
-      // Handle error
-      debugPrint('Error fetching referrals: $e');
+      _log.e('Error fetching referral users: $e');
+      _snackBar.showSnackbar(
+        message: 'Failed to load referrals',
+      );
     } finally {
       setBusy(false);
+      notifyListeners();
     }
   }
+
+  Future<void> fetchReferralCode() async {
+    setBusy(true);
+    notifyListeners();
+    
+    try {
+      final response = await _repo.getReferralCode();
+      
+      if (response.statusCode == 200) {
+        referralId = response.data['data']['id'];
+        referralCode = response.data['data']['referralCode'];
+        
+        referralLink = '$referralCode';
+        
+        _log.i('Referral code fetched: $referralCode');
+      } else {
+        _snackBar.showSnackbar(
+          message: response.data['message'] ?? 'Failed to fetch referral code',
+        );
+      }
+    } catch (e) {
+      _log.e('Error fetching referral code: $e');
+      _snackBar.showSnackbar(
+        message: 'Failed to load referral code',
+      );
+    } finally {
+      setBusy(false);
+      notifyListeners();
+    }
+  }
+
 }
