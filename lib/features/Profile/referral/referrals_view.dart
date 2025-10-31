@@ -2,6 +2,8 @@ import 'package:easy_ph/ui/common/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'referrals_viewmodel.dart';
+import '../../../core/utils/string_util.dart';
+import '../../../ui/components/shimmers/referral_timeline_shimmer.dart';
 
 class ReferralsView extends StatelessWidget {
   const ReferralsView({super.key});
@@ -151,100 +153,139 @@ class ReferralsView extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     verticalSpaceSmall,
                     
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      child: const Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              'Referral',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                    // Show empty state or table
+                    if (viewModel.referrals.isEmpty && !viewModel.isBusy)
+                      Padding(
+                        padding: const EdgeInsets.all(32.0),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.people_outline,
+                                size: 64,
+                                color: Colors.grey[400],
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Text(
-                              'Date Joined',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(height: 16),
+                              Text(
+                                'No referrals yet',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey[700],
+                                ),
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Text(
-                              'Reward',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                              const SizedBox(height: 8),
+                              Text(
+                                'Start inviting friends to earn rewards!',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[600],
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                          ),
-                          horizontalSpaceTiny,
-                          SizedBox(
-                            width: 70,
-                            child: Text(
-                              'Status',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ...viewModel.referrals.map((referral) {
-                      return Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            top: BorderSide(color: Colors.grey[300]!),
+                            ],
                           ),
                         ),
-                        child: Row(
+                      )
+                    else if (viewModel.isBusy)
+                      const ReferralTimelineShimmer()
+                    else ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        child: const Row(
                           children: [
                             Expanded(
                               flex: 2,
                               child: Text(
-                                referral.name,
-                                style: const TextStyle(fontSize: 12),
-                                overflow: TextOverflow.ellipsis,
+                                'Referral',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             Expanded(
                               flex: 2,
                               child: Text(
-                                referral.dateJoined,
-                                style: const TextStyle(fontSize: 12),
+                                'Date Joined',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
                             Expanded(
                               flex: 1,
                               child: Text(
-                                referral.reward,
-                                style: const TextStyle(fontSize: 12),
+                                'Reward',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
+                            horizontalSpaceTiny,
                             SizedBox(
                               width: 70,
-                              child: _buildStatusChip(referral.status),
+                              child: Text(
+                                'Status',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      );
-                    }).toList(),
+                      ),
+                      ...viewModel.referrals.map((referral) {
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  referral.name,
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  formatDate(referral.dateJoined),
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  referral.reward,
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              SizedBox(
+                                width: 70,
+                                child: _buildStatusChip(referral.status),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ],
                   ],
                 ),
               ),
+              
             ],
           ),
         ),
@@ -294,11 +335,15 @@ class ReferralsView extends StatelessWidget {
     Color textColor;
 
     switch (status.toLowerCase()) {
-      case 'paid':
+      case 'completed':
         backgroundColor = Colors.green[100]!;
         textColor = Colors.green[700]!;
         break;
       case 'pending':
+        backgroundColor = Colors.orange[100]!;
+        textColor = Colors.yellow[700]!;
+        break;
+      case 'in progress':
         backgroundColor = Colors.orange[100]!;
         textColor = Colors.orange[700]!;
         break;

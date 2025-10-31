@@ -673,7 +673,39 @@ class Repository extends IRepository {
     return response;
   }
 
+  @override
+  Future<ApiResponse> getReferralCode() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "profile/referralCode",
+    );
 
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getReferralUsers({
+    String? status,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    Map<String, dynamic> params = {
+      "page": page,
+      "limit": limit,
+    };
+
+    if (status != null && status.isNotEmpty) {
+      params["status"] = status;
+    }
+
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "profile/referrals",
+      reqParams: params,
+    );
+
+    return response;
+  }
 
   @override
   Future<ApiResponse> getAddresses() async {

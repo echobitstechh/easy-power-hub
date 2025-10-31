@@ -44,6 +44,7 @@ class AuthViewModel extends BaseViewModel {
   final phone = TextEditingController();
   final password = TextEditingController();
   final cPassword = TextEditingController();
+  final referralCode = TextEditingController();
   final otp = TextEditingController();
   final initialEmail = TextEditingController();
   final inputController = TextEditingController();
@@ -202,6 +203,7 @@ class AuthViewModel extends BaseViewModel {
         "email": email.text,
         "phoneNumber": phone.text,
         "password": password.text,
+        "referralCode": referralCode.text,
         "fcmToken": fcmToken,
       });
 
@@ -421,6 +423,7 @@ class AuthViewModel extends BaseViewModel {
         "email": email.text.isEmpty ? profile.value.email : email.text,
         "phoneNumber": phone.text.isEmpty ? profile.value.phoneNumber : phone.text,
         "password": password.text,
+        "referralCode": referralCode.text,
         "fcmToken": fcmToken,
       });
 

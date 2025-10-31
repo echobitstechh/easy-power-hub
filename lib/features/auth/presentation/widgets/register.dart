@@ -219,6 +219,11 @@ class Register extends StackedView<AuthViewModel> {
             child: Icon(viewModel.obscure ? Icons.visibility_off : Icons.visibility),
           ),
         ),
+        verticalSpaceMedium,
+        TextFieldWidget(
+          hint: "referral code (optional)",
+          controller: viewModel.referralCode,
+        ),
         verticalSpace(30),
         SubmitButton(
           isLoading: viewModel.isBusy,
