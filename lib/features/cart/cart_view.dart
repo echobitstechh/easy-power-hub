@@ -255,6 +255,29 @@ class _CartContentState extends State<_CartContent> with TickerProviderStateMixi
                           ),
                         ),
                       ),
+                      if (item.product?.installmentDeposit != null && 
+                        item.product!.installmentDeposit.toString().isNotEmpty)
+                      ...[
+                        verticalSpaceTiny,
+                        Builder(
+                          builder: (_) {
+                            final depositRaw = item.product!.installmentDeposit;
+                            final int depositValue = depositRaw is int
+                                ? depositRaw
+                                : int.tryParse(depositRaw.toString()) ?? 0;
+                            return Text(
+                              "Down Payment: ${MoneyUtils().formatAmount(depositValue)}",
+                              style: GoogleFonts.roboto(
+                                textStyle: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: kcPrimaryColor,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ],
                   ),
                 ),

@@ -22,6 +22,7 @@ class Product {
   String? updatedAt;
   bool? installment;
   int? installmentFrequency;
+  int? installmentDeposit;
   String? status;
   List<String>? reviews;
   List<String>? images;
@@ -50,6 +51,7 @@ class Product {
     this.installment,
     this.status,
     this.installmentFrequency,
+    this.installmentDeposit,
     this.tags,
   });
 
@@ -75,6 +77,7 @@ class Product {
     images = json['images'] != null ? List<String>.from(json['images']) : null;
     installment = json['installment'];
     installmentFrequency = json['installmentFrequency'];
+    installmentDeposit = json['installmentDeposit'];
     status = json['status'];
 
     tags = json['tags'] != null
@@ -104,6 +107,7 @@ class Product {
     data['updatedAt'] = updatedAt;
     data['installment'] = installment;
     data['installmentFrequency'] = installmentFrequency;
+    data['installmentDeposit'] = installmentDeposit;
     data['status'] = status;
     if (reviews != null) {
       data['reviews'] = reviews;
