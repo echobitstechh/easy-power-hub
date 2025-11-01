@@ -9,6 +9,7 @@ class CartItem {
   double? installmentTotalPrice;
   bool? isInstallment;
   int? installmentFrequency;
+  int? installmentDeposit;
   DateTime? createdAt;
   DateTime? updatedAt;
   Product? product;
@@ -20,6 +21,7 @@ class CartItem {
     this.installmentTotalPrice,
     this.isInstallment,
     this.installmentFrequency,
+    this.installmentDeposit,
     this.createdAt,
     this.updatedAt,
     this.product,
@@ -36,6 +38,7 @@ class CartItem {
           : null,
       isInstallment: json['isInstallment'] as bool?,
       installmentFrequency: json['installmentFrequency'] as int?,
+      installmentDeposit: json['installmentDeposit'] as int?,
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
       product: json['product'] != null ? Product.fromJson(json['product']) : null,
@@ -51,6 +54,7 @@ class CartItem {
       'installmentTotalPrice': installmentTotalPrice,
       'isInstallment': isInstallment,
       'installmentFrequency': installmentFrequency,
+      'installmentDeposit': installmentDeposit,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'product': product?.toJson(),

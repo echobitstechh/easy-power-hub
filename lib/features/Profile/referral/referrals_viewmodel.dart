@@ -62,9 +62,8 @@ class ReferralsViewModel extends BaseViewModel {
     }
     
     Share.share(
-      'Join me on EasyPowerHub and get amazing products! 🎁\n\n'
+      'Join me on Easypowerhub and get amazing products! 🎁\n\n'
       'Use my referral code: $referralCode\n'
-      'Or click this link: $referralLink\n\n'
       'Sign up now and enjoy exclusive deals!',
       subject: 'Join EasyOpenHub with my referral code',
     );

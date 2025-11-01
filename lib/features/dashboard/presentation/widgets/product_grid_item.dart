@@ -111,8 +111,8 @@ class ProductGridItem extends StatelessWidget {
         ),
         if ((product.availability ?? 0) < 1)
           const Positioned(
-            right: 16,
-            top: 16,
+            right: 10,
+            top: 10,
             child: OutOfStockTag(),
           )
         else if (viewModel.isNewProduct(product.createdAt ?? ''))
@@ -141,7 +141,7 @@ class ProductGridItem extends StatelessWidget {
                 child: Text(
                   product.productName ?? 'Product name',
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,
@@ -163,7 +163,7 @@ class ProductGridItem extends StatelessWidget {
                   MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt()),
                   style: const TextStyle(
                     fontFamily: 'Roboto',
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                   overflow: TextOverflow.ellipsis,
