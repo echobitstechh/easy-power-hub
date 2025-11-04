@@ -14,6 +14,7 @@ class LocalStorageDir {
   static const String uiMode = "uiMode";
   static const String productCart = "productCart";
   static const String category = "category";
+  static const String themeMode = 'theme_mode';
 
 
 }

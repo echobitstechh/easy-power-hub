@@ -1,6 +1,7 @@
 import 'package:easy_ph/features/Profile/profile_viewModel.dart';
 import 'package:easy_ph/features/Profile/widgets/company_address_view.dart';
 import 'package:easy_ph/features/Profile/widgets/profile_picture_section.dart';
+import 'package:easy_ph/ui/components/theme_toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -18,9 +19,15 @@ class ProfileView extends StackedView<ProfileViewModel> {
       appBar: AppBar(
         centerTitle: true,
         title: const Text("Profile"),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: ThemeToggleWidget(),
+          ),
+        ],
       ),
       body: viewModel.isBusy
-          ? const ProfilePageShimmer() // Replaced CircularProgressIndicator with shimmer
+          ? const ProfilePageShimmer()
           : CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -35,7 +42,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
           SliverToBoxAdapter(
             child: _buildSignOutAndDeleteSection(viewModel),
           ),
-          
         ],
       ),
     );
@@ -44,7 +50,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
   Widget _buildActionList(BuildContext context, ProfileViewModel viewModel) {
     return Column(
       children: [
-        // ... list items
         ListTile(
           onTap: viewModel.navigateToOrders,
           leading: const Icon(Icons.fire_truck_rounded, color: kcPrimaryColor),
@@ -70,18 +75,6 @@ class ProfileView extends StackedView<ProfileViewModel> {
           leading: const Icon(Icons.lock, color: kcOrangeColor),
           title: const Text("Change password"),
         ),
-        // ListTile(
-        //   onTap: viewModel.toggleUiMode,
-        //   leading: const Icon(Icons.light_mode_sharp, color: kcOrangeColor),
-        //   title: const Text("Dark Theme"),
-        //   trailing: ValueListenableBuilder<AppUiModes>(
-        //     valueListenable: uiMode,
-        //     builder: (context, value, child) => Switch(
-        //       value: value == AppUiModes.dark,
-        //       onChanged: (val) => viewModel.toggleUiMode(),
-        //     ),
-        //   ),
-        // ),
       ],
     );
   }

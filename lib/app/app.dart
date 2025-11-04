@@ -1,3 +1,4 @@
+import 'package:easy_ph/core/services/theme_service.dart';
 import 'package:easy_ph/features/Profile/orders/order_view.dart';
 import 'package:easy_ph/features/Profile/password/change_password_view.dart';
 import 'package:easy_ph/features/Profile/profile_view.dart';
@@ -96,6 +97,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     LazySingleton(classType: Repository),
     LazySingleton(classType: AuthViewModel),
     LazySingleton(classType: ExistingServicesViewModel),
+    LazySingleton(classType: ThemeService),
     // @stacked-service
   ],
   bottomsheets: [
