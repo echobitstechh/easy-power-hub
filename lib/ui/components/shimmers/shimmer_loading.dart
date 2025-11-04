@@ -29,15 +29,15 @@ class DashboardShimmer extends StatelessWidget {
     return const ShimmerLoading(
       child: Column(
         children: [
-          _ShimmerContainer(height: 200, borderRadius: 15),
+          ShimmerContainer(height: 200, borderRadius: 15),
           verticalSpaceSmall,
-          _ShimmerQuickActionsGrid(),
+          ShimmerQuickActionsGrid(),
           verticalSpaceMedium,
-          _ShimmerQuickActionsGrid(),
+          ShimmerQuickActionsGrid(),
           verticalSpaceMedium,
-          _ShimmerSlider(),
+          ShimmerSlider(),
           verticalSpaceMedium,
-          _ShimmerSlider(),
+          ShimmerSlider(),
         ],
       ),
     );
@@ -45,12 +45,12 @@ class DashboardShimmer extends StatelessWidget {
 }
 
 /// Shimmer effect for a generic container.
-class _ShimmerContainer extends StatelessWidget {
+class ShimmerContainer extends StatelessWidget {
   final double height;
   final double? width;
   final double borderRadius;
 
-  const _ShimmerContainer({
+  const ShimmerContainer({super.key, 
     required this.height,
     this.width,
     this.borderRadius = 8.0,
@@ -70,8 +70,8 @@ class _ShimmerContainer extends StatelessWidget {
 }
 
 /// Shimmer effect for the quick action grid items.
-class _ShimmerQuickActionsGrid extends StatelessWidget {
-  const _ShimmerQuickActionsGrid();
+class ShimmerQuickActionsGrid extends StatelessWidget {
+  const ShimmerQuickActionsGrid({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -85,19 +85,19 @@ class _ShimmerQuickActionsGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       children: List.generate(
         4,
-            (index) => const _ShimmerContainer(height: 60),
+            (index) => const ShimmerContainer(height: 60),
       ),
     );
   }
 }
 
 /// Shimmer effect for the horizontal sliders.
-class _ShimmerSlider extends StatelessWidget {
-  const _ShimmerSlider();
+class ShimmerSlider extends StatelessWidget {
+  const ShimmerSlider({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return _ShimmerContainer(
+    return ShimmerContainer(
       height: MediaQuery.of(context).size.height * 0.2,
       borderRadius: 15,
     );

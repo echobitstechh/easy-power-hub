@@ -63,14 +63,14 @@ class DashboardView extends StackedView<DashboardViewModel> {
               controller: _listController,
               slivers: [
                 _buildSliverAppBar(context, viewModel),
-                if (viewModel.isBusy)
-                  const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
-                      child: DashboardShimmer(),
-                    ),
-                  )
-                else
+                // if (viewModel.isBusy)
+                //   const SliverToBoxAdapter(
+                //     child: Padding(
+                //       padding: EdgeInsets.symmetric(horizontal: 20.0),
+                //       child: DashboardShimmer(),
+                //     ),
+                //   )
+                // else
                   _buildContentSlivers(context, viewModel),
                 if (viewModel.isLoadingMore)
                   const SliverToBoxAdapter(
@@ -147,7 +147,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
     );
   }
 
-  Widget _buildContentSlivers(BuildContext context, DashboardViewModel viewModel) {
+Widget _buildContentSlivers(BuildContext context, DashboardViewModel viewModel) {
     return SliverPadding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       sliver: SliverList(
@@ -156,30 +156,46 @@ class DashboardView extends StackedView<DashboardViewModel> {
             verticalSpaceSmall,
             const AdsCarousel(),
             verticalSpaceTiny,
-            Container(
-              padding: const EdgeInsets.all(0),
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 2,
-                padding: const EdgeInsets.all(0),
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: buildGridItems(context, viewModel),
-              ),
-            ),
+            
+            // Categories Section with shimmer loader
+            viewModel.isLoadingCategories
+                ? const ShimmerLoading(
+                    child: ShimmerQuickActionsGrid(),
+                  )
+                : Container(
+                    padding: const EdgeInsets.all(0),
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 2,
+                      padding: const EdgeInsets.all(0),
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: buildGridItems(context, viewModel),
+                    ),
+                  ),
+            
             verticalSpaceSmall,
-            ProductTagsSection(
-              viewModel: viewModel,
-              onAnyTagTap: () {
-                _listController.animateTo(
-                  0, // Scroll to the top of the list
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                );
-              }, crossAxisCount: 1
-            ),
+            
+            // Tags Section with its own loader
+            viewModel.isLoadingTags
+                ? const ShimmerLoading(
+                    child: ShimmerQuickActionsGrid(),
+                  )
+                : ProductTagsSection(
+                  viewModel: viewModel,
+                  onAnyTagTap: () {
+                    _listController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
+                    );
+                  },
+                  crossAxisCount: 1
+                ),
+            
+            // Brands Section
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -188,7 +204,9 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 }).toList(),
               ),
             ),
+            
             verticalSpaceSmall,
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -256,14 +274,26 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 ),
               ],
             ),
+            
             verticalSpaceSmall,
-            PopularProductsSection(viewModel: viewModel),
+            
+            // Products Section with shimmer loader
+            viewModel.isLoadingProducts
+                ? const ShimmerLoading(
+                    child: Column(
+                      children: [
+                        ShimmerSlider(),
+                        verticalSpaceSmall,
+                        ShimmerSlider(),
+                      ],
+                    ),
+                  )
+                : PopularProductsSection(viewModel: viewModel),
           ],
         ),
       ),
     );
   }
-
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);

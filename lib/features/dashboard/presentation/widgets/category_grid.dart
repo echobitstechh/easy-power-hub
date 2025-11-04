@@ -39,7 +39,7 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
             );
           },
           child: actionContainer(
-            imagePath, 
+            category.image?.isNotEmpty == true ? category.image! : imagePath, 
             key == 'light' ? "LIGHTING AND FITTINGS" : key.toUpperCase(),
             context
           ),
@@ -95,7 +95,7 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
           child: SizedBox(
             height: 50, //
             child: actionContainer(
-              imagePath,
+              category.image?.isNotEmpty == true ? category.image! : imagePath ,
               key == 'light' ? "LIGHTING AND FITTINGS" : key,
               context
             ),
@@ -145,10 +145,21 @@ Widget actionContainer(String imagePath, String title, BuildContext context) {
                 ),
               ],
             ),
-            child: Image.asset(
-              imagePath,
-              fit: BoxFit.cover,
-            ),
+            child: imagePath.startsWith('http') 
+              ? Image.network(
+                  imagePath,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    );
+                  },
+                )
+              : Image.asset(
+                  imagePath,
+                  fit: BoxFit.cover,
+                ),
           ),
           // Overlay
           Positioned.fill(
