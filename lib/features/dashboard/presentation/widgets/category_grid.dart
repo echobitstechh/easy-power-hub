@@ -1,4 +1,3 @@
-
 import 'package:easy_ph/app/app.router.dart';
 import 'package:easy_ph/features/dashboard/presentation/dashboad_view.dart';
 import 'package:easy_ph/features/services/service_view.dart';
@@ -17,11 +16,12 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
     "solar": 'assets/images/solar.jpg',
     "electronics": 'assets/images/2148254069.jpg',
     "light": 'assets/images/107.jpg',
+    "smart": 'assets/images/2148087576.jpg',
   };
 
   categories.forEach((key, imagePath) {
     final category = model.filteredCategories.firstWhere(
-          (cat) => cat.name.toLowerCase().contains(key),
+      (cat) => cat.name.toLowerCase().contains(key),
       orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
     );
 
@@ -29,39 +29,24 @@ List<Widget> buildGridItems(BuildContext context, DashboardViewModel model) {
       tiles.add(
         GestureDetector(
           onTap: () {
-            final isSpecial = ['solar', 'electronics', 'light'].contains(key);
+            final isSpecial = ['solar', 'electronics', 'light', 'smart'].contains(key);
             locator<NavigationService>().navigateToShopView(
-              filter: category,
-              isSpecialCategory: isSpecial,
-            );locator<NavigationService>().navigateToShopView(
               filter: category,
               isSpecialCategory: isSpecial,
             );
           },
           child: actionContainer(
-            category.image?.isNotEmpty == true ? category.image! : imagePath, 
-            key == 'light' ? "LIGHTING AND FITTINGS" : key.toUpperCase(),
+            category.image?.isNotEmpty == true ? category.image! : imagePath,
+            _getCategoryTitle(key, category.name),
             context
           ),
         ),
       );
     }
   });
-  tiles.add(
-    GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          builder: (c) =>  ServicesView(),
-        ));
-      },
-      child: actionContainer('assets/images/2148087576.jpg', "Services", context),
-    ),
-  );
 
   return tiles;
 }
-
-
 
 List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel model) {
   List<StaggeredGridTile> tiles = [];
@@ -70,11 +55,12 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
     "solar": 'assets/images/solar.jpg',
     "electronics": 'assets/images/2148254069.jpg',
     "light": 'assets/images/107.jpg',
+    "smart": 'assets/images/2148087576.jpg',
   };
 
   categories.forEach((key, imagePath) {
     final category = model.filteredCategories.firstWhere(
-          (cat) => cat.name.toLowerCase().contains(key),
+      (cat) => cat.name.toLowerCase().contains(key),
       orElse: () => Category(id: -1, name: '', status: CategoryStatus.active),
     );
 
@@ -93,10 +79,10 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
             );
           },
           child: SizedBox(
-            height: 50, //
+            height: 50,
             child: actionContainer(
-              category.image?.isNotEmpty == true ? category.image! : imagePath ,
-              key == 'light' ? "LIGHTING AND FITTINGS" : key,
+              category.image?.isNotEmpty == true ? category.image! : imagePath,
+              _getCategoryTitle(key, category.name),
               context
             ),
           ),
@@ -105,24 +91,23 @@ List<StaggeredGridTile> buildCardTiles(BuildContext context, DashboardViewModel 
     }
   });
 
-  // Services card (always shown)
-  tiles.add(StaggeredGridTile.count(
-    crossAxisCellCount: 1,
-    mainAxisCellCount: 1,
-    child: GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-          //todo switch back to service view
-          builder: (c) => DashboardView(),
-        ));
-      },
-      child: actionContainer('assets/images/2148087576.jpg', "Services", context),
-    ),
-  ));
-
   return tiles;
 }
 
+String _getCategoryTitle(String key, String categoryName) {
+  switch (key) {
+    case 'light':
+      return "LIGHTING AND FITTINGS";
+    case 'smart':
+      return "SMART HOMES";
+    case 'solar':
+      return "SOLAR";
+    case 'electronics':
+      return "ELECTRONICS";
+    default:
+      return categoryName.toUpperCase();
+  }
+}
 
 Widget actionContainer(String imagePath, String title, BuildContext context) {
   return Padding(
@@ -159,13 +144,18 @@ Widget actionContainer(String imagePath, String title, BuildContext context) {
               : Image.asset(
                   imagePath,
                   fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                    );
+                  },
                 ),
           ),
           // Overlay
           Positioned.fill(
             child: Container(
-              color:
-              Colors.black.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.5),
             ),
           ),
           // Title Text
@@ -197,4 +187,3 @@ Widget actionContainer(String imagePath, String title, BuildContext context) {
     ),
   );
 }
-
