@@ -169,7 +169,7 @@ class ProductGridItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              _buildRating(),
+              if ((product.rating ?? 0.0) > 0) _buildRating(),
             ],
           ),
         ],

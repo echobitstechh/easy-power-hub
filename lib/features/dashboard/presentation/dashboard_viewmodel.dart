@@ -32,6 +32,10 @@ class DashboardViewModel extends BaseViewModel {
   bool isLoadingSearch = false;
   String searchQuery = '';
 
+  bool _isLoadingCategories = false;
+  bool _isLoadingProducts = false;
+  bool _isLoadingAds = false;
+
   bool isProductFavorite(String productId) {
     return _favorites.any((f) => f.product.id == productId);
   }
@@ -40,6 +44,9 @@ class DashboardViewModel extends BaseViewModel {
 
   bool _isLoadingMore = false;
   bool get isLoadingMore => _isLoadingMore;
+  bool get isLoadingCategories => _isLoadingCategories;
+  bool get isLoadingProducts => _isLoadingProducts;
+  bool get isLoadingAds => _isLoadingAds;
 
   Set<String> loadingItems = {};
   static const int allCategoriesId = 0;
@@ -83,7 +90,8 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> init() async {
-    await runBusyFuture(_loadData());
+    // await runBusyFuture(_loadData());
+    _loadData();
     if (userLoggedIn.value == true) {
       initCart();
       fetchFavorites();
@@ -91,11 +99,11 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> _loadData() async {
-    await Future.wait([
-      getProducts(isRefresh: true),
-      getCategories(),
-      fetchProductTags(),
-    ]);
+    // await Future.wait([
+      getProducts(isRefresh: true);
+      getCategories();
+      fetchProductTags();
+    // ]);
   }
 
   void initCart() async {
@@ -125,6 +133,7 @@ class DashboardViewModel extends BaseViewModel {
       productList.clear();
       currentPage = 1;
       isLastPage = false;
+      _isLoadingProducts = true;
     }
 
     _isLoadingMore = true;
@@ -196,7 +205,7 @@ class DashboardViewModel extends BaseViewModel {
           duration: Duration(seconds: 3));
     } finally {
       _isLoadingMore = false;
-
+      _isLoadingProducts = false;
       notifyListeners();
       // setBusy(false);
     }
@@ -322,6 +331,8 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> getCategories() async {
+    _isLoadingCategories = true;
+    notifyListeners();
     try {
       final res = await _repo.getCategories();
       if (res.statusCode == 200 &&
@@ -344,6 +355,7 @@ class DashboardViewModel extends BaseViewModel {
           message: "An error occurred while fetching categories.",
           duration: Duration(seconds: 3));
     } finally {
+      _isLoadingCategories = false;
       notifyListeners();
     }
   }

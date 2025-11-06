@@ -1,3 +1,4 @@
+import 'package:easy_ph/core/services/theme_service.dart';
 import 'package:easy_ph/state.dart';
 import 'package:easy_ph/ui/common/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -22,6 +23,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  final themeService = locator<ThemeService>();
+  await themeService.init();
 
   runApp(const MainApp());
 }
@@ -41,15 +44,38 @@ void setupDeepLinkHandler() {
   });
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
+
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  final themeService = locator<ThemeService>();
+
+  @override
+  void initState() {
+    super.initState();
+    themeService.addListener(_onThemeChanged);
+  }
+
+  @override
+  void dispose() {
+    themeService.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
+  void _onThemeChanged() {
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: easyPhLightTheme,
       darkTheme: easyPhDarkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeService.themeMode,
       initialRoute: Routes.startupView,
       onGenerateRoute: StackedRouter().onGenerateRoute,
       navigatorKey: StackedService.navigatorKey,
