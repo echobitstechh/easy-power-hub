@@ -24,13 +24,10 @@ class UpdateService {
         final isForceUpdate = forceUpdate || 
             _isUpdateRequired(currentVersion, minimumVersion);
 
-        print('🆕 Update available! Showing dialog...');
         await _showUpdateDialog(
           message: updateMessage,
           isForceUpdate: isForceUpdate,
         );
-      } else {
-        print('✅ App is up to date');
       }
     } catch (e) {
       print('Error checking for update: $e');
@@ -97,7 +94,6 @@ class UpdateService {
     required String message,
     required bool isForceUpdate,
   }) async {
-    print('Showing update dialog - Force: $isForceUpdate');
     await _dialogService.showCustomDialog(
       variant: DialogType.update,
       barrierDismissible: !isForceUpdate,

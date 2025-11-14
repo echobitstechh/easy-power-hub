@@ -41,20 +41,12 @@ class RemoteConfigService with ListenableServiceMixin {
 
       try {
         await _remoteConfig.fetchAndActivate();
-        print('✅ Remote Config: Fetched and activated new values.');
       } catch (e) {
-        print('❌ Remote Config: Failed to fetch/activate: $e');
-        print('⚠️ Remote Config: Using cached or default values.');
+        print('Remote Config: Failed to fetch/activate: $e');
       }
       
       _initialized = true;
-      print('✅ Remote Config initialized successfully');
-      f (kDebugMode) {
-        print('Active Paystack Key: ${activePaystackKey.substring(0, 10)}...');
-        print('Latest Version: $latestVersion');
-      }
     } catch (e) {
-      print('❌ Failed to initialize Remote Config: $e');
       _initialized = false;
     }
   }

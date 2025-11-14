@@ -25,7 +25,6 @@ class AppConfig {
     } catch (e) {
       print('Failed to get Remote Config key: $e');
     }
-    print('⚠️ Using Fallback Paystack Key');
     return _fallbackLiveKey;
   }
 
