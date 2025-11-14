@@ -109,13 +109,13 @@ class ProductGridItem extends StatelessWidget {
             ),
           ),
         ),
-        if ((product.availability ?? 0) < 1)
-          const Positioned(
-            right: 10,
-            top: 10,
-            child: OutOfStockTag(),
-          )
-        else if (viewModel.isNewProduct(product.createdAt ?? ''))
+        // if ((product.availability ?? 0) < 1)
+        //   const Positioned(
+        //     right: 10,
+        //     top: 10,
+        //     child: OutOfStockTag(),
+        //   )
+        if (viewModel.isNewProduct(product.createdAt ?? ''))
           const Positioned(
             left: 16,
             top: 16,
