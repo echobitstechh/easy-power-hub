@@ -11,12 +11,14 @@ import '../ui/dialogs/info_alert/info_alert_dialog.dart';
 import '../ui/dialogs/info_alert/phone_input_dialog.dart';
 import '../ui/dialogs/info_alert/rating_dialog.dart';
 import '../ui/dialogs/info_alert/reason_form_dialog.dart';
+import '../ui/dialogs/info_alert/update_dialog.dart';
 
 enum DialogType {
   infoAlert,
   rating,
   phoneInput,
   serviceRejectReason,
+  update,
 }
 
 void setupDialogUi() {
@@ -31,6 +33,8 @@ void setupDialogUi() {
         PhoneInputDialog(request: request, completer: completer),
     DialogType.serviceRejectReason: (context, request, completer) =>
         ServiceRejectReasonDialog(request: request, completer: completer),
+    DialogType.update: (context, request, completer) =>
+        UpdateDialog(request: request, completer: completer),
   };
 
   dialogService.registerCustomDialogBuilders(builders);

@@ -11,6 +11,8 @@ import '../../../core/data/models/tags.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
+import '../../../core/services/remote_config_service.dart';
+import '../../../core/services/update_service.dart';
 import '../../../state.dart';
 
 class DashboardViewModel extends BaseViewModel {
@@ -18,6 +20,8 @@ class DashboardViewModel extends BaseViewModel {
   final _log = getLogger("DashboardViewModel");
   final _snackBar = locator<SnackbarService>();
   final _localStorage = locator<LocalStorage>();
+  final _remoteConfig = locator<RemoteConfigService>();
+  final _updateService = locator<UpdateService>();
 
   List<Product> productList = [];
   List<String> brands = [];
@@ -96,6 +100,7 @@ class DashboardViewModel extends BaseViewModel {
       initCart();
       fetchFavorites();
     }
+    await _checkForUpdateOncePerDay();
   }
 
   Future<void> _loadData() async {
@@ -518,4 +523,23 @@ class DashboardViewModel extends BaseViewModel {
     _favorites.removeWhere((f) => f.id == favoriteId);
     notifyListeners();
   }
+
+  Future<void> _checkForUpdateOncePerDay() async {
+    try {
+      final lastCheckDate = await _localStorage.fetch(LocalStorageDir.lastUpdateCheck);
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      
+      if (lastCheckDate != today) {
+        await _updateService.checkForUpdate();
+        await _localStorage.save(LocalStorageDir.lastUpdateCheck, today);
+      } else {
+        _log.i('Already checked for updates today');
+      }
+    } catch (e) {
+      _log.e('Error checking update frequency: $e');
+      
+      await _updateService.checkForUpdate();
+    }
+  }
+
 }

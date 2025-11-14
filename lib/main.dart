@@ -1,3 +1,4 @@
+import 'package:easy_ph/core/services/remote_config_service.dart';
 import 'package:easy_ph/core/services/theme_service.dart';
 import 'package:easy_ph/state.dart';
 import 'package:easy_ph/ui/common/theme.dart';
@@ -14,14 +15,18 @@ import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await setupLocator();
   setupDialogUi();
   setupBottomSheetUi();
   setupDeepLinkHandler();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  final remoteConfigService = locator<RemoteConfigService>();
+  await remoteConfigService.initialize();
 
   final themeService = locator<ThemeService>();
   await themeService.init();

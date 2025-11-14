@@ -186,6 +186,44 @@ class _ProductCardState extends State<ProductCard> {
                 ),
               ),
 
+              if (widget.product.warranty == true && (widget.product.warrantyPeriod ?? 0) > 0)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: Colors.green.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified_user,
+                            color: Colors.green.shade700,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${widget.product.warrantyPeriod}-month${(widget.product.warrantyPeriod ?? 0) > 1 ? 's' : ''} warranty',
+                            style: TextStyle(
+                              color: Colors.green.shade700,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                            
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(

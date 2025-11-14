@@ -42,7 +42,7 @@ class ServicesView extends StackedView<ServicesviewModel> {
                     child: TextField(
                       onChanged: viewModel.updateSearchQuery,
                       decoration: InputDecoration(
-                        hintText: 'Search on Easy Power',
+                        hintText: 'Search on EasyPower Hub',
                         hintStyle: GoogleFonts.redHatDisplay(),
                         prefixIcon: const Icon(Icons.search),
                         filled: true,
