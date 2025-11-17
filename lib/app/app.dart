@@ -1,4 +1,6 @@
+import 'package:easy_ph/core/services/remote_config_service.dart';
 import 'package:easy_ph/core/services/theme_service.dart';
+import 'package:easy_ph/core/services/update_service.dart';
 import 'package:easy_ph/features/Profile/orders/order_view.dart';
 import 'package:easy_ph/features/Profile/password/change_password_view.dart';
 import 'package:easy_ph/features/Profile/profile_view.dart';
@@ -31,6 +33,7 @@ import '../features/home/presentation/home_view.dart';
 import '../features/onboarding/presentation/onboarding_view.dart';
 import '../ui/bottom_sheets/address_sheet/add_address_bottom_sheet.dart';
 import '../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
+import '../ui/dialogs/info_alert/update_dialog.dart';
 import '../ui/dialogs/info_alert/reason_form_dialog.dart';
 import '../features/dashboard/presentation/product-search/search_view.dart';
 import '../ui/bottom_sheets/order_status/order_status_timeline.dart';
@@ -98,6 +101,8 @@ import '../features/services/request/existing_services_viewmodel.dart';
     LazySingleton(classType: AuthViewModel),
     LazySingleton(classType: ExistingServicesViewModel),
     LazySingleton(classType: ThemeService),
+    LazySingleton(classType: RemoteConfigService),
+    LazySingleton(classType: UpdateService),
     // @stacked-service
   ],
   bottomsheets: [
@@ -113,6 +118,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     StackedDialog(classType: RatingDialog),
     StackedDialog(classType: PhoneInputDialog),
     StackedDialog(classType: ServiceRejectReasonDialog),
+    StackedDialog(classType: UpdateDialog),
     // @stacked-dialog
   ],
 

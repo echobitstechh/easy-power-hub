@@ -14,7 +14,9 @@ import 'package:stacked_shared/stacked_shared.dart';
 
 import '../core/data/repositories/repository.dart';
 import '../core/network/api_service.dart';
+import '../core/services/remote_config_service.dart';
 import '../core/services/theme_service.dart';
+import '../core/services/update_service.dart';
 import '../core/utils/local_stotage.dart';
 import '../features/auth/presentation/auth_service.dart';
 import '../features/auth/presentation/auth_viewmodel.dart';
@@ -42,4 +44,6 @@ Future<void> setupLocator({
   locator.registerLazySingleton(() => AuthViewModel());
   locator.registerLazySingleton(() => ExistingServicesViewModel());
   locator.registerLazySingleton(() => ThemeService());
+  locator.registerLazySingleton(() => RemoteConfigService());
+  locator.registerLazySingleton(() => UpdateService());
 }

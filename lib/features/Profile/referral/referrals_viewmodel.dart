@@ -62,10 +62,10 @@ class ReferralsViewModel extends BaseViewModel {
     }
     
     Share.share(
-      'Join me on Easypowerhub and get amazing products! 🎁\n\n'
+      'Join me on EasyPower Hub and get amazing products! 🎁\n\n'
       'Use my referral code: $referralCode\n'
       'Sign up now and enjoy exclusive deals!',
-      subject: 'Join EasyOpenHub with my referral code',
+      subject: 'Join EasyPower Hub with my referral code',
     );
   }
 

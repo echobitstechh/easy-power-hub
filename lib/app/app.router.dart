@@ -5,8 +5,8 @@
 // **************************************************************************
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:easy_ph/core/data/models/category.dart' as _i22;
-import 'package:easy_ph/core/data/models/product.dart' as _i23;
+import 'package:easy_ph/core/data/models/category.dart' as _i23;
+import 'package:easy_ph/core/data/models/product.dart' as _i24;
 import 'package:easy_ph/features/auth/presentation/password_reset/password_reset_view.dart'
     as _i8;
 import 'package:easy_ph/features/auth/presentation/widgets/login.dart' as _i18;
@@ -16,7 +16,7 @@ import 'package:easy_ph/features/auth/presentation/widgets/register.dart'
     as _i19;
 import 'package:easy_ph/features/cart/cart_view.dart' as _i6;
 import 'package:easy_ph/features/dashboard/presentation/dashboard_viewmodel.dart'
-    as _i24;
+    as _i25;
 import 'package:easy_ph/features/dashboard/presentation/product-search/search_view.dart'
     as _i14;
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart'
@@ -36,10 +36,11 @@ import 'package:easy_ph/features/Profile/support/support_view.dart' as _i13;
 import 'package:easy_ph/features/services/service_view.dart' as _i10;
 import 'package:easy_ph/features/shop/shop_view.dart' as _i5;
 import 'package:easy_ph/features/startup/presentation/startup_view.dart' as _i3;
+import 'package:flutter/foundation.dart' as _i22;
 import 'package:flutter/material.dart' as _i21;
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart' as _i1;
-import 'package:stacked_services/stacked_services.dart' as _i25;
+import 'package:stacked_services/stacked_services.dart' as _i26;
 
 class Routes {
   static const homeView = '/home-view';
@@ -354,9 +355,9 @@ class ShopViewArguments {
     this.isSpecialCategory = false,
   });
 
-  final _i21.Key? key;
+  final _i22.Key? key;
 
-  final _i22.Category? filter;
+  final _i23.Category? filter;
 
   final bool isSpecialCategory;
 
@@ -386,11 +387,11 @@ class ProductCardArguments {
     required this.dashboardViewModel,
   });
 
-  final _i21.Key? key;
+  final _i22.Key? key;
 
-  final _i23.Product product;
+  final _i24.Product product;
 
-  final _i24.DashboardViewModel dashboardViewModel;
+  final _i25.DashboardViewModel dashboardViewModel;
 
   @override
   String toString() {
@@ -419,7 +420,7 @@ class ChangePasswordViewArguments {
 
   final bool isResetPassword;
 
-  final _i21.Key? key;
+  final _i22.Key? key;
 
   @override
   String toString() {
@@ -448,7 +449,7 @@ class OTPViewArguments {
     this.email,
   });
 
-  final _i21.Key? key;
+  final _i22.Key? key;
 
   final bool isOtpRequested;
 
@@ -487,7 +488,7 @@ class OTPViewArguments {
   }
 }
 
-extension NavigatorStateExtension on _i25.NavigationService {
+extension NavigatorStateExtension on _i26.NavigationService {
   Future<dynamic> navigateToHomeView([
     int? routerId,
     bool preventDuplicates = true,
@@ -531,8 +532,8 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToShopView({
-    _i21.Key? key,
-    _i22.Category? filter,
+    _i22.Key? key,
+    _i23.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -564,9 +565,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToProductCard({
-    _i21.Key? key,
-    required _i23.Product product,
-    required _i24.DashboardViewModel dashboardViewModel,
+    _i22.Key? key,
+    required _i24.Product product,
+    required _i25.DashboardViewModel dashboardViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -696,7 +697,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
 
   Future<dynamic> navigateToChangePasswordView({
     bool isResetPassword = false,
-    _i21.Key? key,
+    _i22.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -755,7 +756,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> navigateToOTPView({
-    _i21.Key? key,
+    _i22.Key? key,
     bool isOtpRequested = false,
     String? userId,
     String? verificationCode,
@@ -824,8 +825,8 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithShopView({
-    _i21.Key? key,
-    _i22.Category? filter,
+    _i22.Key? key,
+    _i23.Category? filter,
     bool isSpecialCategory = false,
     int? routerId,
     bool preventDuplicates = true,
@@ -857,9 +858,9 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithProductCard({
-    _i21.Key? key,
-    required _i23.Product product,
-    required _i24.DashboardViewModel dashboardViewModel,
+    _i22.Key? key,
+    required _i24.Product product,
+    required _i25.DashboardViewModel dashboardViewModel,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -989,7 +990,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
 
   Future<dynamic> replaceWithChangePasswordView({
     bool isResetPassword = false,
-    _i21.Key? key,
+    _i22.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
@@ -1048,7 +1049,7 @@ extension NavigatorStateExtension on _i25.NavigationService {
   }
 
   Future<dynamic> replaceWithOTPView({
-    _i21.Key? key,
+    _i22.Key? key,
     bool isOtpRequested = false,
     String? userId,
     String? verificationCode,

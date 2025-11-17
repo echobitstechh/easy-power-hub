@@ -24,6 +24,8 @@ class Product {
   int? installmentFrequency;
   int? installmentDeposit;
   String? status;
+  bool? warranty;
+  int? warrantyPeriod;
   List<String>? reviews;
   List<String>? images;
   List<Tag>? tags;
@@ -53,6 +55,8 @@ class Product {
     this.installmentFrequency,
     this.installmentDeposit,
     this.tags,
+    this.warranty,
+    this.warrantyPeriod, 
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -79,6 +83,8 @@ class Product {
     installmentFrequency = json['installmentFrequency'];
     installmentDeposit = json['installmentDeposit'];
     status = json['status'];
+    warranty = json['warranty'];
+    warrantyPeriod = json['warrantyPeriod'];
 
     tags = json['tags'] != null
         ? (json['tags'] as List).map((tagJson) => Tag.fromJson(tagJson)).toList()
@@ -109,6 +115,8 @@ class Product {
     data['installmentFrequency'] = installmentFrequency;
     data['installmentDeposit'] = installmentDeposit;
     data['status'] = status;
+    data['warranty'] = warranty;
+    data['warrantyPeriod'] = warrantyPeriod;
     if (reviews != null) {
       data['reviews'] = reviews;
     }

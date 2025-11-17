@@ -25,15 +25,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -47,32 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC7SzR7nNTjTkxXrK1IQnRRdU00W-UJM6U',
-    appId: '1:875974620022:android:81a401add9720d1f140057',
-    messagingSenderId: '875974620022',
-    projectId: 'easy-ph',
-    storageBucket: 'easy-ph.firebasestorage.app',
+    apiKey: 'AIzaSyBPeMyQDL2y3deRsz3T7trWXqzf9u0sdoA',
+    appId: '1:37884773488:android:975eef0b94903bfcf620b5',
+    messagingSenderId: '37884773488',
+    projectId: 'easy-power-hub',
+    storageBucket: 'easy-power-hub.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyAKvRXM4jGYcr0wOZV9ot3Y8UrteRrvI_8',
-    appId: '1:875974620022:ios:f1528dfad9c87ca7140057',
-    messagingSenderId: '875974620022',
-    projectId: 'easy-ph',
-    storageBucket: 'easy-ph.firebasestorage.app',
-    androidClientId: '875974620022-cnjh2q702m25k602gkuao6hc5o124ks6.apps.googleusercontent.com',
-    iosClientId: '875974620022-ab75vd5sgukrjsgl48uvnq4tdr3vook3.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDRjSHJ4HXK474e_yT63JqyotTFDTG5hGM',
+    appId: '1:37884773488:ios:5ef16a69d293aaa8f620b5',
+    messagingSenderId: '37884773488',
+    projectId: 'easy-power-hub',
+    storageBucket: 'easy-power-hub.firebasestorage.app',
     iosBundleId: 'com.echobitstech.easyph',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCqvkBRvzIVtfsZF23_jdTLlBrFvDscR6E',
-    appId: '1:875974620022:web:f84b0e3d101ca360140057',
-    messagingSenderId: '875974620022',
-    projectId: 'easy-ph',
-    authDomain: 'easy-ph.firebaseapp.com',
-    storageBucket: 'easy-ph.firebasestorage.app',
-    measurementId: 'G-86Z9LZ60TS',
+    apiKey: 'AIzaSyCpJ7YlgHTCcvWm49Rko9vcwTvLqdLznMc',
+    appId: '1:37884773488:web:26d284db59dde12ef620b5',
+    messagingSenderId: '37884773488',
+    projectId: 'easy-power-hub',
+    authDomain: 'easy-power-hub.firebaseapp.com',
+    storageBucket: 'easy-power-hub.firebasestorage.app',
+    measurementId: 'G-HFKXKR1F5T',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDRjSHJ4HXK474e_yT63JqyotTFDTG5hGM',
+    appId: '1:37884773488:ios:b908b193c67f971bf620b5',
+    messagingSenderId: '37884773488',
+    projectId: 'easy-power-hub',
+    storageBucket: 'easy-power-hub.firebasestorage.app',
+    iosBundleId: 'com.example.wahalaHq',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCpJ7YlgHTCcvWm49Rko9vcwTvLqdLznMc',
+    appId: '1:37884773488:web:351fa42f474781dff620b5',
+    messagingSenderId: '37884773488',
+    projectId: 'easy-power-hub',
+    authDomain: 'easy-power-hub.firebaseapp.com',
+    storageBucket: 'easy-power-hub.firebasestorage.app',
+    measurementId: 'G-DQF6JSE86Z',
   );
 
 }
