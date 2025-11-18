@@ -112,8 +112,8 @@ class ApiService {
       }
 
       return ApiResponse(response);
-    } on DioException catch (e, s) {
-      log.e("API error", error: e, stackTrace: s);
+    } on DioException catch (e) {
+      log.e("API error: $e");
 
 
       // Graceful fallbacks

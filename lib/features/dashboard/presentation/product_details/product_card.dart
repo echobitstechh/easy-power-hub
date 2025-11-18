@@ -620,7 +620,7 @@ class _ProductCardState extends State<ProductCard> {
   Widget _buildWhatsAppContactButton(Product product) {
     return InkWell(
       onTap: () async {
-        final phoneNumber = '+2349040811471';
+        final phoneNumber = '+2348081099871';
         final message = "Hello, I'd like to inquire about the product: ${product.productName}";
         final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
         if (await canLaunchUrl(Uri.parse(url))) {

@@ -9,7 +9,8 @@ import 'package:easy_ph/app/app.dialogs.dart';
 import 'package:easy_ph/app/app.locator.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:uni_links/uni_links.dart';
+// import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 
 import 'firebase_options.dart';
 
@@ -35,10 +36,11 @@ Future<void> main() async {
 }
 
 void setupDeepLinkHandler() {
-
   final _navigationService = locator<NavigationService>();
+  final _appLinks = AppLinks();
 
-  getLinksStream().listen((String? uri) {
+  // Listen to incoming links using stringLinkStream
+  _appLinks.stringLinkStream.listen((String? uri) {
     if (uri != null) {
       if (uri == 'easyph://payment-success') {
         _navigationService.navigateTo(Routes.paymentSuccessView);
@@ -46,6 +48,17 @@ void setupDeepLinkHandler() {
     }
   }, onError: (err) {
     print('Failed to receive deep link: $err');
+  });
+  
+  // Handle initial link when app is opened from a deep link
+  _appLinks.getInitialLinkString().then((uri) {
+    if (uri != null) {
+      if (uri == 'easyph://payment-success') {
+        _navigationService.navigateTo(Routes.paymentSuccessView);
+      }
+    }
+  }).catchError((err) {
+    print('Failed to get initial link: $err');
   });
 }
 

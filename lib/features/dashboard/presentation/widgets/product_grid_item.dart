@@ -202,7 +202,7 @@ class ProductGridItem extends StatelessWidget {
   Widget _buildWhatsAppButton() {
     return InkWell(
       onTap: () async {
-        final phoneNumber = '+2349040811471';
+        final phoneNumber = '+2348081099871';
         final message = "Hello, I'd like to inquire about the product: ${product.productName} with the price of ${MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt())}. Is it available?";
         final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
         if (await canLaunchUrl(Uri.parse(url))) {
