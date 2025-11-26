@@ -37,8 +37,8 @@ android {
     namespace "com.echobitstech.easyph"
 
     // ✅ Explicit SDK versions
-    compileSdkVersion 34
-    ndkVersion "25.2.9519653"
+    compileSdkVersion 36
+    ndkVersion "26.1.10909125"
 
     defaultConfig {
         applicationId "com.echobitstech.easyph"
@@ -70,6 +70,12 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
+
     buildTypes {
         release {
             signingConfig signingConfigs.release
@@ -82,7 +88,7 @@ flutter {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-    implementation platform('com.google.firebase:firebase-bom:33.3.0')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.0.21"
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
     implementation 'com.google.firebase:firebase-analytics'
 }
