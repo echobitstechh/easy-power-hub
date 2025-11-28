@@ -70,6 +70,7 @@ class CheckoutViewModel extends BaseViewModel {
 
   Future<void> initData() async {
     await fetchOnlineCart();
+    calculateSubtotal();
     await getDeliveryZones();
     await getShippings();
     checkPayOnDeliveryEligibility();
@@ -162,7 +163,7 @@ class CheckoutViewModel extends BaseViewModel {
         calculatedDeliveryFee = data['shippingFee'] ?? 0;
         calculatedFinalTotal = data['finalTotal'] ?? 0;
         discountAmount = data['discount'] ?? 0;
-        cartSubtotal = data["subtotal"] ?? 0;
+        // cartSubtotal = data["subtotal"] ?? 0;
         notifyListeners();
       } else {
         _snackBar.showSnackbar(message: response.data['message'] ?? "Failed to calculate total");
@@ -345,6 +346,17 @@ class CheckoutViewModel extends BaseViewModel {
     if (isPayOnDeliveryDisabled) {
       updatePaymentMethod('paystack');
     }
+    notifyListeners();
+  }
+
+  void calculateSubtotal() {
+    int total = 0;
+    for (var element in cart.value) {
+      final product = element.product;
+      final price = product?.salePrice != null ? double.tryParse(product!.salePrice!) ?? 0.0 : 0.0;
+      total += (price * (element.quantity ?? 0)).toInt();
+    }
+    cartSubtotal = total;
     notifyListeners();
   }
 
