@@ -32,6 +32,8 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
   void onViewModelReady(CheckoutViewModel viewModel) {
     viewModel.init();
     viewModel.calculatedFinalTotal = calculatedFinalTotal;
+    viewModel.cartSubtotal = cartSubtotal;
+    viewModel.discountAmount = cartDiscount;
   }
 
   @override
