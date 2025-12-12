@@ -2,9 +2,9 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
 const List<String> _gifList = [
-  "assets/gif/quality_power_supply.gif",
+  // "assets/gif/quality_power_supply.gif",
   "assets/gif/easy_power_hub.gif",
-  "assets/gif/easy_ph_1.gif",
+  // "assets/gif/easy_ph_1.gif",
   "assets/gif/motion.gif"
 ];
 
