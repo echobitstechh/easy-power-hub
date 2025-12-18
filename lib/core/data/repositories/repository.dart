@@ -771,4 +771,12 @@ class Repository extends IRepository {
     return response;
   }
 
+  @override
+  Future<ApiResponse> getPickupAddresses() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "pickup-address",
+    );
+    return response;
+  }
 }

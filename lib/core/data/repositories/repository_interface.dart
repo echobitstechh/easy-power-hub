@@ -118,4 +118,6 @@ abstract class IRepository {
   Future<ApiResponse> deleteShipping(String productId);
 
   Future<ApiResponse> reviewOrder(Map<String, dynamic> req);
+
+  Future<ApiResponse> getPickupAddresses();
 }

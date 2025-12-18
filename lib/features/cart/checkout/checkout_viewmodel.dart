@@ -11,6 +11,7 @@ import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/delivery_zone.dart';
 import '../../../core/data/models/profile.dart';
+import '../../../core/data/models/pickup_address.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/utils/config.dart';
 import '../../../core/utils/local_store_dir.dart';
@@ -50,6 +51,8 @@ class CheckoutViewModel extends BaseViewModel {
   bool get isShippingExpanded => _isShippingExpanded;
 
   List<Address> shippingAddresses = [];
+  List<PickupAddress> pickupAddresses = [];
+  PickupAddress? selectedPickupAddress;
   List<DeliveryZone> deliveryZones = [];
   DeliveryZone? selectedDeliveryZone;
 
@@ -73,6 +76,7 @@ class CheckoutViewModel extends BaseViewModel {
     calculateSubtotal();
     await getDeliveryZones();
     await getShippings();
+    await getPickupAddresses();
     checkPayOnDeliveryEligibility();
     if (shippingId.isNotEmpty) {
       await calculateOrder();
@@ -145,17 +149,39 @@ class CheckoutViewModel extends BaseViewModel {
       _snackBar.showSnackbar(message: "Failed to fetch delivery zones: $e");
     }
   }
+  
+  Future<void> getPickupAddresses() async {
+    try {
+      final response = await _repo.getPickupAddresses();
+      if (response.statusCode == 200) {
+        pickupAddresses = (response.data['data'] as List)
+            .map((item) => PickupAddress.fromJson(item))
+            .toList();
+        if (pickupAddresses.isNotEmpty) {
+            selectedPickupAddress = pickupAddresses.first;
+        }
+        notifyListeners();
+      } else {
+        _snackBar.showSnackbar(message: response.data["message"]);
+      }
+    } catch (e) {
+      _snackBar.showSnackbar(message: "Failed to fetch pickup addresses: $e");
+    }
+  }
 
   Future<void> calculateOrder() async {
     final String deliveryOptionString = pickUpOption.toString().split('.').last;
 
     if (shippingId.isEmpty && pickUpOption == PickUpOptions.Delivery) return;
+    if (selectedPickupAddress == null && pickUpOption == PickUpOptions.Pickup) return;
+
+    final addressId = pickUpOption == PickUpOptions.Delivery ? shippingId : selectedPickupAddress?.id;
 
     isCalculating = true;
     notifyListeners();
     try {
       final response = await _repo.calculateOrder({
-        "deliveryAddressId": shippingId,
+        "deliveryAddressId": addressId,
         "deliveryOption": deliveryOptionString,
       });
       if (response.statusCode == 200) {
@@ -240,7 +266,9 @@ class CheckoutViewModel extends BaseViewModel {
       "promoCode": "",
       "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
       "installmentPayment": hasInstallment,
-      "deliveryAddressId": shippingId,
+      "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
+      "installmentPayment": hasInstallment,
+      "deliveryAddressId": pickUpOption == PickUpOptions.Delivery ? shippingId : selectedPickupAddress?.id,
     };
 
     try {
@@ -298,6 +326,11 @@ class CheckoutViewModel extends BaseViewModel {
   
   void updatePaymentMethod(String method) {
     paymentMethod = method;
+    notifyListeners();
+  }
+
+  void updateSelectedPickupAddress(PickupAddress? address) {
+    selectedPickupAddress = address;
     notifyListeners();
   }
 
