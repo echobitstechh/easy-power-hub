@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -35,8 +34,6 @@ class AuthViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _localStorage = locator<LocalStorage>();
 
-
-
   // Text Controllers & UI State
   final firstname = TextEditingController();
   final lastname = TextEditingController();
@@ -48,7 +45,6 @@ class AuthViewModel extends BaseViewModel {
   final otp = TextEditingController();
   final initialEmail = TextEditingController();
   final inputController = TextEditingController();
-
 
   final ValueNotifier<bool> _isPhoneNumberNotifier = ValueNotifier(false);
   ValueNotifier<bool> get isPhoneNumberNotifier => _isPhoneNumberNotifier;
@@ -96,10 +92,14 @@ class AuthViewModel extends BaseViewModel {
   String? validatePassword(String value) {
     if (value.isEmpty) return 'Password is required';
     if (value.length < 8) return 'Password must be at least 8 characters long';
-    if (!RegExp(r'[A-Z]').hasMatch(value)) return 'Password must contain at least one uppercase letter';
-    if (!RegExp(r'[a-z]').hasMatch(value)) return 'Password must contain at least one lowercase letter';
-    if (!RegExp(r'[0-9]').hasMatch(value)) return 'Password must contain at least one digit';
-    if (!RegExp(r'[!@#$%^&*]').hasMatch(value)) return 'Password must contain at least one special character';
+    if (!RegExp(r'[A-Z]').hasMatch(value))
+      return 'Password must contain at least one uppercase letter';
+    if (!RegExp(r'[a-z]').hasMatch(value))
+      return 'Password must contain at least one lowercase letter';
+    if (!RegExp(r'[0-9]').hasMatch(value))
+      return 'Password must contain at least one digit';
+    if (!RegExp(r'[!@#$%^&*]').hasMatch(value))
+      return 'Password must contain at least one special character';
     return null;
   }
 
@@ -151,7 +151,8 @@ class AuthViewModel extends BaseViewModel {
 
       final requestBody = {
         if (inputController.text.contains('@')) "email": inputController.text,
-        if (RegExp(r'^\d').hasMatch(inputController.text)) "phoneNumber": inputController.text,
+        if (RegExp(r'^\d').hasMatch(inputController.text))
+          "phoneNumber": inputController.text,
         "password": password.text,
         "fcmToken": fcmToken,
       };
@@ -168,11 +169,15 @@ class AuthViewModel extends BaseViewModel {
           _handleSuccessfulLogin(data);
         }
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "An error occurred during login.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? "An error occurred during login.",
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Login error: $e");
-      _snackBar.showSnackbar(message: "Unable to login. Please try again.", duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: "Unable to login. Please try again.",
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -209,13 +214,18 @@ class AuthViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         _handleSuccessfulLogin(res.data);
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"], duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? "Registration failed.",
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Registration error: $e");
-      _snackBar.showSnackbar(message: "Registration failed. Please try again.", duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: "Registration failed. Please try again.",
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -231,16 +241,22 @@ class AuthViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
-        _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: 'OTP verified successfully',
+            duration: const Duration(seconds: 2));
         _navigationService.navigateTo(
           Routes.register,
         );
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? 'Verification failed',
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("OTP submission error: $e");
-      _snackBar.showSnackbar(message: 'An error occurred. Please try again later.', duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: 'An error occurred. Please try again later.',
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -263,16 +279,23 @@ class AuthViewModel extends BaseViewModel {
         profile.value.email = email.text;
         if (phone.text.isNotEmpty) {
           profile.value.phoneNumber = phone.text;
-          profile.value.reference = res.data['data']["sendTokenResponse"]["data"]["reference"];
+          profile.value.reference =
+              res.data['data']["sendTokenResponse"]["data"]["reference"];
         }
         isOtpRequested = true;
-        _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: 'OTP sent successfully',
+            duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data['message'] ?? 'An unexpected error occurred',
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Request OTP unhandled error: $e');
-      _snackBar.showSnackbar(message: 'An unexpected error occurred', duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: 'An unexpected error occurred',
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -283,7 +306,9 @@ class AuthViewModel extends BaseViewModel {
     try {
       final googleSignInResult = await _authService.signInWithGoogle();
       if (googleSignInResult == null) {
-        _snackBar.showSnackbar(message: "Google Sign-In was cancelled", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: "Google Sign-In was cancelled",
+            duration: const Duration(seconds: 2));
         return;
       }
 
@@ -294,10 +319,11 @@ class AuthViewModel extends BaseViewModel {
       final fcmToken = await FirebaseMessaging.instance.getToken();
 
       if (idToken == null || email == null) {
-        _snackBar.showSnackbar(message: "Failed to retrieve account info", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: "Failed to retrieve account info",
+            duration: const Duration(seconds: 2));
         return;
       }
-
 
       if (isNewUser == true && (phoneNumber == null || phoneNumber.isEmpty)) {
         final dialogService = locator<DialogService>();
@@ -312,7 +338,9 @@ class AuthViewModel extends BaseViewModel {
         if (response?.confirmed == true && response?.data is String) {
           phoneNumber = response?.data;
         } else {
-          _snackBar.showSnackbar(message: "Phone number is required", duration: const Duration(seconds: 2));
+          _snackBar.showSnackbar(
+              message: "Phone number is required",
+              duration: const Duration(seconds: 2));
           return;
         }
       }
@@ -329,11 +357,14 @@ class AuthViewModel extends BaseViewModel {
         _handleSuccessfulLogin(res.data);
       } else {
         _log.e("Google Sign-In Error: ${res.data}");
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"], duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Google Sign-In Error: $e");
-      _snackBar.showSnackbar(message: "An error occurred during Google Sign-In", duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: "An error occurred during Google Sign-In",
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -364,14 +395,20 @@ class AuthViewModel extends BaseViewModel {
         profile.value.email = isPhone ? '' : inputController.text;
         profile.value.phoneNumber = isPhone ? inputController.text : '';
 
-        _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: 'OTP sent successfully',
+            duration: const Duration(seconds: 2));
         setRegistrationStep(RegistrationStep.verifyOtp);
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data['message'] ?? 'An unexpected error occurred',
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Request OTP unhandled error: $e');
-      _snackBar.showSnackbar(message: 'An unexpected error occurred', duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: 'An unexpected error occurred',
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -387,14 +424,20 @@ class AuthViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
-        _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: 'OTP verified successfully',
+            duration: const Duration(seconds: 2));
         setRegistrationStep(RegistrationStep.completeProfile);
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? 'Verification failed',
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("OTP submission error: $e");
-      _snackBar.showSnackbar(message: 'An error occurred. Please try again later.', duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: 'An error occurred. Please try again later.',
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
@@ -404,7 +447,9 @@ class AuthViewModel extends BaseViewModel {
     setBusy(true);
     try {
       await FirebaseMessaging.instance.requestPermission(
-        alert: true, badge: true, sound: true,
+        alert: true,
+        badge: true,
+        sound: true,
       );
 
       String? fcmToken;
@@ -421,7 +466,8 @@ class AuthViewModel extends BaseViewModel {
         "firstName": firstname.text,
         "lastName": lastname.text,
         "email": email.text.isEmpty ? profile.value.email : email.text,
-        "phoneNumber": phone.text.isEmpty ? profile.value.phoneNumber : phone.text,
+        "phoneNumber":
+            phone.text.isEmpty ? profile.value.phoneNumber : phone.text,
         "password": password.text,
         "referralCode": referralCode.text,
         "fcmToken": fcmToken,
@@ -429,35 +475,37 @@ class AuthViewModel extends BaseViewModel {
 
       if (res.statusCode == 200) {
         _handleSuccessfulLogin(res.data);
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"], duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? "Registration failed.",
+            duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Registration error: $e");
-      _snackBar.showSnackbar(message: "Registration failed. Please try again.", duration: const Duration(seconds: 2));
+      _snackBar.showSnackbar(
+          message: "Registration failed. Please try again.",
+          duration: const Duration(seconds: 2));
     } finally {
       setBusy(false);
     }
   }
 
-
   // --- Helper Methods ---
 
   void _handleVerificationFlow(dynamic data) {
     profile.value.id = data['userId'];
-    profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
+    profile.value.reference =
+        data['sendTokenResponse']?['data']?['token'] ?? '';
     _navigationService.navigateTo(
       Routes.register,
-
     );
   }
 
   void _handleIncompleteProfileFlow(dynamic data) {
     profile.value.id = data['userId'];
-    _navigationService.navigateTo(
-      Routes.register
-    );
+    _navigationService.navigateTo(Routes.register);
   }
 
   void _handleSuccessfulLogin(dynamic data) {

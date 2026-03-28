@@ -56,9 +56,8 @@ class ApiService {
     bool useFormData = false,
   }) async {
     try {
-
-      final options = Options(headers: await _buildHeaders(protected: protected));
-
+      final options =
+          Options(headers: await _buildHeaders(protected: protected));
 
       late Response response;
 
@@ -115,7 +114,6 @@ class ApiService {
     } on DioException catch (e) {
       log.e("API error: $e");
 
-
       // Graceful fallbacks
       switch (e.type) {
         case DioExceptionType.connectionTimeout:
@@ -137,28 +135,29 @@ class ApiService {
 
   // Helpers for consistent fallback responses
   ApiResponse _timeoutResponse(String message) => ApiResponse(
-    Response(
-      statusCode: 504,
-      data: message,
-      requestOptions: RequestOptions(path: ''),
-    ),
-  );
+        Response(
+          statusCode: 504,
+          data: {"message": message},
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
 
   ApiResponse _errorResponse(int code, String message) => ApiResponse(
-    Response(
-      statusCode: code,
-      data: message,
-      requestOptions: RequestOptions(path: ''),
-    ),
-  );
+        Response(
+          statusCode: code,
+          data: {"message": message},
+          requestOptions: RequestOptions(path: ''),
+        ),
+      );
 
-  Future<Map<String, dynamic>> _buildHeaders({bool protected = true, bool refresh = false}) async {
+  Future<Map<String, dynamic>> _buildHeaders(
+      {bool protected = true, bool refresh = false}) async {
     if (!protected) return {};
     return {
-      "Authorization": "Bearer ${refresh ? await _getRefreshToken() : await _getToken()}"
+      "Authorization":
+          "Bearer ${refresh ? await _getRefreshToken() : await _getToken()}"
     };
   }
-
 
   Future<String> _getToken() async {
     final localStorage = locator<LocalStorage>();

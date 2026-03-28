@@ -22,7 +22,7 @@ class ReferralsViewModel extends BaseViewModel {
   int totalReferrals = 0;
   int activeReferrals = 0;
   int bonusEarned = 0;
-  
+
   String referralLink = 'https://www.easyopenhub.com/referral/1';
   String minPurchaseAmount = '₦50,000';
 
@@ -38,7 +38,7 @@ class ReferralsViewModel extends BaseViewModel {
   void initialize() async {
     await fetchReferralCode();
     await fetchReferralUsers();
-    
+
     notifyListeners();
   }
 
@@ -57,10 +57,11 @@ class ReferralsViewModel extends BaseViewModel {
     if (referralCode == null || referralCode!.isEmpty) {
       _snackBar.showSnackbar(
         message: 'Referral code not available',
+        duration: const Duration(seconds: 3),
       );
       return;
     }
-    
+
     Share.share(
       'Join me on EasyPower Hub and get amazing products! 🎁\n\n'
       'Use my referral code: $referralCode\n'
@@ -69,7 +70,8 @@ class ReferralsViewModel extends BaseViewModel {
     );
   }
 
-  Future<void> fetchReferralUsers({int page = 1, int limit = 10, String? status}) async {
+  Future<void> fetchReferralUsers(
+      {int page = 1, int limit = 10, String? status}) async {
     if (page == 1) {
       setBusy(true);
     }
@@ -81,41 +83,45 @@ class ReferralsViewModel extends BaseViewModel {
         limit: limit,
         status: status,
       );
-      
+
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data['data'] ?? [];
         final pagination = response.data['pagination'];
-        
+
         if (page == 1) {
           referrals = data.map((item) => ReferralItem.fromJson(item)).toList();
         } else {
-          referrals.addAll(data.map((item) => ReferralItem.fromJson(item)).toList());
+          referrals
+              .addAll(data.map((item) => ReferralItem.fromJson(item)).toList());
         }
-        
+
         totalPages = pagination['totalPages'] ?? 1;
         currentPage = pagination['currentPage'] ?? 1;
         hasMoreData = currentPage < totalPages;
-        
+
         totalReferrals = pagination['total'] ?? 0;
-        activeReferrals = referrals.where((r) => 
-          r.bonusStatus.toLowerCase() == 'in progress' || 
-          r.bonusStatus.toLowerCase() == 'pending'
-        ).length;
-        
-        bonusEarned = referrals.where((r) => 
-          r.bonusStatus.toLowerCase() == 'completed'
-        ).length;
-        
+        activeReferrals = referrals
+            .where((r) =>
+                r.bonusStatus.toLowerCase() == 'in progress' ||
+                r.bonusStatus.toLowerCase() == 'pending')
+            .length;
+
+        bonusEarned = referrals
+            .where((r) => r.bonusStatus.toLowerCase() == 'completed')
+            .length;
+
         _log.i('Fetched ${referrals.length} referrals');
       } else {
         _snackBar.showSnackbar(
           message: response.data['message'] ?? 'Failed to fetch referrals',
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
       _log.e('Error fetching referral users: $e');
       _snackBar.showSnackbar(
         message: 'Failed to load referrals',
+        duration: const Duration(seconds: 3),
       );
     } finally {
       setBusy(false);
@@ -126,31 +132,32 @@ class ReferralsViewModel extends BaseViewModel {
   Future<void> fetchReferralCode() async {
     setBusy(true);
     notifyListeners();
-    
+
     try {
       final response = await _repo.getReferralCode();
-      
+
       if (response.statusCode == 200) {
         referralId = response.data['data']['id'];
         referralCode = response.data['data']['referralCode'];
-        
+
         referralLink = '$referralCode';
-        
+
         _log.i('Referral code fetched: $referralCode');
       } else {
         _snackBar.showSnackbar(
           message: response.data['message'] ?? 'Failed to fetch referral code',
+          duration: const Duration(seconds: 3),
         );
       }
     } catch (e) {
       _log.e('Error fetching referral code: $e');
       _snackBar.showSnackbar(
         message: 'Failed to load referral code',
+        duration: const Duration(seconds: 3),
       );
     } finally {
       setBusy(false);
       notifyListeners();
     }
   }
-
 }

@@ -372,7 +372,7 @@ class DashboardViewModel extends BaseViewModel {
     notifyListeners();
     try {
       final res = await _repo.getProductTags(categoryId: categoryId);
-      if (res.statusCode == 200) {
+      if (res.statusCode == 200 && res.data is Map) {
         final List<dynamic> tagsData = res.data['tags'] ?? [];
         _tags = tagsData
             .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))

@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:easy_ph/core/data/repositories/repository_interface.dart';
 
@@ -32,7 +31,8 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> modifyCartItem(String productId, String action, {int? newFrequency}) async {
+  Future<ApiResponse> modifyCartItem(String productId, String action,
+      {int? newFrequency}) async {
     final body = {
       "action": action,
       if (newFrequency != null) "newFrequency": newFrequency,
@@ -45,8 +45,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
-
   @override
   Future<ApiResponse> requestOtp(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
@@ -57,6 +55,7 @@ class Repository extends IRepository {
 
     return response;
   }
+
   @override
   Future<ApiResponse> submitOtp(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
@@ -65,16 +64,13 @@ class Repository extends IRepository {
       reqBody: req,
     );
 
-
     return response;
   }
 
   @override
   Future<ApiResponse> logOut() async {
-    ApiResponse response = await api.call(
-        method: HttpMethod.post,
-        endpoint: "auth/logout"
-    );
+    ApiResponse response =
+        await api.call(method: HttpMethod.post, endpoint: "auth/logout");
 
     return response;
   }
@@ -84,8 +80,7 @@ class Repository extends IRepository {
     ApiResponse response = await api.call(
         method: HttpMethod.postRefresh,
         reqBody: req,
-        endpoint: "auth/refresh-token"
-    );
+        endpoint: "auth/refresh-token");
     return response;
   }
 
@@ -132,7 +127,6 @@ class Repository extends IRepository {
 
     return response;
   }
-
 
   @override
   Future<ApiResponse> getProducts({
@@ -199,6 +193,7 @@ class Repository extends IRepository {
     );
     return response;
   }
+
   @override
   Future<ApiResponse> getProductsByTag({
     required String tagId,
@@ -218,7 +213,7 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> getReviews( String productId) async {
+  Future<ApiResponse> getReviews(String productId) async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,
       endpoint: "reviews/$productId",
@@ -271,10 +266,10 @@ class Repository extends IRepository {
   @override
   Future<ApiResponse> requestService(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
-        method: HttpMethod.post,
-        endpoint: "/service-request",
-        reqBody: req,
-      );
+      method: HttpMethod.post,
+      endpoint: "/service-request",
+      reqBody: req,
+    );
     return response;
   }
 
@@ -317,7 +312,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> getProfile() async {
     ApiResponse response = await api.call(
@@ -346,8 +340,6 @@ class Repository extends IRepository {
 
     return response;
   }
-
-
 
   @override
   Future<ApiResponse> verifyTransaction(String ref) async {
@@ -381,7 +373,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> resetPasswordRequest(String email) async {
     ApiResponse response = await api.call(
@@ -393,8 +384,7 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> forgotPassword(
-      Map<String, dynamic> req) async {
+  Future<ApiResponse> forgotPassword(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
       endpoint: "auth/password-reset",
@@ -405,8 +395,7 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> newPassword(
-      Map<String, dynamic> req) async {
+  Future<ApiResponse> newPassword(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
       endpoint: "auth/update-password",
@@ -415,7 +404,6 @@ class Repository extends IRepository {
 
     return response;
   }
-
 
   @override
   Future<ApiResponse> updatePassword(
@@ -473,7 +461,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> withdraw(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
@@ -495,7 +482,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> getOrdersStatus(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
@@ -506,7 +492,6 @@ class Repository extends IRepository {
 
     return response;
   }
-
 
   @override
   Future<ApiResponse> cartList() async {
@@ -571,7 +556,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> getTransactions({int page = 1, int pageSize = 10}) async {
     ApiResponse response = await api.call(
@@ -585,7 +569,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> recommendedProducts(String productId) async {
     ApiResponse response = await api.call(
@@ -595,10 +578,8 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
-  Future<ApiResponse> resetPassword(
-      Map<String, dynamic> req) async {
+  Future<ApiResponse> resetPassword(Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.post,
       endpoint: "auth/update-user-password",
@@ -650,7 +631,8 @@ class Repository extends IRepository {
   }
 
   @override
-  Future<ApiResponse> editShipping(String addressId, Map<String, dynamic> req) async {
+  Future<ApiResponse> editShipping(
+      String addressId, Map<String, dynamic> req) async {
     ApiResponse response = await api.call(
       method: HttpMethod.put,
       endpoint: "profile/addresses/$addressId",
@@ -659,8 +641,6 @@ class Repository extends IRepository {
 
     return response;
   }
-
-
 
   @override
   Future<ApiResponse> calculateOrder(Map<String, dynamic> req) async {
@@ -727,7 +707,6 @@ class Repository extends IRepository {
     return response;
   }
 
-
   @override
   Future<ApiResponse> setDefaultShipping(
       Map<String, dynamic> req, String id) async {
@@ -771,4 +750,82 @@ class Repository extends IRepository {
     return response;
   }
 
+  @override
+  Future<ApiResponse> createSavings(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.post,
+      endpoint: "savings",
+      reqBody: req,
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> cancelSavingsPlan(String id) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.patch,
+      endpoint: "savings/$id/cancel",
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getWalletBalance() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "wallet/balance",
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getWalletHistory({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    final Map<String, dynamic> params = {
+      'page': page,
+      'limit': limit,
+    };
+    if (status != null) params['status'] = status;
+
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: 'wallet/history',
+      reqParams: params,
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getSavings({String? status}) async {
+    final Map<String, dynamic> params = {};
+    if (status != null) params['status'] = status;
+
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: 'savings',
+      reqParams: params.isNotEmpty ? params : null,
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getSavingsDetail(String id) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: 'savings/$id',
+    );
+    return response;
+  }
+
+  @override
+  Future<ApiResponse> getInstallments() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: 'admin/installment-periods',
+    );
+    return response;
+  }
 }

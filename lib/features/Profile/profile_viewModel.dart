@@ -65,11 +65,13 @@ class ProfileViewModel extends BaseViewModel {
         getProfile();
       } else {
         _log.e("Failed to upload image");
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to upload image.");
+        _snackBar.showSnackbar(
+            message: res.data["message"] ?? "Failed to upload image.");
       }
     } catch (e) {
       _log.e("Error uploading image: $e");
-      _snackBar.showSnackbar(message: "An error occurred while uploading the image.",
+      _snackBar.showSnackbar(
+          message: "An error occurred while uploading the image.",
           duration: Duration(seconds: 1));
     } finally {
       setBusy(false);
@@ -79,8 +81,8 @@ class ProfileViewModel extends BaseViewModel {
   void updateProfileData({
     required String firstName,
     required String lastName,
-     String? email,
-     String? phoneNumber,
+    String? email,
+    String? phoneNumber,
   }) async {
     setBusy(true);
     try {
@@ -191,27 +193,29 @@ class ProfileViewModel extends BaseViewModel {
     );
   }
 
-
-
-
   Future<void> getProfile() async {
     setBusy(true);
     try {
-      final localProfileJson = await _localStorage.fetch(LocalStorageDir.authUser);
+      final localProfileJson =
+          await _localStorage.fetch(LocalStorageDir.authUser);
       if (localProfileJson != null) {
         profile.value = Profile.fromJson(jsonDecode(localProfileJson));
       }
 
       ApiResponse res = await _repo.getProfile();
       if (res.statusCode == 200) {
-        profile.value = Profile.fromJson(Map<String, dynamic>.from(res.data["data"]));
-        await _localStorage.save(LocalStorageDir.authUser, jsonEncode(res.data["data"]));
+        profile.value =
+            Profile.fromJson(Map<String, dynamic>.from(res.data["data"]));
+        await _localStorage.save(
+            LocalStorageDir.authUser, jsonEncode(res.data["data"]));
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? "Failed to fetch profile.");
+        _snackBar.showSnackbar(
+            message: res.data['message'] ?? "Failed to fetch profile.");
       }
     } catch (e) {
       _log.e("Error fetching profile: $e");
-      _snackBar.showSnackbar(message: "An error occurred while fetching your profile.");
+      _snackBar.showSnackbar(
+          message: "An error occurred while fetching your profile.");
     } finally {
       setBusy(false);
     }
@@ -235,10 +239,13 @@ class ProfileViewModel extends BaseViewModel {
   }
 
   // Navigation Handlers
-  // void navigateToWallet() => _navigationService.navigateTo(Routes.walletView);
+  void navigateToWallet() => _navigationService.navigateTo(Routes.walletView);
   void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
-  void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
+  void navigateToShippingAddresses() =>
+      _navigationService.navigateTo(Routes.shippingAddressesPage);
   void navigateToSupport() => _navigationService.navigateTo(Routes.supportView);
-  void navigateToReferrals() => _navigationService.navigateTo(Routes.referralsView);
-  void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
+  void navigateToReferrals() =>
+      _navigationService.navigateTo(Routes.referralsView);
+  void navigateToChangePassword() =>
+      _navigationService.navigateTo(Routes.changePasswordView);
 }

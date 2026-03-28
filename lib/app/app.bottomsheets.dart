@@ -8,15 +8,19 @@ import 'package:stacked_services/stacked_services.dart';
 
 import 'app.locator.dart';
 import '../ui/bottom_sheets/address_sheet/add_address_bottom_sheet.dart';
+import '../ui/bottom_sheets/installment_payment_sheet.dart';
 import '../ui/bottom_sheets/notice/notice_sheet.dart';
 import '../ui/bottom_sheets/order_status/order_status_timeline.dart';
 import '../ui/bottom_sheets/profile_screen_sheet.dart';
+import '../ui/bottom_sheets/savings_payment_sheet.dart';
 
 enum BottomSheetType {
   notice,
   profileScreen,
   orderStatusTimeline,
   addAddressBottom,
+  savingsPayment,
+  installmentPayment,
 }
 
 void setupBottomSheetUi() {
@@ -31,6 +35,10 @@ void setupBottomSheetUi() {
         OrderStatusTimelineSheet(request: request, completer: completer),
     BottomSheetType.addAddressBottom: (context, request, completer) =>
         AddAddressBottomSheet(request: request, completer: completer),
+    BottomSheetType.savingsPayment: (context, request, completer) =>
+        SavingsPaymentSheet(request: request, completer: completer),
+    BottomSheetType.installmentPayment: (context, request, completer) =>
+        InstallmentPaymentSheet(request: request, completer: completer),
   };
 
   bottomsheetService.setCustomSheetBuilders(builders);

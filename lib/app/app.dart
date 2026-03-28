@@ -9,9 +9,19 @@ import 'package:easy_ph/features/Profile/shipping/shipping_address_view.dart';
 import 'package:easy_ph/features/Profile/support/support_view.dart';
 import 'package:easy_ph/features/auth/presentation/password_reset/password_reset_view.dart';
 import 'package:easy_ph/features/cart/cart_view.dart';
+import 'package:easy_ph/features/cart/checkout/checkout_view.dart';
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:easy_ph/features/services/service_view.dart';
 import 'package:easy_ph/features/shop/shop_view.dart';
+import 'package:easy_ph/features/wallet/wallet_view.dart';
+import 'package:easy_ph/features/wallet/savings/my_savings_view.dart';
+import 'package:easy_ph/features/wallet/savings/savings_details_view.dart';
+import 'package:easy_ph/features/wallet/savings/create_savings_view.dart';
+import 'package:easy_ph/features/wallet/savings/savings_success_view.dart';
+import 'package:easy_ph/features/wallet/installments/my_installments_view.dart';
+import 'package:easy_ph/features/wallet/installments/installment_details_view.dart';
+import 'package:easy_ph/ui/bottom_sheets/savings_payment_sheet.dart';
+import 'package:easy_ph/ui/bottom_sheets/installment_payment_sheet.dart';
 import 'package:easy_ph/ui/bottom_sheets/notice/notice_sheet.dart';
 import 'package:easy_ph/ui/dialogs/info_alert/info_alert_dialog.dart';
 import 'package:easy_ph/features/startup/presentation/startup_view.dart';
@@ -59,6 +69,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     ),
     MaterialRoute(page: CartView),
     MaterialRoute(page: ProductCard),
+    MaterialRoute(page: CheckoutView),
     MaterialRoute(page: EnterEmailView),
     MaterialRoute(page: ProfileView),
     MaterialRoute(page: ServicesView),
@@ -69,6 +80,13 @@ import '../features/services/request/existing_services_viewmodel.dart';
     MaterialRoute(page: ReferralsView),
     MaterialRoute(page: ChangePasswordView),
     MaterialRoute(page: PaymentSuccessView),
+    MaterialRoute(page: WalletView),
+    MaterialRoute(page: MySavingsView),
+    MaterialRoute(page: SavingsDetailsView),
+    MaterialRoute(page: CreateSavingsView),
+    MaterialRoute(page: SavingsSuccessView),
+    MaterialRoute(page: MyInstallmentsView),
+    MaterialRoute(page: InstallmentDetailsView),
     CustomRoute(
       page: Login,
       transitionsBuilder: TransitionsBuilders.slideRight,
@@ -84,9 +102,6 @@ import '../features/services/request/existing_services_viewmodel.dart';
       transitionsBuilder: TransitionsBuilders.slideRight,
       durationInMilliseconds: 400,
     ),
-    // @stacked-route
-
-
     // @stacked-route
   ],
   dependencies: [
@@ -110,6 +125,8 @@ import '../features/services/request/existing_services_viewmodel.dart';
     StackedBottomsheet(classType: ProfileScreenSheet),
     StackedBottomsheet(classType: OrderStatusTimelineSheet),
     StackedBottomsheet(classType: AddAddressBottomSheet),
+    StackedBottomsheet(classType: SavingsPaymentSheet),
+    StackedBottomsheet(classType: InstallmentPaymentSheet),
     // StackedBottomsheet(classType: FavoritesBottomSheet),
     // @stacked-bottom-sheet
   ],
@@ -121,6 +138,5 @@ import '../features/services/request/existing_services_viewmodel.dart';
     StackedDialog(classType: UpdateDialog),
     // @stacked-dialog
   ],
-
 )
 class App {}

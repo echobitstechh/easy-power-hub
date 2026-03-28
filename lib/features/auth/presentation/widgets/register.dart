@@ -16,17 +16,15 @@ import '../../../../ui/components/text_field_widget.dart';
 import '../../../../ui/components/code_input.dart';
 import '../auth_viewmodel.dart';
 
-
-
 class Register extends StackedView<AuthViewModel> {
   const Register({super.key});
 
   @override
   Widget builder(
-      BuildContext context,
-      AuthViewModel viewModel,
-      Widget? child,
-      ) {
+    BuildContext context,
+    AuthViewModel viewModel,
+    Widget? child,
+  ) {
     final formKey = GlobalKey<FormState>();
     return Scaffold(
       body: SingleChildScrollView(
@@ -52,10 +50,15 @@ class Register extends StackedView<AuthViewModel> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account? ", style: TextStyle(fontSize: 12)),
+                  const Text("Already have an account? ",
+                      style: TextStyle(fontSize: 12)),
                   GestureDetector(
-                    onTap: () { locator<NavigationService>().navigateTo(Routes.login); },
-                    child: const Text("login Account", style: TextStyle(fontSize: 12, color: kcSecondaryColor)),
+                    onTap: () {
+                      locator<NavigationService>().navigateTo(Routes.login);
+                    },
+                    child: const Text("login Account",
+                        style:
+                            TextStyle(fontSize: 12, color: kcSecondaryColor)),
                   ),
                 ],
               ),
@@ -68,7 +71,8 @@ class Register extends StackedView<AuthViewModel> {
     );
   }
 
-  Widget _buildFormContent(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey) {
+  Widget _buildFormContent(AuthViewModel viewModel, BuildContext context,
+      GlobalKey<FormState> formKey) {
     switch (viewModel.registrationStep) {
       case RegistrationStep.collectContact:
         return _buildCollectContactForm(viewModel, context, formKey);
@@ -76,11 +80,13 @@ class Register extends StackedView<AuthViewModel> {
         return _buildVerifyOtpForm(viewModel, context);
       case RegistrationStep.completeProfile:
         return _buildCompleteProfileForm(viewModel, context, formKey);
-      default: return _buildCollectContactForm(viewModel, context, formKey);
+      default:
+        return _buildCollectContactForm(viewModel, context, formKey);
     }
   }
 
-  Widget _buildCollectContactForm(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey ) {
+  Widget _buildCollectContactForm(AuthViewModel viewModel, BuildContext context,
+      GlobalKey<FormState> formKey) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -90,11 +96,15 @@ class Register extends StackedView<AuthViewModel> {
             return TextField(
               controller: viewModel.inputController,
               decoration: InputDecoration(
-                hintText: isPhoneNumber ? "Enter phone number" : "Enter email or Phone",
+                hintText: isPhoneNumber
+                    ? "Enter phone number"
+                    : "Enter email or Phone",
                 prefixText: isPhoneNumber ? "+234 " : null,
                 border: const OutlineInputBorder(),
               ),
-              keyboardType: isPhoneNumber ? TextInputType.phone : TextInputType.emailAddress,
+              keyboardType: isPhoneNumber
+                  ? TextInputType.phone
+                  : TextInputType.emailAddress,
               onChanged: (value) => viewModel.onEmailOrPhoneChanged(value),
             );
           },
@@ -140,7 +150,8 @@ class Register extends StackedView<AuthViewModel> {
     );
   }
 
-  Widget _buildCompleteProfileForm(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey) {
+  Widget _buildCompleteProfileForm(AuthViewModel viewModel,
+      BuildContext context, GlobalKey<FormState> formKey) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -151,7 +162,8 @@ class Register extends StackedView<AuthViewModel> {
                 hint: "Firstname",
                 controller: viewModel.firstname,
                 inputType: TextInputType.name,
-                validator: (value) => value!.isEmpty ? 'First name is required' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'First name is required' : null,
               ),
             ),
             const SizedBox(width: 5),
@@ -159,7 +171,8 @@ class Register extends StackedView<AuthViewModel> {
               child: TextFieldWidget(
                 hint: "Lastname",
                 controller: viewModel.lastname,
-                validator: (value) => value!.isEmpty ? 'Last name is required' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'Last name is required' : null,
               ),
             ),
           ],
@@ -172,11 +185,13 @@ class Register extends StackedView<AuthViewModel> {
             controller: viewModel.email,
             validator: (value) {
               if (value!.isEmpty) return 'Email is required';
-              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(value)) return 'Invalid email address';
+              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
+                  .hasMatch(value)) return 'Invalid email address';
               return null;
             },
           ),
-        if (!viewModel.isPhoneNumber) // If email was used for OTP, ask for phone
+        if (!viewModel
+            .isPhoneNumber) // If email was used for OTP, ask for phone
           IntlPhoneField(
             decoration: InputDecoration(
               labelText: 'Phone Number',
@@ -186,7 +201,9 @@ class Register extends StackedView<AuthViewModel> {
             ),
             initialCountryCode: 'NG',
             controller: viewModel.phone,
-            validator: (value) => value!.completeNumber.isEmpty ? 'Phone number is required' : null,
+            validator: (value) => value!.completeNumber.isEmpty
+                ? 'Phone number is required'
+                : null,
           ),
         verticalSpaceMedium,
         TextFieldWidget(
@@ -196,7 +213,8 @@ class Register extends StackedView<AuthViewModel> {
           obscureText: viewModel.obscure,
           suffix: InkWell(
             onTap: () => viewModel.toggleObscure(),
-            child: Icon(viewModel.obscure ? Icons.visibility_off : Icons.visibility),
+            child: Icon(
+                viewModel.obscure ? Icons.visibility_off : Icons.visibility),
           ),
           validator: (value) => viewModel.validatePassword(value!),
         ),
@@ -216,7 +234,8 @@ class Register extends StackedView<AuthViewModel> {
           validator: (value) => viewModel.validateConfirmPassword(value!),
           suffix: InkWell(
             onTap: () => viewModel.toggleObscure(),
-            child: Icon(viewModel.obscure ? Icons.visibility_off : Icons.visibility),
+            child: Icon(
+                viewModel.obscure ? Icons.visibility_off : Icons.visibility),
           ),
         ),
         verticalSpaceMedium,
@@ -229,12 +248,12 @@ class Register extends StackedView<AuthViewModel> {
           isLoading: viewModel.isBusy,
           label: "Create Account",
           submit: () {
-
             if (formKey.currentState!.validate()) {
               viewModel.completeRegistration();
             } else {
               print('Form validation failed.');
-              locator<SnackbarService>().showSnackbar(message: 'fill all fields');
+              locator<SnackbarService>()
+                  .showSnackbar(message: 'fill all fields');
             }
           },
           color: kcPrimaryColor,

@@ -14,7 +14,8 @@ class ProfileView extends StackedView<ProfileViewModel> {
   const ProfileView({Key? key}) : super(key: key);
 
   @override
-  Widget builder(BuildContext context, ProfileViewModel viewModel, Widget? child) {
+  Widget builder(
+      BuildContext context, ProfileViewModel viewModel, Widget? child) {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -29,27 +30,32 @@ class ProfileView extends StackedView<ProfileViewModel> {
       body: viewModel.isBusy
           ? const ProfilePageShimmer()
           : CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-                ProfilePictureSection(viewModel: viewModel),
-                verticalSpaceMedium,
-                _buildActionList(context, viewModel),
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Column(
+                    children: [
+                      ProfilePictureSection(viewModel: viewModel),
+                      verticalSpaceMedium,
+                      _buildActionList(context, viewModel),
+                    ],
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: _buildSignOutAndDeleteSection(viewModel),
+                ),
               ],
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildSignOutAndDeleteSection(viewModel),
-          ),
-        ],
-      ),
     );
   }
 
   Widget _buildActionList(BuildContext context, ProfileViewModel viewModel) {
     return Column(
       children: [
+        ListTile(
+          onTap: viewModel.navigateToWallet,
+          leading: const Icon(Icons.wallet, color: kcOrangeColor),
+          title: const Text("My Wallet"),
+        ),
         ListTile(
           onTap: viewModel.navigateToOrders,
           leading: const Icon(Icons.fire_truck_rounded, color: kcPrimaryColor),

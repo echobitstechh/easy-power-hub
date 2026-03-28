@@ -50,10 +50,24 @@ android {
 
     signingConfigs {
         release {
-            keyAlias keystoreProperties["keyAlias"]
-            keyPassword keystoreProperties["keyPassword"]
-            storePassword keystoreProperties["storePassword"]
-            storeFile file(keystoreProperties["storeFile"])
+            if (keystoreProperties != null &&
+                keystoreProperties.containsKey('storeFile') && 
+                keystoreProperties.containsKey('storePassword') && 
+                keystoreProperties.containsKey('keyAlias') && 
+                keystoreProperties.containsKey('keyPassword')) {
+                
+                def storeFileObj = file(keystoreProperties['storeFile'])
+                if (storeFileObj.exists()) {
+                    keyAlias keystoreProperties['keyAlias']
+                    keyPassword keystoreProperties['keyPassword']
+                    storePassword keystoreProperties['storePassword']
+                    storeFile storeFileObj
+                } else {
+                    println "Warning: Keystore file not found at ${keystoreProperties['storeFile']}. Signing will be disabled."
+                }
+            } else {
+                println "Warning: Release signing properties are missing or incomplete in key.properties. Signing will be disabled."
+            }
         }
     }
 

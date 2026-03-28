@@ -1,5 +1,3 @@
-
-
 import '../../network/api_response.dart';
 
 abstract class IRepository {
@@ -25,15 +23,17 @@ abstract class IRepository {
 
   Future<ApiResponse> getProducts({required int page, required int limit});
 
-  Future<ApiResponse> searchProducts({required int page, required int limit, required String query});
+  Future<ApiResponse> searchProducts(
+      {required int page, required int limit, required String query});
 
   Future<ApiResponse> getProductTags();
 
-  Future<ApiResponse> getProductsByTag({required String tagId, int page = 1, int limit = 10});
+  Future<ApiResponse> getProductsByTag(
+      {required String tagId, int page = 1, int limit = 10});
 
-  Future<ApiResponse> getReviews( String productId);
+  Future<ApiResponse> getReviews(String productId);
 
-  Future<ApiResponse> deleteFromFavourites( String favouriteId);
+  Future<ApiResponse> deleteFromFavourites(String favouriteId);
 
   Future<ApiResponse> getFavourites();
 
@@ -41,7 +41,8 @@ abstract class IRepository {
 
   Future<ApiResponse> requestService(Map<String, dynamic> req);
 
-  Future<ApiResponse> getExistingService({required int page, required int limit, String status});
+  Future<ApiResponse> getExistingService(
+      {required int page, required int limit, String status});
 
   Future<ApiResponse> cancelServiceRequest(String id, String reason);
 
@@ -85,7 +86,7 @@ abstract class IRepository {
 
   Future<ApiResponse> addToCart(Map<String, dynamic> req);
 
-  Future<ApiResponse>  rating(Map<String, dynamic> req);
+  Future<ApiResponse> rating(Map<String, dynamic> req);
 
   Future<ApiResponse> deleteFromCart(String raffleId);
 
@@ -99,7 +100,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getReferralCode();
 
-  Future<ApiResponse> getReferralUsers({required int page, required int limit, String status});
+  Future<ApiResponse> getReferralUsers(
+      {required int page, required int limit, String status});
 
   Future<ApiResponse> getDeliveryZones();
 
@@ -118,4 +120,19 @@ abstract class IRepository {
   Future<ApiResponse> deleteShipping(String productId);
 
   Future<ApiResponse> reviewOrder(Map<String, dynamic> req);
+
+  Future<ApiResponse> createSavings(Map<String, dynamic> req);
+  
+  Future<ApiResponse> cancelSavingsPlan(String id);
+
+  Future<ApiResponse> getWalletBalance();
+
+  Future<ApiResponse> getWalletHistory(
+      {int page = 1, int limit = 10, String? status});
+
+  Future<ApiResponse> getSavings({String? status});
+
+  Future<ApiResponse> getSavingsDetail(String id);
+
+  Future<ApiResponse> getInstallments();
 }
