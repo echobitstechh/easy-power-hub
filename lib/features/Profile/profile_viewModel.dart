@@ -195,6 +195,8 @@ class ProfileViewModel extends BaseViewModel {
 
 
   Future<void> getProfile() async {
+    if (!userLoggedIn.value) return;
+
     setBusy(true);
     try {
       final localProfileJson = await _localStorage.fetch(LocalStorageDir.authUser);
@@ -217,6 +219,8 @@ class ProfileViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> onDeleteAccount() async => onSignOut();
+
   Future<void> onSignOut() async {
     final res = await _dialogService.showConfirmationDialog(
       title: "Are you sure?",
@@ -235,10 +239,11 @@ class ProfileViewModel extends BaseViewModel {
   }
 
   // Navigation Handlers
-  // void navigateToWallet() => _navigationService.navigateTo(Routes.walletView);
   void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
   void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
   void navigateToSupport() => _navigationService.navigateTo(Routes.supportView);
   void navigateToReferrals() => _navigationService.navigateTo(Routes.referralsView);
   void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
+  void navigateToLogin() => _navigationService.navigateTo(Routes.login);
+  void navigateToRegister() => _navigationService.navigateTo(Routes.register);
 }

@@ -8,7 +8,10 @@ import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
 import '../../../../ui/components/code_input.dart';
-import '../../../../ui/components/submit_button.dart';
+import '../../../../ui/components/glass/glass_button.dart';
+import '../../../../ui/components/glass/glass_card.dart';
+import '../../../../ui/components/glass/glass_scaffold.dart';
+import '../../../../ui/components/glass/glass_text_field.dart';
 import '../auth_viewmodel.dart';
 
 class OTPView extends StackedView<AuthViewModel> {
@@ -28,90 +31,125 @@ class OTPView extends StackedView<AuthViewModel> {
   });
 
   @override
-  Widget builder(
-      BuildContext context,
-      AuthViewModel viewModel,
-      Widget? child,
-      ) {
-    // The Scaffold provides the Material context
-    return Scaffold(
-      body: ListView(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+  Widget builder(BuildContext context, AuthViewModel viewModel, Widget? child) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GlassScaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                verticalSpaceMassive,
+                verticalSpaceMedium,
+
                 Text(
-                  viewModel.isOtpRequested ? "Input OTP" : "Create account",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: kcPrimaryColor,
+                  viewModel.isOtpRequested ? "Verify your identity" : "Create account",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'HostGrotesk',
+                    color: isDark ? kcWhiteColor : kcBlackColor,
                   ),
                 ),
-                verticalSpaceTiny,
+                const SizedBox(height: 8),
                 Text(
                   viewModel.isOtpRequested
-                      ? "Please enter the code sent to your email or phone"
-                      : "Create an account to explore our high-quality products.",
-                  style: const TextStyle(
-                    fontSize: 16,
+                      ? "Enter the code sent to your email or phone"
+                      : "Create an account to explore our products.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'HostGrotesk',
+                    color: isDark ? kcWhiteColor.withOpacity(0.55) : kcMediumGrey,
                   ),
                 ),
+
+                verticalSpaceMedium,
+
+                GlassCard(
+                  borderRadius: 28,
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!viewModel.isOtpRequested)
+                        GlassTextField(
+                          hint: viewModel.isPhoneNumber
+                              ? "Phone number"
+                              : "Email or phone",
+                          controller: viewModel.isPhoneNumber
+                              ? viewModel.phone
+                              : viewModel.email,
+                          prefixText: viewModel.isPhoneNumber ? "+234 " : null,
+                          keyboardType: viewModel.isPhoneNumber
+                              ? TextInputType.phone
+                              : TextInputType.emailAddress,
+                          onChanged: viewModel.onEmailOrPhoneChanged,
+                        ),
+
+                      if (viewModel.isOtpRequested) ...[
+                        const SizedBox(height: 8),
+                        CodeInputWidget(
+                          codeController: viewModel.otp,
+                          onCompleted: (_) => viewModel.submitOtp(),
+                        ),
+                      ],
+
+                      verticalSpaceSmall,
+
+                      ValueListenableBuilder<bool>(
+                        valueListenable: appLoading,
+                        builder: (context, isLoading, _) => GlassButton(
+                          label: viewModel.isOtpRequested
+                              ? 'Verify OTP'
+                              : 'Get OTP',
+                          isLoading: isLoading,
+                          onTap: viewModel.isOtpRequested
+                              ? viewModel.submitOtp
+                              : viewModel.requestOtp,
+                        ),
+                      ),
+
+                      verticalSpaceSmall,
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Already a user? ",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? kcWhiteColor.withOpacity(0.55)
+                                  : kcMediumGrey,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => locator<NavigationService>()
+                                .navigateTo(Routes.login),
+                            child: const Text(
+                              "Sign in",
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: kcPrimaryColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                verticalSpaceMedium,
               ],
             ),
           ),
-          verticalSpaceMedium,
-          if (!viewModel.isOtpRequested)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                controller: viewModel.isPhoneNumber ? viewModel.phone : viewModel.email,
-                decoration: InputDecoration(
-                  hintText: viewModel.isPhoneNumber ? "Enter phone number" : "Enter email or phone",
-                  prefixText: viewModel.isPhoneNumber ? "+234 " : null,
-                  border: const OutlineInputBorder(),
-                ),
-                keyboardType: viewModel.isPhoneNumber ? TextInputType.phone : TextInputType.emailAddress,
-                onChanged: (value) => viewModel.onEmailOrPhoneChanged(value),
-              ),
-            ),
-          verticalSpaceMedium,
-          if (viewModel.isOtpRequested)
-            Padding(
-              padding: const EdgeInsets.all(40.0),
-              child: CodeInputWidget(
-                codeController: viewModel.otp,
-                onCompleted: (String value) => viewModel.submitOtp(),
-              ),
-            ),
-          verticalSpaceSmall,
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: appLoading,
-              builder: (context, isLoading, child) => SubmitButton(
-                isLoading: isLoading,
-                boldText: true,
-                label: viewModel.isOtpRequested ? 'Verify OTP' : 'Get OTP',
-                submit: () => viewModel.isOtpRequested ? viewModel.submitOtp() : viewModel.requestOtp(),
-                color: kcPrimaryColor,
-              ),
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Already a user? ", style: TextStyle(fontSize: 12)),
-              GestureDetector(
-                onTap: () => locator<NavigationService>().navigateToLogin,
-                child: const Text("Login", style: TextStyle(fontSize: 14, color: kcSecondaryColor)),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

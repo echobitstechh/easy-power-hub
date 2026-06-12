@@ -32,9 +32,9 @@ class PopularProductsSection extends StatelessWidget {
             mainAxisSpacing: 10.0,
             childAspectRatio: 0.75,
           ),
-          itemCount: viewModel.filteredProductList.length,
+          itemCount: viewModel.productList.length,
           itemBuilder: (context, index) {
-            final item = viewModel.filteredProductList[index];
+            final item = viewModel.productList[index];
             // Use the extracted ProductGridItem widget for cleaner code
             return ProductGridItem(
               product: item,

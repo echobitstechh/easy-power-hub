@@ -22,6 +22,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 import '../core/data/repositories/repository.dart';
 import '../core/network/api_service.dart';
+import '../core/services/app_data_service.dart';
 import '../core/utils/local_stotage.dart';
 import '../features/Profile/onSuccess/success_view.dart';
 import '../features/auth/presentation/auth_service.dart';
@@ -103,6 +104,7 @@ import '../features/services/request/existing_services_viewmodel.dart';
     LazySingleton(classType: ThemeService),
     LazySingleton(classType: RemoteConfigService),
     LazySingleton(classType: UpdateService),
+    LazySingleton(classType: AppDataService),
     // @stacked-service
   ],
   bottomsheets: [

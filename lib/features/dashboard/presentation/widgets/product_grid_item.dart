@@ -45,13 +45,27 @@ class ProductGridItem extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? kcDarkGreyColor
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+              ? kcGlassSurfaceDark
+              : kcGlassSurfaceLight,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? kcGlassBorderDark
+                : kcGlassBorderLight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black
+                  .withOpacity(Theme.of(context).brightness == Brightness.dark
+                      ? 0.25
+                      : 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,14 +87,7 @@ class ProductGridItem extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? kcDarkGreyColor
-                  : Colors.white,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 1.0,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              borderRadius: const BorderRadius.all(Radius.circular(14)),
             ),
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),

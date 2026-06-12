@@ -16,6 +16,10 @@ class LocalStorageDir {
   static const String category = "category";
   static const String themeMode = 'theme_mode';
   static const String lastUpdateCheck = 'lastUpdateCheck';
-
-
+  static const String cachedProducts   = 'cached_products';
+  static const String cachedCategories = 'cached_categories';
+  static const String cachedTags       = 'cached_tags';
+  static const String cachedBrands     = 'cached_brands';
+  static const String cacheTimestamp   = 'cache_timestamp';
+  static const String cartNeedsSync    = 'cart_needs_sync';
 }

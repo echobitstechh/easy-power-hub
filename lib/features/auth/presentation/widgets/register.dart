@@ -1,244 +1,327 @@
-// lib/features/auth/presentation/register.dart
-
 import 'package:flutter/material.dart';
-import 'package:intl_phone_field/countries.dart' as intl_countries;
 import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../../app/app.locator.dart';
 import '../../../../app/app.router.dart';
-
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
-import '../../../../ui/components/submit_button.dart';
-import '../../../../ui/components/text_field_widget.dart';
 import '../../../../ui/components/code_input.dart';
+import '../../../../ui/components/glass/glass_button.dart';
+import '../../../../ui/components/glass/glass_card.dart';
+import '../../../../ui/components/glass/glass_scaffold.dart';
+import '../../../../ui/components/glass/glass_text_field.dart';
 import '../auth_viewmodel.dart';
-
-
 
 class Register extends StackedView<AuthViewModel> {
   const Register({super.key});
 
   @override
-  Widget builder(
-      BuildContext context,
-      AuthViewModel viewModel,
-      Widget? child,
-      ) {
+  Widget builder(BuildContext context, AuthViewModel viewModel, Widget? child) {
     final formKey = GlobalKey<FormState>();
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-        child: Form(
-          key: formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              verticalSpaceMassive,
-              const Text(
-                "Create Account",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Panchang",
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GlassScaffold(
+      body: Stack(
+        children: [
+          Positioned(
+            top: -60,
+            left: -60,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    kcSecondaryColor.withOpacity(isDark ? 0.20 : 0.12),
+                    Colors.transparent,
+                  ],
                 ),
               ),
-              verticalSpaceTiny,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text("Already have an account? ", style: TextStyle(fontSize: 12)),
-                  GestureDetector(
-                    onTap: () { locator<NavigationService>().navigateTo(Routes.login); },
-                    child: const Text("login Account", style: TextStyle(fontSize: 12, color: kcSecondaryColor)),
-                  ),
-                ],
-              ),
-              verticalSpaceMedium,
-              _buildFormContent(viewModel, context, formKey),
-            ],
+            ),
           ),
-        ),
+
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Form(
+                key: formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      "Create Account",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: 'HostGrotesk',
+                        color: isDark ? kcWhiteColor : kcBlackColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Already have an account? ",
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark
+                                ? kcWhiteColor.withOpacity(0.55)
+                                : kcMediumGrey,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => locator<NavigationService>()
+                              .navigateTo(Routes.login),
+                          child: const Text(
+                            "Sign in",
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: kcPrimaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    verticalSpaceMedium,
+
+                    GlassCard(
+                      borderRadius: 28,
+                      padding: const EdgeInsets.all(24),
+                      child: _buildStepContent(
+                          viewModel, context, formKey, isDark),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildFormContent(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey) {
+  Widget _buildStepContent(AuthViewModel viewModel, BuildContext context,
+      GlobalKey<FormState> formKey, bool isDark) {
     switch (viewModel.registrationStep) {
       case RegistrationStep.collectContact:
-        return _buildCollectContactForm(viewModel, context, formKey);
+        return _contactStep(viewModel, isDark);
       case RegistrationStep.verifyOtp:
-        return _buildVerifyOtpForm(viewModel, context);
+        return _otpStep(viewModel, isDark);
       case RegistrationStep.completeProfile:
-        return _buildCompleteProfileForm(viewModel, context, formKey);
-      default: return _buildCollectContactForm(viewModel, context, formKey);
+        return _profileStep(viewModel, context, formKey, isDark);
+      default:
+        return _contactStep(viewModel, isDark);
     }
   }
 
-  Widget _buildCollectContactForm(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey ) {
+  Widget _contactStep(AuthViewModel viewModel, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          "Enter your contact",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: isDark ? kcWhiteColor : kcBlackColor,
+          ),
+        ),
+        verticalSpaceSmall,
         ValueListenableBuilder<bool>(
           valueListenable: viewModel.isPhoneNumberNotifier,
-          builder: (context, isPhoneNumber, child) {
-            return TextField(
-              controller: viewModel.inputController,
-              decoration: InputDecoration(
-                hintText: isPhoneNumber ? "Enter phone number" : "Enter email or Phone",
-                prefixText: isPhoneNumber ? "+234 " : null,
-                border: const OutlineInputBorder(),
-              ),
-              keyboardType: isPhoneNumber ? TextInputType.phone : TextInputType.emailAddress,
-              onChanged: (value) => viewModel.onEmailOrPhoneChanged(value),
-            );
-          },
+          builder: (context, isPhone, _) => GlassTextField(
+            hint: isPhone ? "Phone number" : "Email or phone",
+            controller: viewModel.inputController,
+            prefixText: isPhone ? "+234 " : null,
+            keyboardType:
+                isPhone ? TextInputType.phone : TextInputType.emailAddress,
+            onChanged: viewModel.onEmailOrPhoneChanged,
+          ),
         ),
-        verticalSpace(30),
-        SubmitButton(
+        verticalSpaceSmall,
+        GlassButton(
+          label: "Get OTP",
           isLoading: viewModel.isBusy,
-          label: 'Get OTP',
-          submit: () {
-            // New method in ViewModel to handle the first step
-            viewModel.requestOtpForRegistration();
-          },
-          color: kcPrimaryColor,
-          boldText: true,
+          onTap: viewModel.requestOtpForRegistration,
         ),
       ],
     );
   }
 
-  Widget _buildVerifyOtpForm(AuthViewModel viewModel, BuildContext context) {
+  Widget _otpStep(AuthViewModel viewModel, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text(
-          "Enter OTP",
+        Text(
+          "Enter the OTP sent to you",
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: isDark ? kcWhiteColor : kcBlackColor,
+          ),
         ),
-        verticalSpaceMedium,
+        verticalSpaceSmall,
         CodeInputWidget(
           codeController: viewModel.otp,
-          onCompleted: (String value) => viewModel.verifyOtpForRegistration(),
+          onCompleted: (_) => viewModel.verifyOtpForRegistration(),
         ),
-        verticalSpace(30),
-        SubmitButton(
+        verticalSpaceSmall,
+        GlassButton(
+          label: "Verify OTP",
           isLoading: viewModel.isBusy,
-          label: 'Verify OTP',
-          submit: () => viewModel.verifyOtpForRegistration(),
-          color: kcPrimaryColor,
-          boldText: true,
+          onTap: viewModel.verifyOtpForRegistration,
         ),
       ],
     );
   }
 
-  Widget _buildCompleteProfileForm(AuthViewModel viewModel, BuildContext context, GlobalKey<FormState> formKey) {
+  Widget _profileStep(AuthViewModel viewModel, BuildContext context,
+      GlobalKey<FormState> formKey, bool isDark) {
+    final inputDecoration = InputDecoration(
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(
+          color: isDark ? kcGlassBorderDark : kcGlassBorderLight,
+        ),
+      ),
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        Text(
+          "Complete your profile",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: isDark ? kcWhiteColor : kcBlackColor,
+          ),
+        ),
+        verticalSpaceSmall,
+
         Row(
           children: [
             Expanded(
-              child: TextFieldWidget(
-                hint: "Firstname",
+              child: GlassTextField(
+                hint: "First name",
                 controller: viewModel.firstname,
-                inputType: TextInputType.name,
-                validator: (value) => value!.isEmpty ? 'First name is required' : null,
+                keyboardType: TextInputType.name,
+                validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
             ),
-            const SizedBox(width: 5),
+            const SizedBox(width: 10),
             Expanded(
-              child: TextFieldWidget(
-                hint: "Lastname",
+              child: GlassTextField(
+                hint: "Last name",
                 controller: viewModel.lastname,
-                validator: (value) => value!.isEmpty ? 'Last name is required' : null,
+                validator: (v) => v!.isEmpty ? 'Required' : null,
               ),
             ),
           ],
         ),
-        verticalSpaceMedium,
-        // The conditionally displayed field for email or phone
-        if (viewModel.isPhoneNumber) // If phone was used for OTP, ask for email
-          TextFieldWidget(
-            hint: "Email Address",
+
+        verticalSpaceSmall,
+
+        if (viewModel.isPhoneNumber)
+          GlassTextField(
+            hint: "Email address",
             controller: viewModel.email,
-            validator: (value) {
-              if (value!.isEmpty) return 'Email is required';
-              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$').hasMatch(value)) return 'Invalid email address';
+            keyboardType: TextInputType.emailAddress,
+            validator: (v) {
+              if (v!.isEmpty) return 'Email is required';
+              if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
+                  .hasMatch(v)) return 'Invalid email';
               return null;
             },
           ),
-        if (!viewModel.isPhoneNumber) // If email was used for OTP, ask for phone
+
+        if (!viewModel.isPhoneNumber) ...[
           IntlPhoneField(
-            decoration: InputDecoration(
-              labelText: 'Phone Number',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-            ),
+            decoration: inputDecoration.copyWith(labelText: 'Phone number'),
             initialCountryCode: 'NG',
             controller: viewModel.phone,
-            validator: (value) => value!.completeNumber.isEmpty ? 'Phone number is required' : null,
+            validator: (v) =>
+                v!.completeNumber.isEmpty ? 'Phone required' : null,
           ),
-        verticalSpaceMedium,
-        TextFieldWidget(
-          inputType: TextInputType.visiblePassword,
+        ],
+
+        verticalSpaceSmall,
+
+        GlassTextField(
           hint: "Password",
           controller: viewModel.password,
           obscureText: viewModel.obscure,
-          suffix: InkWell(
-            onTap: () => viewModel.toggleObscure(),
-            child: Icon(viewModel.obscure ? Icons.visibility_off : Icons.visibility),
+          keyboardType: TextInputType.visiblePassword,
+          validator: (v) => viewModel.validatePassword(v ?? ''),
+          suffix: GestureDetector(
+            onTap: viewModel.toggleObscure,
+            child: Icon(
+              viewModel.obscure
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              size: 20,
+              color: isDark ? kcWhiteColor.withOpacity(0.5) : kcMediumGrey,
+            ),
           ),
-          validator: (value) => viewModel.validatePassword(value!),
         ),
+
+        const SizedBox(height: 4),
+        Text(
+          "At least 8 characters with letters and numbers",
+          style: TextStyle(
+            fontSize: 11,
+            color: isDark ? kcWhiteColor.withOpacity(0.4) : kcMediumGrey,
+          ),
+        ),
+
         verticalSpaceSmall,
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            "Must be at least 8 characters with a combination of letters and numbers",
-            style: TextStyle(fontSize: 11),
-          ),
-        ),
-        verticalSpaceMedium,
-        TextFieldWidget(
+
+        GlassTextField(
           hint: "Confirm password",
           controller: viewModel.cPassword,
           obscureText: viewModel.obscure,
-          validator: (value) => viewModel.validateConfirmPassword(value!),
-          suffix: InkWell(
-            onTap: () => viewModel.toggleObscure(),
-            child: Icon(viewModel.obscure ? Icons.visibility_off : Icons.visibility),
+          validator: (v) => viewModel.validateConfirmPassword(v ?? ''),
+          suffix: GestureDetector(
+            onTap: viewModel.toggleObscure,
+            child: Icon(
+              viewModel.obscure
+                  ? Icons.visibility_off_outlined
+                  : Icons.visibility_outlined,
+              size: 20,
+              color: isDark ? kcWhiteColor.withOpacity(0.5) : kcMediumGrey,
+            ),
           ),
         ),
-        verticalSpaceMedium,
-        TextFieldWidget(
-          hint: "referral code (optional)",
+
+        verticalSpaceSmall,
+
+        GlassTextField(
+          hint: "Referral code (optional)",
           controller: viewModel.referralCode,
         ),
-        verticalSpace(30),
-        SubmitButton(
-          isLoading: viewModel.isBusy,
-          label: "Create Account",
-          submit: () {
 
+        verticalSpaceSmall,
+
+        GlassButton(
+          label: "Create Account",
+          isLoading: viewModel.isBusy,
+          onTap: () {
             if (formKey.currentState!.validate()) {
               viewModel.completeRegistration();
             } else {
-              print('Form validation failed.');
-              locator<SnackbarService>().showSnackbar(message: 'fill all fields');
+              locator<SnackbarService>()
+                  .showSnackbar(message: 'Please fill all fields');
             }
           },
-          color: kcPrimaryColor,
-          boldText: true,
         ),
       ],
     );

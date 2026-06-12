@@ -7,6 +7,7 @@ import '../../../app/app.logger.dart';
 import '../../../core/data/models/service_request.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
+import '../../../state.dart';
 import './request_details_view.dart';
 
 class ExistingServicesViewModel extends BaseViewModel {
@@ -48,6 +49,15 @@ class ExistingServicesViewModel extends BaseViewModel {
   }
 
   Future<void> getServiceRequests({String? status}) async {
+    if (!userLoggedIn.value) {
+      _serviceRequests = [];
+      _pendingServicesCount = 0;
+      _acceptedServicesCount = 0;
+      _completedServicesCount = 0;
+      notifyListeners();
+      return;
+    }
+
     setBusy(true);
     notifyListeners();
     try {
@@ -56,31 +66,17 @@ class ExistingServicesViewModel extends BaseViewModel {
         page: 1,
         limit: 100,
       );
-      
+
       if (res.statusCode == 200 && res.data != null) {
-        _log.i('Service requests fetched: ${res.data}');
-        
         _serviceRequests = (res.data['data'] as List)
             .map((data) => ServiceRequest.fromJson(data))
             .toList();
-        
-        _log.i('Parsed ${_serviceRequests.length} service requests');
-        
         _calculateServiceCounts();
-        
       } else {
         _log.e('Failed to fetch service requests: ${res.statusCode}');
-        _snackBar.showSnackbar(
-          message: 'Failed to fetch service requests.',
-          duration: const Duration(seconds: 2),
-        );
       }
     } catch (e) {
       _log.e('Error fetching service requests: $e');
-      _snackBar.showSnackbar(
-        message: 'An error occurred while fetching service requests.',
-        duration: const Duration(seconds: 2),
-      );
     } finally {
       setBusy(false);
       notifyListeners();
