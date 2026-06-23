@@ -230,14 +230,14 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  void addProductToCart(Product product) async {
+  void addProductToCart(Product product, {bool isUnavailable = false}) async {
     loadingItems.add(product.id!);
     notifyListeners();
 
     // Optimistic local update first
     final idx = cart.value.indexWhere((i) => i.product?.id == product.id);
     if (idx == -1) {
-      cart.value.add(CartItem(product: product, quantity: 1));
+      cart.value.add(CartItem(product: product, quantity: 1, isUnavailable: isUnavailable));
       cart.notifyListeners();
     }
     await _saveLocalCart();
@@ -260,6 +260,7 @@ class DashboardViewModel extends BaseViewModel {
         'quantity': cart.value
             .firstWhere((i) => i.product?.id == product.id)
             .quantity,
+        'isUnavailable': isUnavailable,
       });
 
       if (!_isDisposed) {

@@ -518,28 +518,7 @@ class _CartContentState extends State<_CartContent>
                         height: 52,
                         onTap: () {
                           if (!userLoggedIn.value) {
-                            showDialog(
-                              context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Sign in required'),
-                                content: const Text(
-                                    'Create an account or sign in to place your order. Your cart will be saved.'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      locator<NavigationService>()
-                                          .navigateTo(Routes.login);
-                                    },
-                                    child: const Text('Sign In'),
-                                  ),
-                                ],
-                              ),
-                            );
+                            _showSignInSheet(context);
                           } else {
                             Navigator.push(
                               context,
@@ -558,6 +537,80 @@ class _CartContentState extends State<_CartContent>
                     ),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+
+  void _showSignInSheet(BuildContext context) {
+    final isDark = uiMode.value == AppUiModes.dark;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 24),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.black12,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const Icon(Icons.lock_open_rounded, size: 40, color: kcSecondaryColor),
+            const SizedBox(height: 16),
+            Text(
+              'Almost there!',
+              style: TextStyle(
+                fontFamily: 'HostGrotesk',
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Just sign in to complete your order.\nYour cart is saved and ready to go.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                height: 1.5,
+                color: isDark ? Colors.white60 : Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: GlassButton(
+                label: 'Sign In',
+                height: 52,
+                onTap: () {
+                  Navigator.pop(context);
+                  locator<NavigationService>().navigateTo(Routes.login);
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Maybe later',
+                style: TextStyle(
+                  color: isDark ? Colors.white38 : Colors.black38,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

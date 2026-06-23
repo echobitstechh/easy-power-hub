@@ -4,9 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/data/models/product.dart';
 import '../../../../core/utils/money_util.dart';
@@ -155,10 +153,7 @@ class ProductGridItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if ((product.availability ?? 0) < 1)
-                _buildWhatsAppButton()
-              else
-                _buildCartButton(),
+              _buildCartButton(),
             ],
           ),
           Row(
@@ -185,9 +180,10 @@ class ProductGridItem extends StatelessWidget {
   }
 
   Widget _buildCartButton() {
+    final isUnavailable = (product.availability ?? 0) < 1;
     return InkWell(
       onTap: () {
-        viewModel.addProductToCart(product);
+        viewModel.addProductToCart(product, isUnavailable: isUnavailable);
       },
       child: viewModel.loadingItems.contains(product.id)
           ? const SizedBox(
@@ -206,24 +202,6 @@ class ProductGridItem extends StatelessWidget {
     );
   }
 
-  Widget _buildWhatsAppButton() {
-    return InkWell(
-      onTap: () async {
-        final phoneNumber = '+2348081099871';
-        final message = "Hello, I'd like to inquire about the product: ${product.productName} with the price of ${MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt())}. Is it available?";
-        final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
-        if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(Uri.parse(url));
-        } else {
-
-        }
-      },
-      child: SvgPicture.asset(
-        'assets/icons/whatsapp.svg',
-        height: 20, // Icon size
-      ),
-    );
-  }
 
   Widget _buildRating() {
     return Row(

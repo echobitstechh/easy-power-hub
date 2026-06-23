@@ -3,10 +3,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../app/app.locator.dart';
 import '../../../../core/data/models/cart_item.dart';
@@ -373,8 +371,6 @@ class _ProductCardState extends State<ProductCard> {
   Widget _buildCTA(BuildContext context, bool isDark) {
     final isAvailable = (widget.product.availability ?? 0) >= 1;
 
-    if (!isAvailable) return _buildWhatsAppButton();
-
     return ValueListenableBuilder<List<CartItem>>(
       valueListenable: cart,
       builder: (context, cartItems, _) {
@@ -408,11 +404,14 @@ class _ProductCardState extends State<ProductCard> {
         }
 
         return GlassButton(
-          label: 'Add to Cart',
+          label: isAvailable ? 'Add to Cart' : 'Request Item',
           icon: const Icon(Icons.shopping_bag_outlined, size: 18, color: Colors.white),
           onTap: () {
             setState(() {
-              widget.dashboardViewModel.addProductToCart(widget.product);
+              widget.dashboardViewModel.addProductToCart(
+                widget.product,
+                isUnavailable: !isAvailable,
+              );
             });
           },
         );
@@ -639,58 +638,6 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  // â”€â”€ WhatsApp button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-  Widget _buildWhatsAppButton() {
-    return GestureDetector(
-      onTap: () async {
-        const phone = '+2348081099871';
-        final msg = Uri.encodeComponent(
-          "Hello, I'd like to inquire about: ${widget.product.productName}",
-        );
-        final url = 'https://wa.me/$phone?text=$msg';
-        if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(Uri.parse(url));
-        }
-      },
-      child: Container(
-        height: 52,
-        decoration: BoxDecoration(
-          color: Colors.green.shade600,
-          borderRadius: BorderRadius.circular(14),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.green.withOpacity(0.3),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              'assets/icons/whatsapp.svg',
-              height: 20,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Inquire / Contact us',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w700,
-                fontSize: 15,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 // â”€â”€ Quantity row widget â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

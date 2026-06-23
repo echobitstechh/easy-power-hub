@@ -259,6 +259,7 @@ class CheckoutViewModel extends BaseViewModel {
     final firstInstallmentItem = cart.value.firstWhere(
             (e) => e.isInstallment == true,
         orElse: () => cart.value.first);
+    final hasUnavailableItems = cart.value.any((e) => e.isUnavailable == true);
 
     final requestBody = {
       "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
@@ -266,9 +267,8 @@ class CheckoutViewModel extends BaseViewModel {
       "promoCode": "",
       "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
       "installmentPayment": hasInstallment,
-      "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
-      "installmentPayment": hasInstallment,
       "deliveryAddressId": pickUpOption == PickUpOptions.Delivery ? shippingId : selectedPickupAddress?.id,
+      "hasUnavailableItems": hasUnavailableItems,
     };
 
     try {
