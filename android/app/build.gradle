@@ -49,8 +49,8 @@ android {
     }
 
     signingConfigs {
-        if (keystorePropertiesFile.exists()) {
-            release {
+        release {
+            if (keystoreProperties.containsKey("storeFile")) {
                 keyAlias keystoreProperties["keyAlias"]
                 keyPassword keystoreProperties["keyPassword"]
                 storePassword keystoreProperties["storePassword"]
@@ -80,7 +80,7 @@ android {
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (keystoreProperties.containsKey("storeFile")) {
                 signingConfig signingConfigs.release
             }
             ndk {

@@ -14,56 +14,11 @@ class StartupView extends StackedView<StartupViewModel> {
     StartupViewModel viewModel,
     Widget? child,
   ) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: kcDarkBgGradient,
-          ),
-        ),
-        child: Stack(
-          children: [
-            // Amber glow — top right
-            Positioned(
-              top: -100,
-              right: -100,
-              child: Container(
-                width: 350,
-                height: 350,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [kcGlowAmberStrong, Colors.transparent],
-                  ),
-                ),
-              ),
-            ),
-            // Blue glow — bottom left
-            Positioned(
-              bottom: -80,
-              left: -80,
-              child: Container(
-                width: 280,
-                height: 280,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      const Color(0xFF3B82F6).withOpacity(0.22),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Center(
-              child: _LogoWithRing(isDone: viewModel.isComplete),
-            ),
-          ],
-        ),
+      backgroundColor: isDarkMode ? const Color(0xFF0D1117) : Colors.white,
+      body: Center(
+        child: _LogoWithRing(isDone: viewModel.isComplete),
       ),
     );
   }
@@ -163,6 +118,7 @@ class _LogoWithRingState extends State<_LogoWithRing>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return AnimatedBuilder(
       animation: Listenable.merge([_spinController, _doneController]),
       builder: (context, _) {
@@ -182,9 +138,9 @@ class _LogoWithRingState extends State<_LogoWithRing>
                     height: _containerSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: kcGlassSurfaceDark,
+                      color: isDarkMode ? kcGlassSurfaceDark : kcGlassSurfaceLight,
                       border: Border.all(
-                        color: kcGlassBorderDark,
+                        color: isDarkMode ? kcGlassBorderDark : kcGlassBorderLight,
                         width: 1,
                       ),
                       boxShadow: [
@@ -216,7 +172,7 @@ class _LogoWithRingState extends State<_LogoWithRing>
                             : _spinController.value,
                         strokeWidth: _strokeWidth,
                         color: kcSecondaryColor,
-                        trackColor: kcGlassBorderDark,
+                        trackColor: isDarkMode ? kcGlassBorderDark : kcGlassBorderLight,
                       ),
                     ),
                   ),
