@@ -2,7 +2,7 @@ name: easy_ph
 description: A new Flutter project.
 publish_to: 'none'
 # version: 7.0.0
-version: 25.0.0+29
+version: 25.0.0+31
 
 
 environment:
@@ -144,4 +144,18 @@ flutter:
         - asset: assets/fonts/red_hat_display/RedHatDisplay-Bold.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: "assets/images/easy_ph_logo.png"
+  color_dark: "#0d1117"
+  image_dark: "assets/images/easy_ph_logo.png"
+
+  android_12:
+    image: "assets/images/easy_ph_logo.png"
+    image_dark: "assets/images/easy_ph_logo.png"
+    color: "#ffffff"
+    color_dark: "#0d1117"
+    icon_background_color: "#ffffff"
+    icon_background_color_dark: "#0d1117"
 

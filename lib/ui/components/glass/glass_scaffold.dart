@@ -31,22 +31,22 @@ class GlassScaffold extends StatelessWidget {
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBodyBehindAppBar: extendBodyBehindAppBar,
-        resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        appBar: appBar,
-        bottomNavigationBar: bottomNavigationBar,
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: gradientColors,
-              stops: const [0.0, 0.55, 1.0],
-            ),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: gradientColors,
+            stops: const [0.0, 0.55, 1.0],
           ),
-          child: body,
+        ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          extendBodyBehindAppBar: extendBodyBehindAppBar,
+          resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+          appBar: appBar,
+          bottomNavigationBar: bottomNavigationBar,
+          body: body,
         ),
       ),
     );

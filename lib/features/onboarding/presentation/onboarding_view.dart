@@ -9,6 +9,7 @@ import '../../../core/utils/local_stotage.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/glass/glass_button.dart';
 import '../../../ui/components/glass/glass_card.dart';
+import '../../../ui/components/glass/glass_scaffold.dart';
 
 class OnboardingView extends StatelessWidget {
   const OnboardingView({super.key});
@@ -20,143 +21,132 @@ class OnboardingView extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
-            stops: const [0.0, 0.55, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              // Amber glow orb top-right
-              Positioned(
-                top: -60,
-                right: -60,
-                child: Container(
-                  width: 260,
-                  height: 260,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        kcPrimaryColor.withOpacity(isDark ? 0.25 : 0.18),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              // Subtle orb bottom-left
-              Positioned(
-                bottom: 80,
-                left: -80,
-                child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        kcSecondaryColor.withOpacity(isDark ? 0.18 : 0.12),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Main content
-              SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    verticalSpaceMedium,
-
-                    // Illustration
-                    SizedBox(
-                      height: size.height * 0.38,
-                      child: SvgPicture.asset(
-                        'assets/images/addresspic.svg',
-                        fit: BoxFit.contain,
-                      ),
-                    ),
-
-                    verticalSpaceMedium,
-
-                    // Glass card wrapping the text + CTA
-                    GlassCard(
-                      borderRadius: 28,
-                      padding: const EdgeInsets.all(28),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Anywhere, Anytime",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'HostGrotesk',
-                              color: isDark ? kcWhiteColor : kcBlackColor,
-                            ),
-                          ),
-                          verticalSpaceSmall,
-                          Text(
-                            "We're here for you, wherever you are! "
-                            "Reach out to us from anywhere for seamless support and services.",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 15,
-                              height: 1.55,
-                              fontFamily: 'HostGrotesk',
-                              color: isDark
-                                  ? kcWhiteColor.withOpacity(0.65)
-                                  : kcMediumGrey,
-                            ),
-                          ),
-                          verticalSpaceMedium,
-
-                          // CTA
-                          SizedBox(
-                            width: double.infinity,
-                            child: GlassButton(
-                              label: "Get Started",
-                              onTap: () async {
-                                await localStorage.save(
-                                    LocalStorageDir.onboarded, true);
-                                navService.clearStackAndShow(Routes.homeView);
-                              },
-                            ),
-                          ),
-
-                          verticalSpaceSmall,
-
-                          // Single active dot indicator
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _Dot(isActive: false),
-                              const SizedBox(width: 6),
-                              _Dot(isActive: false),
-                              const SizedBox(width: 6),
-                              _Dot(isActive: true),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+    return GlassScaffold(
+      body: Stack(
+        children: [
+          // Amber glow orb top-right
+          Positioned(
+            top: -60,
+            right: -60,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    kcPrimaryColor.withOpacity(isDark ? 0.25 : 0.18),
+                    Colors.transparent,
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+          // Subtle orb bottom-left
+          Positioned(
+            bottom: 80,
+            left: -80,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    kcSecondaryColor.withOpacity(isDark ? 0.18 : 0.12),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Main content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  verticalSpaceMedium,
+
+                  // Illustration
+                  SizedBox(
+                    height: size.height * 0.38,
+                    child: SvgPicture.asset(
+                      'assets/images/addresspic.svg',
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+
+                  verticalSpaceMedium,
+
+                  // Glass card wrapping the text + CTA
+                  GlassCard(
+                    borderRadius: 28,
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Anywhere, Anytime",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'HostGrotesk',
+                            color: isDark ? kcWhiteColor : kcBlackColor,
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Text(
+                          "We're here for you, wherever you are! "
+                          "Reach out to us from anywhere for seamless support and services.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            height: 1.55,
+                            fontFamily: 'HostGrotesk',
+                            color: isDark
+                                ? kcWhiteColor.withOpacity(0.65)
+                                : kcMediumGrey,
+                          ),
+                        ),
+                        verticalSpaceMedium,
+
+                        // CTA
+                        SizedBox(
+                          width: double.infinity,
+                          child: GlassButton(
+                            label: "Get Started",
+                            onTap: () async {
+                              await localStorage.save(
+                                  LocalStorageDir.onboarded, true);
+                              navService.clearStackAndShow(Routes.homeView);
+                            },
+                          ),
+                        ),
+
+                        verticalSpaceSmall,
+
+                        // Single active dot indicator
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _Dot(isActive: false),
+                            const SizedBox(width: 6),
+                            _Dot(isActive: false),
+                            const SizedBox(width: 6),
+                            _Dot(isActive: true),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
