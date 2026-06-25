@@ -131,24 +131,39 @@ class AppDataService with ListenableServiceMixin {
     notifyListeners();
 
     try {
-      final res = await _repo.getProducts(
-        page: 1,
-        limit: _pageLimit,
-        tag: tag,
-        brand: brand?.isNotEmpty == true ? brand : null,
-        categoryId: categoryId != null && categoryId != 0
-            ? categoryId.toString()
-            : null,
-      );
+      final hasCategoryFilter = categoryId != null && categoryId != 0;
 
-      if (res.statusCode == 200) {
-        products = _parseProducts(res.data);
+      final futures = <Future>[
+        _repo.getProducts(
+          page: 1,
+          limit: _pageLimit,
+          tag: tag,
+          brand: brand?.isNotEmpty == true ? brand : null,
+          categoryId: hasCategoryFilter ? categoryId.toString() : null,
+        ),
+        // Re-fetch tags scoped to the active category (or all tags when none).
+        _repo.getProductTags(categoryId: hasCategoryFilter ? categoryId : null),
+      ];
+
+      final results = await Future.wait(futures);
+      final productsRes = results[0] as dynamic;
+      final tagsRes     = results[1] as dynamic;
+
+      if (productsRes.statusCode == 200) {
+        products = _parseProducts(productsRes.data);
         _sortProducts();
-        if ((res.data['brands'] as List?)?.isNotEmpty == true) {
-          brands = (res.data['brands'] as List).map((b) => b.toString()).toList();
+        if ((productsRes.data['brands'] as List?)?.isNotEmpty == true) {
+          brands = (productsRes.data['brands'] as List).map((b) => b.toString()).toList();
         }
         _currentPage = products.length >= _pageLimit ? 2 : 1;
         _isLastPage  = products.length < _pageLimit;
+      }
+
+      if (tagsRes.statusCode == 200) {
+        tags = (tagsRes.data['tags'] as List? ?? [])
+            .map((t) => Tag.fromJson(Map<String, dynamic>.from(t)))
+            .toList()
+          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       }
     } catch (e) {
       _log.e('refreshWithFilters error: $e');

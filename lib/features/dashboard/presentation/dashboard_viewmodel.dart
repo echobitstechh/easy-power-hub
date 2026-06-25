@@ -71,8 +71,15 @@ class DashboardViewModel extends BaseViewModel {
   Set<String> loadingItems = {};
 
   bool _isDisposed = false;
+  bool _isSubscribed = false;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+  void _subscribe() {
+    if (_isSubscribed) return;
+    _appData.addListener(_onDataChanged);
+    _isSubscribed = true;
+  }
 
   @override
   void dispose() {
@@ -83,7 +90,7 @@ class DashboardViewModel extends BaseViewModel {
 
   Future<void> init() async {
     // Subscribe to service changes so the view rebuilds when data arrives.
-    _appData.addListener(_onDataChanged);
+    _subscribe();
 
     // Kick off a silent background refresh if data is stale. The UI already
     // shows whatever is in the service (cached or previously fetched).
@@ -131,6 +138,7 @@ class DashboardViewModel extends BaseViewModel {
   // ── Filters ───────────────────────────────────────────────────────────────
 
   void setSelectedTag(Tag? tag) {
+    _subscribe();
     _selectedTag       = tag;
     _selectedBrand     = '';
     _selectedCategoryId = 0;
@@ -139,6 +147,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void setSelectedCategory(int categoryId) {
+    _subscribe();
     _selectedCategoryId = categoryId;
     _selectedTag        = null;
     _selectedBrand      = '';
@@ -147,6 +156,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void filterProductsByBrand(String brand) {
+    _subscribe();
     _selectedBrand = brand.toLowerCase() == 'all' ? '' : brand;
     notifyListeners();
     _appData.refreshWithFilters(brand: _selectedBrand);
@@ -333,6 +343,7 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   Future<void> toggleFavorite(Product product) async {
+    if (!userLoggedIn.value) return;
     if (isProductFavorite(product.id!)) {
       final fav = _favorites.firstWhere((f) => f.product.id == product.id);
       await _repo.deleteFromFavourites(fav.id);

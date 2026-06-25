@@ -51,6 +51,7 @@ class _ProductCardState extends State<ProductCard> {
   }
 
   Future<void> fetchProductReviews() async {
+    if (!userLoggedIn.value) return;
     try {
       final res = await repo.getReviews(widget.product.id!);
       if (res.statusCode == 200 && mounted) {

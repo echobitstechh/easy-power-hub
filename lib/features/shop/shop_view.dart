@@ -304,6 +304,7 @@ class ShopView extends StackedView<DashboardViewModel> {
     super.onViewModelReady(viewModel);
     viewModel.filteredProductList = [];
     if (filter != null) {
+      debugPrint('[ShopView] opening with category: id=${filter!.id} name="${filter!.name}"');
       viewModel.setSelectedCategory(filter!.id);
     } else {
       viewModel.init();
