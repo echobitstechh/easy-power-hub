@@ -40,11 +40,27 @@ class StartupViewModel extends BaseViewModel {
   }
 
   /// Returns true if we should navigate to HomeView, false if we navigated
-  /// elsewhere (onboarding).
+  /// elsewhere (onboarding / OTP resume).
   Future<bool> _resolveAuth() async {
     final token     = await _storage.fetch(LocalStorageDir.authToken);
     final user      = await _storage.fetch(LocalStorageDir.authUser);
     final onboarded = await _storage.fetch(LocalStorageDir.onboarded);
+
+    // Resume a pending OTP verification that was interrupted by an app kill.
+    final pendingUserId = await _storage.fetch(LocalStorageDir.pendingOtpUserId);
+    if (pendingUserId != null && pendingUserId.toString().isNotEmpty) {
+      profile.value.id = pendingUserId.toString();
+      final ref = await _storage.fetch(LocalStorageDir.pendingOtpReference);
+      if (ref != null) profile.value.reference = ref.toString();
+      final savedEmail = (await _storage.fetch(LocalStorageDir.pendingOtpEmail))?.toString();
+      final savedPhone = (await _storage.fetch(LocalStorageDir.pendingOtpPhone))?.toString();
+      _nav.replaceWithOTPView(
+        isOtpRequested: true,
+        email: (savedEmail != null && savedEmail.isNotEmpty) ? savedEmail : null,
+        phone: (savedPhone != null && savedPhone.isNotEmpty) ? savedPhone : null,
+      );
+      return false;
+    }
 
     if (onboarded == null || onboarded == false) {
       _nav.replaceWithOnboardingView();

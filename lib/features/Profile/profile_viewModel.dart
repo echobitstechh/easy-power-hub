@@ -222,12 +222,25 @@ class ProfileViewModel extends BaseViewModel {
   Future<void> onDeleteAccount() async => onSignOut();
 
   Future<void> onSignOut() async {
-    final res = await _dialogService.showConfirmationDialog(
-      title: "Are you sure?",
-      cancelTitle: "No",
-      confirmationTitle: "Yes",
+    final context = StackedService.navigatorKey!.currentContext!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
     );
-    if (res!.confirmed) {
+    if (confirmed == true) {
       userLoggedIn.value = false;
       await _localStorage.delete(LocalStorageDir.authToken);
       await _localStorage.delete(LocalStorageDir.authUser);

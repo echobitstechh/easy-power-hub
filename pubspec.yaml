@@ -2,7 +2,7 @@ name: easy_ph
 description: A new Flutter project.
 publish_to: 'none'
 # version: 7.0.0
-version: 25.0.1+30
+version: 25.0.2+31
 
 
 environment:

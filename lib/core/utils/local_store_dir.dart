@@ -22,4 +22,8 @@ class LocalStorageDir {
   static const String cachedBrands     = 'cached_brands';
   static const String cacheTimestamp   = 'cache_timestamp';
   static const String cartNeedsSync    = 'cart_needs_sync';
+  static const String pendingOtpUserId    = 'pending_otp_user_id';
+  static const String pendingOtpReference = 'pending_otp_reference';
+  static const String pendingOtpEmail     = 'pending_otp_email';
+  static const String pendingOtpPhone     = 'pending_otp_phone';
 }

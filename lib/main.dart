@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:easy_ph/app/app.bottomsheets.dart';
 import 'package:easy_ph/app/app.dialogs.dart';
 import 'package:easy_ph/app/app.locator.dart';
+import 'package:easy_ph/app/app.snackbar.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 // import 'package:uni_links/uni_links.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
 
   await setupLocator();
   setupDialogUi();
+  setupSnackbarUi();
   setupBottomSheetUi();
   setupDeepLinkHandler();
 
