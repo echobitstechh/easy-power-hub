@@ -8,6 +8,7 @@ import 'package:easy_ph/app/app.bottomsheets.dart';
 import 'package:easy_ph/app/app.dialogs.dart';
 import 'package:easy_ph/app/app.locator.dart';
 import 'package:easy_ph/app/app.snackbar.dart';
+import 'package:easy_ph/app/app_snackbar_service.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 // import 'package:uni_links/uni_links.dart';
@@ -23,6 +24,10 @@ Future<void> main() async {
   );
 
   await setupLocator();
+  // Replace GetX-based SnackbarService with a ScaffoldMessenger-backed implementation.
+  // GetX snackbars crash when used with Stacked's custom navigator (no Overlay above _Theater).
+  locator.unregister<SnackbarService>();
+  locator.registerLazySingleton<SnackbarService>(() => AppSnackbarService());
   setupDialogUi();
   setupSnackbarUi();
   setupBottomSheetUi();
