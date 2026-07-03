@@ -24,7 +24,7 @@ class ReferralsViewModel extends BaseViewModel {
   int bonusEarned = 0;
   
   String referralLink = 'https://www.easyopenhub.com/referral/1';
-  String minPurchaseAmount = '₦50,000';
+  String minPurchaseAmount = '\u20A650,000';
 
   String? referralId;
   String? referralCode;

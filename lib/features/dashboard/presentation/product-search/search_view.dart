@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import '../../../../core/data/models/product.dart';
+import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
 import '../dashboard_viewmodel.dart';
@@ -433,7 +434,9 @@ class _SearchResultItem extends StatelessWidget {
                       ],
                       const SizedBox(height: 6),
                       Text(
-                        'â‚¦${(double.tryParse(product.salePrice ?? '')?.toStringAsFixed(0) ?? '0')}',
+                        MoneyUtils().formatAmount(
+                          (double.tryParse(product.salePrice ?? '0') ?? 0).toInt(),
+                        ),
                         style: GoogleFonts.roboto(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,

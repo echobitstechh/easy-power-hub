@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/app/app.router.dart';
@@ -77,6 +77,10 @@ class _ProductCardState extends State<ProductCard> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight + 20),
+        child: _buildGlassAppBar(context, isFavorite, isDark),
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -85,25 +89,20 @@ class _ProductCardState extends State<ProductCard> {
             colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
           ),
         ),
-        child: Column(
+        child: ListView(
+          padding: EdgeInsets.only(
+            top: MediaQuery.of(context).padding.top + kToolbarHeight + 28,
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+          ),
           children: [
-            _buildGlassAppBar(context, isFavorite, isDark),
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: [
-                  _buildHeroSection(context, isDark),
-                  _buildInfoCard(context, isDark),
-                  if (widget.dashboardViewModel.filteredProductList.isNotEmpty)
-                    _buildRelatedProducts(context, isDark),
-                  if (productReviews.isNotEmpty)
-                    _buildReviewsSection(context, isDark),
-                  SizedBox(
-                    height: MediaQuery.of(context).padding.bottom + 16,
-                  ),
-                ],
-              ),
-            ),
+            _buildHeroSection(context, isDark),
+            _buildInfoCard(context, isDark),
+            if (widget.dashboardViewModel.filteredProductList.isNotEmpty)
+              _buildRelatedProducts(context, isDark),
+            if (productReviews.isNotEmpty)
+              _buildReviewsSection(context, isDark),
           ],
         ),
       ),
@@ -117,12 +116,6 @@ class _ProductCardState extends State<ProductCard> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 4,
-            right: 4,
-            bottom: 12,
-          ),
           decoration: BoxDecoration(
             color: isDark ? kcGlassSurfaceDark : kcGlassSurfaceLight,
             border: Border(
@@ -132,37 +125,63 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+          child: SafeArea(
+            top: true,
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+                left: 12,
+                right: 12,
+                bottom: 12,
               ),
-              Expanded(
-                child: Text(
-                  'Product Details',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'HostGrotesk',
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
+              child: Row(
+                children: [
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      child: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 20,
+                        color: isDark ? kcWhiteColor : kcBlackColor,
+                      ),
+                    ),
                   ),
-                ),
+                  Expanded(
+                    child: Text(
+                      'Product Details',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'HostGrotesk',
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? kcWhiteColor : kcBlackColor,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color: isFavorite ? Colors.red : Colors.grey,
+                    ),
+                    onPressed: () =>
+                        widget.dashboardViewModel.toggleFavorite(widget.product),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.share_rounded,
+                      size: 22,
+                      color: isDark ? kcWhiteColor : kcBlackColor,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
               ),
-              IconButton(
-                icon: Icon(
-                  isFavorite
-                      ? Icons.favorite_rounded
-                      : Icons.favorite_border_rounded,
-                  color: isFavorite ? Colors.red : Colors.grey,
-                ),
-                onPressed: () =>
-                    widget.dashboardViewModel.toggleFavorite(widget.product),
-              ),
-              IconButton(
-                icon: const Icon(Icons.share_rounded, size: 22),
-                onPressed: () {},
-              ),
-            ],
+            ),
           ),
         ),
       ),

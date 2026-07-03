@@ -183,6 +183,55 @@ class Login extends StackedView<AuthViewModel> {
                     ),
 
                     verticalSpaceMedium,
+
+                    GestureDetector(
+                      onTap: () {
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        } else {
+                          locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: kcPrimaryColor.withOpacity(isDark ? 0.08 : 0.05),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: kcPrimaryColor.withOpacity(isDark ? 0.25 : 0.15),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.explore_outlined,
+                              size: 16,
+                              color: kcPrimaryColor,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              "Explore Products",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'HostGrotesk',
+                                color: kcPrimaryColor,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 14,
+                              color: kcPrimaryColor,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    verticalSpaceMedium,
                   ],
                 ),
               ),
