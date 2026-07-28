@@ -16,7 +16,6 @@ import '../../../core/data/repositories/repository.dart';
 import '../../../core/utils/config.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
-import '../../../core/utils/paystack_util.dart';
 import '../../../state.dart';
 import '../../Profile/onSuccess/success_view.dart';
 import '../../Profile/shipping/shipping_address_viewmodel.dart';
@@ -274,34 +273,19 @@ class CheckoutViewModel extends BaseViewModel {
     try {
       final res = await _repo.payForOrder(requestBody);
       if (res.statusCode == 201) {
-        if (paymentMethod == 'paystack') {
-          final response = await _repo.initializePayment({
-            'paymentMethod': 'CreditCard',
-            'paymentType': 'Paystack',
-            'orderId': res.data['order']['id'],
-          });
-          if (response.statusCode == 200) {
-            await PaystackUtil.processPayment(
-              context: context,
-              ref: response.data['data']['reference'],
-              accessCode: response.data['data']['access_code'],
-              url: response.data['data']['authorization_url'],
-              amountInNaira: calculatedFinalTotal,
-              email: profile.value.email!,
-              cartItems: cart.value,
-            );
-          } else {
-            _snackBar.showSnackbar(message: "Payment processing failed", duration: Duration(seconds: 2));
-          }
-        } else {
-          _snackBar.showSnackbar(message: "Order placed successfully", duration: Duration(seconds: 2));
-          _navigationService.navigateTo(Routes.paymentSuccessView);
-        }
+        // Payment is no longer collected at order-creation time. The order is
+        // reviewed/approved first; the customer pays later via the "Pay Now"
+        // reminder once an InstantPayment order is approved and still unpaid.
+        final message = paymentMethod == 'paystack'
+            ? "Order placed! We'll verify availability and email your invoice."
+            : "Order placed! We'll confirm a delivery schedule with you soon.";
+        _snackBar.showSnackbar(message: message, duration: Duration(seconds: 3));
+        _navigationService.navigateTo(Routes.paymentSuccessView);
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to place the order", duration: Duration(seconds: 2));
       }
     } catch (e) {
-      _snackBar.showSnackbar(message: "An error occurred during payment: $e", duration: Duration(seconds: 2));
+      _snackBar.showSnackbar(message: "An error occurred while placing your order: $e", duration: Duration(seconds: 2));
     } finally {
       isPaying = false;
       notifyListeners();

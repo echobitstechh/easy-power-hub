@@ -42,6 +42,29 @@ class PopularProductsSection extends StatelessWidget {
             );
           },
         ),
+        verticalSpaceMedium,
+        Center(
+          child: OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ShopView()),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: kcSecondaryColor),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Text(
+              'See All',
+              style: TextStyle(fontFamily: 'HostGrotesk',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: kcSecondaryColor,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

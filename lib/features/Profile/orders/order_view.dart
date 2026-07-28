@@ -37,9 +37,9 @@ class OrderList extends StackedView<OrderListViewModel> {
               Expanded(
                 child: TabBarView(
                   children: [
-                    _buildOrderList(viewModel.pendingOrders, viewModel),
-                    _buildOrderList(viewModel.processingOrders, viewModel),
-                    _buildOrderList(viewModel.completedOrders, viewModel),
+                    _buildOrderList(viewModel.activeOrders, viewModel),
+                    _buildOrderList(viewModel.deliveredOrders, viewModel),
+                    _buildOrderList(viewModel.cancelledOrders, viewModel),
                   ],
                 ),
               ),
@@ -110,9 +110,9 @@ Widget _buildTabBar(BuildContext context, OrderListViewModel viewModel) {
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         tabs: [
-          Tab(text: "Pending (${viewModel.pendingOrders.length})"),
-          Tab(text: "Processing (${viewModel.processingOrders.length})"),
-          Tab(text: "Completed (${viewModel.completedOrders.length})"),
+          Tab(text: "Active (${viewModel.activeOrders.length})"),
+          Tab(text: "Delivered (${viewModel.deliveredOrders.length})"),
+          Tab(text: "Cancelled (${viewModel.cancelledOrders.length})"),
         ],
       ),
     ),

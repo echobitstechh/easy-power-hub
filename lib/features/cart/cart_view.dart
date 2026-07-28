@@ -291,6 +291,27 @@ class _CartContentState extends State<_CartContent>
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          if (item.isUnavailable == true) ...[
+                            verticalSpaceTiny,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                    color: Colors.amber.withOpacity(0.5)),
+                              ),
+                              child: const Text(
+                                'Item Requested',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                            ),
+                          ],
                           verticalSpaceTiny,
                           Text(
                             MoneyUtils().formatAmount(

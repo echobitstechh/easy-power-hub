@@ -38,9 +38,14 @@ class OrderListViewModel extends BaseViewModel {
   List<Order> _orders = [];
 
   List<Order> get allOrders => _orders;
-  List<Order> get pendingOrders => _orders.where((o) => o.status == "Pending").toList();
-  List<Order> get processingOrders => _orders.where((o) => o.status == "Processing").toList();
-  List<Order> get completedOrders => _orders.where((o) => o.status == "Delivered" || o.status == "Cancelled").toList();
+
+  // "Active" bundles Pending + Processing, matching the web app's Active
+  // Orders tab. Delivered and Cancelled are their own separate tabs.
+  List<Order> get activeOrders =>
+      _orders.where((o) => o.status == "Pending" || o.status == "Processing").toList();
+  List<Order> get deliveredOrders =>
+      _orders.where((o) => o.status == "Delivered" || o.status == "Completed").toList();
+  List<Order> get cancelledOrders => _orders.where((o) => o.status == "Cancelled").toList();
 
   @override
   Future<void> onModelReady() async {

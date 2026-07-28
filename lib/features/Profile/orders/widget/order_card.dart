@@ -117,11 +117,20 @@ class OrderCard extends StatelessWidget {
             : 'Admin reviewing items — invoice coming soon',
       ));
     } else if (order.status == 'Processing') {
-      if (isInvoiceOrder) {
+      if (isInvoiceOrder && !order.isPaid) {
+        actions.add(
+          ElevatedButton.icon(
+            onPressed: () => viewModel.makePayment(context, order),
+            icon: const Icon(Icons.payment_rounded, size: 16),
+            label: const Text('Pay Now'),
+            style: ElevatedButton.styleFrom(backgroundColor: kcPrimaryColor),
+          ),
+        );
+      } else if (isInvoiceOrder && order.isPaid) {
         actions.add(_infoChip(
-          icon: Icons.email_rounded,
-          color: Colors.blue,
-          label: 'Invoice sent to your email — pay via bank transfer',
+          icon: Icons.check_circle_rounded,
+          color: Colors.green,
+          label: 'Payment received — preparing your order',
         ));
       } else if (isDeliveryOrder) {
         actions.add(_infoChip(

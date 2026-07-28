@@ -11,10 +11,14 @@ import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
 import '../dashboard_viewmodel.dart';
 import '../product_details/product_card.dart';
+import '../widgets/product_grid_item.dart';
 import '../../../../ui/components/shimmers/search_shimmer.dart';
 
 class SearchView extends StackedView<DashboardViewModel> {
-  const SearchView({Key? key}) : super(key: key);
+  SearchView({Key? key}) : super(key: key);
+
+  final TextEditingController searchController = TextEditingController();
+  final ScrollController _resultsController = ScrollController();
 
   @override
   Widget builder(
@@ -42,6 +46,7 @@ class SearchView extends StackedView<DashboardViewModel> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: _GlassSearchAppBar(
+            controller: searchController,
             viewModel: viewModel,
             isDark: isDark,
           ),
@@ -57,7 +62,7 @@ class SearchView extends StackedView<DashboardViewModel> {
     bool isDark,
   ) {
     if (viewModel.searchQuery.isEmpty && !viewModel.isSearching) {
-      return _buildEmptyState(isDark);
+      return _buildEmptyState(viewModel, isDark);
     }
     if (viewModel.isLoadingSearch) {
       return SearchShimmer(isDarkMode: isDark);
@@ -68,11 +73,38 @@ class SearchView extends StackedView<DashboardViewModel> {
     return _buildSearchResults(context, viewModel, isDark);
   }
 
-  Widget _buildEmptyState(bool isDark) {
-    return Center(
+  Widget _buildEmptyState(DashboardViewModel viewModel, bool isDark) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          if (viewModel.recentSearches.isNotEmpty) ...[
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Recent Searches',
+                style: TextStyle(fontFamily: 'HostGrotesk',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? kcWhiteColor : kcBlackColor,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: viewModel.recentSearches.map((term) {
+                return _RecentSearchChip(
+                  label: term,
+                  isDark: isDark,
+                  onTap: () => searchController.text = term,
+                  onRemove: () => viewModel.removeRecentSearch(term),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 32),
+          ],
           Icon(Icons.search_rounded, size: 72, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
@@ -140,14 +172,19 @@ class SearchView extends StackedView<DashboardViewModel> {
     DashboardViewModel viewModel,
     bool isDark,
   ) {
+    final results = viewModel.searchResults;
+    final related = viewModel.relatedSearchResults;
+    final extraItems =
+        (viewModel.isLoadingMoreSearch ? 1 : 0) + (related.isNotEmpty ? 1 : 0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
           child: Text(
-            '${viewModel.searchResults.length} '
-            '${viewModel.searchResults.length == 1 ? 'product' : 'products'} found',
+            '${results.length}${viewModel.hasMoreSearchResults ? '+' : ''} '
+            '${results.length == 1 ? 'product' : 'products'} found',
             style: TextStyle(fontFamily: 'HostGrotesk',
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -156,13 +193,49 @@ class SearchView extends StackedView<DashboardViewModel> {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: viewModel.searchResults.length,
-            itemBuilder: (ctx, i) => _SearchResultItem(
-              product: viewModel.searchResults[i],
-              viewModel: viewModel,
-              isDark: isDark,
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (scrollInfo) {
+              if (scrollInfo is ScrollEndNotification &&
+                  scrollInfo.metrics.pixels >=
+                      scrollInfo.metrics.maxScrollExtent - 200) {
+                viewModel.loadMoreSearchResults();
+              }
+              return false;
+            },
+            child: ListView.builder(
+              controller: _resultsController,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: results.length + extraItems,
+              itemBuilder: (ctx, i) {
+                if (i < results.length) {
+                  return _SearchResultItem(
+                    product: results[i],
+                    viewModel: viewModel,
+                    isDark: isDark,
+                  );
+                }
+                var idx = i - results.length;
+                if (viewModel.isLoadingMoreSearch) {
+                  if (idx == 0) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    );
+                  }
+                  idx -= 1;
+                }
+                return _RelatedProductsSection(
+                  products: related,
+                  viewModel: viewModel,
+                  isDark: isDark,
+                );
+              },
             ),
           ),
         ),
@@ -175,6 +248,17 @@ class SearchView extends StackedView<DashboardViewModel> {
       DashboardViewModel();
 
   @override
+  void onViewModelReady(DashboardViewModel viewModel) {
+    viewModel.loadRecentSearches();
+  }
+
+  @override
+  void onDispose(DashboardViewModel viewModel) {
+    searchController.dispose();
+    _resultsController.dispose();
+  }
+
+  @override
   bool get reactive => true;
 }
 
@@ -182,9 +266,11 @@ class SearchView extends StackedView<DashboardViewModel> {
 
 class _GlassSearchAppBar extends StatefulWidget
     implements PreferredSizeWidget {
+  final TextEditingController controller;
   final DashboardViewModel viewModel;
   final bool isDark;
   const _GlassSearchAppBar({
+    required this.controller,
     required this.viewModel,
     required this.isDark,
   });
@@ -197,7 +283,7 @@ class _GlassSearchAppBar extends StatefulWidget
 }
 
 class _GlassSearchAppBarState extends State<_GlassSearchAppBar> {
-  final TextEditingController _controller = TextEditingController();
+  TextEditingController get _controller => widget.controller;
   final FocusNode _focusNode = FocusNode();
   Timer? _debounce;
 
@@ -212,12 +298,12 @@ class _GlassSearchAppBarState extends State<_GlassSearchAppBar> {
   void dispose() {
     _debounce?.cancel();
     _controller.removeListener(_onChanged);
-    _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _onChanged() {
+    setState(() {}); // refresh the clear-icon visibility
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 400), () {
       widget.viewModel.performSearch(_controller.text);
@@ -456,6 +542,112 @@ class _SearchResultItem extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Recent search chip ───────────────────────────────────────────────────
+
+class _RecentSearchChip extends StatelessWidget {
+  final String label;
+  final bool isDark;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  const _RecentSearchChip({
+    required this.label,
+    required this.isDark,
+    required this.onTap,
+    required this.onRemove,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.only(left: 12, right: 6, top: 6, bottom: 6),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withOpacity(0.08)
+              : Colors.black.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isDark ? kcGlassBorderDark : kcGlassBorderLight,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.history_rounded, size: 14, color: Colors.grey[500]),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? kcWhiteColor : kcBlackColor,
+              ),
+            ),
+            const SizedBox(width: 4),
+            GestureDetector(
+              onTap: onRemove,
+              child: Icon(Icons.close_rounded, size: 15, color: Colors.grey[500]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── You may also like ────────────────────────────────────────────────────
+
+class _RelatedProductsSection extends StatelessWidget {
+  final List<Product> products;
+  final DashboardViewModel viewModel;
+  final bool isDark;
+
+  const _RelatedProductsSection({
+    required this.products,
+    required this.viewModel,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'You may also like',
+            style: TextStyle(fontFamily: 'HostGrotesk',
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: isDark ? kcWhiteColor : kcBlackColor,
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 220,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: products.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (ctx, i) => SizedBox(
+                width: 150,
+                child: ProductGridItem(
+                  product: products[i],
+                  viewModel: viewModel,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

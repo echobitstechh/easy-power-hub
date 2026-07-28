@@ -213,13 +213,11 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                       isLoading: viewModel.isPaying,
                       label: viewModel.paymentMethod == "delivery"
                           ? "Confirm Order"
-                          : "Pay ${MoneyUtils().formatAmount(viewModel.calculatedFinalTotal)}",
+                          : "Place Order — ${MoneyUtils().formatAmount(viewModel.calculatedFinalTotal)}",
                       submit: () => viewModel.processPayment(context),
                       color: kcPrimaryColor,
                       boldText: true,
-                      icon: viewModel.paymentMethod == "delivery"
-                          ? Icons.shopping_bag
-                          : Icons.credit_card,
+                      icon: Icons.shopping_bag,
                       iconColor: Colors.blue,
                       iconIsPrefix: true,
                     ),

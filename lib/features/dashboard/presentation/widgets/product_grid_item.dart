@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../core/data/models/product.dart';
+import '../../../../core/utils/image_util.dart';
 import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
@@ -91,7 +92,7 @@ class ProductGridItem extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: CachedNetworkImage(
                 imageUrl: (product.images != null && product.images!.isNotEmpty)
-                    ? product.images!.first
+                    ? ImageUtils.getCutoutImageUrl(product.images!.first)
                     : 'https://via.placeholder.com/120',
                 placeholder: (context, url) => Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
@@ -125,6 +126,18 @@ class ProductGridItem extends StatelessWidget {
             left: 16,
             top: 16,
             child: NewProductTag(),
+          ),
+        if (product.discountPercent != null && product.discountPercent! > 0)
+          Positioned(
+            right: 16,
+            top: 16,
+            child: DiscountTag(percent: product.discountPercent!),
+          ),
+        if (product.brandName != null && product.brandName!.isNotEmpty)
+          Positioned(
+            left: 16,
+            bottom: 8,
+            child: BrandPill(label: product.brandName!),
           ),
       ],
     );

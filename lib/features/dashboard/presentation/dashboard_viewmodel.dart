@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
@@ -6,6 +7,7 @@ import '../../../app/app.logger.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/favourite.dart';
+import '../../../core/data/models/order_item.dart';
 import '../../../core/data/models/product.dart';
 import '../../../core/data/models/tags.dart';
 import '../../../core/data/repositories/repository.dart';
@@ -13,6 +15,7 @@ import '../../../core/services/app_data_service.dart';
 import '../../../core/services/update_service.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
+import '../../../core/utils/paystack_util.dart';
 import '../../../state.dart';
 
 class DashboardViewModel extends BaseViewModel {
@@ -63,10 +66,22 @@ class DashboardViewModel extends BaseViewModel {
 
   // ── Search ────────────────────────────────────────────────────────────────
 
+  static const _searchLimit = 20;
+
   List<Product> searchResults = [];
+  List<Product> relatedSearchResults = [];
   bool isSearching      = false;
   bool isLoadingSearch  = false;
   String searchQuery    = '';
+
+  int  _searchPage        = 1;
+  bool _searchIsLastPage  = false;
+  bool _searchLoadingMore = false;
+  bool get isLoadingMoreSearch => _searchLoadingMore;
+  bool get hasMoreSearchResults => !_searchIsLastPage;
+
+  List<String> _recentSearches = [];
+  List<String> get recentSearches => _recentSearches;
 
   Set<String> loadingItems = {};
 
@@ -99,11 +114,80 @@ class DashboardViewModel extends BaseViewModel {
     if (userLoggedIn.value) {
       _loadCartFromLocal();
       fetchFavorites();
+      fetchPayNowOrder();
     }
     _checkForUpdateOncePerDay();
+    checkHomePopups();
   }
 
   void _onDataChanged() => notifyListeners();
+
+  // ── Home popups (welcome offer / new arrivals) ───────────────────────────
+  // Mirrors web's localStorage-driven, one-time welcome popup and "new since
+  // last visit" arrivals popup — no backend flag involved on either side.
+
+  bool _welcomePopupPending = false;
+  bool get welcomePopupPending => _welcomePopupPending;
+
+  List<Product> _newArrivals = [];
+  List<Product> get newArrivals => _newArrivals;
+  bool get newArrivalsPending => _newArrivals.isNotEmpty;
+
+  Future<void> checkHomePopups() async {
+    try {
+      final shown = await _localStorage.fetch(LocalStorageDir.welcomePopupShown);
+      _welcomePopupPending = shown != true;
+    } catch (e) {
+      _log.e('checkHomePopups welcome error: $e');
+    }
+
+    try {
+      if (productList.isNotEmpty) {
+        final lastSeenRaw =
+            await _localStorage.fetch(LocalStorageDir.lastSeenProductTime);
+        if (lastSeenRaw == null) {
+          // First time ever — establish a baseline; nothing is "new" yet.
+          await _saveLatestProductTimestamp();
+        } else {
+          final lastSeen = DateTime.tryParse(lastSeenRaw);
+          if (lastSeen != null) {
+            _newArrivals = productList.where((p) {
+              final created = DateTime.tryParse(p.createdAt ?? '');
+              return created != null && created.isAfter(lastSeen);
+            }).take(3).toList();
+          }
+        }
+      }
+    } catch (e) {
+      _log.e('checkHomePopups new-arrivals error: $e');
+    }
+
+    if (!_isDisposed) notifyListeners();
+  }
+
+  Future<void> _saveLatestProductTimestamp() async {
+    final latest = productList
+        .map((p) => DateTime.tryParse(p.createdAt ?? ''))
+        .whereType<DateTime>()
+        .fold<DateTime?>(
+            null, (max, d) => (max == null || d.isAfter(max)) ? d : max);
+    if (latest != null) {
+      await _localStorage.save(
+          LocalStorageDir.lastSeenProductTime, latest.toIso8601String());
+    }
+  }
+
+  Future<void> dismissWelcomePopup() async {
+    _welcomePopupPending = false;
+    notifyListeners();
+    await _localStorage.save(LocalStorageDir.welcomePopupShown, true);
+  }
+
+  Future<void> dismissNewArrivalsPopup() async {
+    _newArrivals = [];
+    notifyListeners();
+    await _saveLatestProductTimestamp();
+  }
 
   // ── Refresh (pull-to-refresh) ─────────────────────────────────────────────
 
@@ -158,6 +242,8 @@ class DashboardViewModel extends BaseViewModel {
   void filterProductsByBrand(String brand) {
     _subscribe();
     _selectedBrand = brand.toLowerCase() == 'all' ? '' : brand;
+    _selectedTag        = null;
+    _selectedCategoryId = 0;
     notifyListeners();
     _appData.refreshWithFilters(brand: _selectedBrand);
   }
@@ -177,30 +263,37 @@ class DashboardViewModel extends BaseViewModel {
 
     if (searchQuery.isEmpty) {
       searchResults  = [];
+      relatedSearchResults = [];
       isSearching    = false;
       isLoadingSearch = false;
+      _searchPage = 1;
+      _searchIsLastPage = false;
       notifyListeners();
       return;
     }
 
     isSearching     = true;
     isLoadingSearch = true;
+    _searchPage       = 1;
+    _searchIsLastPage = false;
+    relatedSearchResults = [];
     notifyListeners();
 
     try {
-      final res = await _repo.searchProducts(query: searchQuery);
+      final res = await _repo.searchProducts(
+          query: searchQuery, page: 1, limit: _searchLimit);
       if (res.statusCode == 200 && res.data != null) {
-        searchResults = (res.data['products'] as List)
+        final items = (res.data['products'] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
             .where((p) => p.status?.toLowerCase() == 'active')
-            .toList()
-          ..sort((a, b) {
-            final aOk = (a.availability ?? 0) >= 1;
-            final bOk = (b.availability ?? 0) >= 1;
-            if (aOk && !bOk) return -1;
-            if (!aOk && bOk) return 1;
-            return 0;
-          });
+            .toList();
+        _sortSearchResults(items);
+        searchResults = items;
+        _searchIsLastPage = items.length < _searchLimit;
+        if (searchResults.isNotEmpty) {
+          _saveRecentSearch(searchQuery);
+          _loadRelatedSearchResults();
+        }
       } else {
         searchResults = [];
       }
@@ -217,12 +310,132 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> loadMoreSearchResults() async {
+    if (_searchIsLastPage || _searchLoadingMore || searchQuery.isEmpty) return;
+    _searchLoadingMore = true;
+    notifyListeners();
+
+    try {
+      final nextPage = _searchPage + 1;
+      final res = await _repo.searchProducts(
+          query: searchQuery, page: nextPage, limit: _searchLimit);
+      if (res.statusCode == 200 && res.data != null) {
+        final items = (res.data['products'] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((p) => p.status?.toLowerCase() == 'active')
+            .toList();
+        final existingIds = searchResults.map((p) => p.id).toSet();
+        searchResults.addAll(items.where((p) => !existingIds.contains(p.id)));
+        _sortSearchResults(searchResults);
+        if (items.length < _searchLimit) {
+          _searchIsLastPage = true;
+        } else {
+          _searchPage = nextPage;
+        }
+      }
+    } catch (e) {
+      _log.e('loadMoreSearchResults error: $e');
+    } finally {
+      _searchLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  void _sortSearchResults(List<Product> items) {
+    items.sort((a, b) {
+      final aOk = (a.availability ?? 0) >= 1;
+      final bOk = (b.availability ?? 0) >= 1;
+      if (aOk && !bOk) return -1;
+      if (!aOk && bOk) return 1;
+      return 0;
+    });
+  }
+
+  Future<void> _loadRelatedSearchResults() async {
+    try {
+      final categoryCounts = <int, int>{};
+      for (final p in searchResults) {
+        if (p.categoryId != null) {
+          categoryCounts[p.categoryId!] = (categoryCounts[p.categoryId!] ?? 0) + 1;
+        }
+      }
+      if (categoryCounts.isEmpty) {
+        relatedSearchResults = [];
+        notifyListeners();
+        return;
+      }
+      final topCategoryId = categoryCounts.entries
+          .reduce((a, b) => a.value >= b.value ? a : b)
+          .key;
+      final matchedIds = searchResults.map((p) => p.id).toSet();
+      final res = await _repo.getProducts(
+        page: 1,
+        limit: 12,
+        categoryId: topCategoryId.toString(),
+      );
+      if (res.statusCode == 200) {
+        relatedSearchResults = (res.data['products'] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((p) =>
+                p.status?.toLowerCase() == 'active' &&
+                !matchedIds.contains(p.id))
+            .take(8)
+            .toList();
+        notifyListeners();
+      }
+    } catch (e) {
+      _log.e('_loadRelatedSearchResults error: $e');
+    }
+  }
+
   void clearSearch() {
     searchQuery     = '';
     searchResults   = [];
+    relatedSearchResults = [];
     isSearching     = false;
     isLoadingSearch = false;
+    _searchPage = 1;
+    _searchIsLastPage = false;
     notifyListeners();
+  }
+
+  // ── Recent searches ───────────────────────────────────────────────────────
+
+  Future<void> loadRecentSearches() async {
+    try {
+      final stored = await _localStorage.fetch(LocalStorageDir.recentSearches);
+      if (stored != null) {
+        _recentSearches = (stored as List).map((e) => e.toString()).toList();
+        if (!_isDisposed) notifyListeners();
+      }
+    } catch (e) {
+      _log.e('loadRecentSearches error: $e');
+    }
+  }
+
+  Future<void> _saveRecentSearch(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+    _recentSearches.removeWhere((q) => q.toLowerCase() == trimmed.toLowerCase());
+    _recentSearches.insert(0, trimmed);
+    if (_recentSearches.length > 6) {
+      _recentSearches = _recentSearches.sublist(0, 6);
+    }
+    try {
+      await _localStorage.save(LocalStorageDir.recentSearches, _recentSearches);
+    } catch (e) {
+      _log.e('_saveRecentSearch error: $e');
+    }
+  }
+
+  Future<void> removeRecentSearch(String query) async {
+    _recentSearches.removeWhere((q) => q == query);
+    notifyListeners();
+    try {
+      await _localStorage.save(LocalStorageDir.recentSearches, _recentSearches);
+    } catch (e) {
+      _log.e('removeRecentSearch error: $e');
+    }
   }
 
   // ── Cart ──────────────────────────────────────────────────────────────────
@@ -353,6 +566,85 @@ class DashboardViewModel extends BaseViewModel {
       await fetchFavorites();
     }
     notifyListeners();
+  }
+
+  // ── Pay Now reminder ──────────────────────────────────────────────────────
+  // Mirrors web's home-page banner: the most recent Processing order that's
+  // InstantPayment and still unpaid gets a dismissible "Pay Now" prompt.
+
+  Order? _payNowOrder;
+  Order? get payNowOrder => _payNowOrder;
+
+  String? _dismissedPayNowOrderId;
+
+  bool get showPayNowBanner =>
+      _payNowOrder != null && _payNowOrder!.id != _dismissedPayNowOrderId;
+
+  Future<void> fetchPayNowOrder() async {
+    if (!userLoggedIn.value) return;
+    try {
+      final res = await _repo.getOrderList();
+      if (res.statusCode == 200) {
+        final candidates = (res.data['orders'] as List)
+            .map((o) => Order.fromJson(Map<String, dynamic>.from(o)))
+            .where((o) =>
+                o.status == 'Processing' &&
+                o.orderType == 'InstantPayment' &&
+                !o.isPaid)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _payNowOrder = candidates.isNotEmpty ? candidates.first : null;
+        if (!_isDisposed) notifyListeners();
+      }
+    } catch (e) {
+      _log.e('fetchPayNowOrder error: $e');
+    }
+  }
+
+  void dismissPayNowBanner() {
+    if (_payNowOrder != null) _dismissedPayNowOrderId = _payNowOrder!.id;
+    notifyListeners();
+  }
+
+  Future<void> payNowForBannerOrder(BuildContext context) async {
+    final order = _payNowOrder;
+    if (order == null) return;
+    try {
+      final response = await _repo.initializePayment({
+        'paymentMethod': 'CreditCard',
+        'paymentType': 'Paystack',
+        'orderId': order.id,
+      });
+      if (!context.mounted) return;
+      if (response.statusCode == 200) {
+        await PaystackUtil.processPayment(
+          context: context,
+          ref: response.data['data']['reference'],
+          accessCode: response.data['data']['access_code'],
+          url: response.data['data']['authorization_url'],
+          amountInNaira: order.totalPrice,
+          email: profile.value.email!,
+          cartItems: order.products
+              .map((p) => CartItem(
+                    product: p,
+                    quantity: 1,
+                    price: double.tryParse(p.salePrice ?? '0.0') ?? 0.0,
+                  ))
+              .toList(),
+        );
+      } else {
+        _snackBar.showSnackbar(
+          message: "Payment initialization failed.",
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      _log.e('payNowForBannerOrder error: $e');
+      _snackBar.showSnackbar(
+        message: "An error occurred during payment.",
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   // ── Reviews ───────────────────────────────────────────────────────────────

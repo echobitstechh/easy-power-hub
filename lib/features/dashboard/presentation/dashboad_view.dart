@@ -19,12 +19,37 @@ import '../../../ui/components/shimmers/shimmer_loading.dart';
 import '../../shop/shop_view.dart';
 import 'dashboard_viewmodel.dart';
 import 'widgets/ads_carousel.dart';
+import 'widgets/new_arrivals_popup.dart';
+import 'widgets/pay_now_banner.dart';
 import 'widgets/popular_products_section.dart';
+import 'widgets/promo_ticker.dart';
+import 'widgets/welcome_popup.dart';
+
+class _HomePopupFlags {
+  bool welcomeShown = false;
+  bool newArrivalsShown = false;
+}
 
 class DashboardView extends StackedView<DashboardViewModel> {
   DashboardView({Key? key}) : super(key: key);
 
   final ScrollController _listController = ScrollController();
+  final _HomePopupFlags _popupFlags = _HomePopupFlags();
+
+  void _maybeShowHomePopups(BuildContext context, DashboardViewModel viewModel) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) return;
+      if (viewModel.welcomePopupPending && !_popupFlags.welcomeShown) {
+        _popupFlags.welcomeShown = true;
+        WelcomePopup.show(context, viewModel);
+      } else if (!viewModel.welcomePopupPending &&
+          viewModel.newArrivalsPending &&
+          !_popupFlags.newArrivalsShown) {
+        _popupFlags.newArrivalsShown = true;
+        NewArrivalsPopup.show(context, viewModel);
+      }
+    });
+  }
 
   @override
   Widget builder(
@@ -33,6 +58,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
     Widget? child,
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    _maybeShowHomePopups(context, viewModel);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -66,6 +92,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 controller: _listController,
                 slivers: [
                   _buildSliverAppBar(context, viewModel),
+                  const SliverToBoxAdapter(child: PromoTicker()),
                   _buildContentSlivers(context, viewModel),
                   if (viewModel.isLoadingMore)
                     const SliverToBoxAdapter(
@@ -180,7 +207,8 @@ class DashboardView extends StackedView<DashboardViewModel> {
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           verticalSpaceSmall,
-          const AdsCarousel(),
+          PayNowBanner(viewModel: viewModel),
+          AdsCarousel(viewModel: viewModel),
           verticalSpaceTiny,
 
           // Categories

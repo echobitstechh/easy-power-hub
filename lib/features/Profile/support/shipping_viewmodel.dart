@@ -3,8 +3,13 @@ import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:open_mail/open_mail.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/app.locator.dart';
+
+/// Same general support line web's floating WhatsApp button points at
+/// (`environment.supportWhatsAppNumber`).
+const String _supportWhatsAppNumber = '2348081099871';
 
 class SupportViewModel extends BaseViewModel {
   final _snackBar = locator<SnackbarService>();
@@ -39,7 +44,25 @@ class SupportViewModel extends BaseViewModel {
         'subtitle': '09059114923',
         'action': () => _launchDialer('09059114923'),
       },
+      {
+        'icon': Icons.chat_bubble_outline_rounded,
+        'title': 'WhatsApp',
+        'subtitle': 'Chat with support',
+        'action': () => _openWhatsAppChat(),
+      },
     ];
+  }
+
+  Future<void> _openWhatsAppChat() async {
+    final message = Uri.encodeFull(
+        'Hello, I need support with my Easy Power Hub order.');
+    final whatsappUrl = 'https://wa.me/$_supportWhatsAppNumber?text=$message';
+
+    if (await canLaunchUrl(Uri.parse(whatsappUrl))) {
+      await launchUrl(Uri.parse(whatsappUrl));
+    } else {
+      _snackBar.showSnackbar(message: 'Could not launch WhatsApp chat.');
+    }
   }
 
   Future<void> _sendEmail() async {

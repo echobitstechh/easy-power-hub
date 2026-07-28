@@ -26,4 +26,7 @@ class LocalStorageDir {
   static const String pendingOtpReference = 'pending_otp_reference';
   static const String pendingOtpEmail     = 'pending_otp_email';
   static const String pendingOtpPhone     = 'pending_otp_phone';
+  static const String recentSearches      = 'recent_searches';
+  static const String welcomePopupShown   = 'welcome_popup_shown';
+  static const String lastSeenProductTime = 'last_seen_product_time';
 }
