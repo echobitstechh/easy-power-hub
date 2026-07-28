@@ -473,6 +473,17 @@ class Repository extends IRepository {
     return response;
   }
 
+  @override
+  Future<ApiResponse> updateFcmToken(Map<String, dynamic> req) async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.put,
+      endpoint: "profile/fcm-token",
+      reqBody: req,
+    );
+
+    return response;
+  }
+
 
   @override
   Future<ApiResponse> withdraw(Map<String, dynamic> req) async {

@@ -7,6 +7,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 import '../../../core/data/models/profile.dart';
 import '../../../core/services/app_data_service.dart';
+import '../../../core/services/notification_handler.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
@@ -71,6 +72,9 @@ class StartupViewModel extends BaseViewModel {
       userLoggedIn.value = true;
       profile.value =
           Profile.fromJson(Map<String, dynamic>.from(jsonDecode(user)));
+      // Fire-and-forget: backfill/refresh the FCM token for this restored
+      // session so it doesn't sit stale until the next explicit login.
+      NotificationHandler.syncFcmToken();
     }
 
     return true;

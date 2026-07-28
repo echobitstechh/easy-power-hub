@@ -73,6 +73,8 @@ abstract class IRepository {
 
   Future<ApiResponse> updateProfilePicture(Map<String, dynamic> req);
 
+  Future<ApiResponse> updateFcmToken(Map<String, dynamic> req);
+
   Future<ApiResponse> withdraw(Map<String, dynamic> req);
 
   Future<ApiResponse> getOrderList();

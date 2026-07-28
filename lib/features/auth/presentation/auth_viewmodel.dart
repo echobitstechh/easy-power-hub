@@ -1,6 +1,5 @@
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -14,6 +13,7 @@ import '../../../app/app.router.dart';
 import '../../../core/data/models/profile.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
+import '../../../core/services/notification_handler.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
@@ -110,28 +110,7 @@ class AuthViewModel extends BaseViewModel {
   }
 
   /// Returns the FCM token, or null if unavailable.
-  /// On iOS, skips FCM entirely when the APNS token hasn't been issued yet —
-  /// calling getToken() without an APNS token blocks indefinitely on iOS.
-  Future<String?> _getFcmToken() async {
-    try {
-      await FirebaseMessaging.instance
-          .requestPermission(alert: true, badge: true, sound: true);
-
-      if (Platform.isIOS) {
-        final apns = await FirebaseMessaging.instance
-            .getAPNSToken()
-            .timeout(const Duration(seconds: 5), onTimeout: () => null);
-        if (apns == null) return null;
-      }
-
-      return await FirebaseMessaging.instance
-          .getToken()
-          .timeout(const Duration(seconds: 8), onTimeout: () => null);
-    } catch (e) {
-      _log.w('FCM token unavailable (non-fatal): $e');
-      return null;
-    }
-  }
+  Future<String?> _getFcmToken() => NotificationHandler.getFcmToken();
 
   String _errorMessage(dynamic data, [String fallback = 'An unexpected error occurred']) {
     if (data is Map) return data['message']?.toString() ?? fallback;
