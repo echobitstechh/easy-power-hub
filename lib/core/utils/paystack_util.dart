@@ -7,8 +7,6 @@ import '../../ui/dialogs/info_alert/payment_modal.dart';
 import '../data/models/cart_item.dart';
 
 class PaystackUtil {
-
-
   static Future<bool> processPayment({
     required BuildContext context,
     required int amountInNaira,
@@ -18,8 +16,6 @@ class PaystackUtil {
     String? accessCode,
     String? url,
   }) async {
-
-
     if (url == null || url.isEmpty) {
       locator<SnackbarService>().showSnackbar(
         message: "Invalid payment URL.",
@@ -33,6 +29,7 @@ class PaystackUtil {
       MaterialPageRoute(
         builder: (context) => PaymentWebView(
           url: url,
+          reference: ref,
           onSuccess: () {
             locator<SnackbarService>().showSnackbar(
               message: "Payment successful!",
@@ -41,10 +38,6 @@ class PaystackUtil {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                // builder: (_) => RaffleReceiptPage(
-                //   carts: cartItems,
-                //   totalAmount: amountInNaira,
-                // ),
                 builder: (context) => const PaymentSuccessView(),
               ),
             );
