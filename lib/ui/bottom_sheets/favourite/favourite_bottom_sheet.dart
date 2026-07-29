@@ -24,7 +24,7 @@ class FavoritesBottomSheet extends StatelessWidget {
 
         if (viewModel.favorites.isEmpty) {
           return const Center(child: EmptyState(
-            animation: "assets/animations/empty_box.json",
+            animation: "assets/animations/empty_cart.json",
             label: "No favorites yet",
           ));
         }

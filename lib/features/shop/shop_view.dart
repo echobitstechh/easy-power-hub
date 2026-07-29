@@ -1,14 +1,14 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import '../../../core/data/models/category.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/empty_state.dart';
+import '../dashboard/presentation/widgets/pay_now_banner.dart';
 import '../../ui/components/shimmers/shimmer_loading.dart';
 import '../../ui/components/brand_chips.dart';
 import '../../ui/components/product_search_bar.dart';
@@ -62,119 +62,123 @@ class ShopView extends StackedView<DashboardViewModel> {
             },
           ];
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        extendBodyBehindAppBar: true,
-        body: RefreshIndicator(
-          color: kcSecondaryColor,
-          onRefresh: () async => viewModel.getProducts(isRefresh: true),
-          child: NestedScrollView(
-            controller: _listController,
-            headerSliverBuilder: (ctx, innerBoxScrolled) =>
-                [_buildSliverAppBar(ctx, viewModel, slides, isDark)],
-            body: Builder(
-              builder: (ctx) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: (info) {
-                    if (info is ScrollEndNotification &&
-                        info.metrics.pixels >=
-                            info.metrics.maxScrollExtent - 200) {
-                      viewModel.getProducts();
-                    }
-                    return false;
-                  },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                          ctx,
-                        ),
-                      ),
-                      if (viewModel.isLoadingProducts)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: DashboardShimmer(),
-                          ),
-                        )
-                      else if (viewModel.productList.isEmpty)
-                        SliverFillRemaining(
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16),
-                            child: EmptyState(
-                              animation: 'assets/animations/empty_cart.json',
-                              label: 'No products yet',
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
+            ),
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            extendBodyBehindAppBar: true,
+            body: RefreshIndicator(
+              color: kcSecondaryColor,
+              onRefresh: () async => viewModel.getProducts(isRefresh: true),
+              child: NestedScrollView(
+                controller: _listController,
+                headerSliverBuilder: (ctx, innerBoxScrolled) =>
+                    [_buildSliverAppBar(ctx, viewModel, slides, isDark)],
+                body: Builder(
+                  builder: (ctx) {
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (info) {
+                        if (info is ScrollEndNotification &&
+                            info.metrics.pixels >=
+                                info.metrics.maxScrollExtent - 200) {
+                          viewModel.getProducts();
+                        }
+                        return false;
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverOverlapInjector(
+                            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                              ctx,
                             ),
                           ),
-                        )
-                      else
-                        SliverList(
-                          delegate: SliverChildListDelegate([
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: ProductTagsSection(
-                                viewModel: viewModel,
-                                crossAxisCount: 2,
+                          if (viewModel.isLoadingProducts)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: DashboardShimmer(),
                               ),
+                            )
+                          else if (viewModel.productList.isEmpty)
+                            SliverFillRemaining(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: EmptyState(
+                                  animation: 'assets/animations/empty_cart.json',
+                                  label: 'No products yet',
+                                ),
+                              ),
+                            )
+                          else
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: ProductTagsSection(
+                                    viewModel: viewModel,
+                                    crossAxisCount: 2,
+                                  ),
+                                ),
+                                verticalSpaceMedium,
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: viewModel.brands
+                                          .map(
+                                            (b) => buildBrandChip(b, viewModel),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: PopularProductsSection(
+                                    viewModel: viewModel,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).padding.bottom + 80,
+                                ),
+                              ]),
                             ),
-                            verticalSpaceMedium,
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  children: viewModel.brands
-                                      .map(
-                                        (b) => buildBrandChip(b, viewModel),
-                                      )
-                                      .toList(),
+                          if (viewModel.isLoadingMore)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: kcSecondaryColor,
+                                  ),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: PopularProductsSection(
-                                viewModel: viewModel,
-                              ),
-                            ),
-                            SizedBox(
-                              height:
-                                  MediaQuery.of(context).padding.bottom + 80,
-                            ),
-                          ]),
-                        ),
-                      if (viewModel.isLoadingMore)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: kcSecondaryColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -267,6 +271,12 @@ class ShopView extends StackedView<DashboardViewModel> {
                   );
                 },
               ),
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: PayNowBanner(viewModel: viewModel),
+              ),
             ],
           ),
         ),
@@ -294,15 +304,16 @@ class ShopView extends StackedView<DashboardViewModel> {
               ),
             ),
           ),
-        ),
-      ),
-    );
+                ), // close ClipRect
+              ), // close SliverAppBar
+            ); // close SliverOverlapAbsorber
   }
 
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
     viewModel.filteredProductList = [];
+    viewModel.fetchPayNowOrder();
     if (filter != null) {
       debugPrint('[ShopView] opening with category: id=${filter!.id} name="${filter!.name}"');
       viewModel.setSelectedCategory(filter!.id);

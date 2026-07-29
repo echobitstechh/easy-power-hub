@@ -8,9 +8,11 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../app/app.bottomsheets.dart';
 import '../../../app/app.dialogs.dart';
 import '../../../app/app.locator.dart';
+import '../../../app/app.logger.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/order_item.dart';
 import '../../../core/data/repositories/repository.dart';
+import '../../../core/utils/paystack_util.dart';
 import '../../../state.dart';
 import '../../../ui/common/app_strings.dart';
 import '../../Profile/profile_view.dart';
@@ -24,6 +26,7 @@ class HomeViewModel extends BaseViewModel {
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
   final _repo = locator<Repository>();
+  final _log = getLogger('HomeViewModel');
 
   final TextEditingController reviewController = TextEditingController();
 
@@ -57,6 +60,67 @@ class HomeViewModel extends BaseViewModel {
 
 
   Widget get currentPage => _pages[selectedTab];
+
+
+  /// --- Pay Now (floating banner) ---
+  Future<void> fetchPayNowOrder() async {
+    if (!userLoggedIn.value) return;
+    try {
+      final res = await _repo.getOrderList();
+      if (res.statusCode == 200) {
+        final candidates = (res.data['orders'] as List)
+            .map((o) => Order.fromJson(Map<String, dynamic>.from(o)))
+            .where((o) =>
+                o.status == 'Processing' &&
+                o.orderType == 'InstantPayment' &&
+                !o.isPaid)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        payNowOrder.value = candidates.isNotEmpty ? candidates.first : null;
+      }
+    } catch (e) {
+      _log.e('fetchPayNowOrder error: $e');
+    }
+  }
+
+  Future<void> payNowForOrder(BuildContext context, Order order) async {
+    try {
+      final response = await _repo.initializePayment({
+        'paymentMethod': 'CreditCard',
+        'paymentType': 'Paystack',
+        'orderId': order.id,
+      });
+      if (!context.mounted) return;
+      if (response.statusCode == 200) {
+        await PaystackUtil.processPayment(
+          context: context,
+          ref: response.data['data']['reference'],
+          accessCode: response.data['data']['access_code'],
+          url: response.data['data']['authorization_url'],
+          amountInNaira: order.totalPrice,
+          email: profile.value.email!,
+          cartItems: order.products
+              .map((p) => CartItem(
+                    product: p,
+                    quantity: 1,
+                    price: double.tryParse(p.salePrice ?? '0.0') ?? 0.0,
+                  ))
+              .toList(),
+        );
+      } else {
+        _snackbarService.showSnackbar(
+          message: 'Payment initialization failed.',
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      _log.e('payNowForOrder error: $e');
+      _snackbarService.showSnackbar(
+        message: 'An error occurred during payment.',
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
 
 
   /// --- Rating ---

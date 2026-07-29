@@ -7,10 +7,12 @@ import '../../app/app.locator.dart';
 import '../../app/app.logger.dart';
 import '../../core/data/models/cart_item.dart';
 import '../../core/data/models/favourite.dart';
+import '../../core/data/models/order_item.dart';
 import '../../core/data/models/product.dart';
 import '../../core/data/repositories/repository.dart';
 import '../../core/utils/local_store_dir.dart';
 import '../../core/utils/local_stotage.dart';
+import '../../core/utils/paystack_util.dart';
 import '../../state.dart';
 
 class CartViewModel extends BaseViewModel {
@@ -58,9 +60,50 @@ class CartViewModel extends BaseViewModel {
 
   @override
   void dispose() {
-    selectedPaymentMethod.dispose();
     refferalCode.dispose();
+    selectedPaymentMethod.dispose();
+    isPaymentProcessing.dispose();
     super.dispose();
+  }
+
+  /// Pay-Now banner: initiates payment for the pending unpaid order.
+  Future<void> payNowForOrder(BuildContext context, Order order) async {
+    try {
+      final response = await _repo.initializePayment({
+        'paymentMethod': 'CreditCard',
+        'paymentType': 'Paystack',
+        'orderId': order.id,
+      });
+      if (!context.mounted) return;
+      if (response.statusCode == 200) {
+        await PaystackUtil.processPayment(
+          context: context,
+          ref: response.data['data']['reference'],
+          accessCode: response.data['data']['access_code'],
+          url: response.data['data']['authorization_url'],
+          amountInNaira: order.totalPrice,
+          email: profile.value.email!,
+          cartItems: order.products
+              .map((p) => CartItem(
+                    product: p,
+                    quantity: 1,
+                    price: double.tryParse(p.salePrice ?? '0.0') ?? 0.0,
+                  ))
+              .toList(),
+        );
+      } else {
+        _snackBar.showSnackbar(
+          message: 'Payment initialization failed.',
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      _log.e('payNowForOrder error: $e');
+      _snackBar.showSnackbar(
+        message: 'An error occurred during payment.',
+        duration: const Duration(seconds: 2),
+      );
+    }
   }
 
   void selectMethod(PaymentMethod method) {

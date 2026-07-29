@@ -50,12 +50,13 @@ class WelcomePopup extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kcPrimaryColor,
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w600)),
+                child: const Text('Got it', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
               ),
             ),
           ],

@@ -1,4 +1,4 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +16,7 @@ import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
 import '../../ui/components/empty_state.dart';
 import '../../ui/components/glass/glass_button.dart';
+
 import 'cart_viewmodel.dart';
 import 'checkout/checkout_view.dart';
 
@@ -44,6 +45,109 @@ class CartView extends StackedView<CartViewModel> {
         child: Column(
           children: [
             _GlassCartAppBar(viewModel: viewModel),
+            // ── Pay-Now floating banner ──────────────────────────────────
+            ValueListenableBuilder(
+              valueListenable: payNowOrder,
+              builder: (context, order, _) {
+                if (order == null ||
+                    order.id == dismissedPayNowId.value) {
+                  return const SizedBox.shrink();
+                }
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.6),
+                        width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.28),
+                        blurRadius: 14,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFFF59E0B).withValues(alpha: 0.18),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.account_balance_wallet_rounded,
+                          color: Color(0xFFF59E0B),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Order #${order.orderNumber} Approved',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                                color: Colors.white,
+                              ),
+                            ),
+                            Text(
+                              'Pay ${MoneyUtils().formatAmount(order.totalPrice)} to process delivery',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () =>
+                            viewModel.payNowForOrder(context, order),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFF59E0B),
+                          foregroundColor: Colors.black,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
+                          minimumSize: const Size(0, 30),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Text(
+                          'Pay Now',
+                          style: TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded,
+                            size: 16, color: Colors.white70),
+                        padding: const EdgeInsets.only(left: 4),
+                        constraints: const BoxConstraints(),
+                        onPressed: () =>
+                            dismissedPayNowId.value = order.id,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
             Expanded(
               child: RefreshIndicator(
                 color: kcSecondaryColor,

@@ -1,16 +1,14 @@
-﻿import 'dart:ui';
+import 'dart:ui';
 
 import 'package:easy_ph/features/dashboard/presentation/widgets/category_grid.dart';
 import 'package:easy_ph/features/dashboard/presentation/widgets/product_tags_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import '../../../app/app.locator.dart';
 import '../../../app/app.router.dart';
 import '../../../state.dart';
-import '../../../ui/bottom_sheets/favourite/favourite_bottom_sheet.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/brand_chips.dart';
@@ -22,7 +20,6 @@ import 'widgets/ads_carousel.dart';
 import 'widgets/new_arrivals_popup.dart';
 import 'widgets/pay_now_banner.dart';
 import 'widgets/popular_products_section.dart';
-import 'widgets/promo_ticker.dart';
 import 'widgets/welcome_popup.dart';
 
 class _HomePopupFlags {
@@ -92,7 +89,7 @@ class DashboardView extends StackedView<DashboardViewModel> {
                 controller: _listController,
                 slivers: [
                   _buildSliverAppBar(context, viewModel),
-                  const SliverToBoxAdapter(child: PromoTicker()),
+                  //const SliverToBoxAdapter(child: PromoTicker()),
                   _buildContentSlivers(context, viewModel),
                   if (viewModel.isLoadingMore)
                     const SliverToBoxAdapter(
@@ -207,8 +204,19 @@ class DashboardView extends StackedView<DashboardViewModel> {
       sliver: SliverList(
         delegate: SliverChildListDelegate([
           verticalSpaceSmall,
-          PayNowBanner(viewModel: viewModel),
-          AdsCarousel(viewModel: viewModel),
+          // Carousel with Pay-Now banner floating on top
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              AdsCarousel(viewModel: viewModel),
+              Positioned(
+                top: 1,
+                left: 0,
+                right: 0,
+                child: PayNowBanner(viewModel: viewModel),
+              ),
+            ],
+          ),
           verticalSpaceTiny,
 
           // Categories

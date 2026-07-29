@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:easy_ph/features/home/presentation/widgets/bottom_nav_bar.dart';
 
-import '../../../core/data/models/cart_item.dart';
 import '../../../state.dart';
 import '../../../ui/common/app_colors.dart';
 import 'home_viewmodel.dart';
@@ -41,6 +40,7 @@ class HomeView extends StackedView<HomeViewModel> {
     if (userLoggedIn.value == true) {
       viewModel.fetchDeliveredOrders();
       viewModel.fetchOnlineCart();
+      viewModel.fetchPayNowOrder();
     }
     super.onViewModelReady(viewModel);
   }

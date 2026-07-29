@@ -16,7 +16,8 @@ import '../../../core/services/update_service.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../core/utils/paystack_util.dart';
-import '../../../state.dart';
+import '../../../state.dart' as appState;
+import '../../../state.dart' show userLoggedIn, profile, cart, uiMode, appLoading, isLoginByEmail, isOtpRequestedByEmail, globalCategories, isFirstLaunch, unreadCount;
 
 class DashboardViewModel extends BaseViewModel {
   final _appData      = locator<AppDataService>();
@@ -573,12 +574,16 @@ class DashboardViewModel extends BaseViewModel {
   // InstantPayment and still unpaid gets a dismissible "Pay Now" prompt.
 
   Order? _payNowOrder;
-  Order? get payNowOrder => _payNowOrder;
+  Order? get payNowOrder => _payNowOrder ?? appState.payNowOrder.value;
 
   String? _dismissedPayNowOrderId;
 
-  bool get showPayNowBanner =>
-      _payNowOrder != null && _payNowOrder!.id != _dismissedPayNowOrderId;
+  bool get showPayNowBanner {
+    final order = payNowOrder;
+    if (order == null) return false;
+    final dismissedId = appState.dismissedPayNowId.value ?? _dismissedPayNowOrderId;
+    return order.id != dismissedId;
+  }
 
   Future<void> fetchPayNowOrder() async {
     if (!userLoggedIn.value) return;
@@ -594,6 +599,8 @@ class DashboardViewModel extends BaseViewModel {
             .toList()
           ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         _payNowOrder = candidates.isNotEmpty ? candidates.first : null;
+        // Push to global notifier so floating banner reacts app-wide
+        appState.payNowOrder.value = _payNowOrder;
         if (!_isDisposed) notifyListeners();
       }
     } catch (e) {
@@ -602,7 +609,12 @@ class DashboardViewModel extends BaseViewModel {
   }
 
   void dismissPayNowBanner() {
-    if (_payNowOrder != null) _dismissedPayNowOrderId = _payNowOrder!.id;
+    final order = payNowOrder;
+    if (order != null) {
+      _dismissedPayNowOrderId = order.id;
+      // Sync global notifier so the floating banner dismisses everywhere
+      appState.dismissedPayNowId.value = order.id;
+    }
     notifyListeners();
   }
 

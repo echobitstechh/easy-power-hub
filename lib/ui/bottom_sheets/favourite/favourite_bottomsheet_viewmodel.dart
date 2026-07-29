@@ -41,7 +41,9 @@ class FavoritesBottomSheetModel extends BaseViewModel {
       if (res.statusCode == 200) {
         final favoritesData = res.data["data"] as List;
         _favorites = favoritesData.map((e) => FavoriteItem.fromJson(Map<String, dynamic>.from(e))).toList();
-        print('favorites first price: ${_favorites.first.product.salePrice}');
+        if (_favorites.isNotEmpty) {
+          print('favorites first price: ${_favorites.first.product.salePrice}');
+        }
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to fetch favorites.", duration: const Duration(seconds: 2));
       }
