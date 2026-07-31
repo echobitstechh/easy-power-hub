@@ -62,10 +62,11 @@ class ReferralsViewModel extends BaseViewModel {
     }
     
     Share.share(
-      'Join me on EasyPower Hub and get amazing products! 🎁\n\n'
-      'Use my referral code: $referralCode\n'
-      'Sign up now and enjoy exclusive deals!',
-      subject: 'Join EasyPower Hub with my referral code',
+      'Join me on EasyPower Hub and get amazing power products! 🎁\n\n'
+      'Sign up using my referral link:\n'
+      '$referralLink\n\n'
+      'Or enter code: $referralCode',
+      subject: 'Join EasyPower Hub with my referral link',
     );
   }
 
@@ -134,7 +135,7 @@ class ReferralsViewModel extends BaseViewModel {
         referralId = response.data['data']['id'];
         referralCode = response.data['data']['referralCode'];
         
-        referralLink = '$referralCode';
+        referralLink = 'https://easypowerhub.com/signup?ref=$referralCode';
         
         _log.i('Referral code fetched: $referralCode');
       } else {
