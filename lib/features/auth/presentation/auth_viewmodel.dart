@@ -432,20 +432,23 @@ class AuthViewModel extends BaseViewModel {
   void _handleVerificationFlow(dynamic data) {
     profile.value.id = data['userId'];
     profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
+    setRegistrationStep(RegistrationStep.verifyOtp);
     _navigationService.navigateTo(
       Routes.register,
-
     );
   }
 
-  void _handleIncompleteProfileFlow(dynamic data) {
+  void _handleIncompleteProfileFlow(dynamic data) async {
     profile.value.id = data['userId'];
+    await _clearPendingOtp();
+    setRegistrationStep(RegistrationStep.completeProfile);
     _navigationService.navigateTo(
       Routes.register
     );
   }
 
-  void _handleSuccessfulLogin(dynamic data) {
+  void _handleSuccessfulLogin(dynamic data) async {
+    await _clearPendingOtp();
     userLoggedIn.value = true;
     profile.value = Profile.fromJson(Map<String, dynamic>.from(data["User"]));
     _localStorage.save(LocalStorageDir.authToken, data["token"]);

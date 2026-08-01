@@ -213,7 +213,13 @@ class _GlassCartAppBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                  }
+                },
                 color: Theme.of(context).brightness == Brightness.dark
                     ? kcWhiteColor
                     : kcBlackColor,

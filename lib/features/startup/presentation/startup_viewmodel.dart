@@ -47,6 +47,18 @@ class StartupViewModel extends BaseViewModel {
     final user      = await _storage.fetch(LocalStorageDir.authUser);
     final onboarded = await _storage.fetch(LocalStorageDir.onboarded);
 
+    if (token != null && user != null) {
+      userLoggedIn.value = true;
+      profile.value =
+          Profile.fromJson(Map<String, dynamic>.from(jsonDecode(user)));
+      await _storage.delete(LocalStorageDir.pendingOtpUserId);
+      await _storage.delete(LocalStorageDir.pendingOtpReference);
+      await _storage.delete(LocalStorageDir.pendingOtpEmail);
+      await _storage.delete(LocalStorageDir.pendingOtpPhone);
+      NotificationHandler.syncFcmToken();
+      return true;
+    }
+
     // Resume a pending OTP verification that was interrupted by an app kill.
     final pendingUserId = await _storage.fetch(LocalStorageDir.pendingOtpUserId);
     if (pendingUserId != null && pendingUserId.toString().isNotEmpty) {
@@ -66,15 +78,6 @@ class StartupViewModel extends BaseViewModel {
     if (onboarded == null || onboarded == false) {
       _nav.replaceWithOnboardingView();
       return false;
-    }
-
-    if (token != null && user != null) {
-      userLoggedIn.value = true;
-      profile.value =
-          Profile.fromJson(Map<String, dynamic>.from(jsonDecode(user)));
-      // Fire-and-forget: backfill/refresh the FCM token for this restored
-      // session so it doesn't sit stale until the next explicit login.
-      NotificationHandler.syncFcmToken();
     }
 
     return true;

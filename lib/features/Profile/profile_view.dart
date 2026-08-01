@@ -449,7 +449,13 @@ class _GlassProfileHeader extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                  }
+                },
               ),
               Expanded(
                 child: Text(

@@ -78,7 +78,7 @@ class _ProductCardState extends State<ProductCard> {
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 20),
+        preferredSize: Size.fromHeight(MediaQuery.of(context).padding.top + kToolbarHeight),
         child: _buildGlassAppBar(context, isFavorite, isDark),
       ),
       body: Container(
@@ -91,7 +91,7 @@ class _ProductCardState extends State<ProductCard> {
         ),
         child: ListView(
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + kToolbarHeight + 28,
+            top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
             left: 0,
             right: 0,
             bottom: MediaQuery.of(context).padding.bottom + 16,
@@ -109,13 +109,16 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  // â”€â”€ Glass app bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Glass app bar ───────────────────────────────────────────────────────────
 
   Widget _buildGlassAppBar(BuildContext context, bool isFavorite, bool isDark) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
+          padding: EdgeInsets.only(top: topPadding),
+          height: topPadding + kToolbarHeight,
           decoration: BoxDecoration(
             color: isDark ? kcGlassSurfaceDark : kcGlassSurfaceLight,
             border: Border(
@@ -125,63 +128,57 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ),
-          child: SafeArea(
-            top: true,
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 8,
-                left: 12,
-                right: 12,
-                bottom: 12,
+          child: Row(
+            children: [
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 20,
+                    color: isDark ? kcWhiteColor : kcBlackColor,
+                  ),
+                ),
               ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 20,
-                        color: isDark ? kcWhiteColor : kcBlackColor,
-                      ),
-                    ),
+              Expanded(
+                child: Text(
+                  'Product Details',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'HostGrotesk',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? kcWhiteColor : kcBlackColor,
                   ),
-                  Expanded(
-                    child: Text(
-                      'Product Details',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'HostGrotesk',
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? kcWhiteColor : kcBlackColor,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      isFavorite
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: isFavorite ? Colors.red : Colors.grey,
-                    ),
-                    onPressed: () =>
-                        widget.dashboardViewModel.toggleFavorite(widget.product),
-                  ),
-                  IconButton(
-                    icon: Icon(
-                      Icons.share_rounded,
-                      size: 22,
-                      color: isDark ? kcWhiteColor : kcBlackColor,
-                    ),
-                    onPressed: () {},
-                  ),
-                ],
+                ),
               ),
-            ),
+              IconButton(
+                icon: Icon(
+                  isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_border_rounded,
+                  color: isFavorite ? Colors.red : Colors.grey,
+                ),
+                onPressed: () =>
+                    widget.dashboardViewModel.toggleFavorite(widget.product),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.share_rounded,
+                  size: 22,
+                  color: isDark ? kcWhiteColor : kcBlackColor,
+                ),
+                onPressed: () {},
+              ),
+            ],
           ),
         ),
       ),

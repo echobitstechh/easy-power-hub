@@ -17,6 +17,8 @@ import '../../../state.dart';
 import '../../../ui/common/app_strings.dart';
 import '../../Profile/profile_view.dart';
 import '../../cart/cart_view.dart';
+import '../../../core/utils/local_store_dir.dart';
+import '../../../core/utils/local_stotage.dart';
 import '../../dashboard/presentation/dashboad_view.dart';
 import '../../services/service_view.dart';
 import '../../shop/shop_view.dart';
@@ -26,6 +28,7 @@ class HomeViewModel extends BaseViewModel {
   final _bottomSheetService = locator<BottomSheetService>();
   final _snackbarService = locator<SnackbarService>();
   final _repo = locator<Repository>();
+  final _localStorage = locator<LocalStorage>();
   final _log = getLogger('HomeViewModel');
 
   final TextEditingController reviewController = TextEditingController();
@@ -41,6 +44,17 @@ class HomeViewModel extends BaseViewModel {
     ProfileView(),
   ];
 
+  void init() async {
+    try {
+      final savedTab = await _localStorage.fetch(LocalStorageDir.lastTabRoute);
+      if (savedTab is int && savedTab >= 0 && savedTab < _pages.length) {
+        selectedTab = savedTab;
+        notifyListeners();
+      }
+    } catch (e) {
+      _log.e('Failed to restore tab: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -49,9 +63,14 @@ class HomeViewModel extends BaseViewModel {
   }
 
   /// --- Navigation ---
-  void changeSelected(int index) {
+  void changeSelected(int index) async {
     selectedTab = index;
     notifyListeners();
+    try {
+      await _localStorage.save(LocalStorageDir.lastTabRoute, index);
+    } catch (e) {
+      _log.e('Failed to save tab: $e');
+    }
   }
   void setRating(double newRating) {
     rating = newRating;
