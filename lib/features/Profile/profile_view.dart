@@ -58,6 +58,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                                           context, viewModel, isDark)
                                       : _buildGuestAuthSection(
                                           context, viewModel, isDark),
+                                  _buildAppVersionSection(isDark, viewModel),
                                   SizedBox(
                                     height:
                                         MediaQuery.of(context).padding.bottom +
@@ -411,8 +412,33 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+  Widget _buildAppVersionSection(bool isDark, ProfileViewModel viewModel) {
+    final versionStr = viewModel.appVersion.isNotEmpty
+        ? 'Version ${viewModel.appVersion}'
+        : 'Version 25.0.5 (34)';
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 4),
+      child: Center(
+        child: Text(
+          versionStr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'HostGrotesk',
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white38 : Colors.black38,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
-  void onViewModelReady(ProfileViewModel viewModel) => viewModel.getProfile();
+  void onViewModelReady(ProfileViewModel viewModel) {
+    viewModel.getProfile();
+    viewModel.loadAppVersion();
+  }
 
   @override
   ProfileViewModel viewModelBuilder(BuildContext context) => ProfileViewModel();
