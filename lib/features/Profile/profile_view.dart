@@ -6,6 +6,9 @@ import 'package:easy_ph/ui/components/theme_toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
+import 'package:stacked_services/stacked_services.dart';
+import '../../app/app.locator.dart';
+import '../../app/app.router.dart';
 import '../../state.dart';
 import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
