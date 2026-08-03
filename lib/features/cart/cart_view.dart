@@ -228,9 +228,13 @@ class _GlassCartAppBar extends StatelessWidget {
                 child: Text(
                   'My Cart',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'HostGrotesk',
+                  style: TextStyle(
+                    fontFamily: 'HostGrotesk',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? kcWhiteColor
+                        : kcBlackColor,
                   ),
                 ),
               ),
