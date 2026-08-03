@@ -462,8 +462,10 @@ class DashboardViewModel extends BaseViewModel {
     final idx = cart.value.indexWhere((i) => i.product?.id == product.id);
     if (idx == -1) {
       cart.value.add(CartItem(product: product, quantity: 1, isUnavailable: isUnavailable));
-      cart.notifyListeners();
+    } else {
+      cart.value[idx].quantity = (cart.value[idx].quantity ?? 0) + 1;
     }
+    cart.notifyListeners();
     await _saveLocalCart();
 
     if (!userLoggedIn.value) {
@@ -481,9 +483,7 @@ class DashboardViewModel extends BaseViewModel {
     try {
       final response = await _repo.addToCart({
         'productId': product.id,
-        'quantity': cart.value
-            .firstWhere((i) => i.product?.id == product.id)
-            .quantity,
+        'quantity': 1,
         'isUnavailable': isUnavailable,
       });
 

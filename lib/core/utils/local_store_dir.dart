@@ -29,4 +29,5 @@ class LocalStorageDir {
   static const String recentSearches      = 'recent_searches';
   static const String welcomePopupShown   = 'welcome_popup_shown';
   static const String lastSeenProductTime = 'last_seen_product_time';
+  static const String lastTabRoute        = 'last_tab_route';
 }

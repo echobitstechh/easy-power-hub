@@ -5,8 +5,8 @@ import 'package:easy_ph/features/Profile/widgets/profile_picture_section.dart';
 import 'package:easy_ph/ui/components/theme_toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 
+import 'package:stacked_services/stacked_services.dart';
 import '../../app/app.locator.dart';
 import '../../app/app.router.dart';
 import '../../state.dart';
@@ -61,6 +61,7 @@ class ProfileView extends StackedView<ProfileViewModel> {
                                           context, viewModel, isDark)
                                       : _buildGuestAuthSection(
                                           context, viewModel, isDark),
+                                  _buildAppVersionSection(isDark, viewModel),
                                   SizedBox(
                                     height:
                                         MediaQuery.of(context).padding.bottom +
@@ -414,8 +415,33 @@ class ProfileView extends StackedView<ProfileViewModel> {
     );
   }
 
+  Widget _buildAppVersionSection(bool isDark, ProfileViewModel viewModel) {
+    final versionStr = viewModel.appVersion.isNotEmpty
+        ? 'Version ${viewModel.appVersion}'
+        : 'Version 25.0.5 (34)';
+    return Padding(
+      padding: const EdgeInsets.only(top: 20, bottom: 4),
+      child: Center(
+        child: Text(
+          versionStr,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'HostGrotesk',
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white38 : Colors.black38,
+            letterSpacing: 0.3,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
-  void onViewModelReady(ProfileViewModel viewModel) => viewModel.getProfile();
+  void onViewModelReady(ProfileViewModel viewModel) {
+    viewModel.getProfile();
+    viewModel.loadAppVersion();
+  }
 
   @override
   ProfileViewModel viewModelBuilder(BuildContext context) => ProfileViewModel();
@@ -451,11 +477,7 @@ class _GlassProfileHeader extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 20,
-                  color: isDark ? kcWhiteColor : kcBlackColor,
-                ),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                 onPressed: () {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
@@ -468,11 +490,10 @@ class _GlassProfileHeader extends StatelessWidget {
                 child: Text(
                   'Profile',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'HostGrotesk',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: isDark ? kcWhiteColor : kcBlackColor,
                   ),
                 ),
               ),

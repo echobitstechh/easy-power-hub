@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../app/app.router.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../app/app.bottomsheets.dart';
@@ -23,6 +24,19 @@ class ProfileViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _bottomSheetService = locator<BottomSheetService>();
   final _dialogService = locator<DialogService>();
+
+  String _appVersion = '';
+  String get appVersion => _appVersion;
+
+  void loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      _appVersion = '${info.version} (${info.buildNumber})';
+      notifyListeners();
+    } catch (e) {
+      _log.e('Failed to load version: $e');
+    }
+  }
 
   File? _selectedFile;
   File? get selectedFile => _selectedFile;

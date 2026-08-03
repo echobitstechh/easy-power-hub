@@ -58,8 +58,17 @@ class CartViewModel extends BaseViewModel {
 
   final Map<String, int> selectedInstallments = {}; // productId -> selected frequency
 
+  CartViewModel() {
+    cart.addListener(_onGlobalCartChanged);
+  }
+
+  void _onGlobalCartChanged() {
+    _recomputeLocalTotals();
+  }
+
   @override
   void dispose() {
+    cart.removeListener(_onGlobalCartChanged);
     refferalCode.dispose();
     selectedPaymentMethod.dispose();
     isPaymentProcessing.dispose();
@@ -293,9 +302,21 @@ class CartViewModel extends BaseViewModel {
       final res = await _repo.cartList();
       if (res.statusCode == 200) {
         final items = res.data['cartItems'] as List? ?? [];
-        cart.value = items
+        final parsed = items
             .map((i) => CartItem.fromJson(Map<String, dynamic>.from(i)))
             .toList();
+
+        final Map<String, CartItem> uniqueMap = {};
+        for (final item in parsed) {
+          final pid = item.product?.id;
+          if (pid == null) continue;
+          if (uniqueMap.containsKey(pid)) {
+            uniqueMap[pid]!.quantity = (uniqueMap[pid]!.quantity ?? 0) + (item.quantity ?? 1);
+          } else {
+            uniqueMap[pid] = item;
+          }
+        }
+        cart.value = uniqueMap.values.toList();
         await getCartSummary();
         await _localStorage.save(
             LocalStorageDir.productCart,
