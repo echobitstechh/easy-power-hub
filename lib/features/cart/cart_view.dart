@@ -213,7 +213,13 @@ class _GlassCartAppBar extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                  }
+                },
                 color: Theme.of(context).brightness == Brightness.dark
                     ? kcWhiteColor
                     : kcBlackColor,
@@ -222,9 +228,13 @@ class _GlassCartAppBar extends StatelessWidget {
                 child: Text(
                   'My Cart',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontFamily: 'HostGrotesk',
+                  style: TextStyle(
+                    fontFamily: 'HostGrotesk',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? kcWhiteColor
+                        : kcBlackColor,
                   ),
                 ),
               ),

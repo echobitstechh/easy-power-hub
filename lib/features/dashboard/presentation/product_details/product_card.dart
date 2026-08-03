@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../../app/app.locator.dart';
@@ -15,7 +16,6 @@ import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
 import '../../../../ui/components/glass/glass_button.dart';
-import '../../../shop/shop_view.dart';
 import '../dashboard_viewmodel.dart';
 
 class ProductCard extends StatefulWidget {
@@ -74,12 +74,18 @@ class _ProductCardState extends State<ProductCard> {
     final isFavorite = widget.dashboardViewModel
         .isProductFavorite(widget.product.id!);
 
+    final double topInset = MediaQuery.of(context).padding.top > 0
+        ? MediaQuery.of(context).padding.top
+        : MediaQuery.of(context).viewPadding.top;
+    final double safeTop = topInset > 0 ? topInset : 24.0;
+    final double appBarHeight = kToolbarHeight + safeTop;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight + 20),
-        child: _buildGlassAppBar(context, isFavorite, isDark),
+        preferredSize: Size.fromHeight(appBarHeight),
+        child: _buildGlassAppBar(context, isFavorite, isDark, safeTop),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -91,7 +97,7 @@ class _ProductCardState extends State<ProductCard> {
         ),
         child: ListView(
           padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + kToolbarHeight + 28,
+            top: appBarHeight + 8,
             left: 0,
             right: 0,
             bottom: MediaQuery.of(context).padding.bottom + 16,
@@ -109,13 +115,15 @@ class _ProductCardState extends State<ProductCard> {
     );
   }
 
-  // â”€â”€ Glass app bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Glass app bar ─────────────────────────────────────────────────────────
 
-  Widget _buildGlassAppBar(BuildContext context, bool isFavorite, bool isDark) {
+  Widget _buildGlassAppBar(
+      BuildContext context, bool isFavorite, bool isDark, double topPadding) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
+          height: kToolbarHeight + topPadding,
           decoration: BoxDecoration(
             color: isDark ? kcGlassSurfaceDark : kcGlassSurfaceLight,
             border: Border(
@@ -125,23 +133,28 @@ class _ProductCardState extends State<ProductCard> {
               ),
             ),
           ),
-          child: SafeArea(
-            top: true,
-            bottom: false,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 8,
-                left: 12,
-                right: 12,
-                bottom: 12,
-              ),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => Navigator.of(context, rootNavigator: true).pop(),
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: topPadding,
+              left: 8,
+              right: 8,
+            ),
+            child: Row(
+              children: [
+                Material(
+                  color: Colors.transparent,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  child: InkWell(
+                    onTap: () {
+                      if (Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop();
+                      } else {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      }
+                    },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: Icon(
                         Icons.arrow_back_ios_new_rounded,
                         size: 20,
@@ -149,38 +162,51 @@ class _ProductCardState extends State<ProductCard> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    child: Text(
-                      'Product Details',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'HostGrotesk',
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? kcWhiteColor : kcBlackColor,
-                      ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Product Details',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'HostGrotesk',
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? kcWhiteColor : kcBlackColor,
                     ),
                   ),
-                  IconButton(
+                ),
+                Material(
+                  color: Colors.transparent,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  child: IconButton(
                     icon: Icon(
                       isFavorite
                           ? Icons.favorite_rounded
                           : Icons.favorite_border_rounded,
-                      color: isFavorite ? Colors.red : Colors.grey,
+                      color: isFavorite ? Colors.red : (isDark ? kcWhiteColor : kcBlackColor),
                     ),
                     onPressed: () =>
                         widget.dashboardViewModel.toggleFavorite(widget.product),
                   ),
-                  IconButton(
+                ),
+                Material(
+                  color: Colors.transparent,
+                  shape: const CircleBorder(),
+                  clipBehavior: Clip.hardEdge,
+                  child: IconButton(
                     icon: Icon(
                       Icons.share_rounded,
                       size: 22,
                       color: isDark ? kcWhiteColor : kcBlackColor,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      final title = widget.product.productName ?? 'Product';
+                      Share.share('Check out $title on Easy Power Hub!');
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -427,12 +453,10 @@ class _ProductCardState extends State<ProductCard> {
           label: isAvailable ? 'Add to Cart' : 'Request Item',
           icon: const Icon(Icons.shopping_bag_outlined, size: 18, color: Colors.white),
           onTap: () {
-            setState(() {
-              widget.dashboardViewModel.addProductToCart(
-                widget.product,
-                isUnavailable: !isAvailable,
-              );
-            });
+            widget.dashboardViewModel.addProductToCart(
+              widget.product,
+              isUnavailable: !isAvailable,
+            );
           },
         );
       },

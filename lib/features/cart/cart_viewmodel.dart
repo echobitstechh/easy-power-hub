@@ -339,6 +339,7 @@ class CartViewModel extends BaseViewModel {
     if (!userLoggedIn.value || cart.value.isEmpty) return;
     final needsSync = await _localStorage.fetch(LocalStorageDir.cartNeedsSync) ?? false;
     if (needsSync != true) return;
+    await _localStorage.save(LocalStorageDir.cartNeedsSync, false);
     try {
       for (final item in cart.value) {
         if (item.product?.id == null) continue;
@@ -347,7 +348,6 @@ class CartViewModel extends BaseViewModel {
           'quantity': item.quantity ?? 1,
         });
       }
-      await _localStorage.save(LocalStorageDir.cartNeedsSync, false);
       await fetchOnlineCart();
     } catch (e) {
       _log.e('Cart sync error: $e');

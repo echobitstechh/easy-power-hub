@@ -5,7 +5,10 @@ import 'package:easy_ph/features/Profile/widgets/profile_picture_section.dart';
 import 'package:easy_ph/ui/components/theme_toggle_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_services/stacked_services.dart';
 
+import '../../app/app.locator.dart';
+import '../../app/app.router.dart';
 import '../../state.dart';
 import '../../ui/common/app_colors.dart';
 import '../../ui/common/ui_helpers.dart';
@@ -448,17 +451,28 @@ class _GlassProfileHeader extends StatelessWidget {
           child: Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                onPressed: () => Navigator.of(context).pop(),
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 20,
+                  color: isDark ? kcWhiteColor : kcBlackColor,
+                ),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop();
+                  } else {
+                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                  }
+                },
               ),
               Expanded(
                 child: Text(
                   'Profile',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'HostGrotesk',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
+                    color: isDark ? kcWhiteColor : kcBlackColor,
                   ),
                 ),
               ),

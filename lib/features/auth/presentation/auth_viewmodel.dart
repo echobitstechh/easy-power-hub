@@ -1,4 +1,4 @@
-
+ 
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -34,6 +34,7 @@ class AuthViewModel extends BaseViewModel {
   final _authService = locator<AuthService>();
   final _navigationService = locator<NavigationService>();
   final _localStorage = locator<LocalStorage>();
+  final _dialogService = locator<DialogService>();
 
 
 
@@ -160,6 +161,17 @@ class AuthViewModel extends BaseViewModel {
         } else {
           _handleSuccessfulLogin(data);
         }
+      } else if (res.statusCode == 403 &&
+          res.data is Map &&
+          (res.data['message'] as String?)
+                  ?.toLowerCase()
+                  .contains('login with google') ==
+              true) {
+        // This account was created with Google. Prompt the user to use Google Sign-In.
+        _snackBar.showSnackbar(
+          message: "This account requires Google Sign-In. Please use the 'Continue with Google' button.",
+          duration: const Duration(seconds: 4),
+        );
       } else {
         _snackBar.showSnackbar(message: _errorMessage(res.data, "An error occurred during login."), duration: const Duration(seconds: 2));
       }
@@ -347,6 +359,27 @@ class AuthViewModel extends BaseViewModel {
         await _savePendingOtp();
         _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
         setRegistrationStep(RegistrationStep.verifyOtp);
+      } else if (res.statusCode == 400 &&
+          res.data is Map &&
+          res.data['incompleteBiodata'] == true) {
+        // Account exists but biodata is incomplete — store userId and prompt user
+        final userId = res.data['userId'] as String?;
+        if (userId != null) profile.value.id = userId;
+
+        final dialogResponse = await _dialogService.showCustomDialog(
+          variant: DialogType.incompleteBiodata,
+          title: 'Profile Incomplete',
+          description:
+              'Your account is verified but your profile details are missing. '  
+              'Complete your biodata to start using the app.',
+          mainButtonTitle: 'Go to Biodata Page',
+          secondaryButtonTitle: 'Cancel',
+        );
+
+        if (dialogResponse?.confirmed == true) {
+          setRegistrationStep(RegistrationStep.completeProfile);
+          _navigationService.navigateTo(Routes.register);
+        }
       } else {
         _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       }
@@ -440,9 +473,8 @@ class AuthViewModel extends BaseViewModel {
 
   void _handleIncompleteProfileFlow(dynamic data) {
     profile.value.id = data['userId'];
-    _navigationService.navigateTo(
-      Routes.register
-    );
+    setRegistrationStep(RegistrationStep.completeProfile);
+    _navigationService.navigateTo(Routes.register);
   }
 
   void _handleSuccessfulLogin(dynamic data) {
