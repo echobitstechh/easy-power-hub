@@ -482,7 +482,7 @@ class _GlassProfileHeader extends StatelessWidget {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
                   } else {
-                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                    activeHomeTab.value = 0;
                   }
                 },
               ),

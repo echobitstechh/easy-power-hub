@@ -455,6 +455,9 @@ class AuthViewModel extends BaseViewModel {
     _localStorage.save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
     _localStorage.save(LocalStorageDir.authUser, jsonEncode(data["User"]));
 
+    await _localStorage.delete(LocalStorageDir.lastTabRoute);
+    activeHomeTab.value = 0;
+
     _navigationService.clearStackAndShow(Routes.homeView);
   }
 }

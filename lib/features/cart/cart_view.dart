@@ -217,7 +217,7 @@ class _GlassCartAppBar extends StatelessWidget {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
                   } else {
-                    locator<NavigationService>().clearStackAndShow(Routes.homeView);
+                    activeHomeTab.value = 0;
                   }
                 },
                 color: Theme.of(context).brightness == Brightness.dark

@@ -26,3 +26,6 @@ ValueNotifier<Order?> payNowOrder = ValueNotifier(null);
 
 /// ID of the order the user dismissed the banner for.
 ValueNotifier<String?> dismissedPayNowId = ValueNotifier(null);
+
+/// Active bottom nav tab index in HomeView
+ValueNotifier<int> activeHomeTab = ValueNotifier(0);

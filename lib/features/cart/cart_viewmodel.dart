@@ -316,7 +316,16 @@ class CartViewModel extends BaseViewModel {
             uniqueMap[pid] = item;
           }
         }
+
+        for (final localItem in cart.value) {
+          final pid = localItem.product?.id;
+          if (pid != null && !uniqueMap.containsKey(pid)) {
+            uniqueMap[pid] = localItem;
+          }
+        }
+
         cart.value = uniqueMap.values.toList();
+        cart.notifyListeners();
         await getCartSummary();
         await _localStorage.save(
             LocalStorageDir.productCart,

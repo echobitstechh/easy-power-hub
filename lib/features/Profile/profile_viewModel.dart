@@ -260,6 +260,8 @@ class ProfileViewModel extends BaseViewModel {
       await _localStorage.delete(LocalStorageDir.authUser);
       await _localStorage.delete(LocalStorageDir.productCart);
       await _localStorage.delete(LocalStorageDir.authRefreshToken);
+      await _localStorage.delete(LocalStorageDir.lastTabRoute);
+      activeHomeTab.value = 0;
       cart.value.clear();
       _navigationService.clearStackAndShow(Routes.login);
     }
