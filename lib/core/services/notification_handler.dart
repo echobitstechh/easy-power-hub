@@ -50,10 +50,18 @@ class NotificationHandler {
           .requestPermission(alert: true, badge: true, sound: true);
 
       if (Platform.isIOS) {
-        final apns = await FirebaseMessaging.instance
-            .getAPNSToken()
-            .timeout(const Duration(seconds: 5), onTimeout: () => null);
-        if (apns == null) return null;
+        String? apns;
+        for (int i = 0; i < 5; i++) {
+          apns = await FirebaseMessaging.instance.getAPNSToken();
+          if (apns != null) break;
+          await Future.delayed(const Duration(seconds: 1));
+        }
+        _log.d('APNS Token: $apns');
+        if (apns == null) {
+          _log.w(
+            'APNS token is null on iOS. Ensure you are testing on a physical iOS device with APNs key uploaded in Firebase Console.',
+          );
+        }
       }
 
       return await FirebaseMessaging.instance

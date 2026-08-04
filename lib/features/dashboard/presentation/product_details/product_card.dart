@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../../app/app.locator.dart';
@@ -15,7 +16,6 @@ import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
 import '../../../../ui/components/glass/glass_button.dart';
-import '../../../shop/shop_view.dart';
 import '../dashboard_viewmodel.dart';
 
 class ProductCard extends StatefulWidget {
@@ -76,11 +76,6 @@ class _ProductCardState extends State<ProductCard> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(MediaQuery.of(context).padding.top + kToolbarHeight),
-        child: _buildGlassAppBar(context, isFavorite, isDark),
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -89,20 +84,30 @@ class _ProductCardState extends State<ProductCard> {
             colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
           ),
         ),
-        child: ListView(
-          padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
-            left: 0,
-            right: 0,
-            bottom: MediaQuery.of(context).padding.bottom + 16,
-          ),
+        child: Column(
           children: [
-            _buildHeroSection(context, isDark),
-            _buildInfoCard(context, isDark),
-            if (widget.dashboardViewModel.filteredProductList.isNotEmpty)
-              _buildRelatedProducts(context, isDark),
-            if (productReviews.isNotEmpty)
-              _buildReviewsSection(context, isDark),
+            // Header sits inside the body, SafeArea pushes it below the notch
+            SafeArea(
+              bottom: false,
+              minimum: const EdgeInsets.only(top: 38),
+              child: _buildGlassAppBar(context, isFavorite, isDark),
+            ),
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.only(
+                  top: 12,
+                  bottom: MediaQuery.of(context).padding.bottom + 16,
+                ),
+                children: [
+                  _buildHeroSection(context, isDark),
+                  _buildInfoCard(context, isDark),
+                  if (widget.dashboardViewModel.filteredProductList.isNotEmpty)
+                    _buildRelatedProducts(context, isDark),
+                  if (productReviews.isNotEmpty)
+                    _buildReviewsSection(context, isDark),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -112,13 +117,11 @@ class _ProductCardState extends State<ProductCard> {
   // ── Glass app bar ───────────────────────────────────────────────────────────
 
   Widget _buildGlassAppBar(BuildContext context, bool isFavorite, bool isDark) {
-    final topPadding = MediaQuery.of(context).padding.top;
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
         child: Container(
-          padding: EdgeInsets.only(top: topPadding),
-          height: topPadding + kToolbarHeight,
+          height: kToolbarHeight,
           decoration: BoxDecoration(
             color: isDark ? kcGlassSurfaceDark : kcGlassSurfaceLight,
             border: Border(
@@ -129,6 +132,7 @@ class _ProductCardState extends State<ProductCard> {
             ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -136,6 +140,7 @@ class _ProductCardState extends State<ProductCard> {
                   if (Navigator.of(context).canPop()) {
                     Navigator.of(context).pop();
                   } else {
+                    activeHomeTab.value = 0;
                     locator<NavigationService>().clearStackAndShow(Routes.homeView);
                   }
                 },
@@ -176,7 +181,21 @@ class _ProductCardState extends State<ProductCard> {
                   size: 22,
                   color: isDark ? kcWhiteColor : kcBlackColor,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  final product = widget.product;
+                  final name = product.productName ?? 'this product';
+                  final price = product.salePrice ?? product.price ?? '';
+                  final productUrl =
+                      'https://easypowerhub.com/product/${product.id ?? ''}';
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text: 'Check out $name on EasyPower Hub! 🛒\n'
+                          '${price.isNotEmpty ? 'Price: ₦$price\n' : ''}'
+                          '$productUrl',
+                      subject: name,
+                    ),
+                  );
+                },
               ),
             ],
           ),

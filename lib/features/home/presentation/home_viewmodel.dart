@@ -49,15 +49,24 @@ class HomeViewModel extends BaseViewModel {
       final savedTab = await _localStorage.fetch(LocalStorageDir.lastTabRoute);
       if (savedTab is int && savedTab >= 0 && savedTab < _pages.length) {
         selectedTab = savedTab;
-        notifyListeners();
+        activeHomeTab.value = savedTab;
       }
     } catch (e) {
       _log.e('Failed to restore tab: $e');
+    }
+    activeHomeTab.addListener(_onActiveTabChanged);
+    notifyListeners();
+  }
+
+  void _onActiveTabChanged() {
+    if (selectedTab != activeHomeTab.value) {
+      changeSelected(activeHomeTab.value);
     }
   }
 
   @override
   void dispose() {
+    activeHomeTab.removeListener(_onActiveTabChanged);
     reviewController.dispose();
     super.dispose();
   }
@@ -65,6 +74,9 @@ class HomeViewModel extends BaseViewModel {
   /// --- Navigation ---
   void changeSelected(int index) async {
     selectedTab = index;
+    if (activeHomeTab.value != index) {
+      activeHomeTab.value = index;
+    }
     notifyListeners();
     try {
       await _localStorage.save(LocalStorageDir.lastTabRoute, index);
@@ -204,9 +216,29 @@ class HomeViewModel extends BaseViewModel {
       final res = await _repo.cartList();
       if (res.statusCode == 200) {
         final items = res.data["cartItems"] as List<dynamic>? ?? [];
-        cart.value = items
+        final parsed = items
             .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
             .toList();
+
+        final Map<String, CartItem> uniqueMap = {};
+        for (final item in parsed) {
+          final pid = item.product?.id;
+          if (pid == null) continue;
+          if (uniqueMap.containsKey(pid)) {
+            uniqueMap[pid]!.quantity = (uniqueMap[pid]!.quantity ?? 0) + (item.quantity ?? 1);
+          } else {
+            uniqueMap[pid] = item;
+          }
+        }
+
+        for (final localItem in cart.value) {
+          final pid = localItem.product?.id;
+          if (pid != null && !uniqueMap.containsKey(pid)) {
+            uniqueMap[pid] = localItem;
+          }
+        }
+
+        cart.value = uniqueMap.values.toList();
         cart.notifyListeners();
         notifyListeners();
       }

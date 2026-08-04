@@ -316,7 +316,16 @@ class CartViewModel extends BaseViewModel {
             uniqueMap[pid] = item;
           }
         }
+
+        for (final localItem in cart.value) {
+          final pid = localItem.product?.id;
+          if (pid != null && !uniqueMap.containsKey(pid)) {
+            uniqueMap[pid] = localItem;
+          }
+        }
+
         cart.value = uniqueMap.values.toList();
+        cart.notifyListeners();
         await getCartSummary();
         await _localStorage.save(
             LocalStorageDir.productCart,
@@ -360,6 +369,7 @@ class CartViewModel extends BaseViewModel {
     if (!userLoggedIn.value || cart.value.isEmpty) return;
     final needsSync = await _localStorage.fetch(LocalStorageDir.cartNeedsSync) ?? false;
     if (needsSync != true) return;
+    await _localStorage.save(LocalStorageDir.cartNeedsSync, false);
     try {
       for (final item in cart.value) {
         if (item.product?.id == null) continue;
@@ -368,7 +378,6 @@ class CartViewModel extends BaseViewModel {
           'quantity': item.quantity ?? 1,
         });
       }
-      await _localStorage.save(LocalStorageDir.cartNeedsSync, false);
       await fetchOnlineCart();
     } catch (e) {
       _log.e('Cart sync error: $e');

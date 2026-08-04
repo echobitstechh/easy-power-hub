@@ -591,6 +591,43 @@ class DashboardViewModel extends BaseViewModel {
     return order.id != dismissedId;
   }
 
+  Future<void> fetchOnlineCart() async {
+    if (!userLoggedIn.value) return;
+    try {
+      final res = await _repo.cartList();
+      if (res.statusCode == 200) {
+        final items = res.data['cartItems'] as List? ?? [];
+        final parsed = items
+            .map((i) => CartItem.fromJson(Map<String, dynamic>.from(i)))
+            .toList();
+
+        final Map<String, CartItem> uniqueMap = {};
+        for (final item in parsed) {
+          final pid = item.product?.id;
+          if (pid == null) continue;
+          if (uniqueMap.containsKey(pid)) {
+            uniqueMap[pid]!.quantity = (uniqueMap[pid]!.quantity ?? 0) + (item.quantity ?? 1);
+          } else {
+            uniqueMap[pid] = item;
+          }
+        }
+
+        for (final localItem in cart.value) {
+          final pid = localItem.product?.id;
+          if (pid != null && !uniqueMap.containsKey(pid)) {
+            uniqueMap[pid] = localItem;
+          }
+        }
+
+        cart.value = uniqueMap.values.toList();
+        cart.notifyListeners();
+        await _saveLocalCart();
+      }
+    } catch (e) {
+      _log.e('Failed to fetch online cart: $e');
+    }
+  }
+
   Future<void> fetchPayNowOrder() async {
     if (!userLoggedIn.value) return;
     try {
