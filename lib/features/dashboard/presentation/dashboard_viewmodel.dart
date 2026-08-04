@@ -224,29 +224,35 @@ class DashboardViewModel extends BaseViewModel {
 
   void setSelectedTag(Tag? tag) {
     _subscribe();
-    _selectedTag       = tag;
-    _selectedBrand     = '';
-    _selectedCategoryId = 0;
+    _selectedTag = tag;
     notifyListeners();
-    _appData.refreshWithFilters(tag: tag?.name);
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
   }
 
   void setSelectedCategory(int categoryId) {
     _subscribe();
     _selectedCategoryId = categoryId;
-    _selectedTag        = null;
-    _selectedBrand      = '';
     notifyListeners();
-    _appData.refreshWithFilters(categoryId: categoryId);
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
   }
 
   void filterProductsByBrand(String brand) {
     _subscribe();
     _selectedBrand = brand.toLowerCase() == 'all' ? '' : brand;
-    _selectedTag        = null;
-    _selectedCategoryId = 0;
     notifyListeners();
-    _appData.refreshWithFilters(brand: _selectedBrand);
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
   }
 
   Future<void> resetFilters() async {
