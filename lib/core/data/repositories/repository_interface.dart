@@ -107,6 +107,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getCategories();
 
+  Future<ApiResponse> getAdMedias();
+
   Future<ApiResponse> updateNotification(String eventId);
 
   Future<ApiResponse> saveShipping(Map<String, dynamic> req);

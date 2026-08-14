@@ -2,6 +2,7 @@ import 'package:stacked/stacked.dart';
 
 import '../../app/app.locator.dart';
 import '../../app/app.logger.dart';
+import '../data/models/ad_media.dart';
 import '../data/models/category.dart';
 import '../data/models/product.dart';
 import '../data/models/tags.dart';
@@ -28,6 +29,7 @@ class AppDataService with ListenableServiceMixin {
   List<Category> categories = [];
   List<Tag>      tags       = [];
   List<String>   brands     = [];
+  List<AdMedia>  adMedias   = [];
 
   // Pagination
   int  _currentPage = 1;
@@ -181,6 +183,7 @@ class AppDataService with ListenableServiceMixin {
         _fetchProducts(),
         _fetchCategories(),
         _fetchTags(),
+        _fetchAdMedias(),
       ]);
       _lastFetched = DateTime.now();
       await _saveToCache();
@@ -241,6 +244,21 @@ class AppDataService with ListenableServiceMixin {
       }
     } catch (e) {
       _log.e('_fetchTags error: $e');
+    }
+  }
+
+  Future<void> _fetchAdMedias() async {
+    try {
+      final res = await _repo.getAdMedias();
+      if (res.statusCode == 200) {
+        adMedias = (res.data['adMedias'] as List? ?? [])
+            .map((m) => AdMedia.fromJson(Map<String, dynamic>.from(m)))
+            .where((m) => m.active)
+            .toList()
+          ..sort((a, b) => a.order.compareTo(b.order));
+      }
+    } catch (e) {
+      _log.e('_fetchAdMedias error: $e');
     }
   }
 

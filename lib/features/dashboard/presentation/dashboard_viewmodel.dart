@@ -4,6 +4,7 @@ import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
 import '../../../app/app.logger.dart';
+import '../../../core/data/models/ad_media.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/favourite.dart';
@@ -33,6 +34,7 @@ class DashboardViewModel extends BaseViewModel {
   List<Category> get filteredCategories => _appData.categories;
   List<String>   get brands             => _appData.brands;
   List<Tag>      get tags               => _appData.tags;
+  List<AdMedia>  get adMediaList        => _appData.adMedias;
 
   // Mutable local list — callers (ShopView, ProductCard) can override this
   // to show a filtered subset without touching the service's master list.

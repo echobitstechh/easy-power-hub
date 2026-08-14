@@ -629,6 +629,15 @@ class Repository extends IRepository {
   }
 
   @override
+  Future<ApiResponse> getAdMedias() async {
+    ApiResponse response = await api.call(
+      method: HttpMethod.get,
+      endpoint: "ad-medias",
+    );
+    return response;
+  }
+
+  @override
   Future<ApiResponse> getNotifications() async {
     ApiResponse response = await api.call(
       method: HttpMethod.get,

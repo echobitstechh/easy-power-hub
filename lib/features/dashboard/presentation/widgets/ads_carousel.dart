@@ -1,20 +1,21 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 
-import '../../../../core/data/models/product.dart';
-import '../../../../core/utils/money_util.dart';
+import '../../../../core/data/models/ad_media.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
-import '../product_details/product_card.dart';
 
 const List<String> _gifList = [
   "assets/gif/easy_power_hub.gif",
   "assets/gif/motion.gif",
 ];
 
-/// Home hero carousel. Shows real products flagged `ad` on the backend
-/// when available (mirrors web's `products.filter((p) => p.ad).slice(0, 6)`),
-/// falling back to the static promo GIFs when there are none yet.
+/// Home hero carousel. Shows admin-managed ad media (image/gif/video)
+/// from the backend when available, falling back to the static promo
+/// GIFs when there is none active.
 class AdsCarousel extends StatefulWidget {
   final DashboardViewModel viewModel;
 
@@ -30,12 +31,9 @@ class _AdsCarouselState extends State<AdsCarousel> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final adProducts = widget.viewModel.productList
-        .where((p) => p.ad == true)
-        .take(6)
-        .toList();
-    final useAds = adProducts.isNotEmpty;
-    final itemCount = useAds ? adProducts.length : _gifList.length;
+    final adMedia = widget.viewModel.adMediaList;
+    final useAds = adMedia.isNotEmpty;
+    final itemCount = useAds ? adMedia.length : _gifList.length;
 
     return Column(
       children: [
@@ -56,7 +54,7 @@ class _AdsCarouselState extends State<AdsCarousel> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: useAds
-                    ? _AdSlide(product: adProducts[index], viewModel: widget.viewModel)
+                    ? _AdMediaSlide(media: adMedia[index])
                     : Stack(
                         children: [
                           Image.asset(
@@ -125,56 +123,89 @@ class _AdsCarouselState extends State<AdsCarousel> {
   }
 }
 
-class _AdSlide extends StatelessWidget {
-  final Product product;
-  final DashboardViewModel viewModel;
+class _AdMediaSlide extends StatefulWidget {
+  final AdMedia media;
 
-  const _AdSlide({required this.product, required this.viewModel});
+  const _AdMediaSlide({required this.media});
 
-  void _openProduct(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: true,
-      backgroundColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (_) => ProductCard(product: product, dashboardViewModel: viewModel),
-    );
+  @override
+  State<_AdMediaSlide> createState() => _AdMediaSlideState();
+}
+
+class _AdMediaSlideState extends State<_AdMediaSlide> {
+  VideoPlayerController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.media.mediaType == AdMediaType.video) {
+      final controller =
+          VideoPlayerController.networkUrl(Uri.parse(widget.media.mediaUrl));
+      _controller = controller;
+      controller.initialize().then((_) {
+        if (!mounted) return;
+        controller
+          ..setLooping(true)
+          ..setVolume(0)
+          ..play();
+        setState(() {});
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _openLink() async {
+    final linkUrl = widget.media.linkUrl;
+    if (linkUrl == null || linkUrl.isEmpty) return;
+    final uri = Uri.tryParse(linkUrl);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
   @override
   Widget build(BuildContext context) {
-    final discountPercent = product.discountPercent;
-
     return GestureDetector(
-      onTap: () => _openProduct(context),
+      onTap: _openLink,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          if (product.images?.isNotEmpty == true)
-            Image.network(
-              product.images!.first,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(color: Colors.grey[300]),
-            )
+          if (widget.media.mediaType == AdMediaType.video)
+            _controller != null && _controller!.value.isInitialized
+                ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _controller!.value.size.width,
+                      height: _controller!.value.size.height,
+                      child: VideoPlayer(_controller!),
+                    ),
+                  )
+                : Container(color: Colors.grey[300])
           else
-            Container(color: Colors.grey[300]),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.65),
-                  ],
+            CachedNetworkImage(
+              imageUrl: widget.media.mediaUrl,
+              fit: BoxFit.cover,
+              errorWidget: (_, __, ___) => Container(color: Colors.grey[300]),
+            ),
+          if (widget.media.title != null || widget.media.description != null)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.65),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
           Positioned(
             left: 16,
             right: 16,
@@ -182,60 +213,29 @@ class _AdSlide extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (product.brandName != null)
+                if (widget.media.title != null)
                   Text(
-                    product.brandName!.toUpperCase(),
+                    widget.media.title!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: kcPrimaryColor,
-                      fontSize: 11,
+                      fontFamily: 'HostGrotesk',
+                      color: Colors.white,
+                      fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.6,
                     ),
                   ),
-                const SizedBox(height: 4),
-                Text(
-                  product.productName ?? '',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontFamily: 'HostGrotesk',
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      MoneyUtils().formatAmount(
-                        (double.tryParse(product.salePrice ?? '0') ?? 0).toInt(),
-                      ),
-                      style: const TextStyle(fontFamily: 'Roboto',
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+                if (widget.media.description != null)
+                  Text(
+                    widget.media.description!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontFamily: 'Roboto',
+                      color: Colors.white,
+                      fontSize: 12,
                     ),
-                    if (discountPercent != null && discountPercent > 0) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.redAccent,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '$discountPercent% OFF',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+                  ),
               ],
             ),
           ),
