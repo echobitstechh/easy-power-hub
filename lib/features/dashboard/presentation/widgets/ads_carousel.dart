@@ -9,8 +9,10 @@ import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
 
 const List<String> _gifList = [
+  "assets/gif/easy_ph_2.gif",
   "assets/gif/easy_power_hub.gif",
   "assets/gif/motion.gif",
+  "assets/gif/quality_power_supply.gif",
 ];
 
 /// Home hero carousel. Shows admin-managed ad media (image/gif/video)
@@ -45,7 +47,7 @@ class _AdsCarouselState extends State<AdsCarousel> {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(isDark ? 0.35 : 0.10),
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.10),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -72,7 +74,7 @@ class _AdsCarouselState extends State<AdsCarousel> {
                                   end: Alignment.bottomCenter,
                                   colors: [
                                     Colors.transparent,
-                                    Colors.black.withOpacity(0.22),
+                                    Colors.black.withValues(alpha: 0.22),
                                   ],
                                 ),
                               ),
@@ -111,8 +113,8 @@ class _AdsCarouselState extends State<AdsCarousel> {
                 color: isActive
                     ? kcPrimaryColor
                     : (isDark
-                        ? kcWhiteColor.withOpacity(0.25)
-                        : kcMediumGrey.withOpacity(0.30)),
+                        ? kcWhiteColor.withValues(alpha: 0.25)
+                        : kcMediumGrey.withValues(alpha: 0.30)),
                 borderRadius: BorderRadius.circular(3),
               ),
             );
@@ -200,7 +202,7 @@ class _AdMediaSlideState extends State<_AdMediaSlide> {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.65),
+                      Colors.black.withValues(alpha: 0.65),
                     ],
                   ),
                 ),
