@@ -58,6 +58,10 @@ class CartViewModel extends BaseViewModel {
 
   final Map<String, int> selectedInstallments = {}; // productId -> selected frequency
 
+  // Guards against a double-tap/double-swipe firing two removal requests
+  // for the same item before the first one completes.
+  final Set<String> _removingProductIds = {};
+
   CartViewModel() {
     cart.addListener(_onGlobalCartChanged);
   }
@@ -122,6 +126,12 @@ class CartViewModel extends BaseViewModel {
 
   /// Removes an item from the cart. Local-only for guests; syncs server when logged in.
   Future<void> removeItem(CartItem item) async {
+    final productId = item.product?.id;
+
+    // Already removing this item — ignore the duplicate tap/swipe rather
+    // than firing a second request.
+    if (productId != null && _removingProductIds.contains(productId)) return;
+
     cart.value.removeWhere((i) => i.product?.id == item.product?.id);
     cart.notifyListeners();
     await _saveLocalCart();
@@ -134,15 +144,20 @@ class CartViewModel extends BaseViewModel {
       return;
     }
 
+    if (productId == null) return;
+    _removingProductIds.add(productId);
     try {
-      if (item.product?.id == null) return;
-      final res = await _repo.deleteFromCart(item.product!.id!);
+      final res = await _repo.deleteFromCart(productId);
       if (res.statusCode == 200) {
+        // The backend treats "already removed" as success too, so this
+        // covers both a real deletion and a harmless duplicate/race.
         await getCartSummary();
         locator<SnackbarService>().showSnackbar(
             message: '${item.product?.productName} removed from cart.',
             duration: const Duration(seconds: 1));
       } else {
+        // A genuine failure (auth/server error) — restore the item since
+        // it's still in the backend cart.
         _snackBar.showSnackbar(
             message: 'Failed to remove item: ${res.data['message']}',
             duration: const Duration(seconds: 2));
@@ -153,6 +168,8 @@ class CartViewModel extends BaseViewModel {
       _log.e('Error removing item: $e');
       cart.value.add(item);
       cart.notifyListeners();
+    } finally {
+      _removingProductIds.remove(productId);
     }
   }
 
