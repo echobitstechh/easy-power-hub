@@ -15,8 +15,7 @@ class ProductSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
+    return GestureDetector(
         onTap: () {
           locator<NavigationService>().navigateTo(Routes.searchView);
         },
@@ -48,7 +47,6 @@ class ProductSearchBar extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

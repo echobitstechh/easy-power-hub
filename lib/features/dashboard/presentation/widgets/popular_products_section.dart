@@ -32,15 +32,38 @@ class PopularProductsSection extends StatelessWidget {
             mainAxisSpacing: 10.0,
             childAspectRatio: 0.75,
           ),
-          itemCount: viewModel.filteredProductList.length,
+          itemCount: viewModel.productList.length,
           itemBuilder: (context, index) {
-            final item = viewModel.filteredProductList[index];
+            final item = viewModel.productList[index];
             // Use the extracted ProductGridItem widget for cleaner code
             return ProductGridItem(
               product: item,
               viewModel: viewModel,
             );
           },
+        ),
+        verticalSpaceMedium,
+        Center(
+          child: OutlinedButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => ShopView()),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: kcSecondaryColor),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: Text(
+              'See All',
+              style: TextStyle(fontFamily: 'HostGrotesk',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: kcSecondaryColor,
+              ),
+            ),
+          ),
         ),
       ],
     );

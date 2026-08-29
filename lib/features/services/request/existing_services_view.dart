@@ -6,6 +6,7 @@ import 'package:stacked/stacked.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/empty_state.dart';
 import '../../../ui/components/shimmers/service_requests_shimmer.dart';
+import '../../../../state.dart';
 import '../../../../ui/common/app_colors.dart';
 import 'existing_services_viewmodel.dart';
 
@@ -80,14 +81,21 @@ class ExistingServicesView extends StackedView<ExistingServicesViewModel> {
                       Expanded(
                         child: viewModel.isBusy
                             ? const ServiceRequestsShimmer(itemCount: 4)
-                            : viewModel.serviceRequests.isEmpty
+                            : !userLoggedIn.value
                                 ? const Center(
                                     child: EmptyState(
                                       animation: "assets/animations/empty_notifications.json",
-                                      label: "No service requests yet",
+                                      label: "Sign in to view your service requests",
                                     ),
                                   )
-                                : ListView(
+                                : viewModel.serviceRequests.isEmpty
+                                    ? const Center(
+                                        child: EmptyState(
+                                          animation: "assets/animations/empty_notifications.json",
+                                          label: "No service requests yet",
+                                        ),
+                                      )
+                                    : ListView(
                                     children: [
                                       ...viewModel.serviceRequests.map((request) {
                                         return ServiceRequestItem(

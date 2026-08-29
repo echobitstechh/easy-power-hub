@@ -16,6 +16,18 @@ class LocalStorageDir {
   static const String category = "category";
   static const String themeMode = 'theme_mode';
   static const String lastUpdateCheck = 'lastUpdateCheck';
-
-
+  static const String cachedProducts   = 'cached_products';
+  static const String cachedCategories = 'cached_categories';
+  static const String cachedTags       = 'cached_tags';
+  static const String cachedBrands     = 'cached_brands';
+  static const String cacheTimestamp   = 'cache_timestamp';
+  static const String cartNeedsSync    = 'cart_needs_sync';
+  static const String pendingOtpUserId    = 'pending_otp_user_id';
+  static const String pendingOtpReference = 'pending_otp_reference';
+  static const String pendingOtpEmail     = 'pending_otp_email';
+  static const String pendingOtpPhone     = 'pending_otp_phone';
+  static const String recentSearches      = 'recent_searches';
+  static const String welcomePopupShown   = 'welcome_popup_shown';
+  static const String lastSeenProductTime = 'last_seen_product_time';
+  static const String lastTabRoute        = 'last_tab_route';
 }

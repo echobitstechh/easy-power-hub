@@ -16,6 +16,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="easyph"/>
+        <data android:scheme="https" android:host="easypowerhub.com" android:pathPrefix="/signup"/>
+        <data android:scheme="https" android:host="www.easypowerhub.com" android:pathPrefix="/signup"/>
       </intent-filter>
     </activity>
     <!-- Don't delete the meta-data below.

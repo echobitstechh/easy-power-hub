@@ -4,11 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_ph/features/dashboard/presentation/product_details/product_card.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/data/models/product.dart';
+import '../../../../core/utils/image_util.dart';
 import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../dashboard_viewmodel.dart';
@@ -45,13 +44,27 @@ class ProductGridItem extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: Theme.of(context).brightness == Brightness.dark
-              ? kcDarkGreyColor
-              : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade200),
+              ? kcGlassSurfaceDark
+              : kcGlassSurfaceLight,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? kcGlassBorderDark
+                : kcGlassBorderLight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black
+                  .withOpacity(Theme.of(context).brightness == Brightness.dark
+                      ? 0.25
+                      : 0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,20 +86,13 @@ class ProductGridItem extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? kcDarkGreyColor
-                  : Colors.white,
-              border: Border.all(
-                color: Colors.grey.shade300,
-                width: 1.0,
-              ),
-              borderRadius: const BorderRadius.all(Radius.circular(12)),
+              borderRadius: const BorderRadius.all(Radius.circular(14)),
             ),
             child: ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
               child: CachedNetworkImage(
                 imageUrl: (product.images != null && product.images!.isNotEmpty)
-                    ? product.images!.first
+                    ? ImageUtils.getCutoutImageUrl(product.images!.first)
                     : 'https://via.placeholder.com/120',
                 placeholder: (context, url) => Shimmer.fromColors(
                   baseColor: Colors.grey[300]!,
@@ -121,6 +127,18 @@ class ProductGridItem extends StatelessWidget {
             top: 16,
             child: NewProductTag(),
           ),
+        if (product.discountPercent != null && product.discountPercent! > 0)
+          Positioned(
+            right: 16,
+            top: 16,
+            child: DiscountTag(percent: product.discountPercent!),
+          ),
+        if (product.brandName != null && product.brandName!.isNotEmpty)
+          Positioned(
+            left: 16,
+            bottom: 8,
+            child: BrandPill(label: product.brandName!),
+          ),
       ],
     );
   }
@@ -148,10 +166,7 @@ class ProductGridItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if ((product.availability ?? 0) < 1)
-                _buildWhatsAppButton()
-              else
-                _buildCartButton(),
+              _buildCartButton(),
             ],
           ),
           Row(
@@ -178,9 +193,10 @@ class ProductGridItem extends StatelessWidget {
   }
 
   Widget _buildCartButton() {
+    final isUnavailable = (product.availability ?? 0) < 1;
     return InkWell(
       onTap: () {
-        viewModel.addProductToCart(product);
+        viewModel.addProductToCart(product, isUnavailable: isUnavailable);
       },
       child: viewModel.loadingItems.contains(product.id)
           ? const SizedBox(
@@ -199,24 +215,6 @@ class ProductGridItem extends StatelessWidget {
     );
   }
 
-  Widget _buildWhatsAppButton() {
-    return InkWell(
-      onTap: () async {
-        final phoneNumber = '+2348081099871';
-        final message = "Hello, I'd like to inquire about the product: ${product.productName} with the price of ${MoneyUtils().formatAmount((double.tryParse(product.salePrice ?? '0.0') ?? 0.0).toInt())}. Is it available?";
-        final url = "https://wa.me/$phoneNumber?text=${Uri.encodeComponent(message)}";
-        if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(Uri.parse(url));
-        } else {
-
-        }
-      },
-      child: SvgPicture.asset(
-        'assets/icons/whatsapp.svg',
-        height: 20, // Icon size
-      ),
-    );
-  }
 
   Widget _buildRating() {
     return Row(

@@ -53,6 +53,7 @@ class BillingSummary extends StatelessWidget {
           Text(
             amount,
             style: TextStyle(
+              fontFamily: 'Roboto',
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
               fontSize: isTotal ? 18 : 16,
               color: color ?? Theme.of(context).textTheme.bodyLarge?.color,

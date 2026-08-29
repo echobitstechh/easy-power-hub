@@ -12,6 +12,7 @@ import '../ui/dialogs/info_alert/phone_input_dialog.dart';
 import '../ui/dialogs/info_alert/rating_dialog.dart';
 import '../ui/dialogs/info_alert/reason_form_dialog.dart';
 import '../ui/dialogs/info_alert/update_dialog.dart';
+import '../ui/dialogs/info_alert/incomplete_biodata_dialog.dart';
 
 enum DialogType {
   infoAlert,
@@ -19,6 +20,7 @@ enum DialogType {
   phoneInput,
   serviceRejectReason,
   update,
+  incompleteBiodata,
 }
 
 void setupDialogUi() {
@@ -35,6 +37,8 @@ void setupDialogUi() {
         ServiceRejectReasonDialog(request: request, completer: completer),
     DialogType.update: (context, request, completer) =>
         UpdateDialog(request: request, completer: completer),
+    DialogType.incompleteBiodata: (context, request, completer) =>
+        IncompleteBiodataDialog(request: request, completer: completer),
   };
 
   dialogService.registerCustomDialogBuilders(builders);

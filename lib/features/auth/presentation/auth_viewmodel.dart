@@ -1,6 +1,5 @@
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -14,6 +13,7 @@ import '../../../app/app.router.dart';
 import '../../../core/data/models/profile.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/network/api_response.dart';
+import '../../../core/services/notification_handler.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../state.dart';
@@ -109,6 +109,15 @@ class AuthViewModel extends BaseViewModel {
     return null;
   }
 
+  /// Returns the FCM token, or null if unavailable.
+  Future<String?> _getFcmToken() => NotificationHandler.getFcmToken();
+
+  String _errorMessage(dynamic data, [String fallback = 'An unexpected error occurred']) {
+    if (data is Map) return data['message']?.toString() ?? fallback;
+    if (data is String && data.isNotEmpty) return data;
+    return fallback;
+  }
+
   // --- Core Logic ---
 
   Future<void> init() async {
@@ -131,29 +140,13 @@ class AuthViewModel extends BaseViewModel {
         phone.text = '0${phone.text}';
       }
 
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      String? fcmToken;
-
-      // Check for APNS token on iOS before getting the FCM token
-      if (Platform.isIOS) {
-        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken == null) {
-          _log.w("APNS token not available. FCM token might not be generated.");
-        }
-      }
-
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      final fcmToken = await _getFcmToken();
 
       final requestBody = {
         if (inputController.text.contains('@')) "email": inputController.text,
         if (RegExp(r'^\d').hasMatch(inputController.text)) "phoneNumber": inputController.text,
         "password": password.text,
-        "fcmToken": fcmToken,
+        if (fcmToken != null) "fcmToken": fcmToken,
       };
 
       ApiResponse res = await _repo.login(requestBody);
@@ -168,7 +161,7 @@ class AuthViewModel extends BaseViewModel {
           _handleSuccessfulLogin(data);
         }
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "An error occurred during login.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data, "An error occurred during login."), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Login error: $e");
@@ -181,22 +174,7 @@ class AuthViewModel extends BaseViewModel {
   Future<void> register() async {
     setBusy(true);
     try {
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      String? fcmToken;
-
-      if (Platform.isIOS) {
-        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken == null) {
-          _log.w("APNS token not available. FCM token might not be generated.");
-        }
-      }
-
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      final fcmToken = await _getFcmToken();
       ApiResponse res = await _repo.register({
         "firstName": firstname.text,
         "lastName": lastname.text,
@@ -204,14 +182,14 @@ class AuthViewModel extends BaseViewModel {
         "phoneNumber": phone.text,
         "password": password.text,
         "referralCode": referralCode.text,
-        "fcmToken": fcmToken,
+        if (fcmToken != null) "fcmToken": fcmToken,
       });
 
       if (res.statusCode == 200) {
         _handleSuccessfulLogin(res.data);
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data, "Registration failed."), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Registration error: $e");
@@ -231,12 +209,13 @@ class AuthViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
+        await _clearPendingOtp();
         _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
         _navigationService.navigateTo(
           Routes.register,
         );
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data, 'Verification failed'), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("OTP submission error: $e");
@@ -266,9 +245,10 @@ class AuthViewModel extends BaseViewModel {
           profile.value.reference = res.data['data']["sendTokenResponse"]["data"]["reference"];
         }
         isOtpRequested = true;
+        await _savePendingOtp();
         _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Request OTP unhandled error: $e');
@@ -329,7 +309,7 @@ class AuthViewModel extends BaseViewModel {
         _handleSuccessfulLogin(res.data);
       } else {
         _log.e("Google Sign-In Error: ${res.data}");
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Google Sign-In Error: $e");
@@ -364,10 +344,11 @@ class AuthViewModel extends BaseViewModel {
         profile.value.email = isPhone ? '' : inputController.text;
         profile.value.phoneNumber = isPhone ? inputController.text : '';
 
+        await _savePendingOtp();
         _snackBar.showSnackbar(message: 'OTP sent successfully', duration: const Duration(seconds: 2));
         setRegistrationStep(RegistrationStep.verifyOtp);
       } else {
-        _snackBar.showSnackbar(message: res.data['message'] ?? 'An unexpected error occurred', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e('Request OTP unhandled error: $e');
@@ -387,10 +368,11 @@ class AuthViewModel extends BaseViewModel {
       });
 
       if (res.statusCode == 200) {
+        await _clearPendingOtp();
         _snackBar.showSnackbar(message: 'OTP verified successfully', duration: const Duration(seconds: 2));
         setRegistrationStep(RegistrationStep.completeProfile);
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? 'Verification failed', duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data, 'Verification failed'), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("OTP submission error: $e");
@@ -403,18 +385,7 @@ class AuthViewModel extends BaseViewModel {
   Future<void> completeRegistration() async {
     setBusy(true);
     try {
-      await FirebaseMessaging.instance.requestPermission(
-        alert: true, badge: true, sound: true,
-      );
-
-      String? fcmToken;
-      if (Platform.isIOS) {
-        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-        if (apnsToken == null) {
-          _log.w("APNS token not available. FCM token might not be generated.");
-        }
-      }
-      fcmToken = await FirebaseMessaging.instance.getToken();
+      final fcmToken = await _getFcmToken();
 
       ApiResponse res = await _repo.register({
         "userId": profile.value.id,
@@ -424,14 +395,14 @@ class AuthViewModel extends BaseViewModel {
         "phoneNumber": phone.text.isEmpty ? profile.value.phoneNumber : phone.text,
         "password": password.text,
         "referralCode": referralCode.text,
-        "fcmToken": fcmToken,
+        if (fcmToken != null) "fcmToken": fcmToken,
       });
 
       if (res.statusCode == 200) {
         _handleSuccessfulLogin(res.data);
-        _snackBar.showSnackbar(message: res.data["message"], duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data), duration: const Duration(seconds: 2));
       } else {
-        _snackBar.showSnackbar(message: res.data["message"] ?? "Registration failed.", duration: const Duration(seconds: 2));
+        _snackBar.showSnackbar(message: _errorMessage(res.data, "Registration failed."), duration: const Duration(seconds: 2));
       }
     } catch (e) {
       _log.e("Registration error: $e");
@@ -444,28 +415,48 @@ class AuthViewModel extends BaseViewModel {
 
   // --- Helper Methods ---
 
+  Future<void> _savePendingOtp() async {
+    await _localStorage.save(LocalStorageDir.pendingOtpUserId, profile.value.id ?? '');
+    await _localStorage.save(LocalStorageDir.pendingOtpReference, profile.value.reference ?? '');
+    await _localStorage.save(LocalStorageDir.pendingOtpEmail, profile.value.email ?? email.text);
+    await _localStorage.save(LocalStorageDir.pendingOtpPhone, profile.value.phoneNumber ?? phone.text);
+  }
+
+  Future<void> _clearPendingOtp() async {
+    await _localStorage.delete(LocalStorageDir.pendingOtpUserId);
+    await _localStorage.delete(LocalStorageDir.pendingOtpReference);
+    await _localStorage.delete(LocalStorageDir.pendingOtpEmail);
+    await _localStorage.delete(LocalStorageDir.pendingOtpPhone);
+  }
+
   void _handleVerificationFlow(dynamic data) {
     profile.value.id = data['userId'];
     profile.value.reference = data['sendTokenResponse']?['data']?['token'] ?? '';
+    setRegistrationStep(RegistrationStep.verifyOtp);
     _navigationService.navigateTo(
       Routes.register,
-
     );
   }
 
-  void _handleIncompleteProfileFlow(dynamic data) {
+  void _handleIncompleteProfileFlow(dynamic data) async {
     profile.value.id = data['userId'];
+    await _clearPendingOtp();
+    setRegistrationStep(RegistrationStep.completeProfile);
     _navigationService.navigateTo(
       Routes.register
     );
   }
 
-  void _handleSuccessfulLogin(dynamic data) {
+  void _handleSuccessfulLogin(dynamic data) async {
+    await _clearPendingOtp();
     userLoggedIn.value = true;
     profile.value = Profile.fromJson(Map<String, dynamic>.from(data["User"]));
     _localStorage.save(LocalStorageDir.authToken, data["token"]);
     _localStorage.save(LocalStorageDir.authRefreshToken, data["refreshToken"]);
     _localStorage.save(LocalStorageDir.authUser, jsonEncode(data["User"]));
+
+    await _localStorage.delete(LocalStorageDir.lastTabRoute);
+    activeHomeTab.value = 0;
 
     _navigationService.clearStackAndShow(Routes.homeView);
   }

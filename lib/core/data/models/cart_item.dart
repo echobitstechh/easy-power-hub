@@ -13,6 +13,7 @@ class CartItem {
   DateTime? createdAt;
   DateTime? updatedAt;
   Product? product;
+  bool? isUnavailable;
 
   CartItem({
     this.id,
@@ -25,6 +26,7 @@ class CartItem {
     this.createdAt,
     this.updatedAt,
     this.product,
+    this.isUnavailable,
   });
 
 
@@ -42,6 +44,7 @@ class CartItem {
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
       updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
       product: json['product'] != null ? Product.fromJson(json['product']) : null,
+      isUnavailable: json['isUnavailable'] as bool?,
     );
   }
 
@@ -58,6 +61,7 @@ class CartItem {
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'product': product?.toJson(),
+      'isUnavailable': isUnavailable,
     };
   }
 }

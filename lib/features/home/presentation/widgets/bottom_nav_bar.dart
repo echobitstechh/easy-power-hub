@@ -1,5 +1,4 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -11,110 +10,233 @@ import '../home_viewmodel.dart';
 class BottomNavBar extends StatelessWidget {
   final HomeViewModel viewModel;
 
-  const BottomNavBar({
-    Key? key,
-    required this.viewModel,
-  }) : super(key: key);
+  const BottomNavBar({Key? key, required this.viewModel}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final navBarBackgroundColor = isDarkMode ? kcDarkGreyColor : kcWhiteColor;
-    final selectedItemColor = kcSecondaryColor;
-    final unselectedItemColor = Colors.grey;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return ValueListenableBuilder<List<CartItem>>(
       valueListenable: cart,
-      builder: (context, currentModule, _) {
-        Color iconColor = Colors.grey;
-        Color selectedColor = kcSecondaryColor;
-
-        List<BottomNavigationBarItem> items = nav_Items(iconColor, selectedColor);
-
-        int currentIndex = viewModel.selectedTab;
-
-        return BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: navBarBackgroundColor,
-          selectedLabelStyle: TextStyle(color: selectedColor),
-          selectedItemColor: selectedColor,
-          unselectedItemColor: iconColor,
-          onTap: (index) => viewModel.changeSelected(index),
-          currentIndex: currentIndex,
-          items: items,
+      builder: (context, cartItems, _) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(28),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xCC161B2E)
+                      : const Color(0xEEFFFFFF),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(
+                    color: isDark ? kcGlassBorderDark : kcGlassBorderLight,
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(isDark ? 0.30 : 0.08),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _NavItem(
+                      filledIcon: 'home.svg',
+                      outlinedIcon: 'home_outline.svg',
+                      label: 'Home',
+                      index: 0,
+                      viewModel: viewModel,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      filledIcon: 'shopicon.svg',
+                      outlinedIcon: 'shopicon.svg',
+                      label: 'Shop',
+                      index: 1,
+                      viewModel: viewModel,
+                      isDark: isDark,
+                    ),
+                    _CartNavItem(
+                      viewModel: viewModel,
+                      cartItems: cartItems,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      filledIcon: 'engineering.svg',
+                      outlinedIcon: 'engineering.svg',
+                      label: 'Services',
+                      index: 3,
+                      viewModel: viewModel,
+                      isDark: isDark,
+                    ),
+                    _NavItem(
+                      filledIcon: 'menu.svg',
+                      outlinedIcon: 'menu_outline.svg',
+                      label: 'Profile',
+                      index: 4,
+                      viewModel: viewModel,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         );
       },
     );
   }
+}
 
-  List<BottomNavigationBarItem> nav_Items(Color iconColor, Color selectedColor) {
-    return [
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon('home.svg', 'home_outline.svg', viewModel.selectedTab == 0, iconColor),
-        label: "Home",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon('shopicon.svg', 'shopicon.svg', viewModel.selectedTab == 1, iconColor),
-        label: "Shop",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemWithCounter('buy.svg', 'buy.svg',  viewModel.selectedTab == 2, cart, iconColor),
-        label: "Cart",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon('engineering.svg', 'engineering.svg', viewModel.selectedTab == 3, iconColor),
-        label: "Services",
-      ),
-      BottomNavigationBarItem(
-        icon: _navBarItemIcon('menu.svg', 'menu_outline.svg', viewModel.selectedTab == 4, iconColor),
-        label: "Profile",
-      ),
-    ];
-  }
+class _NavItem extends StatelessWidget {
+  final String filledIcon;
+  final String outlinedIcon;
+  final String label;
+  final int index;
+  final HomeViewModel viewModel;
+  final bool isDark;
 
-  Widget _navBarItemIcon(String filledIcon, String outlinedIcon, bool isSelected, Color iconColor) {
-    return Container(
-      width: 30,
-      height: 30,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? kcSecondaryColor.withOpacity(0.2) : Colors.transparent,
-      ),
-      child: SvgPicture.asset(
-        'assets/icons/${isSelected ? filledIcon : outlinedIcon}', // Use filledIcon when selected, outlinedIcon when unselected
-        height: 16, // Icon size
-        color: isSelected ? kcSecondaryColor : iconColor,
+  const _NavItem({
+    required this.filledIcon,
+    required this.outlinedIcon,
+    required this.label,
+    required this.index,
+    required this.viewModel,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = viewModel.selectedTab == index;
+
+    return GestureDetector(
+      onTap: () => viewModel.changeSelected(index),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? kcPrimaryColor.withOpacity(0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.15 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              child: SvgPicture.asset(
+                'assets/icons/${isSelected ? filledIcon : outlinedIcon}',
+                height: 20,
+                colorFilter: ColorFilter.mode(
+                  isSelected
+                      ? kcPrimaryColor
+                      : (isDark
+                          ? kcWhiteColor.withOpacity(0.45)
+                          : kcMediumGrey),
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            if (isSelected) ...[
+              const SizedBox(height: 3),
+              Container(
+                width: 4,
+                height: 4,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: kcPrimaryColor,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _navBarItemWithCounter(String icon, String filledIcon, bool isSelected, ValueListenable<List<dynamic>> counterListenable, Color color) {
-    return ValueListenableBuilder<List<dynamic>>(
-      valueListenable: counterListenable,
-      builder: (context, value, child) {
-        return Stack(
+class _CartNavItem extends StatelessWidget {
+  final HomeViewModel viewModel;
+  final List<CartItem> cartItems;
+  final bool isDark;
+
+  const _CartNavItem({
+    required this.viewModel,
+    required this.cartItems,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = viewModel.selectedTab == 2;
+
+    return GestureDetector(
+      onTap: () => viewModel.changeSelected(2),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? kcPrimaryColor.withOpacity(0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Stack(
           clipBehavior: Clip.none,
           children: [
-            _navBarItemIcon(filledIcon, icon, isSelected, color),
-            if (value.isNotEmpty)
+            AnimatedScale(
+              scale: isSelected ? 1.15 : 1.0,
+              duration: const Duration(milliseconds: 200),
+              child: SvgPicture.asset(
+                'assets/icons/buy.svg',
+                height: 20,
+                colorFilter: ColorFilter.mode(
+                  isSelected
+                      ? kcPrimaryColor
+                      : (isDark
+                          ? kcWhiteColor.withOpacity(0.45)
+                          : kcMediumGrey),
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            if (cartItems.isNotEmpty)
               Positioned(
-                right: -6,
-                top: -6,
+                right: -8,
+                top: -8,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: kcPrimaryColor,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
-                    '${value.length}',
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
+                    '${cartItems.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import '../../../core/data/models/category.dart';
 import '../../../ui/common/app_colors.dart';
 import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/empty_state.dart';
+import '../dashboard/presentation/widgets/pay_now_banner.dart';
 import '../../ui/components/shimmers/shimmer_loading.dart';
 import '../../ui/components/brand_chips.dart';
 import '../../ui/components/product_search_bar.dart';
@@ -26,232 +29,293 @@ class ShopView extends StackedView<DashboardViewModel> {
 
   @override
   Widget builder(
-      BuildContext context,
-      DashboardViewModel viewModel,
-      Widget? child,
-      ) {
-    List<Map<String, String>> slides = [];
-    if (filter != null && filter?.image != null) {
-      slides = [
-        {
-          'image': filter!.image!,
-          'title': filter?.name ?? '',
-          'description': 'Explore ${filter?.name ?? ''}',
-        }
-      ];
-    } else {
-      slides = [
-        {
-          'image': 'assets/images/shop_solar.jpeg',
-          'title': 'Solar Energy Systems',
-          'description': 'Explore Solar Products',
-        },
-        {
-          'image': 'assets/images/shop_light.jpeg',
-          'title': 'Electronics',
-          'description': 'Get the best deals',
-        },
-        {
-          'image': 'assets/images/shop_light2.jpeg',
-          'title': 'Lighting',
-          'description': 'Light up your world',
-        },
-      ];
-    }
+    BuildContext context,
+    DashboardViewModel viewModel,
+    Widget? child,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await viewModel.getProducts(isRefresh: true);
-        },
-        child: Container(
-          color: Theme.of(context).brightness == Brightness.dark ? kcDarkGreyColor : kcWhiteColor,
-          child: NestedScrollView(
-            controller: _listController,
-            headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-              return [
-                _buildSliverAppBar(context, viewModel, slides),
-
-              ];
+    final List<Map<String, String>> slides = (filter != null &&
+            filter?.image != null)
+        ? [
+            {
+              'image': filter!.image!,
+              'title': filter?.name ?? '',
+              'description': 'Explore ${filter?.name ?? ''}',
+            }
+          ]
+        : [
+            {
+              'image': 'assets/images/shop_solar.jpeg',
+              'title': 'Solar Energy Systems',
+              'description': 'Explore Solar Products',
             },
-            body: Builder(
-              builder: (BuildContext context) {
-                return NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification scrollInfo) {
-                    if (scrollInfo is ScrollEndNotification &&
-                        scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-                      viewModel.getProducts();
-                    }
-                    return false;
-                  },
-                  child: CustomScrollView(
-                    slivers: [
-                      SliverOverlapInjector(
-                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                      ),
-                      if (viewModel.isBusy)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: DashboardShimmer(),
-                          ),
-                        )
-                      else if (!viewModel.isBusy && viewModel.filteredProductList.isEmpty)
-                        SliverFillRemaining(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: EmptyState(
-                              animation: "assets/animations/empty_cart.json",
-                              label: "No products yet",
+            {
+              'image': 'assets/images/shop_light.jpeg',
+              'title': 'Electronics',
+              'description': 'Get the best deals',
+            },
+            {
+              'image': 'assets/images/shop_light2.jpeg',
+              'title': 'Lighting',
+              'description': 'Light up your world',
+            },
+          ];
+
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isDark ? kcDarkBgGradient : kcLightBgGradient,
+            ),
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            extendBodyBehindAppBar: true,
+            body: RefreshIndicator(
+              color: kcSecondaryColor,
+              onRefresh: () async => viewModel.getProducts(isRefresh: true),
+              child: NestedScrollView(
+                controller: _listController,
+                headerSliverBuilder: (ctx, innerBoxScrolled) =>
+                    [_buildSliverAppBar(ctx, viewModel, slides, isDark)],
+                body: Builder(
+                  builder: (ctx) {
+                    return NotificationListener<ScrollNotification>(
+                      onNotification: (info) {
+                        if (info is ScrollEndNotification &&
+                            info.metrics.pixels >=
+                                info.metrics.maxScrollExtent - 200) {
+                          viewModel.getProducts();
+                        }
+                        return false;
+                      },
+                      child: CustomScrollView(
+                        slivers: [
+                          SliverOverlapInjector(
+                            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                              ctx,
                             ),
                           ),
-                        )
-                      else
-                        SliverList(
-                          delegate: SliverChildListDelegate(
-                            [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: ProductTagsSection(
-                                  viewModel: viewModel,
-                                  crossAxisCount: 2,
+                          if (viewModel.isLoadingProducts)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: DashboardShimmer(),
+                              ),
+                            )
+                          else if (viewModel.productList.isEmpty)
+                            SliverFillRemaining(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: EmptyState(
+                                  animation: 'assets/animations/empty_cart.json',
+                                  label: 'No products yet',
                                 ),
                               ),
-                              verticalSpaceMedium,
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [
-                                      ...viewModel.brands.map((brand) => buildBrandChip(brand, viewModel)),
-                                    ],
+                            )
+                          else
+                            SliverList(
+                              delegate: SliverChildListDelegate([
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: ProductTagsSection(
+                                    viewModel: viewModel,
+                                    crossAxisCount: 2,
+                                  ),
+                                ),
+                                verticalSpaceMedium,
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: viewModel.brands
+                                          .map(
+                                            (b) => buildBrandChip(b, viewModel),
+                                          )
+                                          .toList(),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 16),
+                                  child: PopularProductsSection(
+                                    viewModel: viewModel,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).padding.bottom + 80,
+                                ),
+                              ]),
+                            ),
+                          if (viewModel.isLoadingMore)
+                            const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: kcSecondaryColor,
                                   ),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                child: PopularProductsSection(viewModel: viewModel),
-                              ),
-                            ],
-                          ),
-                        ),
-                      if (viewModel.isLoadingMore)
-                        const SliverToBoxAdapter(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              },
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
-
-
   }
 
-  Widget _buildSliverAppBar(BuildContext context, DashboardViewModel viewModel, List<Map<String, String>> slides) {
+  Widget _buildSliverAppBar(
+    BuildContext context,
+    DashboardViewModel viewModel,
+    List<Map<String, String>> slides,
+    bool isDark,
+  ) {
     return SliverOverlapAbsorber(
       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
       sliver: SliverAppBar(
-        expandedHeight: 250.0,
+        expandedHeight: 260,
         pinned: true,
         floating: true,
-        collapsedHeight: 80.0,
+        collapsedHeight: 70,
         backgroundColor: Colors.transparent,
         elevation: 0,
         flexibleSpace: FlexibleSpaceBar(
-          background: CarouselSlider.builder(
-            options: CarouselOptions(
-              height: 200,
-              viewportFraction: 1.0,
-              autoPlay: true,
-            ),
-            itemCount: slides.length,
-            itemBuilder: (BuildContext context, int index, int pageIndex) {
-              final slide = slides[index];
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  slide['image']!.startsWith('http') || slide['image']!.startsWith('https')
-                      ? CachedNetworkImage(
-                    imageUrl: slide['image']!,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
-                  )
-                      : Image.asset(
-                    slide['image']!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-                  ),
-                  Container(
-                    color: Colors.black.withOpacity(0.3),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Spacer(),
-                        Text(
-                          slide['title']!,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          slide['description']!,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 18,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Row(
+          background: Stack(
+            fit: StackFit.expand,
             children: [
-              Image.asset("assets/images/easy_ph_logo.png", height: 40, width: 40),
-              horizontalSpaceSmall,
-              ProductSearchBar(viewModel: viewModel), // Replaced with the component
+              CarouselSlider.builder(
+                options: CarouselOptions(
+                  height: double.infinity,
+                  viewportFraction: 1.0,
+                  autoPlay: true,
+                  autoPlayInterval: const Duration(seconds: 4),
+                ),
+                itemCount: slides.length,
+                itemBuilder: (ctx, i, _) {
+                  final slide = slides[i];
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      slide['image']!.startsWith('http')
+                          ? CachedNetworkImage(
+                              imageUrl: slide['image']!,
+                              fit: BoxFit.cover,
+                              placeholder: (_, __) => Container(
+                                color: const Color(0xFF161B2E),
+                              ),
+                              errorWidget: (_, __, ___) =>
+                                  const Icon(Icons.error),
+                            )
+                          : Image.asset(
+                              slide['image']!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) =>
+                                  const Icon(Icons.error),
+                            ),
+                      // Gradient overlay
+                      Container(
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Color(0xCC000000),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 20,
+                        bottom: 28,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              slide['title']!,
+                              style: TextStyle(fontFamily: 'HostGrotesk',
+                                color: Colors.white,
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                            Text(
+                              slide['description']!,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: PayNowBanner(viewModel: viewModel),
+              ),
             ],
           ),
         ),
-      ),
-    );
+        title: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDark ? kcGlassSurfaceDark : kcGlassSurfaceLight,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/easy_ph_logo.png',
+                    height: 32,
+                    width: 32,
+                  ),
+                  horizontalSpaceSmall,
+                  Expanded(
+                    child: ProductSearchBar(viewModel: viewModel),
+                  ),
+                ],
+              ),
+            ),
+          ),
+                ), // close ClipRect
+              ), // close SliverAppBar
+            ); // close SliverOverlapAbsorber
   }
-
-
 
   @override
   void onViewModelReady(DashboardViewModel viewModel) {
     super.onViewModelReady(viewModel);
     viewModel.filteredProductList = [];
-    viewModel.setBusy(true);
+    viewModel.fetchPayNowOrder();
     if (filter != null) {
+      debugPrint('[ShopView] opening with category: id=${filter!.id} name="${filter!.name}"');
       viewModel.setSelectedCategory(filter!.id);
     } else {
       viewModel.init();
@@ -259,8 +323,7 @@ class ShopView extends StackedView<DashboardViewModel> {
   }
 
   @override
-  DashboardViewModel viewModelBuilder(
-      BuildContext context,
-      ) =>
+  DashboardViewModel viewModelBuilder(BuildContext context) =>
       DashboardViewModel();
 }
+

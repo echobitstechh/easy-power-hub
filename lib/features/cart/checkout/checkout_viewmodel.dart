@@ -11,11 +11,11 @@ import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/delivery_zone.dart';
 import '../../../core/data/models/profile.dart';
+import '../../../core/data/models/pickup_address.dart';
 import '../../../core/data/repositories/repository.dart';
 import '../../../core/utils/config.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
-import '../../../core/utils/paystack_util.dart';
 import '../../../state.dart';
 import '../../Profile/onSuccess/success_view.dart';
 import '../../Profile/shipping/shipping_address_viewmodel.dart';
@@ -50,6 +50,8 @@ class CheckoutViewModel extends BaseViewModel {
   bool get isShippingExpanded => _isShippingExpanded;
 
   List<Address> shippingAddresses = [];
+  List<PickupAddress> pickupAddresses = [];
+  PickupAddress? selectedPickupAddress;
   List<DeliveryZone> deliveryZones = [];
   DeliveryZone? selectedDeliveryZone;
 
@@ -73,6 +75,7 @@ class CheckoutViewModel extends BaseViewModel {
     calculateSubtotal();
     await getDeliveryZones();
     await getShippings();
+    await getPickupAddresses();
     checkPayOnDeliveryEligibility();
     if (shippingId.isNotEmpty) {
       await calculateOrder();
@@ -145,17 +148,39 @@ class CheckoutViewModel extends BaseViewModel {
       _snackBar.showSnackbar(message: "Failed to fetch delivery zones: $e");
     }
   }
+  
+  Future<void> getPickupAddresses() async {
+    try {
+      final response = await _repo.getPickupAddresses();
+      if (response.statusCode == 200) {
+        pickupAddresses = (response.data['data'] as List)
+            .map((item) => PickupAddress.fromJson(item))
+            .toList();
+        if (pickupAddresses.isNotEmpty) {
+            selectedPickupAddress = pickupAddresses.first;
+        }
+        notifyListeners();
+      } else {
+        _snackBar.showSnackbar(message: response.data["message"]);
+      }
+    } catch (e) {
+      _snackBar.showSnackbar(message: "Failed to fetch pickup addresses: $e");
+    }
+  }
 
   Future<void> calculateOrder() async {
     final String deliveryOptionString = pickUpOption.toString().split('.').last;
 
     if (shippingId.isEmpty && pickUpOption == PickUpOptions.Delivery) return;
+    if (selectedPickupAddress == null && pickUpOption == PickUpOptions.Pickup) return;
+
+    final addressId = pickUpOption == PickUpOptions.Delivery ? shippingId : selectedPickupAddress?.id;
 
     isCalculating = true;
     notifyListeners();
     try {
       final response = await _repo.calculateOrder({
-        "deliveryAddressId": shippingId,
+        "deliveryAddressId": addressId,
         "deliveryOption": deliveryOptionString,
       });
       if (response.statusCode == 200) {
@@ -233,6 +258,7 @@ class CheckoutViewModel extends BaseViewModel {
     final firstInstallmentItem = cart.value.firstWhere(
             (e) => e.isInstallment == true,
         orElse: () => cart.value.first);
+    final hasUnavailableItems = cart.value.any((e) => e.isUnavailable == true);
 
     final requestBody = {
       "orderType": paymentMethod == "delivery" ? "PayOnDelivery" : "InstantPayment",
@@ -240,40 +266,26 @@ class CheckoutViewModel extends BaseViewModel {
       "promoCode": "",
       "installmentFrequency": hasInstallment ? firstInstallmentItem.installmentFrequency : null,
       "installmentPayment": hasInstallment,
-      "deliveryAddressId": shippingId,
+      "deliveryAddressId": pickUpOption == PickUpOptions.Delivery ? shippingId : selectedPickupAddress?.id,
+      "hasUnavailableItems": hasUnavailableItems,
     };
 
     try {
       final res = await _repo.payForOrder(requestBody);
       if (res.statusCode == 201) {
-        if (paymentMethod == 'paystack') {
-          final response = await _repo.initializePayment({
-            'paymentMethod': 'CreditCard',
-            'paymentType': 'Paystack',
-            'orderId': res.data['order']['id'],
-          });
-          if (response.statusCode == 200) {
-            await PaystackUtil.processPayment(
-              context: context,
-              ref: response.data['data']['reference'],
-              accessCode: response.data['data']['access_code'],
-              url: response.data['data']['authorization_url'],
-              amountInNaira: calculatedFinalTotal,
-              email: profile.value.email!,
-              cartItems: cart.value,
-            );
-          } else {
-            _snackBar.showSnackbar(message: "Payment processing failed", duration: Duration(seconds: 2));
-          }
-        } else {
-          _snackBar.showSnackbar(message: "Order placed successfully", duration: Duration(seconds: 2));
-          _navigationService.navigateTo(Routes.paymentSuccessView);
-        }
+        // Payment is no longer collected at order-creation time. The order is
+        // reviewed/approved first; the customer pays later via the "Pay Now"
+        // reminder once an InstantPayment order is approved and still unpaid.
+        final message = paymentMethod == 'paystack'
+            ? "Order placed! We'll verify availability and email your invoice."
+            : "Order placed! We'll confirm a delivery schedule with you soon.";
+        _snackBar.showSnackbar(message: message, duration: Duration(seconds: 3));
+        _navigationService.navigateTo(Routes.paymentSuccessView);
       } else {
         _snackBar.showSnackbar(message: res.data["message"] ?? "Failed to place the order", duration: Duration(seconds: 2));
       }
     } catch (e) {
-      _snackBar.showSnackbar(message: "An error occurred during payment: $e", duration: Duration(seconds: 2));
+      _snackBar.showSnackbar(message: "An error occurred while placing your order: $e", duration: Duration(seconds: 2));
     } finally {
       isPaying = false;
       notifyListeners();
@@ -298,6 +310,11 @@ class CheckoutViewModel extends BaseViewModel {
   
   void updatePaymentMethod(String method) {
     paymentMethod = method;
+    notifyListeners();
+  }
+
+  void updateSelectedPickupAddress(PickupAddress? address) {
+    selectedPickupAddress = address;
     notifyListeners();
   }
 

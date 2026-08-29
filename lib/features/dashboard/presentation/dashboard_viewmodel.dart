@@ -1,295 +1,316 @@
+import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 
 import '../../../app/app.locator.dart';
 import '../../../app/app.logger.dart';
+import '../../../core/data/models/ad_media.dart';
 import '../../../core/data/models/cart_item.dart';
 import '../../../core/data/models/category.dart';
 import '../../../core/data/models/favourite.dart';
+import '../../../core/data/models/order_item.dart';
 import '../../../core/data/models/product.dart';
 import '../../../core/data/models/tags.dart';
 import '../../../core/data/repositories/repository.dart';
+import '../../../core/services/app_data_service.dart';
+import '../../../core/services/update_service.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
-import '../../../core/services/remote_config_service.dart';
-import '../../../core/services/update_service.dart';
-import '../../../state.dart';
+import '../../../core/utils/paystack_util.dart';
+import '../../../state.dart' as appState;
+import '../../../state.dart' show userLoggedIn, profile, cart, uiMode, appLoading, isLoginByEmail, isOtpRequestedByEmail, globalCategories, isFirstLaunch, unreadCount;
 
 class DashboardViewModel extends BaseViewModel {
-  final _repo = locator<Repository>();
-  final _log = getLogger("DashboardViewModel");
-  final _snackBar = locator<SnackbarService>();
+  final _appData      = locator<AppDataService>();
+  final _repo         = locator<Repository>();
+  final _snackBar     = locator<SnackbarService>();
   final _localStorage = locator<LocalStorage>();
-  final _remoteConfig = locator<RemoteConfigService>();
   final _updateService = locator<UpdateService>();
+  final _log          = getLogger('DashboardViewModel');
 
-  List<Product> productList = [];
-  List<String> brands = [];
+  // ── Read-through to AppDataService ───────────────────────────────────────
+
+  List<Product>  get productList       => _appData.products;
+  List<Category> get filteredCategories => _appData.categories;
+  List<String>   get brands             => _appData.brands;
+  List<Tag>      get tags               => _appData.tags;
+  List<AdMedia>  get adMediaList        => _appData.adMedias;
+
+  // Mutable local list — callers (ShopView, ProductCard) can override this
+  // to show a filtered subset without touching the service's master list.
   List<Product> filteredProductList = [];
-  List<Category> categories = [];
-  List<Category> filteredCategories = [];
+
+  bool get isLoadingProducts   => _appData.isInitializing;
+  bool get isLoadingCategories => _appData.isInitializing;
+  bool get isLoadingTags       => _appData.isInitializing;
+  bool get isLoadingMore       => _appData.isLoadingMore;
+
+  // Tags error state (delegated; tags failures are silent after first load)
+  bool   get hasTagsError => false;
+  String? get tagsError   => null;
+
+  // ── Local filter state ────────────────────────────────────────────────────
+
+  String _selectedBrand     = '';
+  Tag?   _selectedTag;
+  int    _selectedCategoryId = 0;
+
+  String get selectedBrand     => _selectedBrand;
+  Tag?   get selectedTag       => _selectedTag;
+  int    get selectedCategoryId => _selectedCategoryId;
+
+  // ── Favourites ────────────────────────────────────────────────────────────
+
   List<FavoriteItem> _favorites = [];
   List<FavoriteItem> get favorites => _favorites;
+
+  bool isProductFavorite(String productId) =>
+      _favorites.any((f) => f.product.id == productId);
+
+  // ── Search ────────────────────────────────────────────────────────────────
+
+  static const _searchLimit = 20;
+
   List<Product> searchResults = [];
-  bool isSearching = false;
+  List<Product> relatedSearchResults = [];
+  bool isSearching      = false;
+  bool isLoadingSearch  = false;
+  String searchQuery    = '';
 
-  bool isLoadingSearch = false;
-  String searchQuery = '';
+  int  _searchPage        = 1;
+  bool _searchIsLastPage  = false;
+  bool _searchLoadingMore = false;
+  bool get isLoadingMoreSearch => _searchLoadingMore;
+  bool get hasMoreSearchResults => !_searchIsLastPage;
 
-  bool _isLoadingCategories = false;
-  bool _isLoadingProducts = false;
-  bool _isLoadingAds = false;
-
-  bool isProductFavorite(String productId) {
-    return _favorites.any((f) => f.product.id == productId);
-  }
-
-
-
-  bool _isLoadingMore = false;
-  bool get isLoadingMore => _isLoadingMore;
-  bool get isLoadingCategories => _isLoadingCategories;
-  bool get isLoadingProducts => _isLoadingProducts;
-  bool get isLoadingAds => _isLoadingAds;
+  List<String> _recentSearches = [];
+  List<String> get recentSearches => _recentSearches;
 
   Set<String> loadingItems = {};
-  static const int allCategoriesId = 0;
 
-  // The state variables for filters
-  String _selectedBrand = '';
-  String get selectedBrand => _selectedBrand;
-  Tag? _selectedTag;
-  Tag? get selectedTag => _selectedTag;
-  int _selectedCategoryId = allCategoriesId; // New state variable
-  int get selectedCategoryId => _selectedCategoryId;
+  bool _isDisposed = false;
+  bool _isSubscribed = false;
 
-  int currentPage = 1;
-  bool isLastPage = false;
-  final int pageLimit = 10;
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  List<Tag> _tags = [];
-  List<Tag> get tags => _tags;
-  bool _isLoadingTags = false;
-  bool get isLoadingTags => _isLoadingTags;
-  bool _hasTagsError = false;
-  bool get hasTagsError => _hasTagsError;
-  String? _tagsError;
-  String? get tagsError => _tagsError;
-
-  bool isNewProduct(String createdAt) {
-    try {
-      final productDate = DateTime.parse(createdAt);
-      final currentDate = DateTime.now();
-      final difference = currentDate.difference(productDate).inDays;
-      return difference <= 14;
-    } catch (e) {
-      _log.e("Error parsing product creation date: $e");
-      return false;
-    }
+  void _subscribe() {
+    if (_isSubscribed) return;
+    _appData.addListener(_onDataChanged);
+    _isSubscribed = true;
   }
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _appData.removeListener(_onDataChanged);
     super.dispose();
   }
 
   Future<void> init() async {
-    // await runBusyFuture(_loadData());
-    _loadData();
-    if (userLoggedIn.value == true) {
-      initCart();
+    // Subscribe to service changes so the view rebuilds when data arrives.
+    _subscribe();
+
+    // Kick off a silent background refresh if data is stale. The UI already
+    // shows whatever is in the service (cached or previously fetched).
+    _appData.backgroundRefresh();
+
+    if (userLoggedIn.value) {
+      _loadCartFromLocal();
       fetchFavorites();
+      fetchPayNowOrder();
     }
-    await _checkForUpdateOncePerDay();
+    _checkForUpdateOncePerDay();
+    checkHomePopups();
   }
 
-  Future<void> _loadData() async {
-    // await Future.wait([
-      getProducts(isRefresh: true);
-      getCategories();
-      fetchProductTags();
-    // ]);
-  }
+  void _onDataChanged() => notifyListeners();
 
-  void initCart() async {
+  // ── Home popups (welcome offer / new arrivals) ───────────────────────────
+  // Mirrors web's localStorage-driven, one-time welcome popup and "new since
+  // last visit" arrivals popup — no backend flag involved on either side.
+
+  bool _welcomePopupPending = false;
+  bool get welcomePopupPending => _welcomePopupPending;
+
+  List<Product> _newArrivals = [];
+  List<Product> get newArrivals => _newArrivals;
+  bool get newArrivalsPending => _newArrivals.isNotEmpty;
+
+  Future<void> checkHomePopups() async {
     try {
-      final storedData = await _localStorage.fetch(LocalStorageDir.productCart);
-      if (storedData != null) {
-        final localCart = (storedData as List)
-            .map((item) => CartItem.fromJson(Map<String, dynamic>.from(item)))
-            .toList();
-        cart.value = localCart;
-      }
+      final shown = await _localStorage.fetch(LocalStorageDir.welcomePopupShown);
+      _welcomePopupPending = shown != true;
     } catch (e) {
-      _log.e('Failed to load cart from local storage: $e');
+      _log.e('checkHomePopups welcome error: $e');
     }
-  }
-
-  void onEnd() {
-    _log.i('Countdown timer ended.');
-    notifyListeners();
-  }
-
-  Future<void> getProducts({bool isRefresh = false}) async {
-    if (isLastPage && !isRefresh) return;
-    if (_isLoadingMore) return;
-
-    if (isRefresh) {
-      productList.clear();
-      currentPage = 1;
-      isLastPage = false;
-      _isLoadingProducts = true;
-    }
-
-    _isLoadingMore = true;
-    notifyListeners();
 
     try {
-      final res = await _repo.getProducts(
-        page: currentPage,
-        limit: pageLimit,
-        tag: _selectedTag?.name,
-        brand: _selectedBrand.isNotEmpty ? _selectedBrand : null,
-        categoryId: _selectedCategoryId != allCategoriesId
-            ? _selectedCategoryId.toString()
-            : null,
-      );
-
-      if (res.statusCode == 200) {
-        final newProducts = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
-
-        if (newProducts.isEmpty && isRefresh) {
-
-          _snackBar.showSnackbar(
-              message: "No products found for the selected filter.",
-              duration: const Duration(seconds: 3));
-          await resetFilters();
-          return;
-        }
-
-
-        final existingIds = productList.map((p) => p.id!).toSet();
-        for (final newProduct in newProducts) {
-          if (newProduct.id != null && !existingIds.contains(newProduct.id)) {
-            productList.add(newProduct);
+      if (productList.isNotEmpty) {
+        final lastSeenRaw =
+            await _localStorage.fetch(LocalStorageDir.lastSeenProductTime);
+        if (lastSeenRaw == null) {
+          // First time ever — establish a baseline; nothing is "new" yet.
+          await _saveLatestProductTimestamp();
+        } else {
+          final lastSeen = DateTime.tryParse(lastSeenRaw);
+          if (lastSeen != null) {
+            _newArrivals = productList.where((p) {
+              final created = DateTime.tryParse(p.createdAt ?? '');
+              return created != null && created.isAfter(lastSeen);
+            }).take(3).toList();
           }
         }
-
-        productList.sort((a, b) {
-          final aAvailable = (a.availability ?? 0) >= 1;
-          final bAvailable = (b.availability ?? 0) >= 1;
-
-          if (aAvailable && !bAvailable) return -1;
-          if (!aAvailable && bAvailable) return 1;
-          return 0; // Maintain original order if availability is the same
-        });
-
-        if (isRefresh) {
-          brands = (res.data["brands"] as List).map((b) => b.toString()).toList();
-        }
-        filteredProductList = List.from(productList);
-
-        if (newProducts.length < pageLimit) {
-          isLastPage = true;
-        } else {
-          currentPage++;
-        }
-      } else {
-        _log.e("API Error: ${res.data["message"]}");
-        _snackBar.showSnackbar(
-            message: res.data["message"] ?? "Failed to fetch products.",
-            duration: Duration(seconds: 3));
       }
     } catch (e) {
-      _log.e("Error fetching products: $e");
-      _snackBar.showSnackbar(
-          message: "An error occurred while fetching products.",
-          duration: Duration(seconds: 3));
-    } finally {
-      _isLoadingMore = false;
-      _isLoadingProducts = false;
-      notifyListeners();
-      // setBusy(false);
+      _log.e('checkHomePopups new-arrivals error: $e');
+    }
+
+    if (!_isDisposed) notifyListeners();
+  }
+
+  Future<void> _saveLatestProductTimestamp() async {
+    final latest = productList
+        .map((p) => DateTime.tryParse(p.createdAt ?? ''))
+        .whereType<DateTime>()
+        .fold<DateTime?>(
+            null, (max, d) => (max == null || d.isAfter(max)) ? d : max);
+    if (latest != null) {
+      await _localStorage.save(
+          LocalStorageDir.lastSeenProductTime, latest.toIso8601String());
     }
   }
 
-  Future<List<Product>> searchProducts(String query) async {
-    if (query.trim().isEmpty) {
-      return [];
-    }
+  Future<void> dismissWelcomePopup() async {
+    _welcomePopupPending = false;
+    notifyListeners();
+    await _localStorage.save(LocalStorageDir.welcomePopupShown, true);
+  }
 
-    try {
-      final res = await _repo.searchProducts(query: query);
+  Future<void> dismissNewArrivalsPopup() async {
+    _newArrivals = [];
+    notifyListeners();
+    await _saveLatestProductTimestamp();
+  }
 
-      if (res.statusCode == 200 && res.data != null) {
-        final products = (res.data["products"] as List)
-            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
-            .toList();
+  // ── Refresh (pull-to-refresh) ─────────────────────────────────────────────
 
-        products.sort((a, b) {
-          final aAvailable = (a.availability ?? 0) >= 1;
-          final bAvailable = (b.availability ?? 0) >= 1;
-          if (aAvailable && !bAvailable) return -1;
-          if (!aAvailable && bAvailable) return 1;
-          return 0;
-        });
+  Future<void> refresh() async {
+    await _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
+  }
 
-        return products;
-      } else {
-        _log.e("Search API Error: ${res.data?["message"] ?? 'Unknown error'}");
-        return [];
-      }
-    } catch (e) {
-      _log.e("Error searching products: $e");
-      return [];
+  // ── Pagination ────────────────────────────────────────────────────────────
+
+  Future<void> getProducts({bool isRefresh = false}) async {
+    if (isRefresh) {
+      await _appData.refreshWithFilters(
+        tag: _selectedTag?.name,
+        brand: _selectedBrand,
+        categoryId: _selectedCategoryId,
+      );
+    } else {
+      await _appData.loadMoreProducts(
+        tag: _selectedTag?.name,
+        brand: _selectedBrand,
+        categoryId: _selectedCategoryId,
+      );
     }
   }
+
+  Future<void> fetchProductTags() => _appData.backgroundRefresh();
+
+  // ── Filters ───────────────────────────────────────────────────────────────
+
+  void setSelectedTag(Tag? tag) {
+    _subscribe();
+    _selectedTag = tag;
+    notifyListeners();
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
+  }
+
+  void setSelectedCategory(int categoryId) {
+    _subscribe();
+    _selectedCategoryId = categoryId;
+    notifyListeners();
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
+  }
+
+  void filterProductsByBrand(String brand) {
+    _subscribe();
+    _selectedBrand = brand.toLowerCase() == 'all' ? '' : brand;
+    notifyListeners();
+    _appData.refreshWithFilters(
+      tag: _selectedTag?.name,
+      brand: _selectedBrand,
+      categoryId: _selectedCategoryId,
+    );
+  }
+
+  Future<void> resetFilters() async {
+    _selectedTag        = null;
+    _selectedBrand      = '';
+    _selectedCategoryId = 0;
+    notifyListeners();
+    await _appData.refreshWithFilters();
+  }
+
+  // ── Search ────────────────────────────────────────────────────────────────
 
   Future<void> performSearch(String query) async {
     searchQuery = query.trim();
 
     if (searchQuery.isEmpty) {
-      searchResults = [];
-      isSearching = false;
+      searchResults  = [];
+      relatedSearchResults = [];
+      isSearching    = false;
       isLoadingSearch = false;
+      _searchPage = 1;
+      _searchIsLastPage = false;
       notifyListeners();
       return;
     }
 
-    isSearching = true;
+    isSearching     = true;
     isLoadingSearch = true;
+    _searchPage       = 1;
+    _searchIsLastPage = false;
+    relatedSearchResults = [];
     notifyListeners();
 
     try {
-      final res = await _repo.searchProducts(query: searchQuery);
-
+      final res = await _repo.searchProducts(
+          query: searchQuery, page: 1, limit: _searchLimit);
       if (res.statusCode == 200 && res.data != null) {
-        searchResults = (res.data["products"] as List)
+        final items = (res.data['products'] as List)
             .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
-            .where((product) => product.status?.toLowerCase() == 'active')
+            .where((p) => p.status?.toLowerCase() == 'active')
             .toList();
-
-        // Sort by availability (in stock first)
-        searchResults.sort((a, b) {
-          final aAvailable = (a.availability ?? 0) >= 1;
-          final bAvailable = (b.availability ?? 0) >= 1;
-          if (aAvailable && !bAvailable) return -1;
-          if (!aAvailable && bAvailable) return 1;
-          return 0;
-        });
+        _sortSearchResults(items);
+        searchResults = items;
+        _searchIsLastPage = items.length < _searchLimit;
+        if (searchResults.isNotEmpty) {
+          _saveRecentSearch(searchQuery);
+          _loadRelatedSearchResults();
+        }
       } else {
-        _log.e("Search API Error: ${res.data?["message"] ?? 'Unknown error'}");
         searchResults = [];
       }
     } catch (e) {
-      _log.e("Error searching products: $e");
+      _log.e('Search error: $e');
       searchResults = [];
       _snackBar.showSnackbar(
-        message: "Search failed. Please try again.",
+        message: 'Search failed. Please try again.',
         duration: const Duration(seconds: 2),
       );
     } finally {
@@ -298,248 +319,427 @@ class DashboardViewModel extends BaseViewModel {
     }
   }
 
-  // Clear search
-  void clearSearch() {
-    searchQuery = '';
-    searchResults = [];
-    isSearching = false;
-    isLoadingSearch = false;
+  Future<void> loadMoreSearchResults() async {
+    if (_searchIsLastPage || _searchLoadingMore || searchQuery.isEmpty) return;
+    _searchLoadingMore = true;
     notifyListeners();
-  }
-  
-  void setSelectedTag(Tag? tag) {
-    _selectedTag = tag;
-    _selectedBrand = '';
-    _selectedCategoryId = allCategoriesId;
-    getProducts(isRefresh: true);
-  }
 
-  void setSelectedCategory(int categoryId) {
-    _selectedCategoryId = categoryId;
-    _selectedTag = null;
-    _selectedBrand = '';
-    getProducts(isRefresh: true);
-    fetchProductTags(categoryId: categoryId);
-  }
-
-  void filterProductsByBrand(String brand) {
-    _selectedBrand = brand.toLowerCase() == "all" ? '' : brand;
-    getProducts(isRefresh: true);
-  }
-
-  Future<void> resetFilters() async {
-    _selectedTag = null;
-    _selectedBrand = '';
-    _selectedCategoryId = allCategoriesId;
-    getProducts(isRefresh: true);
-    print('tried to reset filters');
-  }
-
-  Future<void> getCategories() async {
-    _isLoadingCategories = true;
-    notifyListeners();
     try {
-      final res = await _repo.getCategories();
-      if (res.statusCode == 200 &&
-          res.data != null &&
-          res.data["categories"] != null) {
-        categories = (res.data["categories"] as List)
-            .map((e) => Category.fromJson(Map<String, dynamic>.from(e)))
-            .where((category) => category.status == CategoryStatus.active)
+      final nextPage = _searchPage + 1;
+      final res = await _repo.searchProducts(
+          query: searchQuery, page: nextPage, limit: _searchLimit);
+      if (res.statusCode == 200 && res.data != null) {
+        final items = (res.data['products'] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((p) => p.status?.toLowerCase() == 'active')
             .toList();
-        await _localStorage.save(LocalStorageDir.category,
-            categories.map((e) => e.toJson()).toList());
-        filteredCategories = [
-          Category(id: 0, name: 'All', status: CategoryStatus.active),
-          ...categories,
-        ];
+        final existingIds = searchResults.map((p) => p.id).toSet();
+        searchResults.addAll(items.where((p) => !existingIds.contains(p.id)));
+        _sortSearchResults(searchResults);
+        if (items.length < _searchLimit) {
+          _searchIsLastPage = true;
+        } else {
+          _searchPage = nextPage;
+        }
       }
     } catch (e) {
-      _log.e("Error fetching categories: $e");
-      _snackBar.showSnackbar(
-          message: "An error occurred while fetching categories.",
-          duration: Duration(seconds: 3));
+      _log.e('loadMoreSearchResults error: $e');
     } finally {
-      _isLoadingCategories = false;
+      _searchLoadingMore = false;
       notifyListeners();
     }
   }
 
-  Future<void> fetchProductTags({int? categoryId}) async {
-    _isLoadingTags = true;
-    _hasTagsError = false;
-    _tagsError = null;
-    notifyListeners();
+  void _sortSearchResults(List<Product> items) {
+    items.sort((a, b) {
+      final aOk = (a.availability ?? 0) >= 1;
+      final bOk = (b.availability ?? 0) >= 1;
+      if (aOk && !bOk) return -1;
+      if (!aOk && bOk) return 1;
+      return 0;
+    });
+  }
+
+  Future<void> _loadRelatedSearchResults() async {
     try {
-      final res = await _repo.getProductTags(categoryId: categoryId);
+      final categoryCounts = <int, int>{};
+      for (final p in searchResults) {
+        if (p.categoryId != null) {
+          categoryCounts[p.categoryId!] = (categoryCounts[p.categoryId!] ?? 0) + 1;
+        }
+      }
+      if (categoryCounts.isEmpty) {
+        relatedSearchResults = [];
+        notifyListeners();
+        return;
+      }
+      final topCategoryId = categoryCounts.entries
+          .reduce((a, b) => a.value >= b.value ? a : b)
+          .key;
+      final matchedIds = searchResults.map((p) => p.id).toSet();
+      final res = await _repo.getProducts(
+        page: 1,
+        limit: 12,
+        categoryId: topCategoryId.toString(),
+      );
       if (res.statusCode == 200) {
-        final List<dynamic> tagsData = res.data['tags'] ?? [];
-        _tags = tagsData
-            .map((tagJson) => Tag.fromJson(Map<String, dynamic>.from(tagJson)))
+        relatedSearchResults = (res.data['products'] as List)
+            .map((e) => Product.fromJson(Map<String, dynamic>.from(e)))
+            .where((p) =>
+                p.status?.toLowerCase() == 'active' &&
+                !matchedIds.contains(p.id))
+            .take(8)
             .toList();
-        _tags.sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-        _log.i("Loaded ${_tags.length} tags.");
-      } else {
-        _log.e("API Error fetching tags: ${res.data['message']}");
-        _tagsError = res.data['message'] ?? 'Failed to load tags.';
-        _hasTagsError = true;
+        notifyListeners();
       }
     } catch (e) {
-      _log.e('Error fetching product tags: $e');
-      _tagsError = 'Network error. Please try again.';
-      _hasTagsError = true;
-    } finally {
-      _isLoadingTags = false;
-      setBusy(false);
-      notifyListeners();
+      _log.e('_loadRelatedSearchResults error: $e');
     }
   }
 
-  void addProductToCart(Product product) async {
+  void clearSearch() {
+    searchQuery     = '';
+    searchResults   = [];
+    relatedSearchResults = [];
+    isSearching     = false;
+    isLoadingSearch = false;
+    _searchPage = 1;
+    _searchIsLastPage = false;
+    notifyListeners();
+  }
+
+  // ── Recent searches ───────────────────────────────────────────────────────
+
+  Future<void> loadRecentSearches() async {
+    try {
+      final stored = await _localStorage.fetch(LocalStorageDir.recentSearches);
+      if (stored != null) {
+        _recentSearches = (stored as List).map((e) => e.toString()).toList();
+        if (!_isDisposed) notifyListeners();
+      }
+    } catch (e) {
+      _log.e('loadRecentSearches error: $e');
+    }
+  }
+
+  Future<void> _saveRecentSearch(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return;
+    _recentSearches.removeWhere((q) => q.toLowerCase() == trimmed.toLowerCase());
+    _recentSearches.insert(0, trimmed);
+    if (_recentSearches.length > 6) {
+      _recentSearches = _recentSearches.sublist(0, 6);
+    }
+    try {
+      await _localStorage.save(LocalStorageDir.recentSearches, _recentSearches);
+    } catch (e) {
+      _log.e('_saveRecentSearch error: $e');
+    }
+  }
+
+  Future<void> removeRecentSearch(String query) async {
+    _recentSearches.removeWhere((q) => q == query);
+    notifyListeners();
+    try {
+      await _localStorage.save(LocalStorageDir.recentSearches, _recentSearches);
+    } catch (e) {
+      _log.e('removeRecentSearch error: $e');
+    }
+  }
+
+  // ── Cart ──────────────────────────────────────────────────────────────────
+
+  void _loadCartFromLocal() async {
+    try {
+      final stored = await _localStorage.fetch(LocalStorageDir.productCart);
+      if (stored != null) {
+        cart.value = (stored as List)
+            .map((e) => CartItem.fromJson(Map<String, dynamic>.from(e)))
+            .toList();
+      }
+    } catch (e) {
+      _log.e('Failed to load local cart: $e');
+    }
+  }
+
+  void addProductToCart(Product product, {bool isUnavailable = false}) async {
     loadingItems.add(product.id!);
     notifyListeners();
 
-    try {
-      final existingIndex = cart.value.indexWhere(
-        (raffleItem) => raffleItem.product?.id == product.id,
-      );
+    // Optimistic local update first
+    final idx = cart.value.indexWhere((i) => i.product?.id == product.id);
+    if (idx == -1) {
+      cart.value.add(CartItem(product: product, quantity: 1, isUnavailable: isUnavailable));
+    } else {
+      cart.value[idx].quantity = (cart.value[idx].quantity ?? 0) + 1;
+    }
+    cart.notifyListeners();
+    await _saveLocalCart();
 
-      if (existingIndex != -1) {
-        CartItem(
-          product: cart.value[existingIndex].product,
-          quantity: cart.value[existingIndex].quantity! + 1,
-        );
-      } else {
-        cart.value.add(CartItem(product: product, quantity: 1));
-        cart.notifyListeners();
+    if (!userLoggedIn.value) {
+      // Guest mode — local cart only; flag for sync after login
+      await _localStorage.save(LocalStorageDir.cartNeedsSync, true);
+      if (!_isDisposed) {
+        _snackBar.showSnackbar(
+            message: 'Added to cart', duration: const Duration(seconds: 2));
       }
+      loadingItems.remove(product.id!);
+      notifyListeners();
+      return;
+    }
 
-      List<Map<String, dynamic>> storedList =
-          cart.value.map((e) => e.toJson()).toList();
-      // await locator<LocalStorage>().save(LocalStorageDir.raffleCart, storedList);
-
+    try {
       final response = await _repo.addToCart({
-        "productId": product.id,
-        "quantity": cart.value
-            .firstWhere((item) => item.product?.id == product.id)
-            .quantity,
+        'productId': product.id,
+        'quantity': 1,
+        'isUnavailable': isUnavailable,
       });
 
-      if (response.statusCode == 200) {
-        locator<SnackbarService>().showSnackbar(
-            message: "Product added to cart",
-            duration: const Duration(seconds: 2));
-      } else {
-        locator<SnackbarService>().showSnackbar(
-            message: response.data["message"],
-            duration: const Duration(seconds: 2));
+      if (!_isDisposed) {
+        if (response.statusCode == 200) {
+          _snackBar.showSnackbar(
+              message: 'Added to cart', duration: const Duration(seconds: 2));
+        } else {
+          _snackBar.showSnackbar(
+              message: response.data['message'],
+              duration: const Duration(seconds: 2));
+        }
       }
     } catch (e) {
-      locator<SnackbarService>().showSnackbar(
-          message: "Failed to add product to cart: $e",
-          duration: const Duration(seconds: 2));
+      if (!_isDisposed) {
+        _snackBar.showSnackbar(
+            message: 'Failed to add to cart',
+            duration: const Duration(seconds: 2));
+      }
     } finally {
-      // Remove product ID from loading set
       loadingItems.remove(product.id!);
-      cart.notifyListeners();
-      notifyListeners();
+      if (!_isDisposed) {
+        cart.notifyListeners();
+        notifyListeners();
+      }
     }
   }
 
   void modifyCartQuantity(CartItem item, String action) async {
+    // Local update first
+    if (action == 'increment') {
+      item.quantity = (item.quantity ?? 0) + 1;
+    } else if (action == 'decrement' && (item.quantity ?? 1) > 1) {
+      item.quantity = item.quantity! - 1;
+    }
+    cart.notifyListeners();
+    await _saveLocalCart();
+
+    if (!userLoggedIn.value) return;
+
     setBusy(true);
     try {
-      final res = await _repo.modifyCartItem(item.product!.id.toString(), action);
-
-      if (res.statusCode == 200) {
-        if (action == "increment") {
-          item.quantity = item.quantity! + 1;
-        } else if (action == "decrement" && item.quantity! > 1) {
-          item.quantity = item.quantity! - 1;
-        }
-
-        cart.notifyListeners();
-      } else {
-        _snackBar.showSnackbar(message: "Failed to update cart: ${res.data['message']}", duration: Duration(seconds: 2));
-      }
+      await _repo.modifyCartItem(item.product!.id.toString(), action);
     } catch (e) {
-      _log.e("Cart modification error: $e");
-      _snackBar.showSnackbar(message: "An error occurred while updating the cart", duration: Duration(seconds: 2));
+      _log.e('Cart modify error: $e');
     } finally {
       setBusy(false);
     }
   }
 
-  Future<List<Review>> fetchProductReviews(Product product) async {
+  Future<void> _saveLocalCart() async {
     try {
-      final response = await _repo.getReviews(product.id!);
-
-      if (response.statusCode == 200) {
-        final List<dynamic> reviewJson = response.data["reviews"];
-        return reviewJson.map((r) => Review.fromJson(r)).toList();
-      }
-      return[];
+      await _localStorage.save(
+        LocalStorageDir.productCart,
+        cart.value.map((e) => e.toJson()).toList(),
+      );
     } catch (e) {
-      print("Failed to load reviews: $e");
-      return [];
+      _log.e('Failed to save local cart: $e');
     }
   }
 
-  Future<void> toggleFavorite(Product product) async {
-    final isFavorite = isProductFavorite(product.id!);
-
-    if (isFavorite) {
-      final favoriteItem = _favorites.firstWhere((f) => f.product.id == product.id);
-      await removeFavorite(favoriteItem.id);
-    } else {
-      await addToFavorites(product.id!);
-    }
-  }
+  // ── Favourites ────────────────────────────────────────────────────────────
 
   Future<void> fetchFavorites() async {
-    print('fetch favs');
-    setBusy(true);
+    if (!userLoggedIn.value) return;
     try {
       final res = await _repo.getFavourites();
       _favorites = (res as List).map((e) => FavoriteItem.fromJson(e)).toList();
-    } finally {
-      setBusy(false);
-      notifyListeners();
-    }
+      if (!_isDisposed) notifyListeners();
+    } catch (_) {}
   }
 
-  Future<void> addToFavorites(String productId) async {
-    final response = await _repo.addToFavourites({"productId": productId});
-    if (response.statusCode == 201) {
-      _snackBar.showSnackbar(message: 'Product added to favorites', duration: Duration(seconds: 2));
+  Future<void> toggleFavorite(Product product) async {
+    if (!userLoggedIn.value) return;
+    if (isProductFavorite(product.id!)) {
+      final fav = _favorites.firstWhere((f) => f.product.id == product.id);
+      await _repo.deleteFromFavourites(fav.id);
+      _favorites.removeWhere((f) => f.id == fav.id);
+    } else {
+      await _repo.addToFavourites({'productId': product.id});
       await fetchFavorites();
     }
-
+    notifyListeners();
   }
 
-  Future<void> removeFavorite(String favoriteId) async {
-    await _repo.deleteFromFavourites(favoriteId);
-    _favorites.removeWhere((f) => f.id == favoriteId);
+  // ── Pay Now reminder ──────────────────────────────────────────────────────
+  // Mirrors web's home-page banner: the most recent Processing order that's
+  // InstantPayment and still unpaid gets a dismissible "Pay Now" prompt.
+
+  Order? _payNowOrder;
+  Order? get payNowOrder => _payNowOrder ?? appState.payNowOrder.value;
+
+  String? _dismissedPayNowOrderId;
+
+  bool get showPayNowBanner {
+    final order = payNowOrder;
+    if (order == null) return false;
+    final dismissedId = appState.dismissedPayNowId.value ?? _dismissedPayNowOrderId;
+    return order.id != dismissedId;
+  }
+
+  Future<void> fetchOnlineCart() async {
+    if (!userLoggedIn.value) return;
+    try {
+      final res = await _repo.cartList();
+      if (res.statusCode == 200) {
+        final items = res.data['cartItems'] as List? ?? [];
+        final parsed = items
+            .map((i) => CartItem.fromJson(Map<String, dynamic>.from(i)))
+            .toList();
+
+        final Map<String, CartItem> uniqueMap = {};
+        for (final item in parsed) {
+          final pid = item.product?.id;
+          if (pid == null) continue;
+          if (uniqueMap.containsKey(pid)) {
+            uniqueMap[pid]!.quantity = (uniqueMap[pid]!.quantity ?? 0) + (item.quantity ?? 1);
+          } else {
+            uniqueMap[pid] = item;
+          }
+        }
+
+        for (final localItem in cart.value) {
+          final pid = localItem.product?.id;
+          if (pid != null && !uniqueMap.containsKey(pid)) {
+            uniqueMap[pid] = localItem;
+          }
+        }
+
+        cart.value = uniqueMap.values.toList();
+        cart.notifyListeners();
+        await _saveLocalCart();
+      }
+    } catch (e) {
+      _log.e('Failed to fetch online cart: $e');
+    }
+  }
+
+  Future<void> fetchPayNowOrder() async {
+    if (!userLoggedIn.value) return;
+    try {
+      final res = await _repo.getOrderList();
+      if (res.statusCode == 200) {
+        final candidates = (res.data['orders'] as List)
+            .map((o) => Order.fromJson(Map<String, dynamic>.from(o)))
+            .where((o) =>
+                o.status == 'Processing' &&
+                o.orderType == 'InstantPayment' &&
+                !o.isPaid)
+            .toList()
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _payNowOrder = candidates.isNotEmpty ? candidates.first : null;
+        // Push to global notifier so floating banner reacts app-wide
+        appState.payNowOrder.value = _payNowOrder;
+        if (!_isDisposed) notifyListeners();
+      }
+    } catch (e) {
+      _log.e('fetchPayNowOrder error: $e');
+    }
+  }
+
+  void dismissPayNowBanner() {
+    final order = payNowOrder;
+    if (order != null) {
+      _dismissedPayNowOrderId = order.id;
+      // Sync global notifier so the floating banner dismisses everywhere
+      appState.dismissedPayNowId.value = order.id;
+    }
     notifyListeners();
+  }
+
+  Future<void> payNowForBannerOrder(BuildContext context) async {
+    final order = _payNowOrder;
+    if (order == null) return;
+    try {
+      final response = await _repo.initializePayment({
+        'paymentMethod': 'CreditCard',
+        'paymentType': 'Paystack',
+        'orderId': order.id,
+      });
+      if (!context.mounted) return;
+      if (response.statusCode == 200) {
+        await PaystackUtil.processPayment(
+          context: context,
+          ref: response.data['data']['reference'],
+          accessCode: response.data['data']['access_code'],
+          url: response.data['data']['authorization_url'],
+          amountInNaira: order.totalPrice,
+          email: profile.value.email!,
+          cartItems: order.products
+              .map((p) => CartItem(
+                    product: p,
+                    quantity: 1,
+                    price: double.tryParse(p.salePrice ?? '0.0') ?? 0.0,
+                  ))
+              .toList(),
+        );
+      } else {
+        _snackBar.showSnackbar(
+          message: "Payment initialization failed.",
+          duration: const Duration(seconds: 2),
+        );
+      }
+    } catch (e) {
+      _log.e('payNowForBannerOrder error: $e');
+      _snackBar.showSnackbar(
+        message: "An error occurred during payment.",
+        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+
+  // ── Reviews ───────────────────────────────────────────────────────────────
+
+  Future<List<Review>> fetchProductReviews(Product product) async {
+    try {
+      final res = await _repo.getReviews(product.id!);
+      if (res.statusCode == 200) {
+        return (res.data['reviews'] as List)
+            .map((r) => Review.fromJson(r))
+            .toList();
+      }
+    } catch (e) {
+      _log.e('fetchProductReviews error: $e');
+    }
+    return [];
+  }
+
+  // ── Misc ──────────────────────────────────────────────────────────────────
+
+  bool isNewProduct(String createdAt) {
+    try {
+      return DateTime.now().difference(DateTime.parse(createdAt)).inDays <= 14;
+    } catch (_) {
+      return false;
+    }
   }
 
   Future<void> _checkForUpdateOncePerDay() async {
     try {
-      final lastCheckDate = await _localStorage.fetch(LocalStorageDir.lastUpdateCheck);
-      final today = DateTime.now().toIso8601String().split('T')[0];
-      
-      if (lastCheckDate != today) {
+      final lastCheck = await _localStorage.fetch(LocalStorageDir.lastUpdateCheck);
+      final today     = DateTime.now().toIso8601String().split('T')[0];
+      if (lastCheck != today) {
         await _updateService.checkForUpdate();
         await _localStorage.save(LocalStorageDir.lastUpdateCheck, today);
-      } else {
-        _log.i('Already checked for updates today');
       }
     } catch (e) {
-      _log.e('Error checking update frequency: $e');
-      
-      await _updateService.checkForUpdate();
+      _log.e('Update check error: $e');
     }
   }
-
 }

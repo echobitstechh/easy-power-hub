@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:easy_ph/ui/common/app_colors.dart';
 import '../../../app/app.locator.dart';
@@ -8,7 +7,9 @@ import '../../../app/app.router.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../../core/utils/local_stotage.dart';
 import '../../../ui/common/ui_helpers.dart';
-import '../../../ui/components/submit_button.dart';
+import '../../../ui/components/glass/glass_button.dart';
+import '../../../ui/components/glass/glass_card.dart';
+import '../../../ui/components/glass/glass_scaffold.dart';
 
 class OnboardingView extends StatelessWidget {
   const OnboardingView({super.key});
@@ -18,136 +19,152 @@ class OnboardingView extends StatelessWidget {
     final localStorage = locator<LocalStorage>();
     final navService = locator<NavigationService>();
     final size = MediaQuery.of(context).size;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Curved background
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: ClipPath(
-                clipper: CurvedClipper(),
-                child: Container(
-                  height: size.height * 0.55,
-                  color: kcClipColor,
+    return GlassScaffold(
+      body: Stack(
+        children: [
+          // Amber glow orb top-right
+          Positioned(
+            top: -60,
+            right: -60,
+            child: Container(
+              width: 260,
+              height: 260,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    kcPrimaryColor.withOpacity(isDark ? 0.25 : 0.18),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
+          ),
+          // Subtle orb bottom-left
+          Positioned(
+            bottom: 80,
+            left: -80,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    kcSecondaryColor.withOpacity(isDark ? 0.18 : 0.12),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
 
-            // Content
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          // Main content
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  /// SVG Illustration
+                  verticalSpaceMedium,
+
+                  // Illustration
                   SizedBox(
-                    height: size.height * 0.35,
+                    height: size.height * 0.38,
                     child: SvgPicture.asset(
                       'assets/images/addresspic.svg',
                       fit: BoxFit.contain,
                     ),
                   ),
 
-                  verticalSpaceLarge,
+                  verticalSpaceMedium,
 
-                  /// Title & Subtitle
-                  Text(
-                    "Anywhere, Anytime",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                  // Glass card wrapping the text + CTA
+                  GlassCard(
+                    borderRadius: 28,
+                    padding: const EdgeInsets.all(28),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Anywhere, Anytime",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'HostGrotesk',
+                            color: isDark ? kcWhiteColor : kcBlackColor,
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Text(
+                          "We're here for you, wherever you are! "
+                          "Reach out to us from anywhere for seamless support and services.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 15,
+                            height: 1.55,
+                            fontFamily: 'HostGrotesk',
+                            color: isDark
+                                ? kcWhiteColor.withOpacity(0.65)
+                                : kcMediumGrey,
+                          ),
+                        ),
+                        verticalSpaceMedium,
+
+                        // CTA
+                        SizedBox(
+                          width: double.infinity,
+                          child: GlassButton(
+                            label: "Get Started",
+                            onTap: () async {
+                              await localStorage.save(
+                                  LocalStorageDir.onboarded, true);
+                              navService.clearStackAndShow(Routes.homeView);
+                            },
+                          ),
+                        ),
+
+                        verticalSpaceSmall,
+
+                        // Single active dot indicator
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _Dot(isActive: false),
+                            const SizedBox(width: 6),
+                            _Dot(isActive: false),
+                            const SizedBox(width: 6),
+                            _Dot(isActive: true),
+                          ],
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    "We're here for you, wherever you are! "
-                        "Reach out to us from anywhere for seamless support and services.",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
-                  ),
-
-                  verticalSpaceLarge,
-
-                  /// Get Started Button
-                  SubmitButton(
-                    isLoading: false,
-                    boldText: true,
-                    label: "GET STARTED",
-                    submit: () async {
-                      await localStorage.save(LocalStorageDir.onboarded, true);
-                      navService.clearStackAndShow(Routes.homeView);
-                    },
-                    color: kcPrimaryColor,
-                  ),
-
-                  verticalSpaceLarge,
-
-                  /// Indicator Dots
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IndicatorDot(isActive: false),
-                      SizedBox(width: 8),
-                      IndicatorDot(isActive: false),
-                      SizedBox(width: 8),
-                      IndicatorDot(isActive: true),
-                    ],
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
-/// Curved Background
-class CurvedClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path()
-      ..lineTo(0, size.height - 100)
-      ..quadraticBezierTo(
-        size.width / 2,
-        size.height,
-        size.width,
-        size.height - 100,
-      )
-      ..lineTo(size.width, 0)
-      ..close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-/// Dot Indicator
-class IndicatorDot extends StatelessWidget {
+class _Dot extends StatelessWidget {
   final bool isActive;
-  const IndicatorDot({super.key, required this.isActive});
+  const _Dot({required this.isActive});
 
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
-      width: isActive ? 14 : 10,
-      height: isActive ? 14 : 10,
+      width: isActive ? 20 : 8,
+      height: 8,
       decoration: BoxDecoration(
-        color: isActive ? Colors.orange : Colors.grey.shade400,
-        shape: BoxShape.circle,
+        color: isActive ? kcPrimaryColor : kcLightGrey.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(4),
       ),
     );
   }

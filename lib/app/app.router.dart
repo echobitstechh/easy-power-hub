@@ -274,8 +274,11 @@ class StackedRouter extends _i1.RouterBase {
       );
     },
     _i14.SearchView: (data) {
+      final args = data.getArgs<SearchViewArguments>(
+        orElse: () => const SearchViewArguments(),
+      );
       return _i21.MaterialPageRoute<dynamic>(
-        builder: (context) => const _i14.SearchView(),
+        builder: (context) => _i14.SearchView(key: args.key),
         settings: data,
       );
     },
@@ -409,6 +412,28 @@ class ProductCardArguments {
   @override
   int get hashCode {
     return key.hashCode ^ product.hashCode ^ dashboardViewModel.hashCode;
+  }
+}
+
+class SearchViewArguments {
+  const SearchViewArguments({this.key});
+
+  final _i22.Key? key;
+
+  @override
+  String toString() {
+    return '{"key": "$key"}';
+  }
+
+  @override
+  bool operator ==(covariant SearchViewArguments other) {
+    if (identical(this, other)) return true;
+    return other.key == key;
+  }
+
+  @override
+  int get hashCode {
+    return key.hashCode;
   }
 }
 
@@ -667,14 +692,16 @@ extension NavigatorStateExtension on _i26.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> navigateToSearchView([
+  Future<dynamic> navigateToSearchView({
+    _i22.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
-  ]) async {
+  }) async {
     return navigateTo<dynamic>(Routes.searchView,
+        arguments: SearchViewArguments(key: key),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,
@@ -960,14 +987,16 @@ extension NavigatorStateExtension on _i26.NavigationService {
         transition: transition);
   }
 
-  Future<dynamic> replaceWithSearchView([
+  Future<dynamic> replaceWithSearchView({
+    _i22.Key? key,
     int? routerId,
     bool preventDuplicates = true,
     Map<String, String>? parameters,
     Widget Function(BuildContext, Animation<double>, Animation<double>, Widget)?
         transition,
-  ]) async {
+  }) async {
     return replaceWith<dynamic>(Routes.searchView,
+        arguments: SearchViewArguments(key: key),
         id: routerId,
         preventDuplicates: preventDuplicates,
         parameters: parameters,

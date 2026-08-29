@@ -26,20 +26,16 @@ class CheckoutPaymentOptions extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Payment Method",
+              "How would you like to proceed?",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             verticalSpaceSmall,
             RadioListTile<String>(
               title: Row(
                 children: [
-                  SvgPicture.asset(
-                    'assets/images/paystack.svg',
-                    height: 24,
-                    width: 24,
-                  ),
+                  Icon(Icons.receipt),
                   const SizedBox(width: 12),
-                  const Text('Paystack'),
+                  const Text('Confirm your order'),
                 ],
               ),
               value: 'paystack',

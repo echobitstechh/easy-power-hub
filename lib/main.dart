@@ -1,12 +1,16 @@
+import 'package:easy_ph/core/services/notification_handler.dart';
 import 'package:easy_ph/core/services/remote_config_service.dart';
 import 'package:easy_ph/core/services/theme_service.dart';
 import 'package:easy_ph/state.dart';
 import 'package:easy_ph/ui/common/theme.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_ph/app/app.bottomsheets.dart';
 import 'package:easy_ph/app/app.dialogs.dart';
 import 'package:easy_ph/app/app.locator.dart';
+import 'package:easy_ph/app/app.snackbar.dart';
+import 'package:easy_ph/app/app_snackbar_service.dart';
 import 'package:easy_ph/app/app.router.dart';
 import 'package:stacked_services/stacked_services.dart';
 // import 'package:uni_links/uni_links.dart';
@@ -21,10 +25,19 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // Register top-level background message handler before any other FCM calls
+  FirebaseMessaging.onBackgroundMessage(firebaseBackgroundMessageHandler);
+
   await setupLocator();
+  // Replace GetX-based SnackbarService with a ScaffoldMessenger-backed implementation.
+  // GetX snackbars crash when used with Stacked's custom navigator (no Overlay above _Theater).
+  locator.unregister<SnackbarService>();
+  locator.registerLazySingleton<SnackbarService>(() => AppSnackbarService());
   setupDialogUi();
+  setupSnackbarUi();
   setupBottomSheetUi();
   setupDeepLinkHandler();
+  NotificationHandler.initialize();
 
   final remoteConfigService = locator<RemoteConfigService>();
   await remoteConfigService.initialize();

@@ -29,6 +29,25 @@ class Product {
   List<String>? reviews;
   List<String>? images;
   List<Tag>? tags;
+  Discount? discount;
+
+  /// Percentage discount to show as a badge, derived from [discount] when
+  /// present, or from the gap between [price] and [salePrice] otherwise.
+  int? get discountPercent {
+    if (discount?.value != null) {
+      if (discount!.type == 'percentage') return discount!.value!.round();
+      final original = double.tryParse(price ?? '0') ?? 0;
+      if (original > 0) {
+        return ((discount!.value! / original) * 100).round();
+      }
+    }
+    final original = double.tryParse(price ?? '0') ?? 0;
+    final sale = double.tryParse(salePrice ?? '0') ?? 0;
+    if (original > 0 && sale > 0 && sale < original) {
+      return (((original - sale) / original) * 100).round();
+    }
+    return null;
+  }
 
   Product({
     this.id,
@@ -56,7 +75,8 @@ class Product {
     this.installmentDeposit,
     this.tags,
     this.warranty,
-    this.warrantyPeriod, 
+    this.warrantyPeriod,
+    this.discount,
   });
 
   Product.fromJson(Map<String, dynamic> json) {
@@ -90,6 +110,9 @@ class Product {
         ? (json['tags'] as List).map((tagJson) => Tag.fromJson(tagJson)).toList()
         : null;
 
+    discount = json['discount'] != null
+        ? Discount.fromJson(Map<String, dynamic>.from(json['discount']))
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -117,6 +140,9 @@ class Product {
     data['status'] = status;
     data['warranty'] = warranty;
     data['warrantyPeriod'] = warrantyPeriod;
+    if (discount != null) {
+      data['discount'] = discount!.toJson();
+    }
     if (reviews != null) {
       data['reviews'] = reviews;
     }
@@ -132,6 +158,19 @@ class Product {
   }
 }
 
+class Discount {
+  String? type; // 'percentage' | 'fixed'
+  double? value;
+
+  Discount({this.type, this.value});
+
+  factory Discount.fromJson(Map<String, dynamic> json) => Discount(
+        type: json['type'],
+        value: double.tryParse(json['value']?.toString() ?? '0'),
+      );
+
+  Map<String, dynamic> toJson() => {'type': type, 'value': value};
+}
 
 class Pictures {
   String? id;

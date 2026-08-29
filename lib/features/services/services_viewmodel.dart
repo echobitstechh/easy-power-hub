@@ -11,6 +11,7 @@ import '../../app/app.locator.dart';
 import '../../app/app.logger.dart';
 import '../../core/data/repositories/repository.dart';
 import '../../core/network/api_response.dart';
+import '../../state.dart';
 import './request/service_request_view.dart';
 import 'request/existing_services_view.dart';
 import 'request/existing_services_viewmodel.dart';
@@ -40,6 +41,7 @@ class ServicesviewModel extends BaseViewModel {
   }
 
   Future<void> getServiceCounts() async {
+    if (!userLoggedIn.value) return;
     try {
       await _existingServicesViewModel.getServiceRequests();
       notifyListeners();

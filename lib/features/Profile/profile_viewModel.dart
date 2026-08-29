@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../../app/app.router.dart';
 import '../../../core/utils/local_store_dir.dart';
 import '../../app/app.bottomsheets.dart';
@@ -23,6 +24,19 @@ class ProfileViewModel extends BaseViewModel {
   final _navigationService = locator<NavigationService>();
   final _bottomSheetService = locator<BottomSheetService>();
   final _dialogService = locator<DialogService>();
+
+  String _appVersion = '';
+  String get appVersion => _appVersion;
+
+  void loadAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      _appVersion = '${info.version} (${info.buildNumber})';
+      notifyListeners();
+    } catch (e) {
+      _log.e('Failed to load version: $e');
+    }
+  }
 
   File? _selectedFile;
   File? get selectedFile => _selectedFile;
@@ -195,6 +209,8 @@ class ProfileViewModel extends BaseViewModel {
 
 
   Future<void> getProfile() async {
+    if (!userLoggedIn.value) return;
+
     setBusy(true);
     try {
       final localProfileJson = await _localStorage.fetch(LocalStorageDir.authUser);
@@ -217,28 +233,46 @@ class ProfileViewModel extends BaseViewModel {
     }
   }
 
+  Future<void> onDeleteAccount() async => onSignOut();
+
   Future<void> onSignOut() async {
-    final res = await _dialogService.showConfirmationDialog(
-      title: "Are you sure?",
-      cancelTitle: "No",
-      confirmationTitle: "Yes",
+    final context = StackedService.navigatorKey!.currentContext!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
     );
-    if (res!.confirmed) {
+    if (confirmed == true) {
       userLoggedIn.value = false;
       await _localStorage.delete(LocalStorageDir.authToken);
       await _localStorage.delete(LocalStorageDir.authUser);
       await _localStorage.delete(LocalStorageDir.productCart);
       await _localStorage.delete(LocalStorageDir.authRefreshToken);
+      await _localStorage.delete(LocalStorageDir.lastTabRoute);
+      activeHomeTab.value = 0;
       cart.value.clear();
       _navigationService.clearStackAndShow(Routes.login);
     }
   }
 
   // Navigation Handlers
-  // void navigateToWallet() => _navigationService.navigateTo(Routes.walletView);
   void navigateToOrders() => _navigationService.navigateTo(Routes.orderList);
   void navigateToShippingAddresses() => _navigationService.navigateTo(Routes.shippingAddressesPage);
   void navigateToSupport() => _navigationService.navigateTo(Routes.supportView);
   void navigateToReferrals() => _navigationService.navigateTo(Routes.referralsView);
   void navigateToChangePassword() => _navigationService.navigateTo(Routes.changePasswordView);
+  void navigateToLogin() => _navigationService.navigateTo(Routes.login);
+  void navigateToRegister() => _navigationService.navigateTo(Routes.register);
 }

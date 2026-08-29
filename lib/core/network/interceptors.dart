@@ -1,11 +1,8 @@
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import '../../app/app.dialogs.dart';
 import '../../app/app.locator.dart';
-import '../../app/app.router.dart';
 import '../../state.dart';
 import '../data/repositories/repository.dart';
 import '../utils/custom_pretty_dio_logger.dart';
@@ -38,7 +35,6 @@ int refreshTokenRetryCount = 0;
 const int maxRetryCount = 3;
 final repo = locator<Repository>();
 final apiService = locator<ApiService>();
-bool isDialogBeingDisplayed = false;
 
 final requestInterceptors = InterceptorsWrapper(
   onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
@@ -51,19 +47,19 @@ final requestInterceptors = InterceptorsWrapper(
     // Handle common Dio exceptions
     switch (dioError.type) {
       case DioExceptionType.connectionTimeout:
-        await showDialog("Connection Timed Out", null, isDialogBeingDisplayed);
+        locator<SnackbarService>().showSnackbar(message: "Connection timed out", duration: const Duration(seconds: 3));
         handler.next(dioError);
         return;
       case DioExceptionType.receiveTimeout:
-        await showDialog("Receive Timed Out", null, isDialogBeingDisplayed);
+        locator<SnackbarService>().showSnackbar(message: "Request timed out", duration: const Duration(seconds: 3));
         handler.next(dioError);
         return;
       case DioExceptionType.sendTimeout:
-        await showDialog("Send Timed Out", null, isDialogBeingDisplayed);
+        locator<SnackbarService>().showSnackbar(message: "Upload timed out", duration: const Duration(seconds: 3));
         handler.next(dioError);
         return;
       case DioExceptionType.unknown:
-        await showDialog("Network is unreachable", null, isDialogBeingDisplayed);
+        locator<SnackbarService>().showSnackbar(message: "Network is unreachable", duration: const Duration(seconds: 3));
         handler.next(dioError);
         return;
       default:
@@ -123,26 +119,11 @@ final requestInterceptors = InterceptorsWrapper(
 
           return;
         } else {
-          final res = await locator<DialogService>().showCustomDialog(
-            variant: DialogType.infoAlert,
-            title: "Session Expired",
-            description: "Login again to continue",
-          );
-          if (res?.confirmed == true) {
-            userLoggedIn.value = false;
-            await locator<LocalStorage>().delete(LocalStorageDir.authToken);
-            await locator<LocalStorage>().delete(LocalStorageDir.authUser);
-            await locator<LocalStorage>().delete(LocalStorageDir.authRefreshToken);
-          }
+          await showSessionExpiredDialog();
           return;
         }
       } else {
-        if (kDebugMode) print('refresh token is null');
-        await showDialogWithResponse(
-          "Session Expired",
-          "Login again to continue",
-          isDialogBeingDisplayed,
-        );
+        await showSessionExpiredDialog();
         return;
       }
     }

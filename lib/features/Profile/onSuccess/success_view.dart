@@ -40,7 +40,7 @@ class PaymentSuccessView extends StackedView<PaymentSuccessViewModel> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Text(
-                'Your order will be delivered soon.\nThank you for choosing our app!',
+                'Your order have been placed successfully ',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: isDarkMode ? Colors.white70 : kcBlackColor,
                   height: 1.5,

@@ -73,6 +73,8 @@ abstract class IRepository {
 
   Future<ApiResponse> updateProfilePicture(Map<String, dynamic> req);
 
+  Future<ApiResponse> updateFcmToken(Map<String, dynamic> req);
+
   Future<ApiResponse> withdraw(Map<String, dynamic> req);
 
   Future<ApiResponse> getOrderList();
@@ -105,6 +107,8 @@ abstract class IRepository {
 
   Future<ApiResponse> getCategories();
 
+  Future<ApiResponse> getAdMedias();
+
   Future<ApiResponse> updateNotification(String eventId);
 
   Future<ApiResponse> saveShipping(Map<String, dynamic> req);
@@ -118,4 +122,6 @@ abstract class IRepository {
   Future<ApiResponse> deleteShipping(String productId);
 
   Future<ApiResponse> reviewOrder(Map<String, dynamic> req);
+
+  Future<ApiResponse> getPickupAddresses();
 }

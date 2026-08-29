@@ -12,6 +12,7 @@ import '../../../ui/common/ui_helpers.dart';
 import '../../../ui/components/shimmers/checkout_page_shimmer.dart';
 import '../../../ui/components/shimmers/shipping_list_shimmers.dart';
 import '../../../ui/components/submit_button.dart';
+import '../../../core/data/models/pickup_address.dart';
 import 'checkout_viewmodel.dart';
 
 class CheckoutView extends StackedView<CheckoutViewModel> {
@@ -54,6 +55,60 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                     children: [
                       CheckoutOrderSummary(cartItems: cartItems),
                       verticalSpaceSmall,
+                      verticalSpaceSmall,
+                      DeliveryMethodWidget(
+                        pickUpOption: viewModel.pickUpOption,
+                        onOptionChanged: (option) {
+                          viewModel.updatePickupOption(option);
+                          viewModel.calculateOrder();
+                        },
+                      ),
+                      verticalSpaceSmall,
+                      if (viewModel.pickUpOption == PickUpOptions.Pickup)
+                         Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Select Pickup Station",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                verticalSpaceSmall,
+                                if (viewModel.pickupAddresses.isEmpty)
+                                  const Text("No pickup stations available.")
+                                else
+                                  DropdownButtonFormField<PickupAddress>(
+                                    isExpanded: true,
+                                    decoration: const InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    ),
+                                    value: viewModel.selectedPickupAddress,
+                                    items: viewModel.pickupAddresses.map((address) {
+                                      return DropdownMenuItem<PickupAddress>(
+                                        value: address,
+                                        child: Text(
+                                          "${address.address}, ${address.city}",
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      );
+                                    }).toList(),
+                                    onChanged: (value) {
+                                      viewModel.updateSelectedPickupAddress(value);
+                                      viewModel.calculateOrder();
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                      if (viewModel.pickUpOption == PickUpOptions.Delivery)
                       Card(
                         child: ExpansionTile(
                           title: const Text(
@@ -130,20 +185,13 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                           ],
                         ),
                       ),
+
                       verticalSpaceSmall,
                       BillingSummary(
                         subtotal: viewModel.cartSubtotal,
                         discount: viewModel.discountAmount,
                         deliveryFee: viewModel.calculatedDeliveryFee,
                         total: viewModel.calculatedFinalTotal,
-                      ),
-                      verticalSpaceSmall,
-                      DeliveryMethodWidget(
-                        pickUpOption: viewModel.pickUpOption,
-                        onOptionChanged: (option) {
-                          viewModel.updatePickupOption(option);
-                          viewModel.calculateOrder();
-                        },
                       ),
                       verticalSpaceSmall,
                       CheckoutPaymentOptions(
@@ -165,13 +213,11 @@ class CheckoutView extends StackedView<CheckoutViewModel> {
                       isLoading: viewModel.isPaying,
                       label: viewModel.paymentMethod == "delivery"
                           ? "Confirm Order"
-                          : "Pay ${MoneyUtils().formatAmount(viewModel.calculatedFinalTotal)}",
+                          : "Place Order — ${MoneyUtils().formatAmount(viewModel.calculatedFinalTotal)}",
                       submit: () => viewModel.processPayment(context),
                       color: kcPrimaryColor,
                       boldText: true,
-                      icon: viewModel.paymentMethod == "delivery"
-                          ? Icons.shopping_bag
-                          : Icons.credit_card,
+                      icon: Icons.shopping_bag,
                       iconColor: Colors.blue,
                       iconIsPrefix: true,
                     ),

@@ -6,7 +6,6 @@ import '../../../../core/data/models/order_item.dart';
 import '../../../../core/utils/money_util.dart';
 import '../../../../ui/common/app_colors.dart';
 import '../../../../ui/common/ui_helpers.dart';
-import '../../../../ui/components/submit_button.dart';
 import '../order_viewmodel.dart';
 
 class OrderCard extends StatelessWidget {
@@ -106,38 +105,58 @@ class OrderCard extends StatelessWidget {
   Widget _buildOrderActions(BuildContext context) {
     List<Widget> actions = [];
 
-    if (order.isPaid == false && order.status != "Cancelled" && order.status != "Completed") {
-      actions.add(
-        SubmitButton(
-          isLoading: false,
-          label: "Make Payment",
-          submit: () => viewModel.makePayment( context, order),
-          boldText: true,
-          color: kcPrimaryColor,
-        ),
-      );
-    }
+    final isInvoiceOrder = order.orderType == 'InstantPayment';
+    final isDeliveryOrder = order.orderType == 'PayOnDelivery';
 
-    if (order.status == "Cancelled") {
+    if (order.status == 'Pending') {
+      actions.add(_infoChip(
+        icon: Icons.hourglass_top_rounded,
+        color: Colors.amber,
+        label: isDeliveryOrder
+            ? 'Admin confirming delivery schedule…'
+            : 'Admin reviewing items — invoice coming soon',
+      ));
+    } else if (order.status == 'Processing') {
+      if (isInvoiceOrder && !order.isPaid) {
+        actions.add(
+          ElevatedButton.icon(
+            onPressed: () => viewModel.makePayment(context, order),
+            icon: const Icon(Icons.payment_rounded, size: 16),
+            label: const Text('Pay Now'),
+            style: ElevatedButton.styleFrom(backgroundColor: kcPrimaryColor),
+          ),
+        );
+      } else if (isInvoiceOrder && order.isPaid) {
+        actions.add(_infoChip(
+          icon: Icons.check_circle_rounded,
+          color: Colors.green,
+          label: 'Payment received — preparing your order',
+        ));
+      } else if (isDeliveryOrder) {
+        actions.add(_infoChip(
+          icon: Icons.local_shipping_rounded,
+          color: Colors.green,
+          label: 'Delivery scheduled — our team will contact you',
+        ));
+      }
+    } else if (order.status == 'Cancelled') {
       actions.add(
         ElevatedButton.icon(
           onPressed: null,
           icon: const Icon(Icons.cancel_outlined, size: 16),
-          label: const Text("Cancelled"),
+          label: const Text('Cancelled'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.redAccent,
             disabledForegroundColor: Colors.white,
           ),
         ),
       );
-    }
-
-    if (order.status == "Completed") {
+    } else if (order.status == 'Completed' || order.status == 'Delivered') {
       actions.add(
         ElevatedButton.icon(
           onPressed: () => viewModel.leaveReview(order),
           icon: const Icon(Icons.star, size: 16),
-          label: const Text("Leave Review"),
+          label: const Text('Leave Review'),
           style: ElevatedButton.styleFrom(backgroundColor: kcPrimaryColor),
         ),
       );
@@ -145,14 +164,41 @@ class OrderCard extends StatelessWidget {
 
     return actions.isNotEmpty
         ? Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: actions
-          .map((e) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 5),
-        child: e,
-      ))
-          .toList(),
-    )
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: actions
+                .map((e) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: e,
+                    ))
+                .toList(),
+          )
         : const SizedBox();
+  }
+
+  Widget _infoChip({
+    required IconData icon,
+    required Color color,
+    required String label,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 15, color: color),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(fontSize: 12, color: color.withValues(alpha: 0.85)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
